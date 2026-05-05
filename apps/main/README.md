@@ -1,37 +1,37 @@
-# Ark Main Portal
+# Main Portal
 
-Main shell application for Ark Institute ERP.
+Login + dashboard hub. Card grid of all 7 portals.
 
-## Tech Stack
-- SolidJS
-- Vike (SSR framework)
-- Tanstack Query
-- Tailwind CSS
-- Lucide Icons
+**Production**: https://portal.arkinstitutebc.com
+**Part of**: [`ark-frontend`](../../README.md) monorepo
 
-## Design System
-- Primary: #193a7a (Ark Blue)
-- Accent: #c80100 (Ark Red)
-- Font: Montserrat
+## Pages
 
-## Development
+| Route | Purpose |
+|---|---|
+| `/` | Dashboard with portal cards |
+| `/login` | Email + password login (sets shared SSO cookie) |
 
+## Develop
+
+From the monorepo root:
 ```bash
-npm install
-npm run dev
+bun install                # one-time
+bun run dev:main           # this app on its dedicated port
 ```
 
-## Build
+You also need the backend running — see [`ark-services`](https://github.com/arkinstitutebc/ark-services).
 
-```bash
-npm run build
-npm run preview
-```
+## What's app-specific vs shared
 
-## Environment Variables
+- **App-specific**: `pages/` (vike routes), `components/modals/`, `components/layout/sidebar.tsx` (just the navItems), `data/hooks/` (per-domain TanStack Query hooks)
+- **Shared from `@ark/ui`**: Sidebar shell, TopBar, Modal, Input, Button, Card, Icons, AuthGate, QueryBoundary
+- **Shared from `@ark/api-client`**: `api()`, `useCurrentUser()`, `useLogin()`, `performLogout()`, query client
+- **Shared from `@ark/data-types`**: type definitions
+- **Shared from `@ark/design-system`**: `globals.css`, Tailwind theme
 
-Copy `.env.example` to `.env` and configure:
-- API endpoints
-- Auth configuration
+To fix something shared (Sidebar styling, Input behavior, etc.) → edit `packages/<name>/` once → all apps inherit.
 
-<!-- monorepo CI test -->
+## Deploy
+
+`git push` to monorepo main. CI matrix detects which apps changed and only deploys those.

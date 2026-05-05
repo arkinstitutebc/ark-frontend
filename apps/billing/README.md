@@ -1,43 +1,38 @@
-# Ark Billing Portal
+# Billing Portal
 
-TESDA billing and AR tracking portal for Ark Institute ERP.
+TESDA receivables management.
 
-## Tech Stack
-- SolidJS
-- Vike (SSR framework)
-- Tailwind CSS 4
-- Lucide Icons
-
-## Design System
-- Primary: #193a7a (Ark Blue)
-- Accent: #c80100 (Ark Red)
-- Font: Montserrat
-
-## Development
-
-```bash
-npm install
-npm run dev
-```
-
-## Build
-
-```bash
-npm run build
-npm run preview
-```
+**Production**: https://billing.arkinstitutebc.com
+**Part of**: [`ark-frontend`](../../README.md) monorepo
 
 ## Pages
 
-| Route | Page | Status |
-|-------|------|--------|
-| `/` | Dashboard | ✅ |
+| Route | Purpose |
+|---|---|
+| `/` | Dashboard (totals, status) |
+| `/receivables` | AR list |
+| `/receivables/create` | New billing statement |
 
-## Features (TODO)
-- TESDA billing statement generation
-- AR tracking and management
-- Payment recording
-- Batch completion % calculation
-- PDF generation for billing
+## Develop
 
-<!-- monorepo CI test -->
+From the monorepo root:
+```bash
+bun install                # one-time
+bun run dev:billing           # this app on its dedicated port
+```
+
+You also need the backend running — see [`ark-services`](https://github.com/arkinstitutebc/ark-services).
+
+## What's app-specific vs shared
+
+- **App-specific**: `pages/` (vike routes), `components/modals/`, `components/layout/sidebar.tsx` (just the navItems), `data/hooks/` (per-domain TanStack Query hooks)
+- **Shared from `@ark/ui`**: Sidebar shell, TopBar, Modal, Input, Button, Card, Icons, AuthGate, QueryBoundary
+- **Shared from `@ark/api-client`**: `api()`, `useCurrentUser()`, `useLogin()`, `performLogout()`, query client
+- **Shared from `@ark/data-types`**: type definitions
+- **Shared from `@ark/design-system`**: `globals.css`, Tailwind theme
+
+To fix something shared (Sidebar styling, Input behavior, etc.) → edit `packages/<name>/` once → all apps inherit.
+
+## Deploy
+
+`git push` to monorepo main. CI matrix detects which apps changed and only deploys those.

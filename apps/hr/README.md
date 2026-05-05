@@ -1,43 +1,39 @@
-# Ark HR Portal
+# HR & Payroll Portal
 
-Biometric sync and payroll management portal for Ark Institute ERP.
+Trainer profiles, attendance, semi-monthly payroll.
 
-## Tech Stack
-- SolidJS
-- Vike (SSR framework)
-- Tailwind CSS 4
-- Lucide Icons
-
-## Design System
-- Primary: #193a7a (Ark Blue)
-- Accent: #c80100 (Ark Red)
-- Font: Montserrat
-
-## Development
-
-```bash
-npm install
-npm run dev
-```
-
-## Build
-
-```bash
-npm run build
-npm run preview
-```
+**Production**: https://hr.arkinstitutebc.com
+**Part of**: [`ark-frontend`](../../README.md) monorepo
 
 ## Pages
 
-| Route | Page | Status |
-|-------|------|--------|
-| `/` | Dashboard | ✅ |
+| Route | Purpose |
+|---|---|
+| `/` | Trainer roster |
+| `/attendance` | Attendance sheet (biometric or manual) |
+| `/payroll` | Payroll periods |
+| `/payroll/[period]` | Period detail with entries + export |
 
-## Features (TODO)
-- Trainer management
-- Biometric attendance import
-- Hours calculation
-- Payroll export
-- Employee records
+## Develop
 
-<!-- monorepo CI test -->
+From the monorepo root:
+```bash
+bun install                # one-time
+bun run dev:hr           # this app on its dedicated port
+```
+
+You also need the backend running — see [`ark-services`](https://github.com/arkinstitutebc/ark-services).
+
+## What's app-specific vs shared
+
+- **App-specific**: `pages/` (vike routes), `components/modals/`, `components/layout/sidebar.tsx` (just the navItems), `data/hooks/` (per-domain TanStack Query hooks)
+- **Shared from `@ark/ui`**: Sidebar shell, TopBar, Modal, Input, Button, Card, Icons, AuthGate, QueryBoundary
+- **Shared from `@ark/api-client`**: `api()`, `useCurrentUser()`, `useLogin()`, `performLogout()`, query client
+- **Shared from `@ark/data-types`**: type definitions
+- **Shared from `@ark/design-system`**: `globals.css`, Tailwind theme
+
+To fix something shared (Sidebar styling, Input behavior, etc.) → edit `packages/<name>/` once → all apps inherit.
+
+## Deploy
+
+`git push` to monorepo main. CI matrix detects which apps changed and only deploys those.

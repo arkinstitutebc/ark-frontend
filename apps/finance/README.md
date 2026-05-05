@@ -1,70 +1,42 @@
-# Ark Finance Portal
+# Finance Portal
 
-Two-bank tracking and P&L management portal for Ark Institute ERP.
+Two-bank tracking (Revenue Vault + Operational Hub) and per-batch P&L.
 
-## Tech Stack
-- SolidJS
-- Vike (SSR framework)
-- Tailwind CSS 4
-- Lucide Icons
-
-## Design System
-- Primary: #193a7a (Ark Blue)
-- Accent: #c80100 (Ark Red)
-- Font: Montserrat
-
-## Development
-
-```bash
-bun install
-bun run dev
-```
-
-## Build
-
-```bash
-bun run build
-bun run preview
-```
+**Production**: https://finance.arkinstitutebc.com
+**Part of**: [`ark-frontend`](../../README.md) monorepo
 
 ## Pages
 
-| Route | Page | Status |
-|-------|------|--------|
-| `/` | Financial Overview Dashboard | ✅ |
-| `/banks` | Bank Accounts & Transactions | ✅ |
-| `/transfers` | Fund Transfers (Double-Entry) | ✅ |
-| `/transfers/create` | Create New Transfer | ✅ |
-| `/disbursements` | Cash Disbursements/Expenses | TODO |
+| Route | Purpose |
+|---|---|
+| `/` | Overview (balances, AR, recent txns) |
+| `/banks` | Bank detail + filtered transactions |
+| `/transfers` | Transfer list |
+| `/transfers/create` | Internal transfer (double-entry) |
+| `/disbursements` | Operational expenses |
+| `/disbursements/create` | Record an expense |
+| `/pnl` | Per-batch profit and loss report |
 
-## Two-Bank System
+## Develop
 
-### Revenue Vault (Land Bank)
-- Holds government funds, grants, AR payments
-- Money IN: Income from TESDA/batches
-- Money OUT: Transfers to Operational Hub only
+From the monorepo root:
+```bash
+bun install                # one-time
+bun run dev:finance           # this app on its dedicated port
+```
 
-### Operational Hub (Security Bank)
-- Day-to-day operations spending
-- Money IN: Transfers from Revenue Vault only
-- Money OUT: Expenses (suppliers, rent, trainer fees, etc.)
+You also need the backend running — see [`ark-services`](https://github.com/arkinstitutebc/ark-services).
 
-## Data Layer
+## What's app-specific vs shared
 
-Located in `/ark-portals/data/`:
-- `types/finance.ts` - TypeScript types
-- `finance.json` - Transaction log
-- `ar.json` - Accounts receivable
-- `index.ts` - API functions
+- **App-specific**: `pages/` (vike routes), `components/modals/`, `components/layout/sidebar.tsx` (just the navItems), `data/hooks/` (per-domain TanStack Query hooks)
+- **Shared from `@ark/ui`**: Sidebar shell, TopBar, Modal, Input, Button, Card, Icons, AuthGate, QueryBoundary
+- **Shared from `@ark/api-client`**: `api()`, `useCurrentUser()`, `useLogin()`, `performLogout()`, query client
+- **Shared from `@ark/data-types`**: type definitions
+- **Shared from `@ark/design-system`**: `globals.css`, Tailwind theme
 
-## Audit Features
+To fix something shared (Sidebar styling, Input behavior, etc.) → edit `packages/<name>/` once → all apps inherit.
 
-- ✅ Immutable transaction log (no edits/deletes)
-- ✅ Double-entry accounting for transfers
-- ✅ Unique transaction IDs with timestamps
-- ✅ User attribution (createdBy)
-- ✅ Reference linking (PO, batch, AR)
-- ✅ CSV export for accounting
-- ✅ High-value approval notes (≥₱50,000)
+## Deploy
 
-<!-- monorepo CI test -->
+`git push` to monorepo main. CI matrix detects which apps changed and only deploys those.

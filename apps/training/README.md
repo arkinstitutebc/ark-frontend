@@ -1,48 +1,38 @@
-# Ark Training Portal
+# Training Portal
 
-[![Deploy](https://github.com/arkinstitutebc/ark-training-portal/actions/workflows/ci.yml/badge.svg)](https://github.com/arkinstitutebc/ark-training-portal/actions/workflows/ci.yml)
+Batch + student management. ₱3M per 200-student batch.
 
-Training and student management portal for Ark Institute ERP.
-
-## Tech Stack
-- SolidJS
-- Vike (SSR framework)
-- Tailwind CSS 4
-- Lucide Icons
-
-## Design System
-- Primary: #193a7a (Ark Blue)
-- Accent: #c80100 (Ark Red)
-- Font: Montserrat
-
-## Development
-
-```bash
-npm install
-npm run dev
-```
-
-## Build
-
-```bash
-npm run build
-npm run preview
-```
+**Production**: https://training.arkinstitutebc.com
+**Part of**: [`ark-frontend`](../../README.md) monorepo
 
 ## Pages
 
-| Route | Page | Status |
-|-------|------|--------|
-| `/` | Dashboard | ✅ |
-| `/students` | Student Management | ✅ |
-| `/students/create` | Add Student | ✅ |
-| `/batch/@id` | Batch Details | ✅ |
+| Route | Purpose |
+|---|---|
+| `/` | Batch list |
+| `/batch/@id` | Batch detail (students, attendance, completion) |
+| `/students` | All students across batches |
 
-## Features
-- ✅ Batch management (₱3M budget, 200 students)
-- ✅ Student enrollment with photo/PSA certificate upload
-- ✅ Attendance tracking
-- ✅ Certificate management
-- ✅ Student status tracking (enrolled, in training, certified, dropped)
+## Develop
 
-<!-- monorepo CI test -->
+From the monorepo root:
+```bash
+bun install                # one-time
+bun run dev:training           # this app on its dedicated port
+```
+
+You also need the backend running — see [`ark-services`](https://github.com/arkinstitutebc/ark-services).
+
+## What's app-specific vs shared
+
+- **App-specific**: `pages/` (vike routes), `components/modals/`, `components/layout/sidebar.tsx` (just the navItems), `data/hooks/` (per-domain TanStack Query hooks)
+- **Shared from `@ark/ui`**: Sidebar shell, TopBar, Modal, Input, Button, Card, Icons, AuthGate, QueryBoundary
+- **Shared from `@ark/api-client`**: `api()`, `useCurrentUser()`, `useLogin()`, `performLogout()`, query client
+- **Shared from `@ark/data-types`**: type definitions
+- **Shared from `@ark/design-system`**: `globals.css`, Tailwind theme
+
+To fix something shared (Sidebar styling, Input behavior, etc.) → edit `packages/<name>/` once → all apps inherit.
+
+## Deploy
+
+`git push` to monorepo main. CI matrix detects which apps changed and only deploys those.
