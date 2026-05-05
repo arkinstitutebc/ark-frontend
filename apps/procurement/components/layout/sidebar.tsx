@@ -1,5 +1,5 @@
-import { CheckCircle, ShoppingBag, ShoppingCart } from "lucide-solid"
 import { type NavItem, Sidebar as SharedSidebar } from "@ark/ui"
+import { CheckCircle, ShoppingBag, ShoppingCart } from "lucide-solid"
 
 const navItems: NavItem[] = [
   { id: "requests", label: "Requests", href: "/", icon: ShoppingCart },
