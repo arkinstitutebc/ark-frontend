@@ -79,12 +79,12 @@ export function EditBatchModal(props: EditBatchModalProps) {
     <Modal open={props.open} onClose={handleClose} title="Edit Batch">
       <form onSubmit={handleSubmit} class="space-y-4">
         <label class="block">
-          <span class="block text-sm font-medium text-gray-700 mb-1">Training Type</span>
+          <span class="block text-sm font-medium text-foreground mb-1">Training Type</span>
           <select
             value={trainingName()}
             onChange={e => setTrainingName(e.target.value)}
             required
-            class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().trainingName ? "border-red-300" : "border-gray-200"}`}
+            class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().trainingName ? "border-red-300" : "border-border"}`}
           >
             {TRAINING_TYPES.map(type => (
               <option value={type}>{type}</option>
@@ -97,12 +97,12 @@ export function EditBatchModal(props: EditBatchModalProps) {
 
         <div class="grid grid-cols-2 gap-3">
           <label class="block">
-            <span class="block text-sm font-medium text-gray-700 mb-1">Level</span>
+            <span class="block text-sm font-medium text-foreground mb-1">Level</span>
             <select
               value={trainingLevel()}
               onChange={e => setTrainingLevel(e.target.value as Batch["trainingLevel"])}
               required
-              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().trainingLevel ? "border-red-300" : "border-gray-200"}`}
+              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().trainingLevel ? "border-red-300" : "border-border"}`}
             >
               {TRAINING_LEVELS.map(level => (
                 <option value={level}>{level}</option>
@@ -113,12 +113,12 @@ export function EditBatchModal(props: EditBatchModalProps) {
             </Show>
           </label>
           <label class="block">
-            <span class="block text-sm font-medium text-gray-700 mb-1">Status</span>
+            <span class="block text-sm font-medium text-foreground mb-1">Status</span>
             <select
               value={status()}
               onChange={e => setStatus(e.target.value as Batch["status"])}
               required
-              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().status ? "border-red-300" : "border-gray-200"}`}
+              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().status ? "border-red-300" : "border-border"}`}
             >
               {STATUSES.map(s => (
                 <option value={s}>{s}</option>
@@ -131,14 +131,14 @@ export function EditBatchModal(props: EditBatchModalProps) {
         </div>
 
         <label class="block">
-          <span class="block text-sm font-medium text-gray-700 mb-1">Senator Sponsor</span>
+          <span class="block text-sm font-medium text-foreground mb-1">Senator Sponsor</span>
           <input
             type="text"
             value={senator()}
             onInput={e => setSenator(e.target.value)}
             required
             placeholder="e.g., Sen. Juan Dela Cruz"
-            class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().senator ? "border-red-300" : "border-gray-200"}`}
+            class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().senator ? "border-red-300" : "border-border"}`}
           />
           <Show when={errors().senator}>
             <p class="text-xs text-red-600 mt-1">{errors().senator}</p>
@@ -147,26 +147,26 @@ export function EditBatchModal(props: EditBatchModalProps) {
 
         <div class="grid grid-cols-2 gap-3">
           <label class="block">
-            <span class="block text-sm font-medium text-gray-700 mb-1">Start Date</span>
+            <span class="block text-sm font-medium text-foreground mb-1">Start Date</span>
             <input
               type="date"
               value={startDate()}
               onInput={e => setStartDate(e.target.value)}
               required
-              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().startDate ? "border-red-300" : "border-gray-200"}`}
+              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().startDate ? "border-red-300" : "border-border"}`}
             />
             <Show when={errors().startDate}>
               <p class="text-xs text-red-600 mt-1">{errors().startDate}</p>
             </Show>
           </label>
           <label class="block">
-            <span class="block text-sm font-medium text-gray-700 mb-1">End Date</span>
+            <span class="block text-sm font-medium text-foreground mb-1">End Date</span>
             <input
               type="date"
               value={endDate()}
               onInput={e => setEndDate(e.target.value)}
               required
-              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().endDate ? "border-red-300" : "border-gray-200"}`}
+              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().endDate ? "border-red-300" : "border-border"}`}
             />
             <Show when={errors().endDate}>
               <p class="text-xs text-red-600 mt-1">{errors().endDate}</p>
@@ -175,13 +175,13 @@ export function EditBatchModal(props: EditBatchModalProps) {
         </div>
 
         <label class="block">
-          <span class="block text-sm font-medium text-gray-700 mb-1">Venue</span>
+          <span class="block text-sm font-medium text-foreground mb-1">Venue</span>
           <input
             type="text"
             value={venue()}
             onInput={e => setVenue(e.target.value)}
             required
-            class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().venue ? "border-red-300" : "border-gray-200"}`}
+            class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().venue ? "border-red-300" : "border-border"}`}
           />
           <Show when={errors().venue}>
             <p class="text-xs text-red-600 mt-1">{errors().venue}</p>
@@ -189,13 +189,13 @@ export function EditBatchModal(props: EditBatchModalProps) {
         </label>
 
         <label class="block">
-          <span class="block text-sm font-medium text-gray-700 mb-1">Instructor</span>
+          <span class="block text-sm font-medium text-foreground mb-1">Instructor</span>
           <input
             type="text"
             value={instructor()}
             onInput={e => setInstructor(e.target.value)}
             required
-            class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().instructor ? "border-red-300" : "border-gray-200"}`}
+            class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().instructor ? "border-red-300" : "border-border"}`}
           />
           <Show when={errors().instructor}>
             <p class="text-xs text-red-600 mt-1">{errors().instructor}</p>
@@ -206,11 +206,11 @@ export function EditBatchModal(props: EditBatchModalProps) {
           <p class="text-sm text-red-600">{mutation.error?.message}</p>
         </Show>
 
-        <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+        <div class="flex justify-end gap-3 pt-4 border-t border-border">
           <button
             type="button"
             onClick={handleClose}
-            class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            class="px-4 py-2 text-sm font-medium text-foreground hover:bg-surface-muted rounded-lg transition-colors"
           >
             Cancel
           </button>

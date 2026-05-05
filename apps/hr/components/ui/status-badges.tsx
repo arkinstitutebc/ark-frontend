@@ -2,7 +2,7 @@ import type { AttendanceStatus, PayrollStatus, TrainerStatus } from "@data/types
 
 const trainerStatusColors: Record<TrainerStatus, { bg: string; text: string; dot: string }> = {
   active: { bg: "bg-green-50", text: "text-green-700", dot: "bg-green-400" },
-  inactive: { bg: "bg-gray-100", text: "text-gray-600", dot: "bg-gray-400" },
+  inactive: { bg: "bg-surface-muted", text: "text-muted", dot: "bg-gray-400" },
   "on-leave": { bg: "bg-yellow-50", text: "text-yellow-700", dot: "bg-yellow-400" },
 }
 
@@ -20,7 +20,7 @@ const attendanceStatusColors: Record<AttendanceStatus, { bg: string; text: strin
   }
 
 const payrollStatusColors: Record<PayrollStatus, { bg: string; text: string; dot: string }> = {
-  draft: { bg: "bg-gray-100", text: "text-gray-600", dot: "bg-gray-400" },
+  draft: { bg: "bg-surface-muted", text: "text-muted", dot: "bg-gray-400" },
   processed: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-400" },
   paid: { bg: "bg-green-50", text: "text-green-700", dot: "bg-green-400" },
 }

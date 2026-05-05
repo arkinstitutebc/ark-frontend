@@ -47,8 +47,8 @@ export default function StudentsPage() {
       <div class="max-w-6xl mx-auto">
         <div class="flex items-center justify-between mb-8">
           <div>
-            <h1 class="text-2xl font-semibold text-gray-900">Students</h1>
-            <p class="text-sm text-gray-500 mt-1">
+            <h1 class="text-2xl font-semibold text-foreground">Students</h1>
+            <p class="text-sm text-muted mt-1">
               {filteredStudents().length} student{filteredStudents().length !== 1 ? "s" : ""}
             </p>
           </div>
@@ -83,19 +83,19 @@ export default function StudentsPage() {
 
         <div class="flex items-center gap-3 mb-6">
           <div class="relative">
-            <Icons.search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <Icons.search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
             <input
               type="text"
               placeholder="Search students..."
               value={searchQuery()}
               onInput={e => setSearchQuery(e.target.value)}
-              class="pl-9 pr-4 py-2 w-64 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              class="pl-9 pr-4 py-2 w-64 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
           </div>
           <select
             value={filterBatch()}
             onChange={e => setFilterBatch(e.target.value)}
-            class="px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            class="px-3 py-2 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           >
             <option value="all">All Batches</option>
             <For each={batchesQuery.data || []}>
@@ -108,31 +108,31 @@ export default function StudentsPage() {
           when={!studentsQuery.isLoading}
           fallback={
             <div class="animate-pulse space-y-3">
-              <div class="h-12 bg-gray-200 rounded" />
-              <div class="h-64 bg-gray-200 rounded" />
+              <div class="h-12 bg-surface-muted rounded" />
+              <div class="h-64 bg-surface-muted rounded" />
             </div>
           }
         >
-          <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div class="bg-surface rounded-lg border border-border overflow-hidden">
             <table class="w-full">
-              <thead class="bg-gray-50 border-b border-gray-200">
+              <thead class="bg-surface-muted border-b border-border">
                 <tr>
-                  <th class="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
                     Student ID
                   </th>
-                  <th class="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
                     Name
                   </th>
-                  <th class="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
                     Batch
                   </th>
-                  <th class="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
                     Level
                   </th>
-                  <th class="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
                     Status
                   </th>
-                  <th class="text-right py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  <th class="text-right py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -142,7 +142,7 @@ export default function StudentsPage() {
                   when={filteredStudents().length > 0}
                   fallback={
                     <tr>
-                      <td colSpan={6} class="py-12 text-center text-gray-500 text-sm">
+                      <td colSpan={6} class="py-12 text-center text-muted text-sm">
                         No students found.
                       </td>
                     </tr>
@@ -151,16 +151,16 @@ export default function StudentsPage() {
                   <For each={filteredStudents()}>
                     {student => (
                       <tr
-                        class="border-t border-gray-100 hover:bg-primary/5 transition-colors cursor-pointer"
+                        class="border-t border-border hover:bg-primary/5 transition-colors cursor-pointer"
                         onClick={() => setViewingStudentId(student.id)}
                       >
-                        <td class="py-4 px-6 text-sm text-gray-900 font-mono">
+                        <td class="py-4 px-6 text-sm text-foreground font-mono">
                           {student.studentId}
                         </td>
-                        <td class="py-4 px-6 text-sm text-gray-900">
+                        <td class="py-4 px-6 text-sm text-foreground">
                           {student.firstName} {student.lastName}
                         </td>
-                        <td class="py-4 px-6 text-sm text-gray-600">
+                        <td class="py-4 px-6 text-sm text-muted">
                           {getBatchCode(student.batchId)}
                         </td>
                         <td class="py-4 px-6 text-sm text-primary font-medium">
@@ -176,7 +176,7 @@ export default function StudentsPage() {
                               e.stopPropagation()
                               setEditingStudentId(student.id)
                             }}
-                            class="text-gray-500 hover:text-primary transition-colors p-1"
+                            class="text-muted hover:text-primary transition-colors p-1"
                             title="Edit student"
                           >
                             <Icons.edit class="w-4 h-4" />

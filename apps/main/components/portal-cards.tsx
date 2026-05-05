@@ -81,7 +81,7 @@ export function PortalCards(props: PortalCardsProps) {
           return (
             <a
               href={portal.url}
-              class="group block bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl hover:border-primary/30 transition-all"
+              class="group block bg-surface rounded-2xl shadow-lg p-6 border border-border hover:shadow-xl hover:border-primary/30 transition-all"
             >
               <div class="flex items-start justify-between mb-5">
                 <div class="p-4 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
@@ -94,11 +94,11 @@ export function PortalCards(props: PortalCardsProps) {
                 )}
               </div>
 
-              <h3 class="text-xl font-semibold text-gray-900 group-hover:text-primary transition-colors">
+              <h3 class="text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
                 {portal.title}
               </h3>
 
-              <p class="text-sm text-gray-500 mt-1.5">{portal.description}</p>
+              <p class="text-sm text-muted mt-1.5">{portal.description}</p>
 
               <div class="flex items-center gap-2 mt-5 text-primary font-medium text-sm group-hover:gap-3 transition-all">
                 <span>Open portal</span>

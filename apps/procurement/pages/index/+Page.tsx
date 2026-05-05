@@ -50,8 +50,8 @@ export default function Page() {
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h1 class="text-2xl font-semibold text-gray-900">Purchase Requests</h1>
-          <p class="text-sm text-gray-500 mt-1">Manage procurement requests and approvals</p>
+          <h1 class="text-2xl font-semibold text-foreground">Purchase Requests</h1>
+          <p class="text-sm text-muted mt-1">Manage procurement requests and approvals</p>
         </div>
         <a
           href="/pr/create"
@@ -62,33 +62,33 @@ export default function Page() {
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <p class="text-sm text-gray-500 mb-1">Total</p>
-          <p class="text-2xl text-gray-900">{query.isSuccess ? stats().total : "-"}</p>
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted mb-1">Total</p>
+          <p class="text-2xl text-foreground">{query.isSuccess ? stats().total : "-"}</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <p class="text-sm text-gray-500 mb-1">Pending</p>
-          <p class="text-2xl text-gray-900">{query.isSuccess ? stats().pending : "-"}</p>
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted mb-1">Pending</p>
+          <p class="text-2xl text-foreground">{query.isSuccess ? stats().pending : "-"}</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <p class="text-sm text-gray-500 mb-1">Approved</p>
-          <p class="text-2xl text-gray-900">{query.isSuccess ? stats().approved : "-"}</p>
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted mb-1">Approved</p>
+          <p class="text-2xl text-foreground">{query.isSuccess ? stats().approved : "-"}</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <p class="text-sm text-gray-500 mb-1">Ordered</p>
-          <p class="text-2xl text-gray-900">{query.isSuccess ? stats().ordered : "-"}</p>
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted mb-1">Ordered</p>
+          <p class="text-2xl text-foreground">{query.isSuccess ? stats().ordered : "-"}</p>
         </div>
       </div>
 
       <div class="flex flex-col sm:flex-row gap-3 mb-6">
         <div class="relative flex-1">
-          <Icons.search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Icons.search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
           <input
             type="text"
             placeholder="Search by PR #, batch, or category..."
             value={search()}
             onInput={e => setSearch(e.currentTarget.value)}
-            class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            class="w-full pl-9 pr-4 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           />
         </div>
         <div class="flex gap-2">
@@ -104,7 +104,7 @@ export default function Page() {
               <button
                 type="button"
                 onClick={() => setFilter(item.value)}
-                class={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${filter() === item.value ? "bg-primary text-white" : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"}`}
+                class={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${filter() === item.value ? "bg-primary text-white" : "bg-surface text-foreground border border-border hover:bg-surface-muted"}`}
               >
                 {item.label}
               </button>
@@ -115,38 +115,38 @@ export default function Page() {
 
       <QueryBoundary query={query}>
         {(_data: PurchaseRequest[]) => (
-          <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div class="bg-surface rounded-lg border border-border overflow-hidden">
             <Show
               when={filteredRequests().length > 0}
               fallback={
                 <div class="py-16 text-center">
                   <Icons.fileText class="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p class="text-sm font-medium text-gray-900">No purchase requests found</p>
+                  <p class="text-sm font-medium text-foreground">No purchase requests found</p>
                 </div>
               }
             >
               <table class="w-full">
-                <thead class="bg-gray-50 border-b border-gray-200">
+                <thead class="bg-surface-muted border-b border-border">
                   <tr>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                       PR Code
                     </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                       Batch
                     </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                       Category
                     </th>
-                    <th class="py-4 px-6 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
                       Amount
                     </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                       Status
                     </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                       Created
                     </th>
-                    <th class="py-4 px-6 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -156,25 +156,25 @@ export default function Page() {
                     {(pr: PurchaseRequest) => (
                       <tr
                         onClick={() => (window.location.href = `/pr/${pr.id}`)}
-                        class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                        class="border-t border-border hover:bg-surface-muted cursor-pointer transition-colors"
                       >
                         <td class="py-4 px-6">
-                          <span class="font-mono text-sm font-medium text-gray-900">
+                          <span class="font-mono text-sm font-medium text-foreground">
                             {pr.prCode}
                           </span>
                         </td>
                         <td class="py-4 px-6">
-                          <p class="text-sm text-gray-900">{pr.batchName}</p>
-                          <p class="text-xs text-gray-500">{pr.batchCode}</p>
+                          <p class="text-sm text-foreground">{pr.batchName}</p>
+                          <p class="text-xs text-muted">{pr.batchCode}</p>
                         </td>
-                        <td class="py-4 px-6 text-sm text-gray-700">{pr.category}</td>
-                        <td class="py-4 px-6 text-right text-sm text-gray-900">
+                        <td class="py-4 px-6 text-sm text-foreground">{pr.category}</td>
+                        <td class="py-4 px-6 text-right text-sm text-foreground">
                           {formatCurrency(Number(pr.totalAmount))}
                         </td>
                         <td class="py-4 px-6">
                           <PrStatusBadge status={pr.status} />
                         </td>
-                        <td class="py-4 px-6 text-sm text-gray-600">{formatDate(pr.createdAt)}</td>
+                        <td class="py-4 px-6 text-sm text-muted">{formatDate(pr.createdAt)}</td>
                         <td class="py-4 px-6 text-right">
                           <button
                             type="button"

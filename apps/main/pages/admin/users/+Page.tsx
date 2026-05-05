@@ -100,12 +100,12 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div class="min-h-screen bg-gray-50 flex flex-col">
+    <div class="min-h-screen bg-surface-muted flex flex-col">
       <Show
         when={!userQuery.isPending && isAdmin()}
         fallback={
           <div class="flex-1 flex items-center justify-center">
-            <div class="animate-pulse text-sm text-gray-500">Loading…</div>
+            <div class="animate-pulse text-sm text-muted">Loading…</div>
           </div>
         }
       >
@@ -121,12 +121,12 @@ export default function AdminUsersPage() {
               <div>
                 <a
                   href="/"
-                  class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-primary mb-2"
+                  class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary mb-2"
                 >
                   <Icons.arrowLeft class="w-4 h-4" /> Dashboard
                 </a>
-                <h1 class="text-2xl font-bold text-gray-900">User Management</h1>
-                <p class="text-sm text-gray-500 mt-0.5">
+                <h1 class="text-2xl font-bold text-foreground">User Management</h1>
+                <p class="text-sm text-muted mt-0.5">
                   Invite, edit, and deactivate users in the Ark Institute portal.
                 </p>
               </div>
@@ -135,16 +135,16 @@ export default function AdminUsersPage() {
               </Button>
             </div>
 
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+            <div class="bg-surface rounded-2xl shadow-sm border border-border overflow-hidden">
               <Show
                 when={!usersQuery.isPending}
-                fallback={<div class="p-12 text-center text-sm text-gray-500">Loading users…</div>}
+                fallback={<div class="p-12 text-center text-sm text-muted">Loading users…</div>}
               >
                 <Show
                   when={usersQuery.isError}
                   fallback={
                     <table class="w-full text-sm">
-                      <thead class="bg-gray-50 text-gray-600 text-xs uppercase tracking-wide">
+                      <thead class="bg-surface-muted text-muted text-xs uppercase tracking-wide">
                         <tr>
                           <th class="px-5 py-3 text-left font-medium">Name</th>
                           <th class="px-5 py-3 text-left font-medium">Email</th>
@@ -156,8 +156,8 @@ export default function AdminUsersPage() {
                       <tbody>
                         <For each={sortedUsers()}>
                           {user => (
-                            <tr class="border-t border-gray-100 hover:bg-gray-50">
-                              <td class="px-5 py-3 text-gray-900">
+                            <tr class="border-t border-border hover:bg-surface-muted">
+                              <td class="px-5 py-3 text-foreground">
                                 {user.firstName} {user.lastName}
                                 <Show when={user.mustChangePassword}>
                                   <span class="ml-2 inline-flex items-center gap-1 text-xs text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full">
@@ -166,13 +166,13 @@ export default function AdminUsersPage() {
                                   </span>
                                 </Show>
                               </td>
-                              <td class="px-5 py-3 text-gray-600">{user.email}</td>
-                              <td class="px-5 py-3 text-gray-700 capitalize">{user.role}</td>
+                              <td class="px-5 py-3 text-muted">{user.email}</td>
+                              <td class="px-5 py-3 text-foreground capitalize">{user.role}</td>
                               <td class="px-5 py-3">
                                 <Show
                                   when={user.isActive}
                                   fallback={
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-600">
+                                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs bg-surface-muted text-muted">
                                       <span class="w-1.5 h-1.5 rounded-full bg-gray-400" />
                                       Inactive
                                     </span>
@@ -197,7 +197,7 @@ export default function AdminUsersPage() {
                         </For>
                         <Show when={sortedUsers().length === 0}>
                           <tr>
-                            <td colspan={5} class="px-5 py-12 text-center text-sm text-gray-500">
+                            <td colspan={5} class="px-5 py-12 text-center text-sm text-muted">
                               No users yet.
                             </td>
                           </tr>
@@ -243,14 +243,14 @@ export default function AdminUsersPage() {
             error={errors().email}
           />
           <div>
-            <label for="invite-role" class="block text-sm font-medium text-gray-700 mb-1.5">
+            <label for="invite-role" class="block text-sm font-medium text-foreground mb-1.5">
               Role
             </label>
             <select
               id="invite-role"
               value={form().role}
               onChange={e => setForm({ ...form(), role: e.currentTarget.value as AdminRole })}
-              class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
+              class="w-full px-4 py-2.5 border border-border rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none"
             >
               <option value="trainer">Trainer</option>
               <option value="director">Director</option>
@@ -326,10 +326,10 @@ function TempPasswordModal(props: {
               </div>
             </div>
 
-            <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
-              <p class="text-xs text-gray-500 mb-1">Temporary password</p>
+            <div class="bg-surface-muted border border-border rounded-lg p-3">
+              <p class="text-xs text-muted mb-1">Temporary password</p>
               <div class="flex items-center gap-2">
-                <code class="flex-1 font-mono text-sm bg-white px-3 py-2 rounded border border-gray-200 select-all">
+                <code class="flex-1 font-mono text-sm bg-surface px-3 py-2 rounded border border-border select-all">
                   {cred().tempPassword}
                 </code>
                 <Button type="button" variant="secondary" size="sm" onClick={copyPassword}>
@@ -341,7 +341,7 @@ function TempPasswordModal(props: {
               </div>
             </div>
 
-            <label class="flex items-start gap-2 text-sm text-gray-700">
+            <label class="flex items-start gap-2 text-sm text-foreground">
               <input
                 type="checkbox"
                 checked={acknowledged()}

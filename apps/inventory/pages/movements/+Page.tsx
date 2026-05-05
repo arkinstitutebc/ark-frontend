@@ -49,35 +49,35 @@ export default function MovementsPage() {
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
       <div class="mb-8">
-        <h1 class="text-2xl font-semibold text-gray-900">Stock Movements</h1>
-        <p class="text-sm text-gray-500 mt-1">Audit log of all stock changes</p>
+        <h1 class="text-2xl font-semibold text-foreground">Stock Movements</h1>
+        <p class="text-sm text-muted mt-1">Audit log of all stock changes</p>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <p class="text-sm text-gray-500">Total Movements</p>
-          <p class="text-2xl text-gray-900 mt-1">{query.isSuccess ? stats().total : "-"}</p>
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted">Total Movements</p>
+          <p class="text-2xl text-foreground mt-1">{query.isSuccess ? stats().total : "-"}</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <p class="text-sm text-gray-500">Stock In</p>
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted">Stock In</p>
           <p class="text-2xl text-green-600 mt-1">{query.isSuccess ? stats().totalIn : "-"}</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <p class="text-sm text-gray-500">Stock Out</p>
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted">Stock Out</p>
           <p class="text-2xl text-red-600 mt-1">{query.isSuccess ? stats().totalOut : "-"}</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <p class="text-sm text-gray-500">Adjustments</p>
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted">Adjustments</p>
           <p class="text-2xl text-yellow-600 mt-1">{query.isSuccess ? stats().totalAdj : "-"}</p>
         </div>
       </div>
 
       <QueryBoundary query={query}>
         {(_movements: StockMovement[]) => (
-          <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200">
+          <div class="bg-surface rounded-lg border border-border overflow-hidden">
+            <div class="px-6 py-4 border-b border-border">
               <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-gray-900">Movement History</h2>
+                <h2 class="text-lg font-semibold text-foreground">Movement History</h2>
                 <div class="flex items-center gap-3">
                   <select
                     value={typeFilter()}
@@ -86,7 +86,7 @@ export default function MovementsPage() {
                         e.currentTarget.value as typeof typeFilter extends () => infer T ? T : never
                       )
                     }
-                    class="px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    class="px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   >
                     <option value="all">All Types</option>
                     <option value="in">Stock In</option>
@@ -94,37 +94,37 @@ export default function MovementsPage() {
                     <option value="adjustment">Adjustments</option>
                   </select>
                   <div class="relative">
-                    <Icons.search class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <Icons.search class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
                     <input
                       type="text"
                       value={searchQuery()}
                       onInput={e => setSearchQuery(e.currentTarget.value)}
                       placeholder="Search items..."
-                      class="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary w-64"
+                      class="pl-9 pr-4 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary w-64"
                     />
                   </div>
                 </div>
               </div>
             </div>
             <table class="w-full">
-              <thead class="bg-gray-50">
+              <thead class="bg-surface-muted">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                     Date
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                     Item
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                     Type
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                     Quantity
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                     Reason / Reference
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                     User
                   </th>
                 </tr>
@@ -132,11 +132,11 @@ export default function MovementsPage() {
               <tbody class="divide-y divide-gray-200">
                 <For each={filteredMovements()}>
                   {(m: StockMovement) => (
-                    <tr class="hover:bg-gray-50 transition-colors">
-                      <td class="px-6 py-4 text-sm text-gray-900">{formatDate(m.createdAt)}</td>
+                    <tr class="hover:bg-surface-muted transition-colors">
+                      <td class="px-6 py-4 text-sm text-foreground">{formatDate(m.createdAt)}</td>
                       <td class="px-6 py-4">
-                        <p class="text-sm font-medium text-gray-900">{m.itemName}</p>
-                        <p class="text-xs text-gray-500 mt-0.5">{m.batchCode}</p>
+                        <p class="text-sm font-medium text-foreground">{m.itemName}</p>
+                        <p class="text-xs text-muted mt-0.5">{m.batchCode}</p>
                       </td>
                       <td class="px-6 py-4">
                         <span
@@ -154,12 +154,10 @@ export default function MovementsPage() {
                         </span>
                       </td>
                       <td class="px-6 py-4">
-                        <p class="text-sm text-gray-900">{m.reason || m.reference || "-"}</p>
-                        {m.reference && (
-                          <p class="text-xs text-gray-500 mt-0.5">Ref: {m.reference}</p>
-                        )}
+                        <p class="text-sm text-foreground">{m.reason || m.reference || "-"}</p>
+                        {m.reference && <p class="text-xs text-muted mt-0.5">Ref: {m.reference}</p>}
                       </td>
-                      <td class="px-6 py-4 text-sm text-gray-600">{m.createdBy}</td>
+                      <td class="px-6 py-4 text-sm text-muted">{m.createdBy}</td>
                     </tr>
                   )}
                 </For>
@@ -167,7 +165,7 @@ export default function MovementsPage() {
             </table>
             {filteredMovements().length === 0 && (
               <div class="px-6 py-12 text-center">
-                <p class="text-sm text-gray-500">No movements found</p>
+                <p class="text-sm text-muted">No movements found</p>
               </div>
             )}
           </div>

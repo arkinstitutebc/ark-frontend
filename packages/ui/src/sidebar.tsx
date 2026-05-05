@@ -45,17 +45,17 @@ export function Sidebar(props: SidebarProps) {
   const isActiveFn = (item: NavItem) => (props.isActive ?? defaultIsActive)(item, currentPath())
 
   const sidebarContent = () => (
-    <div class="flex flex-col h-full bg-white border-r border-gray-200">
+    <div class="flex flex-col h-full bg-surface border-r border-border">
       {/* Portal branding */}
-      <div class="flex items-center gap-3 px-4 h-14 border-b border-gray-100 flex-shrink-0">
+      <div class="flex items-center gap-3 px-4 h-14 border-b border-border flex-shrink-0">
         <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
           <props.brandIcon class="w-4.5 h-4.5 text-primary" />
         </div>
         <Show when={!collapsed()}>
           <div class="overflow-hidden">
-            <p class="text-sm font-semibold text-gray-900 truncate">{props.brandTitle}</p>
+            <p class="text-sm font-semibold text-foreground truncate">{props.brandTitle}</p>
             <Show when={props.brandSubtitle}>
-              <p class="text-[11px] text-gray-500 truncate">{props.brandSubtitle}</p>
+              <p class="text-[11px] text-muted truncate">{props.brandSubtitle}</p>
             </Show>
           </div>
         </Show>
@@ -70,18 +70,18 @@ export function Sidebar(props: SidebarProps) {
               onClick={() => setMobileOpen(false)}
               class={`group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                 isActiveFn(item)
-                  ? "bg-gray-100 text-gray-900 font-semibold"
-                  : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                  ? "bg-surface-muted text-foreground font-semibold"
+                  : "text-muted hover:bg-surface-muted hover:text-foreground"
               }`}
             >
               <item.icon
-                class={`w-[18px] h-[18px] flex-shrink-0 ${isActiveFn(item) ? "text-gray-900" : "text-gray-400 group-hover:text-gray-600"}`}
+                class={`w-[18px] h-[18px] flex-shrink-0 ${isActiveFn(item) ? "text-foreground" : "text-muted group-hover:text-foreground"}`}
               />
               <Show when={!collapsed()}>
                 <span>{item.label}</span>
               </Show>
               <Show when={collapsed()}>
-                <span class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded hidden group-hover:block whitespace-nowrap z-50">
+                <span class="absolute left-full ml-2 px-2 py-1 bg-foreground text-background text-xs rounded hidden group-hover:block whitespace-nowrap z-50">
                   {item.label}
                 </span>
               </Show>
@@ -91,17 +91,17 @@ export function Sidebar(props: SidebarProps) {
       </nav>
 
       {/* Bottom section */}
-      <div class="border-t border-gray-100 px-2 py-3 space-y-1 flex-shrink-0">
+      <div class="border-t border-border px-2 py-3 space-y-1 flex-shrink-0">
         <a
           href={portalUrl()}
-          class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors"
+          class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted hover:bg-surface-muted hover:text-foreground transition-colors"
         >
-          <ArrowLeft class="w-[18px] h-[18px] flex-shrink-0 text-gray-400 group-hover:text-gray-600" />
+          <ArrowLeft class="w-[18px] h-[18px] flex-shrink-0 text-muted group-hover:text-foreground" />
           <Show when={!collapsed()}>
             <span>Back to Portal</span>
           </Show>
           <Show when={collapsed()}>
-            <span class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded hidden group-hover:block whitespace-nowrap z-50">
+            <span class="absolute left-full ml-2 px-2 py-1 bg-foreground text-background text-xs rounded hidden group-hover:block whitespace-nowrap z-50">
               Back to Portal
             </span>
           </Show>
@@ -118,7 +118,7 @@ export function Sidebar(props: SidebarProps) {
               <span>Logout</span>
             </Show>
             <Show when={collapsed()}>
-              <span class="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded hidden group-hover:block whitespace-nowrap z-50">
+              <span class="absolute left-full ml-2 px-2 py-1 bg-foreground text-background text-xs rounded hidden group-hover:block whitespace-nowrap z-50">
                 Logout
               </span>
             </Show>
@@ -139,7 +139,7 @@ export function Sidebar(props: SidebarProps) {
         <button
           type="button"
           onClick={toggleCollapsed}
-          class="hidden md:flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-gray-400 hover:bg-gray-50 hover:text-gray-600 transition-colors"
+          class="hidden md:flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-muted hover:bg-surface-muted hover:text-foreground transition-colors"
         >
           <Show
             when={collapsed()}

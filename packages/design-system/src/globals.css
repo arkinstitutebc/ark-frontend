@@ -10,15 +10,19 @@
 @source "../data/**/*.tsx";
 
 @theme {
-  /* Ark Institute Design System */
+  /* Ark Institute Design System — semantic tokens (flip per theme) */
   --color-background: #ffffff;
   --color-foreground: #171717;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f9fafb;
+  --color-border: #e5e7eb;
+  --color-muted: #6b7280;
 
-  /* Brand Colors */
+  /* Brand Colors — identical in both themes */
   --color-primary: #193a7a;
   --color-accent: #c80100;
 
-  /* Gray scale */
+  /* Gray scale — kept for non-themed use (badges, dot indicators, etc.) */
   --color-gray-50: #f9fafb;
   --color-gray-100: #f3f4f6;
   --color-gray-200: #e5e7eb;
@@ -32,6 +36,16 @@
 
   /* Font */
   --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Dark mode overrides — flips semantic tokens; brand stays. */
+:root[data-theme="dark"] {
+  --color-background: #0b1220;
+  --color-foreground: #e5e7eb;
+  --color-surface: #0f172a;
+  --color-surface-muted: #1e293b;
+  --color-border: #1e293b;
+  --color-muted: #94a3b8;
 }
 
 body {

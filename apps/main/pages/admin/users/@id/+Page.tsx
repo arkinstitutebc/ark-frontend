@@ -116,12 +116,12 @@ export default function AdminUserDetailPage() {
   }
 
   return (
-    <div class="min-h-screen bg-gray-50 flex flex-col">
+    <div class="min-h-screen bg-surface-muted flex flex-col">
       <Show
         when={!userQuery.isPending && isAdmin()}
         fallback={
           <div class="flex-1 flex items-center justify-center">
-            <div class="animate-pulse text-sm text-gray-500">Loading…</div>
+            <div class="animate-pulse text-sm text-muted">Loading…</div>
           </div>
         }
       >
@@ -135,7 +135,7 @@ export default function AdminUserDetailPage() {
           <div class="max-w-3xl mx-auto mt-4">
             <a
               href="/admin/users"
-              class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-primary mb-4"
+              class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary mb-4"
             >
               <Icons.arrowLeft class="w-4 h-4" /> Back to users
             </a>
@@ -143,7 +143,7 @@ export default function AdminUserDetailPage() {
             <Show
               when={!target.isPending}
               fallback={
-                <div class="bg-white rounded-2xl border border-gray-200 p-12 text-center text-sm text-gray-500">
+                <div class="bg-surface rounded-2xl border border-border p-12 text-center text-sm text-muted">
                   Loading user…
                 </div>
               }
@@ -151,25 +151,25 @@ export default function AdminUserDetailPage() {
               <Show
                 when={target.data}
                 fallback={
-                  <div class="bg-white rounded-2xl border border-gray-200 p-12 text-center text-sm text-red-600">
+                  <div class="bg-surface rounded-2xl border border-border p-12 text-center text-sm text-red-600">
                     User not found.
                   </div>
                 }
               >
                 {user => (
                   <div class="space-y-6">
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                      <div class="px-6 py-5 border-b border-gray-100 flex items-start justify-between gap-4">
+                    <div class="bg-surface rounded-2xl shadow-sm border border-border overflow-hidden">
+                      <div class="px-6 py-5 border-b border-border flex items-start justify-between gap-4">
                         <div>
-                          <h1 class="text-xl font-bold text-gray-900">
+                          <h1 class="text-xl font-bold text-foreground">
                             {user().firstName} {user().lastName}
                           </h1>
-                          <p class="text-sm text-gray-500 mt-0.5">{user().email}</p>
+                          <p class="text-sm text-muted mt-0.5">{user().email}</p>
                         </div>
                         <Show
                           when={user().isActive}
                           fallback={
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs bg-gray-100 text-gray-600">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs bg-surface-muted text-muted">
                               <span class="w-1.5 h-1.5 rounded-full bg-gray-400" /> Inactive
                             </span>
                           }
@@ -196,7 +196,7 @@ export default function AdminUserDetailPage() {
                         <div>
                           <label
                             for="user-role"
-                            class="block text-sm font-medium text-gray-700 mb-1.5"
+                            class="block text-sm font-medium text-foreground mb-1.5"
                           >
                             Role
                           </label>
@@ -205,16 +205,14 @@ export default function AdminUserDetailPage() {
                             value={role()}
                             disabled={isSelf()}
                             onChange={e => setRole(e.currentTarget.value as AdminRole)}
-                            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none disabled:bg-gray-50 disabled:cursor-not-allowed"
+                            class="w-full px-4 py-2.5 border border-border rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none disabled:bg-surface-muted disabled:cursor-not-allowed"
                           >
                             <option value="trainer">Trainer</option>
                             <option value="director">Director</option>
                             <option value="admin">Admin</option>
                           </select>
                           <Show when={isSelf()}>
-                            <p class="text-xs text-gray-500 mt-1">
-                              You cannot change your own role.
-                            </p>
+                            <p class="text-xs text-muted mt-1">You cannot change your own role.</p>
                           </Show>
                         </div>
 
@@ -244,27 +242,27 @@ export default function AdminUserDetailPage() {
                       </form>
                     </div>
 
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                      <div class="px-6 py-5 border-b border-gray-100">
-                        <h2 class="text-base font-semibold text-gray-900">Account actions</h2>
+                    <div class="bg-surface rounded-2xl shadow-sm border border-border overflow-hidden">
+                      <div class="px-6 py-5 border-b border-border">
+                        <h2 class="text-base font-semibold text-foreground">Account actions</h2>
                       </div>
                       <div class="px-6 py-5 space-y-3">
                         <button
                           type="button"
                           onClick={handleReset}
                           disabled={reset.isPending}
-                          class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-gray-200 hover:border-primary hover:bg-primary/5 text-left transition-colors disabled:opacity-50"
+                          class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-border hover:border-primary hover:bg-primary/5 text-left transition-colors disabled:opacity-50"
                         >
                           <span>
-                            <span class="block text-sm font-medium text-gray-900">
+                            <span class="block text-sm font-medium text-foreground">
                               Reset password
                             </span>
-                            <span class="block text-xs text-gray-500 mt-0.5">
+                            <span class="block text-xs text-muted mt-0.5">
                               Generate a new temporary password. The user will be forced to change
                               it on next login.
                             </span>
                           </span>
-                          <Icons.lock class="w-5 h-5 text-gray-400" />
+                          <Icons.lock class="w-5 h-5 text-muted" />
                         </button>
 
                         <Show
@@ -274,17 +272,17 @@ export default function AdminUserDetailPage() {
                               type="button"
                               onClick={handleActivate}
                               disabled={activate.isPending}
-                              class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-gray-200 hover:border-green-500 hover:bg-green-50 text-left transition-colors disabled:opacity-50"
+                              class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-border hover:border-green-500 hover:bg-green-50 text-left transition-colors disabled:opacity-50"
                             >
                               <span>
-                                <span class="block text-sm font-medium text-gray-900">
+                                <span class="block text-sm font-medium text-foreground">
                                   Reactivate user
                                 </span>
-                                <span class="block text-xs text-gray-500 mt-0.5">
+                                <span class="block text-xs text-muted mt-0.5">
                                   Restore login access for this user.
                                 </span>
                               </span>
-                              <Icons.checkCircle class="w-5 h-5 text-gray-400" />
+                              <Icons.checkCircle class="w-5 h-5 text-muted" />
                             </button>
                           }
                         >
@@ -292,19 +290,19 @@ export default function AdminUserDetailPage() {
                             type="button"
                             onClick={handleDeactivate}
                             disabled={isSelf() || deactivate.isPending}
-                            class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-gray-200 hover:border-red-500 hover:bg-red-50 text-left transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-border hover:border-red-500 hover:bg-red-50 text-left transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             <span>
-                              <span class="block text-sm font-medium text-gray-900">
+                              <span class="block text-sm font-medium text-foreground">
                                 Deactivate user
                               </span>
-                              <span class="block text-xs text-gray-500 mt-0.5">
+                              <span class="block text-xs text-muted mt-0.5">
                                 {isSelf()
                                   ? "You cannot deactivate yourself."
                                   : "Block this user from logging in. Their data is preserved."}
                               </span>
                             </span>
-                            <Icons.xCircle class="w-5 h-5 text-gray-400" />
+                            <Icons.xCircle class="w-5 h-5 text-muted" />
                           </button>
                         </Show>
                       </div>
@@ -368,10 +366,10 @@ function TempPasswordModal(props: {
               </div>
             </div>
 
-            <div class="bg-gray-50 border border-gray-200 rounded-lg p-3">
-              <p class="text-xs text-gray-500 mb-1">Temporary password</p>
+            <div class="bg-surface-muted border border-border rounded-lg p-3">
+              <p class="text-xs text-muted mb-1">Temporary password</p>
               <div class="flex items-center gap-2">
-                <code class="flex-1 font-mono text-sm bg-white px-3 py-2 rounded border border-gray-200 select-all">
+                <code class="flex-1 font-mono text-sm bg-surface px-3 py-2 rounded border border-border select-all">
                   {cred().tempPassword}
                 </code>
                 <Button type="button" variant="secondary" size="sm" onClick={copyPassword}>
@@ -383,7 +381,7 @@ function TempPasswordModal(props: {
               </div>
             </div>
 
-            <label class="flex items-start gap-2 text-sm text-gray-700">
+            <label class="flex items-start gap-2 text-sm text-foreground">
               <input
                 type="checkbox"
                 checked={acknowledged()}

@@ -35,7 +35,7 @@ export function Footer() {
   })
 
   return (
-    <footer class="bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200 mt-auto">
+    <footer class="bg-gradient-to-r from-gray-50 to-gray-100 border-t border-border mt-auto">
       <div class="px-6 sm:px-8 lg:px-12 py-6">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div class="flex items-center gap-3">
@@ -46,12 +46,12 @@ export function Footer() {
               height="28"
               class="object-contain opacity-60"
             />
-            <p class="text-sm text-gray-500">© 2025 Ark Institute. All rights reserved.</p>
+            <p class="text-sm text-muted">© 2025 Ark Institute. All rights reserved.</p>
           </div>
           <div class="flex items-center gap-4">
-            <div class="flex items-center gap-2 bg-white/80 px-4 py-2 rounded-full border border-gray-200 shadow-sm">
+            <div class="flex items-center gap-2 bg-surface/80 px-4 py-2 rounded-full border border-border shadow-sm">
               <UI.calendar class="w-4 h-4 text-primary" />
-              <p class="text-sm text-gray-700">{formatDate(currentTime())}</p>
+              <p class="text-sm text-foreground">{formatDate(currentTime())}</p>
             </div>
             <div class="flex items-center gap-2 bg-primary/5 px-4 py-2 rounded-full border border-primary/10 shadow-sm">
               <UI.clock class="w-4 h-4 text-primary" />

@@ -69,7 +69,7 @@ export function ViewItemModal(props: ViewItemModalProps) {
                 <div class="flex items-start justify-between">
                   <div class="flex-1">
                     <div class="flex items-center gap-3 mb-2">
-                      <span class="font-mono text-sm font-medium text-gray-500">{_item().id}</span>
+                      <span class="font-mono text-sm font-medium text-muted">{_item().id}</span>
                       <span
                         class={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${config.bg} ${config.text}`}
                       >
@@ -77,8 +77,8 @@ export function ViewItemModal(props: ViewItemModalProps) {
                         {config.label}
                       </span>
                     </div>
-                    <h3 class="text-xl text-gray-900">{_item().name}</h3>
-                    <p class="text-sm text-gray-500 mt-1">{_item().category}</p>
+                    <h3 class="text-xl text-foreground">{_item().name}</h3>
+                    <p class="text-sm text-muted mt-1">{_item().category}</p>
                   </div>
                   <button
                     type="button"
@@ -95,23 +95,23 @@ export function ViewItemModal(props: ViewItemModalProps) {
                   <div class="grid grid-cols-3 gap-4">
                     <div class="text-center">
                       <p class="text-xs text-primary/70 uppercase tracking-wide mb-1">On Hand</p>
-                      <p class="text-2xl text-gray-900">
+                      <p class="text-2xl text-foreground">
                         {_item().quantityOnHand}
-                        <span class="text-sm font-normal text-gray-500 ml-1">{_item().unit}</span>
+                        <span class="text-sm font-normal text-muted ml-1">{_item().unit}</span>
                       </p>
                     </div>
                     <div class="text-center border-x border-primary/10">
                       <p class="text-xs text-primary/70 uppercase tracking-wide mb-1">Reorder At</p>
-                      <p class="text-2xl text-gray-900">
+                      <p class="text-2xl text-foreground">
                         {_item().reorderLevel}
-                        <span class="text-sm font-normal text-gray-500 ml-1">{_item().unit}</span>
+                        <span class="text-sm font-normal text-muted ml-1">{_item().unit}</span>
                       </p>
                     </div>
                     <div class="text-center">
                       <p class="text-xs text-primary/70 uppercase tracking-wide mb-1">
                         Last Updated
                       </p>
-                      <p class="text-sm font-medium text-gray-900">
+                      <p class="text-sm font-medium text-foreground">
                         {formatDate(_item().lastUpdated)}
                       </p>
                     </div>
@@ -120,25 +120,25 @@ export function ViewItemModal(props: ViewItemModalProps) {
 
                 {/* Details Grid */}
                 <div>
-                  <h4 class="text-sm font-medium text-gray-900 mb-3">Item Information</h4>
+                  <h4 class="text-sm font-medium text-foreground mb-3">Item Information</h4>
                   <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-gray-50 rounded-lg px-4 py-3">
-                      <p class="text-xs text-gray-500 mb-1">Category</p>
-                      <p class="text-sm font-medium text-gray-900">{_item().category}</p>
+                    <div class="bg-surface-muted rounded-lg px-4 py-3">
+                      <p class="text-xs text-muted mb-1">Category</p>
+                      <p class="text-sm font-medium text-foreground">{_item().category}</p>
                     </div>
-                    <div class="bg-gray-50 rounded-lg px-4 py-3">
-                      <p class="text-xs text-gray-500 mb-1">Unit of Measure</p>
-                      <p class="text-sm font-medium text-gray-900">{_item().unit}</p>
+                    <div class="bg-surface-muted rounded-lg px-4 py-3">
+                      <p class="text-xs text-muted mb-1">Unit of Measure</p>
+                      <p class="text-sm font-medium text-foreground">{_item().unit}</p>
                     </div>
-                    <div class="bg-gray-50 rounded-lg px-4 py-3">
-                      <p class="text-xs text-gray-500 mb-1">Reorder Level</p>
-                      <p class="text-sm font-medium text-gray-900">
+                    <div class="bg-surface-muted rounded-lg px-4 py-3">
+                      <p class="text-xs text-muted mb-1">Reorder Level</p>
+                      <p class="text-sm font-medium text-foreground">
                         {_item().reorderLevel} {_item().unit}
                       </p>
                     </div>
-                    <div class="bg-gray-50 rounded-lg px-4 py-3">
-                      <p class="text-xs text-gray-500 mb-1">Last Updated</p>
-                      <p class="text-sm font-medium text-gray-900">
+                    <div class="bg-surface-muted rounded-lg px-4 py-3">
+                      <p class="text-xs text-muted mb-1">Last Updated</p>
+                      <p class="text-sm font-medium text-foreground">
                         {formatDate(_item().lastUpdated)}
                       </p>
                     </div>
@@ -147,28 +147,28 @@ export function ViewItemModal(props: ViewItemModalProps) {
 
                 {/* Batch Information */}
                 <div>
-                  <h4 class="text-sm font-medium text-gray-900 mb-3">Batch Information</h4>
-                  <div class="bg-gray-50 rounded-lg px-4 py-3">
+                  <h4 class="text-sm font-medium text-foreground mb-3">Batch Information</h4>
+                  <div class="bg-surface-muted rounded-lg px-4 py-3">
                     <div class="grid grid-cols-2 gap-4">
                       <div>
-                        <p class="text-xs text-gray-500">Batch Code</p>
-                        <p class="text-sm font-mono font-medium text-gray-900">
+                        <p class="text-xs text-muted">Batch Code</p>
+                        <p class="text-sm font-mono font-medium text-foreground">
                           {_item().batchCode}
                         </p>
                       </div>
                       <div>
-                        <p class="text-xs text-gray-500">Batch Name</p>
-                        <p class="text-sm font-medium text-gray-900">{_item().batchName}</p>
+                        <p class="text-xs text-muted">Batch Name</p>
+                        <p class="text-sm font-medium text-foreground">{_item().batchName}</p>
                       </div>
                       {_item().poReference ? (
                         <>
                           <div>
-                            <p class="text-xs text-gray-500">PO Reference</p>
-                            <p class="text-sm font-medium text-gray-900">{_item().poReference}</p>
+                            <p class="text-xs text-muted">PO Reference</p>
+                            <p class="text-sm font-medium text-foreground">{_item().poReference}</p>
                           </div>
                           <div>
-                            <p class="text-xs text-gray-500">Source</p>
-                            <p class="text-sm font-medium text-gray-900">Procurement</p>
+                            <p class="text-xs text-muted">Source</p>
+                            <p class="text-sm font-medium text-foreground">Procurement</p>
                           </div>
                         </>
                       ) : null}
@@ -180,7 +180,7 @@ export function ViewItemModal(props: ViewItemModalProps) {
                 <Show when={itemMovements().length > 0}>
                   <div>
                     <div class="flex items-center justify-between mb-3">
-                      <h4 class="text-sm font-medium text-gray-900">Recent Movements</h4>
+                      <h4 class="text-sm font-medium text-foreground">Recent Movements</h4>
                       <a
                         href="/movements"
                         class="text-xs text-primary hover:text-primary/80 font-medium"
@@ -188,20 +188,20 @@ export function ViewItemModal(props: ViewItemModalProps) {
                         View all →
                       </a>
                     </div>
-                    <div class="border border-gray-200 rounded-lg overflow-hidden">
+                    <div class="border border-border rounded-lg overflow-hidden">
                       <table class="w-full">
-                        <thead class="bg-gray-50 border-b border-gray-200">
+                        <thead class="bg-surface-muted border-b border-border">
                           <tr>
-                            <th class="text-left px-4 py-2.5 text-xs font-medium text-gray-600 uppercase">
+                            <th class="text-left px-4 py-2.5 text-xs font-medium text-muted uppercase">
                               Date
                             </th>
-                            <th class="text-left px-4 py-2.5 text-xs font-medium text-gray-600 uppercase">
+                            <th class="text-left px-4 py-2.5 text-xs font-medium text-muted uppercase">
                               Type
                             </th>
-                            <th class="text-right px-4 py-2.5 text-xs font-medium text-gray-600 uppercase">
+                            <th class="text-right px-4 py-2.5 text-xs font-medium text-muted uppercase">
                               Qty
                             </th>
-                            <th class="text-left px-4 py-2.5 text-xs font-medium text-gray-600 uppercase">
+                            <th class="text-left px-4 py-2.5 text-xs font-medium text-muted uppercase">
                               Reason
                             </th>
                           </tr>
@@ -209,8 +209,8 @@ export function ViewItemModal(props: ViewItemModalProps) {
                         <tbody>
                           <For each={itemMovements()}>
                             {movement => (
-                              <tr class="border-b border-gray-100 last:border-b-0">
-                                <td class="px-4 py-2.5 text-sm text-gray-600 whitespace-nowrap">
+                              <tr class="border-b border-border last:border-b-0">
+                                <td class="px-4 py-2.5 text-sm text-muted whitespace-nowrap">
                                   {formatDate(movement.createdAt)}
                                 </td>
                                 <td class="px-4 py-2.5 text-sm">
@@ -230,11 +230,11 @@ export function ViewItemModal(props: ViewItemModalProps) {
                                         : "ADJ"}
                                   </span>
                                 </td>
-                                <td class="px-4 py-2.5 text-sm text-right font-medium text-gray-900">
+                                <td class="px-4 py-2.5 text-sm text-right font-medium text-foreground">
                                   {movement.type === "out" ? "-" : "+"}
                                   {movement.quantity}
                                 </td>
-                                <td class="px-4 py-2.5 text-sm text-gray-600">
+                                <td class="px-4 py-2.5 text-sm text-muted">
                                   {movement.reason || movement.reference || "-"}
                                 </td>
                               </tr>
@@ -248,11 +248,11 @@ export function ViewItemModal(props: ViewItemModalProps) {
               </div>
 
               {/* Footer Actions */}
-              <div class="flex items-center justify-end gap-3 pt-4 mt-4 border-t border-gray-100">
+              <div class="flex items-center justify-end gap-3 pt-4 mt-4 border-t border-border">
                 <button
                   type="button"
                   onClick={props.onClose}
-                  class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                  class="px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors"
                 >
                   Close
                 </button>

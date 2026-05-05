@@ -37,7 +37,7 @@ function getTxnColor(type: string) {
     case "expense":
       return "text-red-700"
     default:
-      return "text-gray-700"
+      return "text-foreground"
   }
 }
 
@@ -61,8 +61,8 @@ export default function Page() {
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
       <div class="mb-6">
-        <h1 class="text-2xl font-semibold text-gray-900">Bank Accounts</h1>
-        <p class="text-sm text-gray-500 mt-1">View balances and transaction history</p>
+        <h1 class="text-2xl font-semibold text-foreground">Bank Accounts</h1>
+        <p class="text-sm text-muted mt-1">View balances and transaction history</p>
       </div>
 
       {/* Bank Cards */}
@@ -74,10 +74,10 @@ export default function Page() {
                 {(bank: Bank) => (
                   <button
                     type="button"
-                    class={`text-left bg-white rounded-lg border p-5 transition-colors ${
+                    class={`text-left bg-surface rounded-lg border p-5 transition-colors ${
                       selectedBank() === bank.id || selectedBank() === "all"
                         ? "border-primary ring-1 ring-primary/20"
-                        : "border-gray-200 hover:border-gray-300"
+                        : "border-border hover:border-border"
                     }`}
                     onClick={() => setSelectedBank(bank.id)}
                   >
@@ -91,18 +91,18 @@ export default function Page() {
                           />
                         </div>
                         <div>
-                          <p class="text-base font-semibold text-gray-900">{bank.name}</p>
-                          <p class="text-xs text-gray-500">{bank.bankName}</p>
+                          <p class="text-base font-semibold text-foreground">{bank.name}</p>
+                          <p class="text-xs text-muted">{bank.bankName}</p>
                         </div>
                       </div>
-                      <p class="text-xl font-semibold text-gray-900 tabular-nums">
+                      <p class="text-xl font-semibold text-foreground tabular-nums">
                         {(() => {
                           const balance = getBalanceFor(bank.id)
                           return balance !== null ? formatCurrency(balance) : "-"
                         })()}
                       </p>
                     </div>
-                    <p class="text-xs text-gray-500">{bank.accountNumber}</p>
+                    <p class="text-xs text-muted">{bank.accountNumber}</p>
                   </button>
                 )}
               </For>
@@ -116,7 +116,7 @@ export default function Page() {
                 class={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   selectedBank() === "all"
                     ? "bg-primary text-white"
-                    : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                    : "bg-surface text-foreground border border-border hover:bg-surface-muted"
                 }`}
               >
                 All Banks
@@ -129,7 +129,7 @@ export default function Page() {
                     class={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                       selectedBank() === bank.id
                         ? "bg-primary text-white"
-                        : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"
+                        : "bg-surface text-foreground border border-border hover:bg-surface-muted"
                     }`}
                   >
                     {bank.bankName}
@@ -144,28 +144,28 @@ export default function Page() {
       {/* Transactions */}
       <QueryBoundary query={transactionsQuery}>
         {(txns: Transaction[]) => (
-          <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div class="px-5 py-4 border-b border-gray-200 flex items-center justify-between">
-              <h2 class="text-sm font-semibold text-gray-900">Transaction History</h2>
-              <p class="text-xs text-gray-500">{txns.length} transactions</p>
+          <div class="bg-surface rounded-lg border border-border overflow-hidden">
+            <div class="px-5 py-4 border-b border-border flex items-center justify-between">
+              <h2 class="text-sm font-semibold text-foreground">Transaction History</h2>
+              <p class="text-xs text-muted">{txns.length} transactions</p>
             </div>
             <div class="overflow-x-auto">
               <table class="w-full">
-                <thead class="bg-gray-50 border-b border-gray-200">
+                <thead class="bg-surface-muted border-b border-border">
                   <tr>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                       Reference
                     </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                       Type
                     </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                       Description
                     </th>
-                    <th class="py-4 px-6 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
                       Amount
                     </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                       Date
                     </th>
                   </tr>
@@ -173,22 +173,22 @@ export default function Page() {
                 <tbody>
                   <For each={txns}>
                     {(txn: Transaction) => (
-                      <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+                      <tr class="border-t border-border hover:bg-surface-muted transition-colors">
                         <td class="py-4 px-6">
-                          <span class="text-sm font-medium text-gray-900">
+                          <span class="text-sm font-medium text-foreground">
                             {txn.referenceId || txn.id.slice(0, 8)}
                           </span>
                         </td>
                         <td class="py-4 px-6">
                           <StatusBadge status={getTxnLabel(txn.type)} />
                         </td>
-                        <td class="py-4 px-6 text-sm text-gray-600">{txn.description}</td>
+                        <td class="py-4 px-6 text-sm text-muted">{txn.description}</td>
                         <td
                           class={`py-4 px-6 text-right text-sm font-semibold tabular-nums ${getTxnColor(txn.type)}`}
                         >
                           {formatCurrency(Math.abs(Number(txn.amount)))}
                         </td>
-                        <td class="py-4 px-6 text-sm text-gray-600">{formatDate(txn.createdAt)}</td>
+                        <td class="py-4 px-6 text-sm text-muted">{formatDate(txn.createdAt)}</td>
                       </tr>
                     )}
                   </For>

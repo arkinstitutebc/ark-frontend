@@ -32,92 +32,92 @@ export function PrDocumentModal(props: PrDocumentModalProps) {
               {/* Header Section */}
               <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                  <span class="font-mono text-sm font-medium text-gray-900">
+                  <span class="font-mono text-sm font-medium text-foreground">
                     {pr().prCode || pr().id}
                   </span>
                   <PrStatusBadge status={pr().status} />
                 </div>
-                <span class="text-lg font-semibold text-gray-900">
+                <span class="text-lg font-semibold text-foreground">
                   {formatCurrency(Number(pr().totalAmount))}
                 </span>
               </div>
 
               {/* Details Grid - improved with subtle cards */}
               <div class="grid grid-cols-2 gap-3">
-                <div class="bg-gray-50 rounded-lg px-4 py-3">
-                  <p class="text-xs text-gray-500 mb-1">Batch Name</p>
-                  <p class="text-sm font-semibold text-gray-900">{pr().batchName}</p>
+                <div class="bg-surface-muted rounded-lg px-4 py-3">
+                  <p class="text-xs text-muted mb-1">Batch Name</p>
+                  <p class="text-sm font-semibold text-foreground">{pr().batchName}</p>
                 </div>
-                <div class="bg-gray-50 rounded-lg px-4 py-3">
-                  <p class="text-xs text-gray-500 mb-1">Batch Code</p>
-                  <p class="text-sm font-mono font-medium text-gray-900">{pr().batchCode}</p>
+                <div class="bg-surface-muted rounded-lg px-4 py-3">
+                  <p class="text-xs text-muted mb-1">Batch Code</p>
+                  <p class="text-sm font-mono font-medium text-foreground">{pr().batchCode}</p>
                 </div>
-                <div class="bg-gray-50 rounded-lg px-4 py-3">
-                  <p class="text-xs text-gray-500 mb-1">Category</p>
-                  <p class="text-sm font-medium text-gray-900">{pr().category}</p>
+                <div class="bg-surface-muted rounded-lg px-4 py-3">
+                  <p class="text-xs text-muted mb-1">Category</p>
+                  <p class="text-sm font-medium text-foreground">{pr().category}</p>
                 </div>
-                <div class="bg-gray-50 rounded-lg px-4 py-3">
-                  <p class="text-xs text-gray-500 mb-1">Created Date</p>
-                  <p class="text-sm font-medium text-gray-900">{formatDate(pr().createdAt)}</p>
+                <div class="bg-surface-muted rounded-lg px-4 py-3">
+                  <p class="text-xs text-muted mb-1">Created Date</p>
+                  <p class="text-sm font-medium text-foreground">{formatDate(pr().createdAt)}</p>
                 </div>
                 <div class="bg-primary/5 rounded-lg px-4 py-3 col-span-2 border border-primary/10">
                   <p class="text-xs text-primary/70 mb-1">Created By</p>
-                  <p class="text-sm font-semibold text-gray-900">{pr().createdBy}</p>
+                  <p class="text-sm font-semibold text-foreground">{pr().createdBy}</p>
                 </div>
               </div>
 
               {/* Purpose Section */}
               <div>
-                <p class="text-xs text-gray-500 mb-2">Purpose</p>
-                <p class="text-sm text-gray-900 whitespace-pre-wrap">{pr().purpose}</p>
+                <p class="text-xs text-muted mb-2">Purpose</p>
+                <p class="text-sm text-foreground whitespace-pre-wrap">{pr().purpose}</p>
               </div>
 
               {/* Items Table */}
               <div>
-                <p class="text-xs text-gray-500 mb-2">Items</p>
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                <p class="text-xs text-muted mb-2">Items</p>
+                <div class="border border-border rounded-lg overflow-hidden">
                   <table class="w-full">
-                    <thead class="bg-gray-50 border-b border-gray-200">
+                    <thead class="bg-surface-muted border-b border-border">
                       <tr>
-                        <th class="text-left px-4 py-2 text-xs font-semibold text-gray-600 uppercase">
+                        <th class="text-left px-4 py-2 text-xs font-semibold text-muted uppercase">
                           Item
                         </th>
-                        <th class="text-center px-4 py-2 text-xs font-semibold text-gray-600 uppercase">
+                        <th class="text-center px-4 py-2 text-xs font-semibold text-muted uppercase">
                           Qty
                         </th>
-                        <th class="text-right px-4 py-2 text-xs font-semibold text-gray-600 uppercase">
+                        <th class="text-right px-4 py-2 text-xs font-semibold text-muted uppercase">
                           Price
                         </th>
-                        <th class="text-right px-4 py-2 text-xs font-semibold text-gray-600 uppercase">
+                        <th class="text-right px-4 py-2 text-xs font-semibold text-muted uppercase">
                           Total
                         </th>
                       </tr>
                     </thead>
                     <tbody>
                       {pr().items.map(item => (
-                        <tr class="border-b border-gray-100 last:border-b-0">
-                          <td class="px-4 py-3 text-sm text-gray-900">{item.name}</td>
-                          <td class="px-4 py-3 text-sm text-gray-900 text-center">
+                        <tr class="border-b border-border last:border-b-0">
+                          <td class="px-4 py-3 text-sm text-foreground">{item.name}</td>
+                          <td class="px-4 py-3 text-sm text-foreground text-center">
                             {item.quantity} {item.unit}
                           </td>
-                          <td class="px-4 py-3 text-sm text-gray-900 text-right">
+                          <td class="px-4 py-3 text-sm text-foreground text-right">
                             {formatCurrency(item.unitPrice)}
                           </td>
-                          <td class="px-4 py-3 text-sm text-gray-900 text-right">
+                          <td class="px-4 py-3 text-sm text-foreground text-right">
                             {formatCurrency(item.total)}
                           </td>
                         </tr>
                       ))}
                     </tbody>
-                    <tfoot class="bg-gray-50 border-t border-gray-200">
+                    <tfoot class="bg-surface-muted border-t border-border">
                       <tr>
                         <td
                           colSpan={3}
-                          class="px-4 py-3 text-sm font-semibold text-gray-900 text-right"
+                          class="px-4 py-3 text-sm font-semibold text-foreground text-right"
                         >
                           Grand Total
                         </td>
-                        <td class="px-4 py-3 text-sm font-semibold text-gray-900 text-right">
+                        <td class="px-4 py-3 text-sm font-semibold text-foreground text-right">
                           {formatCurrency(Number(pr().totalAmount))}
                         </td>
                       </tr>
@@ -128,27 +128,27 @@ export function PrDocumentModal(props: PrDocumentModalProps) {
 
               {/* Approval Info */}
               <Show when={pr().status !== "pending"}>
-                <div class="bg-gray-50 rounded-lg p-4">
-                  <p class="text-xs text-gray-500 mb-2">Approval Details</p>
+                <div class="bg-surface-muted rounded-lg p-4">
+                  <p class="text-xs text-muted mb-2">Approval Details</p>
                   <div class="grid grid-cols-2 gap-4">
                     <Show when={pr().approvedBy}>
                       <div>
-                        <p class="text-xs text-gray-500 mb-1">Approved By</p>
-                        <p class="text-sm font-medium text-gray-900">{pr().approvedBy}</p>
+                        <p class="text-xs text-muted mb-1">Approved By</p>
+                        <p class="text-sm font-medium text-foreground">{pr().approvedBy}</p>
                       </div>
                     </Show>
                     <Show when={pr().approvedAt}>
                       <div>
-                        <p class="text-xs text-gray-500 mb-1">Approved Date</p>
-                        <p class="text-sm font-medium text-gray-900">
+                        <p class="text-xs text-muted mb-1">Approved Date</p>
+                        <p class="text-sm font-medium text-foreground">
                           {formatDate(pr().approvedAt ?? "")}
                         </p>
                       </div>
                     </Show>
                     <Show when={pr().approvalNotes}>
                       <div class="col-span-2">
-                        <p class="text-xs text-gray-500 mb-1">Notes</p>
-                        <p class="text-sm text-gray-900">{pr().approvalNotes}</p>
+                        <p class="text-xs text-muted mb-1">Notes</p>
+                        <p class="text-sm text-foreground">{pr().approvalNotes}</p>
                       </div>
                     </Show>
                   </div>
@@ -157,11 +157,11 @@ export function PrDocumentModal(props: PrDocumentModalProps) {
             </div>
 
             {/* Fixed Action Buttons */}
-            <div class="flex items-center justify-end gap-3 pt-4 mt-4 border-t border-gray-100">
+            <div class="flex items-center justify-end gap-3 pt-4 mt-4 border-t border-border">
               <button
                 type="button"
                 onClick={props.onClose}
-                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                class="px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors cursor-pointer"
               >
                 Close
               </button>

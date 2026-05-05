@@ -59,8 +59,8 @@ export default function Page() {
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h1 class="text-2xl font-semibold text-gray-900">Stock Overview</h1>
-          <p class="text-sm text-gray-500 mt-1">Track inventory levels across all batches</p>
+          <h1 class="text-2xl font-semibold text-foreground">Stock Overview</h1>
+          <p class="text-sm text-muted mt-1">Track inventory levels across all batches</p>
         </div>
         <a
           href="/receiving"
@@ -71,11 +71,11 @@ export default function Page() {
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
+        <div class="bg-surface rounded-lg border border-border p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-500">Total Items</p>
-              <p class="text-2xl text-gray-900 mt-1">
+              <p class="text-sm text-muted">Total Items</p>
+              <p class="text-2xl text-foreground mt-1">
                 {stockQuery.isSuccess ? stats().total : "-"}
               </p>
             </div>
@@ -84,11 +84,11 @@ export default function Page() {
             </div>
           </div>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
+        <div class="bg-surface rounded-lg border border-border p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-500">Low Stock</p>
-              <p class="text-2xl text-gray-900 mt-1">
+              <p class="text-sm text-muted">Low Stock</p>
+              <p class="text-2xl text-foreground mt-1">
                 {stockQuery.isSuccess ? stats().lowStock : "-"}
               </p>
             </div>
@@ -97,11 +97,11 @@ export default function Page() {
             </div>
           </div>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
+        <div class="bg-surface rounded-lg border border-border p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-500">Out of Stock</p>
-              <p class="text-2xl text-gray-900 mt-1">
+              <p class="text-sm text-muted">Out of Stock</p>
+              <p class="text-2xl text-foreground mt-1">
                 {stockQuery.isSuccess ? stats().outOfStock : "-"}
               </p>
             </div>
@@ -110,11 +110,11 @@ export default function Page() {
             </div>
           </div>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
+        <div class="bg-surface rounded-lg border border-border p-4">
           <div class="flex items-center justify-between">
             <div>
-              <p class="text-sm text-gray-500">Total Movements</p>
-              <p class="text-2xl text-gray-900 mt-1">
+              <p class="text-sm text-muted">Total Movements</p>
+              <p class="text-2xl text-foreground mt-1">
                 {movementsQuery.isSuccess ? stats().totalMovements : "-"}
               </p>
             </div>
@@ -127,38 +127,38 @@ export default function Page() {
 
       <QueryBoundary query={stockQuery}>
         {(_items: StockItem[]) => (
-          <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div class="px-6 py-4 border-b border-gray-200">
+          <div class="bg-surface rounded-lg border border-border overflow-hidden">
+            <div class="px-6 py-4 border-b border-border">
               <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-gray-900">Current Stock</h2>
+                <h2 class="text-lg font-semibold text-foreground">Current Stock</h2>
                 <div class="relative">
-                  <Icons.search class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Icons.search class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
                   <input
                     type="text"
                     placeholder="Search items..."
                     value={searchQuery()}
                     onInput={e => setSearchQuery(e.currentTarget.value)}
-                    class="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary w-64"
+                    class="pl-9 pr-4 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary w-64"
                   />
                 </div>
               </div>
             </div>
             <table class="w-full">
-              <thead class="bg-gray-50">
+              <thead class="bg-surface-muted">
                 <tr>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                     Item
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                     Batch
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                     On Hand
                   </th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th class="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                     Status
                   </th>
-                  <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                  <th class="px-6 py-3 text-right text-xs font-semibold text-muted uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -166,17 +166,17 @@ export default function Page() {
               <tbody class="divide-y divide-gray-200">
                 <For each={filteredStock()}>
                   {(item: StockItem) => (
-                    <tr class="hover:bg-gray-50 transition-colors">
+                    <tr class="hover:bg-surface-muted transition-colors">
                       <td class="px-6 py-4">
-                        <p class="text-sm font-medium text-gray-900">{item.name}</p>
-                        <p class="text-xs text-gray-500 mt-0.5">{item.category}</p>
+                        <p class="text-sm font-medium text-foreground">{item.name}</p>
+                        <p class="text-xs text-muted mt-0.5">{item.category}</p>
                       </td>
                       <td class="px-6 py-4">
-                        <span class="text-sm text-gray-700">{item.batchCode}</span>
-                        <p class="text-xs text-gray-500 mt-0.5">{item.batchName}</p>
+                        <span class="text-sm text-foreground">{item.batchCode}</span>
+                        <p class="text-xs text-muted mt-0.5">{item.batchName}</p>
                       </td>
                       <td class="px-6 py-4">
-                        <span class="text-sm font-medium text-gray-900">
+                        <span class="text-sm font-medium text-foreground">
                           {item.quantityOnHand} {item.unit}
                         </span>
                       </td>
@@ -188,7 +188,7 @@ export default function Page() {
                           <button
                             type="button"
                             onClick={() => openAdjustModal(item)}
-                            class="text-sm text-gray-600 hover:text-primary font-medium"
+                            class="text-sm text-muted hover:text-primary font-medium"
                           >
                             Adjust
                           </button>

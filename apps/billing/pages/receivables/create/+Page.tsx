@@ -74,30 +74,30 @@ export default function CreateBillingPage() {
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
       <div class="flex items-center gap-4 mb-8">
-        <a href="/receivables" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-          <Icons.arrowLeft class="w-5 h-5 text-gray-600" />
+        <a href="/receivables" class="p-2 hover:bg-surface-muted rounded-lg transition-colors">
+          <Icons.arrowLeft class="w-5 h-5 text-muted" />
         </a>
         <div>
-          <h1 class="text-2xl font-semibold text-gray-900">Create Billing Statement</h1>
-          <p class="text-sm text-gray-500 mt-1">Create an accounts receivable record for a batch</p>
+          <h1 class="text-2xl font-semibold text-foreground">Create Billing Statement</h1>
+          <p class="text-sm text-muted mt-1">Create an accounts receivable record for a batch</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit}>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div class="lg:col-span-2 space-y-6">
-            <div class="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 class="text-lg font-semibold text-gray-900 mb-4">Billing Details</h2>
+            <div class="bg-surface rounded-lg border border-border p-6">
+              <h2 class="text-lg font-semibold text-foreground mb-4">Billing Details</h2>
               <div class="space-y-4">
                 <div>
-                  <label for="batch-select" class="block text-sm font-medium text-gray-700 mb-1">
+                  <label for="batch-select" class="block text-sm font-medium text-foreground mb-1">
                     Select Batch
                   </label>
                   <select
                     id="batch-select"
                     value={selectedBatchId()}
                     onChange={e => setSelectedBatchId(e.currentTarget.value)}
-                    class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white ${errors().batchId ? "border-red-300" : "border-gray-200"}`}
+                    class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface ${errors().batchId ? "border-red-300" : "border-border"}`}
                   >
                     <option value="">Choose a batch...</option>
                     <For each={batchesQuery.data || []}>
@@ -139,7 +139,10 @@ export default function CreateBillingPage() {
                 </Show>
 
                 <div>
-                  <label for="billing-amount" class="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    for="billing-amount"
+                    class="block text-sm font-medium text-foreground mb-1"
+                  >
                     Billing Amount (PHP)
                   </label>
                   <input
@@ -150,7 +153,7 @@ export default function CreateBillingPage() {
                     value={amount()}
                     onInput={e => setAmount(e.currentTarget.value)}
                     placeholder="0.00"
-                    class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().amount ? "border-red-300" : "border-gray-200"}`}
+                    class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().amount ? "border-red-300" : "border-border"}`}
                   />
                   <Show when={errors().amount}>
                     <p class="text-xs text-red-600 mt-1">{errors().amount}</p>
@@ -160,7 +163,7 @@ export default function CreateBillingPage() {
                       <button
                         type="button"
                         onClick={() => setAmount(String(v))}
-                        class="px-2 py-1 text-xs bg-gray-100 hover:bg-gray-200 rounded transition-colors"
+                        class="px-2 py-1 text-xs bg-surface-muted hover:bg-surface-muted rounded transition-colors"
                       >
                         {formatCurrency(v)}
                       </button>
@@ -169,8 +172,8 @@ export default function CreateBillingPage() {
                 </div>
 
                 <div>
-                  <label for="billing-notes" class="block text-sm font-medium text-gray-700 mb-1">
-                    Notes <span class="text-gray-400">(optional)</span>
+                  <label for="billing-notes" class="block text-sm font-medium text-foreground mb-1">
+                    Notes <span class="text-muted">(optional)</span>
                   </label>
                   <textarea
                     id="billing-notes"
@@ -178,7 +181,7 @@ export default function CreateBillingPage() {
                     onInput={e => setNotes(e.currentTarget.value)}
                     placeholder="Additional notes..."
                     rows={3}
-                    class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+                    class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
                   />
                 </div>
               </div>
@@ -186,11 +189,11 @@ export default function CreateBillingPage() {
           </div>
 
           <div class="lg:col-span-1">
-            <div class="bg-white rounded-lg border border-gray-200 p-6 sticky top-24">
-              <h2 class="text-lg font-semibold text-gray-900 mb-4">Summary</h2>
+            <div class="bg-surface rounded-lg border border-border p-6 sticky top-24">
+              <h2 class="text-lg font-semibold text-foreground mb-4">Summary</h2>
               <div class="space-y-3 text-sm">
                 <div class="flex justify-between">
-                  <span class="text-gray-500">Batch</span>
+                  <span class="text-muted">Batch</span>
                   <span class="font-medium">{selectedBatch()?.batchCode || "—"}</span>
                 </div>
                 <div class="border-t pt-3 flex justify-between">
@@ -201,7 +204,7 @@ export default function CreateBillingPage() {
                 </div>
                 <Show when={selectedBatch()}>
                   {batch => (
-                    <div class="border-t pt-3 flex justify-between text-xs text-gray-500">
+                    <div class="border-t pt-3 flex justify-between text-xs text-muted">
                       <span>Batch Budget</span>
                       <span class="tabular-nums">{formatCurrency(Number(batch().budget))}</span>
                     </div>
@@ -225,7 +228,7 @@ export default function CreateBillingPage() {
                 </button>
                 <a
                   href="/receivables"
-                  class="block w-full px-4 py-2.5 bg-white text-gray-700 border border-gray-200 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors text-center"
+                  class="block w-full px-4 py-2.5 bg-surface text-foreground border border-border text-sm font-medium rounded-lg hover:bg-surface-muted transition-colors text-center"
                 >
                   Cancel
                 </a>

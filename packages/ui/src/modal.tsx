@@ -29,15 +29,15 @@ export function Modal(props: ModalProps) {
           onKeyDown={e => e.key === "Escape" && props.onClose()}
         >
           <div
-            class={`bg-white rounded-xl shadow-xl w-full mx-4 max-h-[90vh] overflow-hidden ${props.size === "lg" ? "max-w-2xl" : "max-w-md"}`}
+            class={`bg-surface rounded-xl shadow-xl w-full mx-4 max-h-[90vh] overflow-hidden ${props.size === "lg" ? "max-w-2xl" : "max-w-md"}`}
           >
             {/* Header */}
-            <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
-              <h2 class="text-lg font-semibold text-gray-900">{props.title}</h2>
+            <div class="flex items-center justify-between px-5 py-4 border-b border-border">
+              <h2 class="text-lg font-semibold text-foreground">{props.title}</h2>
               <button
                 type="button"
                 onClick={props.onClose}
-                class="p-1 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors"
+                class="p-1 text-muted hover:text-foreground rounded-lg hover:bg-surface-muted transition-colors"
               >
                 <Icons.close class="w-5 h-5" />
               </button>

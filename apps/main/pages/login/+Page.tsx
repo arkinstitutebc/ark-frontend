@@ -52,9 +52,9 @@ export default function LoginPage() {
     <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4">
       <div class="w-full max-w-md animate-fade-in">
         {/* Card */}
-        <div class="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+        <div class="bg-surface rounded-2xl shadow-xl border border-border overflow-hidden">
           {/* Header with Logo */}
-          <div class="p-10 text-center border-b border-gray-100 bg-gradient-to-b from-primary/5 to-transparent">
+          <div class="p-10 text-center border-b border-border bg-gradient-to-b from-primary/5 to-transparent">
             <div class="flex justify-center mb-5">
               <div class="relative">
                 <div class="absolute inset-0 bg-primary/10 rounded-full blur-xl" />
@@ -67,8 +67,8 @@ export default function LoginPage() {
                 />
               </div>
             </div>
-            <h1 class="text-2xl font-bold text-gray-900">Ark Institute</h1>
-            <p class="text-gray-500 text-sm mt-1">ERP Portal</p>
+            <h1 class="text-2xl font-bold text-foreground">Ark Institute</h1>
+            <p class="text-muted text-sm mt-1">ERP Portal</p>
           </div>
 
           {/* Form */}
@@ -147,13 +147,13 @@ export default function LoginPage() {
           </form>
 
           {/* Footer */}
-          <div class="px-10 pb-8 pt-5 border-t border-gray-100 bg-gray-50/50">
-            <p class="text-center text-xs text-gray-400">Secure admin access</p>
+          <div class="px-10 pb-8 pt-5 border-t border-border bg-surface-muted/50">
+            <p class="text-center text-xs text-muted">Secure admin access</p>
           </div>
         </div>
 
         {/* Help text */}
-        <p class="text-center text-sm text-gray-500 mt-6">
+        <p class="text-center text-sm text-muted mt-6">
           Need help? Contact{" "}
           <a href="mailto:info@arkinstitutebc.com" class="text-primary hover:underline font-medium">
             IT Support

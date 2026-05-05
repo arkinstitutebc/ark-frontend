@@ -18,16 +18,16 @@ export function ViewStudentModal(props: ViewStudentModalProps) {
     <Modal open={props.open} onClose={props.onClose} title="Student Details" size="lg">
       <div class="space-y-6">
         {/* Header */}
-        <div class="flex items-center gap-4 pb-6 border-b border-gray-100">
+        <div class="flex items-center gap-4 pb-6 border-b border-border">
           <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
             <Icons.user class="w-8 h-8 text-primary" />
           </div>
           <div>
-            <h3 class="text-lg font-semibold text-gray-900">
+            <h3 class="text-lg font-semibold text-foreground">
               {props.student.firstName} {props.student.middleName} {props.student.lastName}
             </h3>
             <div class="flex items-center gap-2 mt-1">
-              <span class="text-sm text-gray-500">{props.student.studentId}</span>
+              <span class="text-sm text-muted">{props.student.studentId}</span>
               <StatusBadge status={props.student.status} />
             </div>
           </div>
@@ -36,15 +36,15 @@ export function ViewStudentModal(props: ViewStudentModalProps) {
         {/* Details - Simple Grid */}
         <div class="grid grid-cols-3 gap-6">
           <div>
-            <span class="text-xs text-gray-500">Date of Birth</span>
-            <p class="text-sm text-gray-900 mt-0.5">{props.student.dateOfBirth}</p>
+            <span class="text-xs text-muted">Date of Birth</span>
+            <p class="text-sm text-foreground mt-0.5">{props.student.dateOfBirth}</p>
           </div>
           <div>
-            <span class="text-xs text-gray-500">Gender</span>
-            <p class="text-sm text-gray-900 mt-0.5">{props.student.gender}</p>
+            <span class="text-xs text-muted">Gender</span>
+            <p class="text-sm text-foreground mt-0.5">{props.student.gender}</p>
           </div>
           <div>
-            <span class="text-xs text-gray-500">Batch</span>
+            <span class="text-xs text-muted">Batch</span>
             <Show when={getBatch()}>
               {batch => (
                 <div class="mt-0.5">
@@ -55,35 +55,35 @@ export function ViewStudentModal(props: ViewStudentModalProps) {
                   >
                     {batch().batchCode}
                   </a>
-                  <span class="text-xs text-gray-500 ml-1">{batch().trainingLevel}</span>
+                  <span class="text-xs text-muted ml-1">{batch().trainingLevel}</span>
                 </div>
               )}
             </Show>
           </div>
           <div class="col-span-3">
-            <span class="text-xs text-gray-500">Address</span>
-            <p class="text-sm text-gray-900 mt-0.5">{props.student.address}</p>
+            <span class="text-xs text-muted">Address</span>
+            <p class="text-sm text-foreground mt-0.5">{props.student.address}</p>
           </div>
           <div>
-            <span class="text-xs text-gray-500">Contact</span>
-            <p class="text-sm text-gray-900 mt-0.5">{props.student.contactNumber}</p>
+            <span class="text-xs text-muted">Contact</span>
+            <p class="text-sm text-foreground mt-0.5">{props.student.contactNumber}</p>
           </div>
           <div>
-            <span class="text-xs text-gray-500">Email</span>
-            <p class="text-sm text-gray-900 mt-0.5">{props.student.email}</p>
+            <span class="text-xs text-muted">Email</span>
+            <p class="text-sm text-foreground mt-0.5">{props.student.email}</p>
           </div>
           <div>
-            <span class="text-xs text-gray-500">Education</span>
-            <p class="text-sm text-gray-900 mt-0.5">{props.student.educationalAttainment}</p>
+            <span class="text-xs text-muted">Education</span>
+            <p class="text-sm text-foreground mt-0.5">{props.student.educationalAttainment}</p>
           </div>
         </div>
 
         {/* Close */}
-        <div class="flex justify-end pt-4 border-t border-gray-100">
+        <div class="flex justify-end pt-4 border-t border-border">
           <button
             type="button"
             onClick={props.onClose}
-            class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            class="px-4 py-2 text-sm font-medium text-foreground hover:bg-surface-muted rounded-lg transition-colors"
           >
             Close
           </button>

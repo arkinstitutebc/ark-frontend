@@ -74,13 +74,13 @@ export function AddBatchModal(props: AddBatchModalProps) {
   }
 
   const fieldClass = (field: string) =>
-    `w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors()[field] ? "border-red-300" : "border-gray-200"}`
+    `w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors()[field] ? "border-red-300" : "border-border"}`
 
   return (
     <Modal open={props.open} onClose={handleClose} title="Add New Batch">
       <form onSubmit={handleSubmit} class="space-y-4">
         <label class="block">
-          <span class="block text-sm font-medium text-gray-700 mb-1">Training Type</span>
+          <span class="block text-sm font-medium text-foreground mb-1">Training Type</span>
           <select
             value={trainingName()}
             onChange={e => setTrainingName(e.target.value)}
@@ -97,7 +97,7 @@ export function AddBatchModal(props: AddBatchModalProps) {
         </label>
 
         <label class="block">
-          <span class="block text-sm font-medium text-gray-700 mb-1">Senator Sponsor</span>
+          <span class="block text-sm font-medium text-foreground mb-1">Senator Sponsor</span>
           <input
             type="text"
             value={senator()}
@@ -112,7 +112,7 @@ export function AddBatchModal(props: AddBatchModalProps) {
 
         <div class="grid grid-cols-2 gap-3">
           <label class="block">
-            <span class="block text-sm font-medium text-gray-700 mb-1">Start Date</span>
+            <span class="block text-sm font-medium text-foreground mb-1">Start Date</span>
             <input
               type="date"
               value={startDate()}
@@ -124,7 +124,7 @@ export function AddBatchModal(props: AddBatchModalProps) {
             </Show>
           </label>
           <label class="block">
-            <span class="block text-sm font-medium text-gray-700 mb-1">End Date</span>
+            <span class="block text-sm font-medium text-foreground mb-1">End Date</span>
             <input
               type="date"
               value={endDate()}
@@ -138,7 +138,7 @@ export function AddBatchModal(props: AddBatchModalProps) {
         </div>
 
         <label class="block">
-          <span class="block text-sm font-medium text-gray-700 mb-1">Venue</span>
+          <span class="block text-sm font-medium text-foreground mb-1">Venue</span>
           <input
             type="text"
             value={venue()}
@@ -152,7 +152,7 @@ export function AddBatchModal(props: AddBatchModalProps) {
         </label>
 
         <label class="block">
-          <span class="block text-sm font-medium text-gray-700 mb-1">Instructor</span>
+          <span class="block text-sm font-medium text-foreground mb-1">Instructor</span>
           <input
             type="text"
             value={instructor()}
@@ -165,11 +165,11 @@ export function AddBatchModal(props: AddBatchModalProps) {
           </Show>
         </label>
 
-        <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+        <div class="flex justify-end gap-3 pt-4 border-t border-border">
           <button
             type="button"
             onClick={handleClose}
-            class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            class="px-4 py-2 text-sm font-medium text-foreground hover:bg-surface-muted rounded-lg transition-colors"
           >
             Cancel
           </button>

@@ -65,27 +65,27 @@ function ApprovalCard(props: {
   }
 
   return (
-    <div class="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-all">
+    <div class="bg-surface rounded-lg border border-border p-6 hover:shadow-md transition-all">
       {/* Header */}
       <div class="flex items-start justify-between mb-4">
-        <span class="font-mono text-sm font-medium text-gray-900">{props.pr.prCode}</span>
+        <span class="font-mono text-sm font-medium text-foreground">{props.pr.prCode}</span>
         <StatusBadge status={props.pr.status} />
       </div>
 
       {/* Batch info */}
-      <p class="text-sm text-gray-600 mb-1">
-        {props.pr.batchName} <span class="text-gray-400">|</span> {props.pr.batchCode}{" "}
-        <span class="text-gray-400">|</span> {props.pr.category}
+      <p class="text-sm text-muted mb-1">
+        {props.pr.batchName} <span class="text-muted">|</span> {props.pr.batchCode}{" "}
+        <span class="text-muted">|</span> {props.pr.category}
       </p>
 
       {/* Purpose */}
-      <p class="text-sm text-gray-900 mb-4 truncate" title={props.pr.purpose}>
+      <p class="text-sm text-foreground mb-4 truncate" title={props.pr.purpose}>
         {props.pr.purpose}
       </p>
 
       {/* Items summary */}
       <div class="flex items-center justify-between mb-4">
-        <p class="text-xs text-gray-500">{itemsSummary()}</p>
+        <p class="text-xs text-muted">{itemsSummary()}</p>
         <div class="flex items-center gap-3">
           <button
             type="button"
@@ -97,7 +97,7 @@ function ApprovalCard(props: {
           <button
             type="button"
             onClick={() => props.onViewDetails(props.pr)}
-            class="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-700 cursor-pointer"
+            class="flex items-center gap-1 text-xs text-muted hover:text-foreground cursor-pointer"
             title="View PDF"
           >
             <Icons.fileText class="w-3.5 h-3.5" /> View PDF
@@ -106,13 +106,13 @@ function ApprovalCard(props: {
       </div>
 
       {/* Footer */}
-      <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+      <div class="flex items-center justify-between pt-4 border-t border-border">
         <div>
-          <span class="text-sm font-medium text-gray-900">
+          <span class="text-sm font-medium text-foreground">
             {formatCurrency(Number(props.pr.totalAmount))}
           </span>
-          <span class="text-gray-400 mx-2">|</span>
-          <span class="text-xs text-gray-500">
+          <span class="text-muted mx-2">|</span>
+          <span class="text-xs text-muted">
             Created {formatDate(props.pr.createdAt)} by {props.pr.createdBy}
           </span>
         </div>
@@ -225,8 +225,8 @@ export default function ApprovalsPage() {
       {/* Header */}
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h1 class="text-2xl font-semibold text-gray-900">Approvals</h1>
-          <p class="text-sm text-gray-500 mt-1">Review and approve purchase requests</p>
+          <h1 class="text-2xl font-semibold text-foreground">Approvals</h1>
+          <p class="text-sm text-muted mt-1">Review and approve purchase requests</p>
         </div>
       </div>
 
@@ -239,34 +239,34 @@ export default function ApprovalsPage() {
 
       {/* Stats */}
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <p class="text-sm text-gray-500 mb-1">Total</p>
-          <p class="text-2xl text-gray-900">{query.isSuccess ? stats().total : "-"}</p>
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted mb-1">Total</p>
+          <p class="text-2xl text-foreground">{query.isSuccess ? stats().total : "-"}</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <p class="text-sm text-gray-500 mb-1">Pending</p>
-          <p class="text-2xl text-gray-900">{query.isSuccess ? stats().pending : "-"}</p>
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted mb-1">Pending</p>
+          <p class="text-2xl text-foreground">{query.isSuccess ? stats().pending : "-"}</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <p class="text-sm text-gray-500 mb-1">Approved</p>
-          <p class="text-2xl text-gray-900">{query.isSuccess ? stats().approved : "-"}</p>
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted mb-1">Approved</p>
+          <p class="text-2xl text-foreground">{query.isSuccess ? stats().approved : "-"}</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <p class="text-sm text-gray-500 mb-1">Rejected</p>
-          <p class="text-2xl text-gray-900">{query.isSuccess ? stats().rejected : "-"}</p>
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted mb-1">Rejected</p>
+          <p class="text-2xl text-foreground">{query.isSuccess ? stats().rejected : "-"}</p>
         </div>
       </div>
 
       {/* Filters */}
       <div class="flex flex-col sm:flex-row gap-3 mb-6">
         <div class="relative flex-1">
-          <Icons.search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Icons.search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
           <input
             type="text"
             placeholder="Search by PR #, batch, or category..."
             value={search()}
             onInput={e => setSearch(e.currentTarget.value)}
-            class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            class="w-full pl-9 pr-4 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           />
         </div>
         <div class="flex gap-2">
@@ -282,7 +282,7 @@ export default function ApprovalsPage() {
               <button
                 type="button"
                 onClick={() => setFilter(item.value)}
-                class={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${filter() === item.value ? "bg-primary text-white" : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"}`}
+                class={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${filter() === item.value ? "bg-primary text-white" : "bg-surface text-foreground border border-border hover:bg-surface-muted"}`}
               >
                 {item.label}
               </button>
@@ -301,8 +301,8 @@ export default function ApprovalsPage() {
               return (
                 <div class="py-16 text-center">
                   <emptyState.icon class="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p class="text-sm font-medium text-gray-900">{emptyState.title}</p>
-                  <p class="text-sm text-gray-500 mt-1">{emptyState.message}</p>
+                  <p class="text-sm font-medium text-foreground">{emptyState.title}</p>
+                  <p class="text-sm text-muted mt-1">{emptyState.message}</p>
                 </div>
               )
             })()}

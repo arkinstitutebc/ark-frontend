@@ -21,13 +21,13 @@ export function Input(props: InputProps) {
   return (
     <div class="flex flex-col gap-2">
       {props.label && (
-        <label for={inputId()} class="text-sm font-medium text-gray-700">
+        <label for={inputId()} class="text-sm font-medium text-foreground">
           {props.label}
         </label>
       )}
       <div class="relative">
         {hasLeftIcon() && (
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-gray-400">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted">
             {props.leftIcon}
           </div>
         )}
@@ -36,7 +36,7 @@ export function Input(props: InputProps) {
           id={inputId()}
           type={props.showPassword ? "text" : props.type}
           class={cn(
-            "block w-full py-2.5 border rounded-lg text-gray-900 placeholder-gray-400 transition-all",
+            "block w-full py-2.5 border rounded-lg bg-surface text-foreground placeholder:text-muted transition-all",
             "focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent",
             hasLeftIcon() && "pl-10",
             hasPasswordToggle() && "pr-12",
@@ -44,7 +44,7 @@ export function Input(props: InputProps) {
             hasLeftIcon() && !hasPasswordToggle() && "pr-3",
             !hasLeftIcon() && hasPasswordToggle() && "pl-3 pr-12",
             props.error && "border-red-500 focus:border-red-500 focus:ring-red-500/20",
-            !props.error && "border-gray-300",
+            !props.error && "border-border",
             props.class
           )}
         />
@@ -52,7 +52,7 @@ export function Input(props: InputProps) {
           <button
             type="button"
             onClick={props.onTogglePassword}
-            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors"
+            class="absolute inset-y-0 right-0 pr-3 flex items-center text-muted hover:text-foreground transition-colors"
             aria-label={props.showPassword ? "Hide password" : "Show password"}
           >
             {props.showPassword ? props.eyeOffIcon : props.eyeIcon}
@@ -76,7 +76,7 @@ export function Textarea(
   return (
     <div class="flex flex-col gap-1.5">
       {props.label && (
-        <label for={textareaId()} class="text-sm font-medium text-gray-700">
+        <label for={textareaId()} class="text-sm font-medium text-foreground">
           {props.label}
         </label>
       )}
@@ -84,8 +84,8 @@ export function Textarea(
         {...props}
         id={textareaId()}
         class={cn(
-          "w-full px-4 py-2.5 border rounded-lg outline-none transition-all resize-none",
-          "border-gray-300 focus:border-primary focus:ring-2 focus:ring-primary/20",
+          "w-full px-4 py-2.5 border rounded-lg bg-surface text-foreground placeholder:text-muted outline-none transition-all resize-none",
+          "border-border focus:border-primary focus:ring-2 focus:ring-primary/20",
           props.error && "border-red-500 focus:border-red-500 focus:ring-red-500/20",
           props.class
         )}

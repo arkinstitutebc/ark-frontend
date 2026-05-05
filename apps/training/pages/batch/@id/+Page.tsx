@@ -37,11 +37,11 @@ export default function BatchDetailPage() {
       case "In Progress":
         return "bg-blue-100 text-blue-700"
       case "Not Started":
-        return "bg-gray-100 text-gray-600"
+        return "bg-surface-muted text-muted"
       case "On Hold":
         return "bg-yellow-100 text-yellow-700"
       default:
-        return "bg-gray-100 text-gray-600"
+        return "bg-surface-muted text-muted"
     }
   }
 
@@ -53,11 +53,11 @@ export default function BatchDetailPage() {
       case "Enrolled":
         return "bg-blue-100 text-blue-700"
       case "Completed":
-        return "bg-gray-100 text-gray-600"
+        return "bg-surface-muted text-muted"
       case "Dropped":
         return "bg-red-100 text-red-700"
       default:
-        return "bg-gray-100 text-gray-600"
+        return "bg-surface-muted text-muted"
     }
   }
 
@@ -66,7 +66,7 @@ export default function BatchDetailPage() {
       <div class="max-w-6xl mx-auto">
         <a
           href="/"
-          class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-primary mb-6"
+          class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary mb-6"
         >
           <Icons.arrowLeft class="w-4 h-4" />
           Back to Batches
@@ -76,14 +76,14 @@ export default function BatchDetailPage() {
           when={!batchQuery.isLoading}
           fallback={
             <div class="animate-pulse space-y-4">
-              <div class="h-10 bg-gray-200 rounded w-1/3" />
+              <div class="h-10 bg-surface-muted rounded w-1/3" />
               <div class="grid grid-cols-4 gap-4">
-                <div class="h-20 bg-gray-200 rounded" />
-                <div class="h-20 bg-gray-200 rounded" />
-                <div class="h-20 bg-gray-200 rounded" />
-                <div class="h-20 bg-gray-200 rounded" />
+                <div class="h-20 bg-surface-muted rounded" />
+                <div class="h-20 bg-surface-muted rounded" />
+                <div class="h-20 bg-surface-muted rounded" />
+                <div class="h-20 bg-surface-muted rounded" />
               </div>
-              <div class="h-48 bg-gray-200 rounded" />
+              <div class="h-48 bg-surface-muted rounded" />
             </div>
           }
         >
@@ -91,8 +91,8 @@ export default function BatchDetailPage() {
             when={batchQuery.data}
             fallback={
               <div class="text-center py-20">
-                <h1 class="text-xl font-semibold text-gray-900 mb-2">Batch not found</h1>
-                <p class="text-sm text-gray-500">The batch you're looking for doesn't exist.</p>
+                <h1 class="text-xl font-semibold text-foreground mb-2">Batch not found</h1>
+                <p class="text-sm text-muted">The batch you're looking for doesn't exist.</p>
               </div>
             }
           >
@@ -101,70 +101,70 @@ export default function BatchDetailPage() {
                 <div class="flex items-start justify-between mb-8">
                   <div>
                     <div class="flex items-center gap-3 mb-2">
-                      <h1 class="text-2xl font-semibold text-gray-900">{b().batchCode}</h1>
+                      <h1 class="text-2xl font-semibold text-foreground">{b().batchCode}</h1>
                       <span
                         class={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${getStatusColor(b().status)}`}
                       >
                         {b().status}
                       </span>
                     </div>
-                    <p class="text-gray-600">{b().trainingName}</p>
+                    <p class="text-muted">{b().trainingName}</p>
                   </div>
                   <button
                     type="button"
                     onClick={() => setShowEditModal(true)}
-                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    class="px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors"
                   >
                     Edit Batch
                   </button>
                 </div>
 
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                  <div class="bg-white rounded-lg border border-gray-200 p-4">
-                    <p class="text-xs text-gray-500 mb-1">Schedule</p>
-                    <p class="text-sm font-medium text-gray-900">
+                  <div class="bg-surface rounded-lg border border-border p-4">
+                    <p class="text-xs text-muted mb-1">Schedule</p>
+                    <p class="text-sm font-medium text-foreground">
                       {formatDate(b().startDate)} – {formatDate(b().endDate)}
                     </p>
                   </div>
-                  <div class="bg-white rounded-lg border border-gray-200 p-4">
-                    <p class="text-xs text-gray-500 mb-1">Students</p>
-                    <p class="text-sm font-medium text-gray-900">{b().studentsEnrolled}</p>
+                  <div class="bg-surface rounded-lg border border-border p-4">
+                    <p class="text-xs text-muted mb-1">Students</p>
+                    <p class="text-sm font-medium text-foreground">{b().studentsEnrolled}</p>
                   </div>
-                  <div class="bg-white rounded-lg border border-gray-200 p-4">
-                    <p class="text-xs text-gray-500 mb-1">Budget</p>
-                    <p class="text-sm font-medium text-gray-900">
+                  <div class="bg-surface rounded-lg border border-border p-4">
+                    <p class="text-xs text-muted mb-1">Budget</p>
+                    <p class="text-sm font-medium text-foreground">
                       {formatCurrency(Number(b().budget))}
                     </p>
                   </div>
-                  <div class="bg-white rounded-lg border border-gray-200 p-4">
-                    <p class="text-xs text-gray-500 mb-1">Level</p>
-                    <p class="text-sm font-medium text-gray-900">{b().trainingLevel}</p>
+                  <div class="bg-surface rounded-lg border border-border p-4">
+                    <p class="text-xs text-muted mb-1">Level</p>
+                    <p class="text-sm font-medium text-foreground">{b().trainingLevel}</p>
                   </div>
                 </div>
 
-                <div class="bg-white rounded-lg border border-gray-200 mb-8">
-                  <div class="px-4 py-3 border-b border-gray-100">
-                    <h2 class="text-sm font-semibold text-gray-900">Details</h2>
+                <div class="bg-surface rounded-lg border border-border mb-8">
+                  <div class="px-4 py-3 border-b border-border">
+                    <h2 class="text-sm font-semibold text-foreground">Details</h2>
                   </div>
                   <div class="divide-y divide-gray-100">
                     <div class="flex py-4 px-6">
-                      <span class="w-32 text-sm text-gray-500">Sponsor</span>
-                      <span class="text-sm text-gray-900">{b().senator}</span>
+                      <span class="w-32 text-sm text-muted">Sponsor</span>
+                      <span class="text-sm text-foreground">{b().senator}</span>
                     </div>
                     <div class="flex py-4 px-6">
-                      <span class="w-32 text-sm text-gray-500">Venue</span>
-                      <span class="text-sm text-gray-900">{b().venue}</span>
+                      <span class="w-32 text-sm text-muted">Venue</span>
+                      <span class="text-sm text-foreground">{b().venue}</span>
                     </div>
                     <div class="flex py-4 px-6">
-                      <span class="w-32 text-sm text-gray-500">Instructor</span>
-                      <span class="text-sm text-gray-900">{b().instructor}</span>
+                      <span class="w-32 text-sm text-muted">Instructor</span>
+                      <span class="text-sm text-foreground">{b().instructor}</span>
                     </div>
                   </div>
                 </div>
 
                 <div>
                   <div class="flex items-center justify-between mb-4">
-                    <h2 class="text-sm font-semibold text-gray-900">
+                    <h2 class="text-sm font-semibold text-foreground">
                       Students ({studentsQuery.data?.length ?? 0})
                     </h2>
                     <button
@@ -189,19 +189,19 @@ export default function BatchDetailPage() {
 
                   <Show
                     when={!studentsQuery.isLoading}
-                    fallback={<div class="animate-pulse h-48 bg-gray-200 rounded" />}
+                    fallback={<div class="animate-pulse h-48 bg-surface-muted rounded" />}
                   >
-                    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div class="bg-surface rounded-lg border border-border overflow-hidden">
                       <table class="w-full">
-                        <thead class="bg-gray-50 border-b border-gray-200">
+                        <thead class="bg-surface-muted border-b border-border">
                           <tr>
-                            <th class="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
                               Student ID
                             </th>
-                            <th class="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
                               Name
                             </th>
-                            <th class="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                            <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
                               Status
                             </th>
                           </tr>
@@ -211,7 +211,7 @@ export default function BatchDetailPage() {
                             when={(studentsQuery.data?.length ?? 0) > 0}
                             fallback={
                               <tr>
-                                <td colSpan={3} class="py-12 text-center text-gray-500 text-sm">
+                                <td colSpan={3} class="py-12 text-center text-muted text-sm">
                                   No students enrolled yet.
                                 </td>
                               </tr>
@@ -219,11 +219,11 @@ export default function BatchDetailPage() {
                           >
                             <For each={studentsQuery.data}>
                               {student => (
-                                <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors">
-                                  <td class="py-4 px-6 text-sm text-gray-900 font-mono">
+                                <tr class="border-t border-border hover:bg-surface-muted transition-colors">
+                                  <td class="py-4 px-6 text-sm text-foreground font-mono">
                                     {student.studentId}
                                   </td>
-                                  <td class="py-4 px-6 text-sm text-gray-900">
+                                  <td class="py-4 px-6 text-sm text-foreground">
                                     {student.firstName} {student.lastName}
                                   </td>
                                   <td class="py-4 px-6">

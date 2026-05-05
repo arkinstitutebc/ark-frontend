@@ -144,13 +144,13 @@ export default function CreatePrPage() {
         <button
           type="button"
           onClick={() => (window.location.href = "/")}
-          class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          class="p-2 hover:bg-surface-muted rounded-lg transition-colors"
         >
-          <Icons.arrowLeft class="w-5 h-5 text-gray-600" />
+          <Icons.arrowLeft class="w-5 h-5 text-muted" />
         </button>
         <div>
-          <h1 class="text-2xl font-semibold text-gray-900">Create Purchase Request</h1>
-          <p class="text-sm text-gray-500 mt-1">Submit a new procurement request for approval</p>
+          <h1 class="text-2xl font-semibold text-foreground">Create Purchase Request</h1>
+          <p class="text-sm text-muted mt-1">Submit a new procurement request for approval</p>
         </div>
       </div>
 
@@ -165,12 +165,12 @@ export default function CreatePrPage() {
           {/* Main Form */}
           <div class="lg:col-span-2 space-y-6">
             {/* Batch & Category */}
-            <div class="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 class="text-lg font-semibold text-gray-900 mb-4">Request Details</h2>
+            <div class="bg-surface rounded-lg border border-border p-6">
+              <h2 class="text-lg font-semibold text-foreground mb-4">Request Details</h2>
 
               <div class="space-y-4">
                 <div>
-                  <label for="pr-batch" class="block text-sm font-medium text-gray-700 mb-1">
+                  <label for="pr-batch" class="block text-sm font-medium text-foreground mb-1">
                     Batch <span class="text-red-500">*</span>
                   </label>
                   <select
@@ -179,7 +179,7 @@ export default function CreatePrPage() {
                     onInput={e => setSelectedBatchId(e.currentTarget.value)}
                     required
                     disabled={batchesQuery.isPending}
-                    class={`w-full px-3 py-2 border rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:bg-gray-50 disabled:cursor-not-allowed ${errors().batchId ? "border-red-300" : "border-gray-200"}`}
+                    class={`w-full px-3 py-2 border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:bg-surface-muted disabled:cursor-not-allowed ${errors().batchId ? "border-red-300" : "border-border"}`}
                   >
                     <option value="">
                       {batchesQuery.isPending ? "Loading batches..." : "Select a batch"}
@@ -196,7 +196,7 @@ export default function CreatePrPage() {
                     <p class="text-xs text-red-600 mt-1">{errors().batchId}</p>
                   </Show>
                   <Show when={selectedBatch()}>
-                    <p class="text-xs text-gray-500 mt-1">
+                    <p class="text-xs text-muted mt-1">
                       Budget: {formatCurrency(selectedBatch()?.budget || 0)} | Used:{" "}
                       {formatCurrency(selectedBatch()?.budgetUsed || 0)}
                     </p>
@@ -204,7 +204,7 @@ export default function CreatePrPage() {
                 </div>
 
                 <div>
-                  <label for="pr-category" class="block text-sm font-medium text-gray-700 mb-1">
+                  <label for="pr-category" class="block text-sm font-medium text-foreground mb-1">
                     Category <span class="text-red-500">*</span>
                   </label>
                   <select
@@ -212,7 +212,7 @@ export default function CreatePrPage() {
                     value={category()}
                     onInput={e => setCategory(e.currentTarget.value)}
                     required
-                    class={`w-full px-3 py-2 border rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().category ? "border-red-300" : "border-gray-200"}`}
+                    class={`w-full px-3 py-2 border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().category ? "border-red-300" : "border-border"}`}
                   >
                     <option value="">Select category</option>
                     <For each={categories}>{cat => <option value={cat}>{cat}</option>}</For>
@@ -223,7 +223,7 @@ export default function CreatePrPage() {
                 </div>
 
                 <div>
-                  <label for="pr-purpose" class="block text-sm font-medium text-gray-700 mb-1">
+                  <label for="pr-purpose" class="block text-sm font-medium text-foreground mb-1">
                     Purpose <span class="text-red-500">*</span>
                   </label>
                   <textarea
@@ -233,7 +233,7 @@ export default function CreatePrPage() {
                     required
                     rows={3}
                     placeholder="Describe the purpose of this purchase request..."
-                    class={`w-full px-3 py-2 border rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none ${errors().purpose ? "border-red-300" : "border-gray-200"}`}
+                    class={`w-full px-3 py-2 border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none ${errors().purpose ? "border-red-300" : "border-border"}`}
                   />
                   <Show when={errors().purpose}>
                     <p class="text-xs text-red-600 mt-1">{errors().purpose}</p>
@@ -243,9 +243,9 @@ export default function CreatePrPage() {
             </div>
 
             {/* Items */}
-            <div class="bg-white rounded-lg border border-gray-200 p-6">
+            <div class="bg-surface rounded-lg border border-border p-6">
               <div class="flex items-center justify-between mb-4">
-                <h2 class="text-lg font-semibold text-gray-900">Items</h2>
+                <h2 class="text-lg font-semibold text-foreground">Items</h2>
                 <Show when={errors().items}>
                   <p class="text-xs text-red-600">{errors().items}</p>
                 </Show>
@@ -261,9 +261,9 @@ export default function CreatePrPage() {
               <div class="space-y-4">
                 <Index each={items()}>
                   {(item, index) => (
-                    <div class="border border-gray-200 rounded-lg p-4 space-y-3">
+                    <div class="border border-border rounded-lg p-4 space-y-3">
                       <div class="flex items-center justify-between">
-                        <span class="text-sm font-medium text-gray-700">Item {index + 1}</span>
+                        <span class="text-sm font-medium text-foreground">Item {index + 1}</span>
                         <Show when={items().length > 1}>
                           <button
                             type="button"
@@ -281,13 +281,13 @@ export default function CreatePrPage() {
                           value={item().name}
                           onInput={e => updateItem(item().id, "name", e.currentTarget.value)}
                           placeholder="Item name/description"
-                          class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                          class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                         />
                       </div>
 
                       <div class="grid grid-cols-3 gap-3">
                         <label class="block">
-                          <span class="block text-xs text-gray-500 mb-1">Quantity</span>
+                          <span class="block text-xs text-muted mb-1">Quantity</span>
                           <input
                             type="number"
                             min="1"
@@ -299,21 +299,21 @@ export default function CreatePrPage() {
                                 Number.parseInt(e.currentTarget.value, 10) || 0
                               )
                             }
-                            class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                            class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                           />
                         </label>
                         <label class="block">
-                          <span class="block text-xs text-gray-500 mb-1">Unit</span>
+                          <span class="block text-xs text-muted mb-1">Unit</span>
                           <select
                             value={item().unit}
                             onInput={e => updateItem(item().id, "unit", e.currentTarget.value)}
-                            class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                            class="w-full px-3 py-2 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                           >
                             <For each={units}>{unit => <option value={unit}>{unit}</option>}</For>
                           </select>
                         </label>
                         <label class="block">
-                          <span class="block text-xs text-gray-500 mb-1">Unit Price (P)</span>
+                          <span class="block text-xs text-muted mb-1">Unit Price (P)</span>
                           <input
                             type="number"
                             min="0"
@@ -326,13 +326,13 @@ export default function CreatePrPage() {
                                 Number.parseFloat(e.currentTarget.value) || 0
                               )
                             }
-                            class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                            class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                           />
                         </label>
                       </div>
 
                       <Show when={item().name && item().quantity > 0 && item().unitPrice > 0}>
-                        <p class="text-sm text-gray-600 text-right">
+                        <p class="text-sm text-muted text-right">
                           Item Total: {formatCurrency(item().quantity * item().unitPrice)}
                         </p>
                       </Show>
@@ -345,35 +345,35 @@ export default function CreatePrPage() {
 
           {/* Summary Sidebar */}
           <div class="lg:col-span-1">
-            <div class="bg-white rounded-lg border border-gray-200 p-6 sticky top-24">
-              <h2 class="text-lg font-semibold text-gray-900 mb-4">Summary</h2>
+            <div class="bg-surface rounded-lg border border-border p-6 sticky top-24">
+              <h2 class="text-lg font-semibold text-foreground mb-4">Summary</h2>
 
               <div class="space-y-3">
                 <div class="flex justify-between text-sm">
-                  <span class="text-gray-600">Total Items</span>
-                  <span class="font-medium text-gray-900">
+                  <span class="text-muted">Total Items</span>
+                  <span class="font-medium text-foreground">
                     {items().filter(i => i.name.trim()).length}
                   </span>
                 </div>
 
                 <div class="flex justify-between text-sm">
-                  <span class="text-gray-600">Total Quantity</span>
-                  <span class="font-medium text-gray-900">
+                  <span class="text-muted">Total Quantity</span>
+                  <span class="font-medium text-foreground">
                     {items().reduce((sum, i) => sum + (i.quantity || 0), 0)}
                   </span>
                 </div>
 
-                <div class="border-t border-gray-200 pt-3">
+                <div class="border-t border-border pt-3">
                   <div class="flex justify-between">
-                    <span class="text-gray-900 font-medium">Total Amount</span>
-                    <span class="text-lg text-gray-900">{formatCurrency(totalAmount())}</span>
+                    <span class="text-foreground font-medium">Total Amount</span>
+                    <span class="text-lg text-foreground">{formatCurrency(totalAmount())}</span>
                   </div>
                 </div>
 
                 <Show when={selectedBatch()}>
-                  <div class="border-t border-gray-200 pt-3">
-                    <p class="text-xs text-gray-500 mb-1">Budget Remaining</p>
-                    <p class="text-sm font-medium text-gray-900">
+                  <div class="border-t border-border pt-3">
+                    <p class="text-xs text-muted mb-1">Budget Remaining</p>
+                    <p class="text-sm font-medium text-foreground">
                       {formatCurrency(
                         (selectedBatch()?.budget || 0) -
                           (selectedBatch()?.budgetUsed || 0) -
@@ -395,14 +395,14 @@ export default function CreatePrPage() {
                 <button
                   type="button"
                   onClick={() => (window.location.href = "/")}
-                  class="w-full px-4 py-2.5 bg-white text-gray-700 border border-gray-200 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                  class="w-full px-4 py-2.5 bg-surface text-foreground border border-border text-sm font-medium rounded-lg hover:bg-surface-muted transition-colors"
                 >
                   Cancel
                 </button>
               </div>
 
-              <div class="mt-4 pt-4 border-t border-gray-200">
-                <p class="text-xs text-gray-500">
+              <div class="mt-4 pt-4 border-t border-border">
+                <p class="text-xs text-muted">
                   <Icons.info class="w-3 h-3 inline mr-1" />
                   Submitted requests will be sent to the Director for approval.
                 </p>

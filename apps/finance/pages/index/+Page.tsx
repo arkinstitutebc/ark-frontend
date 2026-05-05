@@ -25,7 +25,7 @@ function getTxnColor(type: string) {
     case "expense":
       return "text-red-700"
     default:
-      return "text-gray-700"
+      return "text-foreground"
   }
 }
 
@@ -52,49 +52,49 @@ export default function Page() {
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
       <div class="mb-6">
-        <h1 class="text-2xl font-semibold text-gray-900">Financial Overview</h1>
-        <p class="text-sm text-gray-500 mt-1">Two-bank system tracking and P&L management</p>
+        <h1 class="text-2xl font-semibold text-foreground">Financial Overview</h1>
+        <p class="text-sm text-muted mt-1">Two-bank system tracking and P&L management</p>
       </div>
 
       {/* Stats Cards */}
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <p class="text-sm text-gray-500 mb-1">Revenue Vault</p>
-          <p class="text-2xl text-gray-900 tabular-nums tracking-tight">
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted mb-1">Revenue Vault</p>
+          <p class="text-2xl text-foreground tabular-nums tracking-tight">
             {revenueBalance.data ? formatCurrency(revenueBalance.data.balance) : "-"}
           </p>
-          <p class="text-xs text-gray-400 mt-1">Land Bank</p>
+          <p class="text-xs text-muted mt-1">Land Bank</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <p class="text-sm text-gray-500 mb-1">Operational Hub</p>
-          <p class="text-2xl text-gray-900 tabular-nums tracking-tight">
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted mb-1">Operational Hub</p>
+          <p class="text-2xl text-foreground tabular-nums tracking-tight">
             {opsBalance.data ? formatCurrency(opsBalance.data.balance) : "-"}
           </p>
-          <p class="text-xs text-gray-400 mt-1">Security Bank</p>
+          <p class="text-xs text-muted mt-1">Security Bank</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <p class="text-sm text-gray-500 mb-1">Total Balance</p>
-          <p class="text-2xl text-gray-900 tabular-nums tracking-tight">
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted mb-1">Total Balance</p>
+          <p class="text-2xl text-foreground tabular-nums tracking-tight">
             {(() => {
               const v = totalBalance()
               return v !== null ? formatCurrency(v) : "-"
             })()}
           </p>
-          <p class="text-xs text-gray-400 mt-1">Combined banks</p>
+          <p class="text-xs text-muted mt-1">Combined banks</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <p class="text-sm text-gray-500 mb-1">Transactions</p>
-          <p class="text-2xl text-gray-900 tabular-nums tracking-tight">
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted mb-1">Transactions</p>
+          <p class="text-2xl text-foreground tabular-nums tracking-tight">
             {transactionsQuery.data?.length ?? "-"}
           </p>
-          <p class="text-xs text-gray-400 mt-1">Recent activity</p>
+          <p class="text-xs text-muted mt-1">Recent activity</p>
         </div>
       </div>
 
       {/* Bank Balances Detail */}
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div class="bg-white rounded-lg border border-gray-200 p-5">
-          <h3 class="text-sm font-semibold text-gray-900 mb-4">Bank Balances</h3>
+        <div class="bg-surface rounded-lg border border-border p-5">
+          <h3 class="text-sm font-semibold text-foreground mb-4">Bank Balances</h3>
           <div class="space-y-4">
             <div class="flex items-center justify-between py-2">
               <div class="flex items-center gap-3">
@@ -102,11 +102,11 @@ export default function Page() {
                   <Icons.landmark class="w-4 h-4 text-blue-600" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900">Revenue Vault</p>
-                  <p class="text-xs text-gray-500">Land Bank</p>
+                  <p class="text-sm font-medium text-foreground">Revenue Vault</p>
+                  <p class="text-xs text-muted">Land Bank</p>
                 </div>
               </div>
-              <p class="text-sm font-semibold text-gray-900 tabular-nums">
+              <p class="text-sm font-semibold text-foreground tabular-nums">
                 {revenueBalance.data ? formatCurrency(revenueBalance.data.balance) : "-"}
               </p>
             </div>
@@ -116,17 +116,17 @@ export default function Page() {
                   <Icons.wallet class="w-4 h-4 text-green-600" />
                 </div>
                 <div>
-                  <p class="text-sm font-medium text-gray-900">Operational Hub</p>
-                  <p class="text-xs text-gray-500">Security Bank</p>
+                  <p class="text-sm font-medium text-foreground">Operational Hub</p>
+                  <p class="text-xs text-muted">Security Bank</p>
                 </div>
               </div>
-              <p class="text-sm font-semibold text-gray-900 tabular-nums">
+              <p class="text-sm font-semibold text-foreground tabular-nums">
                 {opsBalance.data ? formatCurrency(opsBalance.data.balance) : "-"}
               </p>
             </div>
-            <div class="pt-3 border-t border-gray-100 flex items-center justify-between">
-              <p class="text-sm text-gray-600">Total</p>
-              <p class="text-sm font-semibold text-gray-900 tabular-nums">
+            <div class="pt-3 border-t border-border flex items-center justify-between">
+              <p class="text-sm text-muted">Total</p>
+              <p class="text-sm font-semibold text-foreground tabular-nums">
                 {(() => {
                   const v = totalBalance()
                   return v !== null ? formatCurrency(v) : "-"
@@ -137,37 +137,37 @@ export default function Page() {
         </div>
 
         {/* Placeholder for AR summary — will wire when billing API is cross-queryable */}
-        <div class="bg-white rounded-lg border border-gray-200 p-5">
-          <h3 class="text-sm font-semibold text-gray-900 mb-4">Quick Actions</h3>
+        <div class="bg-surface rounded-lg border border-border p-5">
+          <h3 class="text-sm font-semibold text-foreground mb-4">Quick Actions</h3>
           <div class="space-y-3">
             <a
               href="/transfers/create"
-              class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+              class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-muted transition-colors"
             >
-              <Icons.arrowLeftRight class="w-5 h-5 text-gray-400" />
+              <Icons.arrowLeftRight class="w-5 h-5 text-muted" />
               <div>
-                <p class="text-sm font-medium text-gray-900">New Transfer</p>
-                <p class="text-xs text-gray-500">Move funds between banks</p>
+                <p class="text-sm font-medium text-foreground">New Transfer</p>
+                <p class="text-xs text-muted">Move funds between banks</p>
               </div>
             </a>
             <a
               href="/disbursements/create"
-              class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+              class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-muted transition-colors"
             >
-              <Icons.receipt class="w-5 h-5 text-gray-400" />
+              <Icons.receipt class="w-5 h-5 text-muted" />
               <div>
-                <p class="text-sm font-medium text-gray-900">New Disbursement</p>
-                <p class="text-xs text-gray-500">Record an expense</p>
+                <p class="text-sm font-medium text-foreground">New Disbursement</p>
+                <p class="text-xs text-muted">Record an expense</p>
               </div>
             </a>
             <a
               href="/pnl"
-              class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors"
+              class="flex items-center gap-3 p-3 rounded-lg hover:bg-surface-muted transition-colors"
             >
-              <Icons.fileText class="w-5 h-5 text-gray-400" />
+              <Icons.fileText class="w-5 h-5 text-muted" />
               <div>
-                <p class="text-sm font-medium text-gray-900">P&L Report</p>
-                <p class="text-xs text-gray-500">Segmented income statement</p>
+                <p class="text-sm font-medium text-foreground">P&L Report</p>
+                <p class="text-xs text-muted">Segmented income statement</p>
               </div>
             </a>
           </div>
@@ -177,27 +177,27 @@ export default function Page() {
       {/* Recent Transactions */}
       <QueryBoundary query={transactionsQuery}>
         {(txns: Transaction[]) => (
-          <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-            <div class="px-5 py-4 border-b border-gray-200">
-              <h2 class="text-sm font-semibold text-gray-900">Recent Transactions</h2>
+          <div class="bg-surface rounded-lg border border-border overflow-hidden">
+            <div class="px-5 py-4 border-b border-border">
+              <h2 class="text-sm font-semibold text-foreground">Recent Transactions</h2>
             </div>
             <div class="overflow-x-auto">
               <table class="w-full">
-                <thead class="bg-gray-50 border-b border-gray-200">
+                <thead class="bg-surface-muted border-b border-border">
                   <tr>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                       Reference
                     </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                       Type
                     </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                       Description
                     </th>
-                    <th class="py-4 px-6 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
                       Amount
                     </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                       Date
                     </th>
                   </tr>
@@ -205,22 +205,22 @@ export default function Page() {
                 <tbody>
                   <For each={txns}>
                     {txn => (
-                      <tr class="border-t border-gray-100 hover:bg-gray-50 transition-colors">
+                      <tr class="border-t border-border hover:bg-surface-muted transition-colors">
                         <td class="py-4 px-6">
-                          <span class="text-sm font-medium text-gray-900">
+                          <span class="text-sm font-medium text-foreground">
                             {txn.referenceId || txn.id.slice(0, 8)}
                           </span>
                         </td>
                         <td class="py-4 px-6">
                           <StatusBadge status={getTxnLabel(txn.type)} />
                         </td>
-                        <td class="py-4 px-6 text-sm text-gray-600">{txn.description}</td>
+                        <td class="py-4 px-6 text-sm text-muted">{txn.description}</td>
                         <td
                           class={`py-4 px-6 text-right text-sm font-semibold tabular-nums ${getTxnColor(txn.type)}`}
                         >
                           {formatCurrency(Math.abs(Number(txn.amount)))}
                         </td>
-                        <td class="py-4 px-6 text-sm text-gray-600">{formatDate(txn.createdAt)}</td>
+                        <td class="py-4 px-6 text-sm text-muted">{formatDate(txn.createdAt)}</td>
                       </tr>
                     )}
                   </For>

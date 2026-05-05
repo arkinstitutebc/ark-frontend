@@ -76,28 +76,28 @@ export default function CreateDisbursementPage() {
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
       <div class="flex items-center gap-4 mb-8">
-        <a href="/disbursements" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-          <Icons.arrowLeft class="w-5 h-5 text-gray-600" />
+        <a href="/disbursements" class="p-2 hover:bg-surface-muted rounded-lg transition-colors">
+          <Icons.arrowLeft class="w-5 h-5 text-muted" />
         </a>
         <div>
-          <h1 class="text-2xl font-semibold text-gray-900">New Disbursement</h1>
-          <p class="text-sm text-gray-500 mt-1">Record a cash disbursement from Operational Hub</p>
+          <h1 class="text-2xl font-semibold text-foreground">New Disbursement</h1>
+          <p class="text-sm text-muted mt-1">Record a cash disbursement from Operational Hub</p>
         </div>
       </div>
 
       <form onSubmit={handleSubmit}>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div class="lg:col-span-2">
-            <div class="bg-white rounded-lg border border-gray-200 p-6 space-y-4">
+            <div class="bg-surface rounded-lg border border-border p-6 space-y-4">
               <div>
-                <label for="dis-category" class="block text-sm font-medium text-gray-700 mb-1">
+                <label for="dis-category" class="block text-sm font-medium text-foreground mb-1">
                   Category
                 </label>
                 <select
                   id="dis-category"
                   value={category()}
                   onChange={e => setCategory(e.currentTarget.value)}
-                  class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().category ? "border-red-300" : "border-gray-200"}`}
+                  class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().category ? "border-red-300" : "border-border"}`}
                 >
                   {CATEGORIES.map(c => (
                     <option value={c.value}>{c.label}</option>
@@ -108,7 +108,7 @@ export default function CreateDisbursementPage() {
                 </Show>
               </div>
               <div>
-                <label for="dis-amount" class="block text-sm font-medium text-gray-700 mb-1">
+                <label for="dis-amount" class="block text-sm font-medium text-foreground mb-1">
                   Amount (PHP)
                 </label>
                 <input
@@ -119,14 +119,14 @@ export default function CreateDisbursementPage() {
                   value={amount()}
                   onInput={e => setAmount(e.currentTarget.value)}
                   placeholder="0.00"
-                  class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().amount ? "border-red-300" : "border-gray-200"}`}
+                  class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().amount ? "border-red-300" : "border-border"}`}
                 />
                 <Show when={errors().amount}>
                   <p class="text-xs text-red-600 mt-1">{errors().amount}</p>
                 </Show>
               </div>
               <div>
-                <label for="dis-description" class="block text-sm font-medium text-gray-700 mb-1">
+                <label for="dis-description" class="block text-sm font-medium text-foreground mb-1">
                   Description
                 </label>
                 <input
@@ -135,15 +135,15 @@ export default function CreateDisbursementPage() {
                   value={description()}
                   onInput={e => setDescription(e.currentTarget.value)}
                   placeholder="What was this expense for?"
-                  class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().description ? "border-red-300" : "border-gray-200"}`}
+                  class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().description ? "border-red-300" : "border-border"}`}
                 />
                 <Show when={errors().description}>
                   <p class="text-xs text-red-600 mt-1">{errors().description}</p>
                 </Show>
               </div>
               <div>
-                <label for="dis-reference" class="block text-sm font-medium text-gray-700 mb-1">
-                  Reference <span class="text-gray-400">(optional)</span>
+                <label for="dis-reference" class="block text-sm font-medium text-foreground mb-1">
+                  Reference <span class="text-muted">(optional)</span>
                 </label>
                 <input
                   id="dis-reference"
@@ -151,26 +151,26 @@ export default function CreateDisbursementPage() {
                   value={referenceId()}
                   onInput={e => setReferenceId(e.currentTarget.value)}
                   placeholder="e.g., PO-001"
-                  class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
               </div>
             </div>
           </div>
 
           <div class="lg:col-span-1">
-            <div class="bg-white rounded-lg border border-gray-200 p-6 sticky top-24">
-              <h2 class="text-lg font-semibold text-gray-900 mb-4">Summary</h2>
+            <div class="bg-surface rounded-lg border border-border p-6 sticky top-24">
+              <h2 class="text-lg font-semibold text-foreground mb-4">Summary</h2>
               <div class="space-y-3 text-sm">
                 <div class="flex justify-between">
-                  <span class="text-gray-500">Bank</span>
+                  <span class="text-muted">Bank</span>
                   <span class="font-medium">Operational Hub</span>
                 </div>
                 <div class="flex justify-between">
-                  <span class="text-gray-500">Category</span>
+                  <span class="text-muted">Category</span>
                   <span class="font-medium capitalize">{category().replace("_", " ")}</span>
                 </div>
                 <div class="flex justify-between">
-                  <span class="text-gray-500">Balance</span>
+                  <span class="text-muted">Balance</span>
                   <span class="tabular-nums">
                     {opsBalance.data ? formatCurrency(opsBalance.data.balance) : "-"}
                   </span>
@@ -199,7 +199,7 @@ export default function CreateDisbursementPage() {
                 </button>
                 <a
                   href="/disbursements"
-                  class="block w-full px-4 py-2.5 bg-white text-gray-700 border border-gray-200 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors text-center"
+                  class="block w-full px-4 py-2.5 bg-surface text-foreground border border-border text-sm font-medium rounded-lg hover:bg-surface-muted transition-colors text-center"
                 >
                   Cancel
                 </a>

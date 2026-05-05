@@ -9,7 +9,7 @@ export function Card(props: CardProps) {
   return (
     <div
       class={cn(
-        "bg-white rounded-lg shadow-lg border border-gray-100 hover:shadow-xl transition-shadow",
+        "bg-surface rounded-lg shadow-lg border border-border hover:shadow-xl transition-shadow",
         props.class
       )}
     >

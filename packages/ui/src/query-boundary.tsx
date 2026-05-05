@@ -30,20 +30,20 @@ export function QueryBoundary<T>(props: QueryBoundaryProps<T>) {
 function DefaultSkeleton() {
   return (
     <div class="animate-pulse space-y-3">
-      <div class="h-8 bg-gray-200 rounded w-1/3" />
-      <div class="h-64 bg-gray-200 rounded" />
+      <div class="h-8 bg-surface-muted rounded w-1/3" />
+      <div class="h-64 bg-surface-muted rounded" />
     </div>
   )
 }
 
 function DefaultError(props: { error: Error; retry: () => void }) {
   return (
-    <div class="rounded-lg border border-gray-200 bg-gray-50 p-8 text-center">
-      <p class="text-sm text-gray-600 mb-3">{props.error.message}</p>
+    <div class="rounded-lg border border-border bg-surface-muted p-8 text-center">
+      <p class="text-sm text-muted mb-3">{props.error.message}</p>
       <button
         type="button"
         onClick={props.retry}
-        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+        class="px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors"
       >
         Retry
       </button>

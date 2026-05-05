@@ -28,7 +28,7 @@ export function AuthGate(props: AuthGateProps) {
       when={!props.userQuery.isPending}
       fallback={
         <div class="flex h-screen items-center justify-center">
-          <div class="animate-pulse text-sm text-gray-500">Loading…</div>
+          <div class="animate-pulse text-sm text-muted">Loading…</div>
         </div>
       }
     >

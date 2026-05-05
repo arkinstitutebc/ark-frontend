@@ -54,39 +54,39 @@ export default function Page() {
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h1 class="text-2xl font-semibold text-gray-900">Trainers</h1>
-          <p class="text-sm text-gray-500 mt-1">Manage trainer profiles and assignments</p>
+          <h1 class="text-2xl font-semibold text-foreground">Trainers</h1>
+          <p class="text-sm text-muted mt-1">Manage trainer profiles and assignments</p>
         </div>
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <p class="text-sm text-gray-500 mb-1">Total</p>
-          <p class="text-2xl text-gray-900">{query.isSuccess ? stats().total : "-"}</p>
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted mb-1">Total</p>
+          <p class="text-2xl text-foreground">{query.isSuccess ? stats().total : "-"}</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <p class="text-sm text-gray-500 mb-1">Active</p>
-          <p class="text-2xl text-gray-900">{query.isSuccess ? stats().active : "-"}</p>
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted mb-1">Active</p>
+          <p class="text-2xl text-foreground">{query.isSuccess ? stats().active : "-"}</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <p class="text-sm text-gray-500 mb-1">On Leave</p>
-          <p class="text-2xl text-gray-900">{query.isSuccess ? stats().onLeave : "-"}</p>
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted mb-1">On Leave</p>
+          <p class="text-2xl text-foreground">{query.isSuccess ? stats().onLeave : "-"}</p>
         </div>
-        <div class="bg-white rounded-lg border border-gray-200 p-4">
-          <p class="text-sm text-gray-500 mb-1">Inactive</p>
-          <p class="text-2xl text-gray-900">{query.isSuccess ? stats().inactive : "-"}</p>
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted mb-1">Inactive</p>
+          <p class="text-2xl text-foreground">{query.isSuccess ? stats().inactive : "-"}</p>
         </div>
       </div>
 
       <div class="flex flex-col sm:flex-row gap-3 mb-6">
         <div class="relative flex-1">
-          <Icons.search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <Icons.search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
           <input
             type="text"
             placeholder="Search by name or specialization..."
             value={search()}
             onInput={e => setSearch(e.currentTarget.value)}
-            class="w-full pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            class="w-full pl-9 pr-4 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           />
         </div>
         <div class="flex gap-2">
@@ -102,7 +102,7 @@ export default function Page() {
               <button
                 type="button"
                 onClick={() => setFilter(item.value)}
-                class={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${filter() === item.value ? "bg-primary text-white" : "bg-white text-gray-700 border border-gray-200 hover:bg-gray-50"}`}
+                class={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${filter() === item.value ? "bg-primary text-white" : "bg-surface text-foreground border border-border hover:bg-surface-muted"}`}
               >
                 {item.label}
               </button>
@@ -113,32 +113,32 @@ export default function Page() {
 
       <QueryBoundary query={query}>
         {(_data: Trainer[]) => (
-          <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div class="bg-surface rounded-lg border border-border overflow-hidden">
             <Show
               when={filteredTrainers().length > 0}
               fallback={
                 <div class="py-16 text-center">
                   <Icons.users class="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                  <p class="text-sm font-medium text-gray-900">No trainers found</p>
+                  <p class="text-sm font-medium text-foreground">No trainers found</p>
                 </div>
               }
             >
               <table class="w-full">
-                <thead class="bg-gray-50 border-b border-gray-200">
+                <thead class="bg-surface-muted border-b border-border">
                   <tr>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                       Name
                     </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                       Specialization
                     </th>
-                    <th class="py-4 px-6 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
                       Rate/hr
                     </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                       Status
                     </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                       Hired
                     </th>
                   </tr>
@@ -148,7 +148,7 @@ export default function Page() {
                     {(trainer: Trainer) => (
                       <tr
                         onClick={() => handleView(trainer)}
-                        class="border-t border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors"
+                        class="border-t border-border hover:bg-surface-muted cursor-pointer transition-colors"
                       >
                         <td class="py-4 px-6">
                           <div class="flex items-center gap-3">
@@ -156,19 +156,19 @@ export default function Page() {
                               <Icons.user class="w-4 h-4 text-primary" />
                             </div>
                             <div>
-                              <p class="text-sm text-gray-900">{trainer.name}</p>
-                              <p class="text-xs text-gray-500">{trainer.email}</p>
+                              <p class="text-sm text-foreground">{trainer.name}</p>
+                              <p class="text-xs text-muted">{trainer.email}</p>
                             </div>
                           </div>
                         </td>
-                        <td class="py-4 px-6 text-sm text-gray-700">{trainer.specialization}</td>
-                        <td class="py-4 px-6 text-right text-sm text-gray-900">
+                        <td class="py-4 px-6 text-sm text-foreground">{trainer.specialization}</td>
+                        <td class="py-4 px-6 text-right text-sm text-foreground">
                           {formatCurrency(Number(trainer.hourlyRate))}
                         </td>
                         <td class="py-4 px-6">
                           <TrainerStatusBadge status={trainer.status} />
                         </td>
-                        <td class="py-4 px-6 text-sm text-gray-600">
+                        <td class="py-4 px-6 text-sm text-muted">
                           {trainer.hireDate ? formatDate(trainer.hireDate) : "-"}
                         </td>
                       </tr>

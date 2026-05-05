@@ -47,12 +47,12 @@ export default function DashboardPage() {
   onCleanup(() => clearInterval(intervalId))
 
   return (
-    <div class="min-h-screen bg-gray-50 flex flex-col">
+    <div class="min-h-screen bg-surface-muted flex flex-col">
       <Show
         when={!userQuery.isPending}
         fallback={
           <div class="flex-1 flex items-center justify-center">
-            <div class="animate-pulse text-sm text-gray-500">Loading…</div>
+            <div class="animate-pulse text-sm text-muted">Loading…</div>
           </div>
         }
       >
@@ -61,7 +61,7 @@ export default function DashboardPage() {
         <main class="flex-1 px-6 sm:px-8 lg:px-12 py-8 sm:py-10">
           <div class="max-w-6xl mx-auto mt-8">
             <div class="mb-8">
-              <h2 class="text-xl sm:text-2xl text-gray-900 font-medium">
+              <h2 class="text-xl sm:text-2xl text-foreground font-medium">
                 {getGreeting().text}, {firstName()} {getGreeting().emoji}
               </h2>
             </div>
@@ -70,13 +70,13 @@ export default function DashboardPage() {
 
             <Show when={userRole() === "admin"}>
               <div class="mt-10">
-                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+                <h3 class="text-sm font-semibold text-muted uppercase tracking-wide mb-4">
                   Administration
                 </h3>
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                   <a
                     href="/admin/users"
-                    class="group block bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl hover:border-primary/30 transition-all"
+                    class="group block bg-surface rounded-2xl shadow-lg p-6 border border-border hover:shadow-xl hover:border-primary/30 transition-all"
                   >
                     <div class="flex items-start justify-between mb-5">
                       <div class="p-4 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
@@ -86,10 +86,10 @@ export default function DashboardPage() {
                         Admin
                       </span>
                     </div>
-                    <h3 class="text-xl font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                    <h3 class="text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
                       User Management
                     </h3>
-                    <p class="text-sm text-gray-500 mt-1.5">
+                    <p class="text-sm text-muted mt-1.5">
                       Invite, edit, deactivate, and reset passwords for portal users.
                     </p>
                     <div class="flex items-center gap-2 mt-5 text-primary font-medium text-sm group-hover:gap-3 transition-all">

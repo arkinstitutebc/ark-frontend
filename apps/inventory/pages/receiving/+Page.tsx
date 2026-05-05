@@ -96,8 +96,8 @@ export default function ReceivingPage() {
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
       <div class="mb-8">
-        <h1 class="text-2xl font-semibold text-gray-900">New Receipt</h1>
-        <p class="text-sm text-gray-500 mt-1">Receive goods from purchase orders</p>
+        <h1 class="text-2xl font-semibold text-foreground">New Receipt</h1>
+        <p class="text-sm text-muted mt-1">Receive goods from purchase orders</p>
       </div>
 
       <Show when={showSuccess()}>
@@ -121,8 +121,8 @@ export default function ReceivingPage() {
       <Show when={!selectedPo()}>
         <Show when={ordersQuery.isLoading}>
           <div class="animate-pulse space-y-4">
-            <div class="h-24 bg-gray-200 rounded-lg" />
-            <div class="h-24 bg-gray-200 rounded-lg" />
+            <div class="h-24 bg-surface-muted rounded-lg" />
+            <div class="h-24 bg-surface-muted rounded-lg" />
           </div>
         </Show>
         <Show when={ordersQuery.isSuccess}>
@@ -131,30 +131,30 @@ export default function ReceivingPage() {
               {po => (
                 <button
                   type="button"
-                  class="w-full text-left bg-white rounded-lg border border-gray-200 p-5 hover:border-primary/30 transition-colors"
+                  class="w-full text-left bg-surface rounded-lg border border-border p-5 hover:border-primary/30 transition-colors"
                   onClick={() => openPo(po)}
                 >
                   <div class="flex items-start justify-between">
                     <div class="flex-1">
                       <div class="flex items-center gap-3 mb-2">
-                        <span class="font-mono text-sm font-semibold text-gray-900">
+                        <span class="font-mono text-sm font-semibold text-foreground">
                           {po.poCode}
                         </span>
                         <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
                           {po.status}
                         </span>
                       </div>
-                      <h3 class="text-base font-semibold text-gray-900">{po.supplier}</h3>
-                      <div class="flex items-center gap-4 text-sm text-gray-500 mt-1">
+                      <h3 class="text-base font-semibold text-foreground">{po.supplier}</h3>
+                      <div class="flex items-center gap-4 text-sm text-muted mt-1">
                         <span>Batch: {po.batchName}</span>
                         <span>Est: {formatDate(po.estimatedDelivery)}</span>
                       </div>
                     </div>
                     <div class="text-right">
-                      <p class="text-lg font-bold text-gray-900">
+                      <p class="text-lg font-bold text-foreground">
                         {formatCurrency(Number(po.totalAmount))}
                       </p>
-                      <p class="text-xs text-gray-500">{po.items.length} items</p>
+                      <p class="text-xs text-muted">{po.items.length} items</p>
                     </div>
                   </div>
                 </button>
@@ -162,10 +162,10 @@ export default function ReceivingPage() {
             </For>
 
             {((ordersQuery.data as PurchaseOrder[]) || []).length === 0 && (
-              <div class="text-center py-12 bg-white rounded-lg border border-gray-200">
-                <Icons.fileText class="w-12 h-12 text-gray-400 mx-auto mb-3" />
-                <h3 class="text-base font-semibold text-gray-900 mb-1">No orders to receive</h3>
-                <p class="text-sm text-gray-500">All purchase orders have been received.</p>
+              <div class="text-center py-12 bg-surface rounded-lg border border-border">
+                <Icons.fileText class="w-12 h-12 text-muted mx-auto mb-3" />
+                <h3 class="text-base font-semibold text-foreground mb-1">No orders to receive</h3>
+                <p class="text-sm text-muted">All purchase orders have been received.</p>
               </div>
             )}
           </div>
@@ -188,41 +188,41 @@ export default function ReceivingPage() {
                 <button
                   type="button"
                   onClick={closePo}
-                  class="text-gray-500 hover:text-gray-700 flex items-center gap-1"
+                  class="text-muted hover:text-foreground flex items-center gap-1"
                 >
                   <Icons.arrowLeft class="w-4 h-4" /> All Orders
                 </button>
                 <span class="text-gray-300">/</span>
-                <span class="text-gray-900 font-medium">{po().poCode}</span>
+                <span class="text-foreground font-medium">{po().poCode}</span>
               </nav>
 
-              <div class="bg-white rounded-lg border border-gray-200 p-5">
+              <div class="bg-surface rounded-lg border border-border p-5">
                 <div class="flex items-start justify-between mb-4">
                   <div>
-                    <h2 class="text-lg font-semibold text-gray-900">{po().supplier}</h2>
-                    <p class="text-sm text-gray-500 mt-1">
+                    <h2 class="text-lg font-semibold text-foreground">{po().supplier}</h2>
+                    <p class="text-sm text-muted mt-1">
                       PO: {po().poCode} | Batch: {po().batchName}
                     </p>
                   </div>
-                  <p class="text-lg font-bold text-gray-900">
+                  <p class="text-lg font-bold text-foreground">
                     {formatCurrency(Number(po().totalAmount))}
                   </p>
                 </div>
 
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                <div class="border border-border rounded-lg overflow-hidden">
                   <table class="w-full">
-                    <thead class="bg-gray-50">
+                    <thead class="bg-surface-muted">
                       <tr>
-                        <th class="text-left px-4 py-3 text-xs font-semibold text-gray-600 uppercase">
+                        <th class="text-left px-4 py-3 text-xs font-semibold text-muted uppercase">
                           Item
                         </th>
-                        <th class="text-center px-4 py-3 text-xs font-semibold text-gray-600 uppercase">
+                        <th class="text-center px-4 py-3 text-xs font-semibold text-muted uppercase">
                           Ordered
                         </th>
-                        <th class="text-center px-4 py-3 text-xs font-semibold text-gray-600 uppercase">
+                        <th class="text-center px-4 py-3 text-xs font-semibold text-muted uppercase">
                           Received
                         </th>
-                        <th class="text-center px-4 py-3 text-xs font-semibold text-gray-600 uppercase">
+                        <th class="text-center px-4 py-3 text-xs font-semibold text-muted uppercase">
                           Remaining
                         </th>
                       </tr>
@@ -233,11 +233,11 @@ export default function ReceivingPage() {
                           const received = () => receivedItems()[item.id]?.quantityReceived ?? 0
                           const remaining = () => item.quantity - received()
                           return (
-                            <tr class="border-t border-gray-100">
-                              <td class="px-4 py-3 text-sm font-medium text-gray-900">
+                            <tr class="border-t border-border">
+                              <td class="px-4 py-3 text-sm font-medium text-foreground">
                                 {item.name}
                               </td>
-                              <td class="px-4 py-3 text-center text-sm text-gray-600">
+                              <td class="px-4 py-3 text-center text-sm text-muted">
                                 {item.quantity} {item.unit}
                               </td>
                               <td class="px-4 py-3">
@@ -263,12 +263,12 @@ export default function ReceivingPage() {
                                         )
                                       )
                                     }
-                                    class="w-20 px-2 py-1.5 border border-gray-200 rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                    class="w-20 px-2 py-1.5 border border-border rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                                   />
                                   <button
                                     type="button"
                                     onClick={() => updateReceivedQty(item.id, 0)}
-                                    class="px-2 py-1 text-xs text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                                    class="px-2 py-1 text-xs text-muted hover:text-foreground hover:bg-surface-muted rounded transition-colors"
                                   >
                                     Clear
                                   </button>
@@ -279,7 +279,7 @@ export default function ReceivingPage() {
                                   class={
                                     remaining() === 0
                                       ? "inline-flex items-center gap-1 text-green-600 font-medium"
-                                      : "text-gray-600"
+                                      : "text-muted"
                                   }
                                 >
                                   {remaining() === 0 && <Icons.check class="w-3.5 h-3.5" />}
@@ -298,7 +298,7 @@ export default function ReceivingPage() {
                   <button
                     type="button"
                     onClick={closePo}
-                    class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+                    class="px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors"
                   >
                     Cancel
                   </button>

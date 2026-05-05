@@ -152,9 +152,9 @@ export function EditStudentModal(props: EditStudentModalProps) {
     <Modal open={props.open} onClose={handleClose} title="Edit Student" size="lg">
       <form onSubmit={handleSubmit} class="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
         {/* Photo Upload */}
-        <div class="flex items-center gap-4 pb-4 border-b border-gray-100">
-          <div class="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden border-2 border-gray-200">
-            <Show when={photoUrl()} fallback={<Icons.user class="w-10 h-10 text-gray-400" />}>
+        <div class="flex items-center gap-4 pb-4 border-b border-border">
+          <div class="w-20 h-20 rounded-full bg-surface-muted flex items-center justify-center overflow-hidden border-2 border-border">
+            <Show when={photoUrl()} fallback={<Icons.user class="w-10 h-10 text-muted" />}>
               <img src={photoUrl()} alt="Student" class="w-full h-full object-cover" />
             </Show>
           </div>
@@ -185,43 +185,43 @@ export function EditStudentModal(props: EditStudentModalProps) {
                 Remove
               </button>
             </Show>
-            <p class="text-xs text-gray-500 mt-1">Recommended: 2x2 photo, JPG or PNG</p>
+            <p class="text-xs text-muted mt-1">Recommended: 2x2 photo, JPG or PNG</p>
           </div>
         </div>
 
         {/* Name */}
         <div class="grid grid-cols-3 gap-3">
           <label class="block">
-            <span class="block text-sm font-medium text-gray-700 mb-1">First Name</span>
+            <span class="block text-sm font-medium text-foreground mb-1">First Name</span>
             <input
               type="text"
               value={firstName()}
               onInput={e => setFirstName(e.target.value)}
               required
-              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().firstName ? "border-red-300" : "border-gray-200"}`}
+              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().firstName ? "border-red-300" : "border-border"}`}
             />
             <Show when={errors().firstName}>
               <p class="text-xs text-red-600 mt-1">{errors().firstName}</p>
             </Show>
           </label>
           <label class="block">
-            <span class="block text-sm font-medium text-gray-700 mb-1">Middle Name</span>
+            <span class="block text-sm font-medium text-foreground mb-1">Middle Name</span>
             <input
               type="text"
               value={middleName()}
               onInput={e => setMiddleName(e.target.value)}
               placeholder="Optional"
-              class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
           </label>
           <label class="block">
-            <span class="block text-sm font-medium text-gray-700 mb-1">Last Name</span>
+            <span class="block text-sm font-medium text-foreground mb-1">Last Name</span>
             <input
               type="text"
               value={lastName()}
               onInput={e => setLastName(e.target.value)}
               required
-              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().lastName ? "border-red-300" : "border-gray-200"}`}
+              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().lastName ? "border-red-300" : "border-border"}`}
             />
             <Show when={errors().lastName}>
               <p class="text-xs text-red-600 mt-1">{errors().lastName}</p>
@@ -232,22 +232,22 @@ export function EditStudentModal(props: EditStudentModalProps) {
         {/* Personal Info */}
         <div class="grid grid-cols-3 gap-3">
           <label class="block">
-            <span class="block text-sm font-medium text-gray-700 mb-1">Date of Birth</span>
+            <span class="block text-sm font-medium text-foreground mb-1">Date of Birth</span>
             <input
               type="date"
               value={dateOfBirth()}
               onInput={e => setDateOfBirth(e.target.value)}
               required
-              class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
           </label>
           <label class="block">
-            <span class="block text-sm font-medium text-gray-700 mb-1">Gender</span>
+            <span class="block text-sm font-medium text-foreground mb-1">Gender</span>
             <select
               value={gender()}
               onChange={e => setGender(e.target.value as Student["gender"])}
               required
-              class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             >
               {GENDERS.map(g => (
                 <option value={g}>{g}</option>
@@ -255,12 +255,12 @@ export function EditStudentModal(props: EditStudentModalProps) {
             </select>
           </label>
           <label class="block">
-            <span class="block text-sm font-medium text-gray-700 mb-1">Status</span>
+            <span class="block text-sm font-medium text-foreground mb-1">Status</span>
             <select
               value={status()}
               onChange={e => setStatus(e.target.value as Student["status"])}
               required
-              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().status ? "border-red-300" : "border-gray-200"}`}
+              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().status ? "border-red-300" : "border-border"}`}
             >
               {STATUSES.map(s => (
                 <option value={s}>{s}</option>
@@ -275,28 +275,28 @@ export function EditStudentModal(props: EditStudentModalProps) {
         {/* Contact Info */}
         <div class="grid grid-cols-2 gap-3">
           <label class="block">
-            <span class="block text-sm font-medium text-gray-700 mb-1">Contact Number</span>
+            <span class="block text-sm font-medium text-foreground mb-1">Contact Number</span>
             <input
               type="tel"
               value={contactNumber()}
               onInput={e => setContactNumber(e.target.value)}
               required
               placeholder="09XXXXXXXXX"
-              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().contactNumber ? "border-red-300" : "border-gray-200"}`}
+              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().contactNumber ? "border-red-300" : "border-border"}`}
             />
             <Show when={errors().contactNumber}>
               <p class="text-xs text-red-600 mt-1">{errors().contactNumber}</p>
             </Show>
           </label>
           <label class="block">
-            <span class="block text-sm font-medium text-gray-700 mb-1">Email</span>
+            <span class="block text-sm font-medium text-foreground mb-1">Email</span>
             <input
               type="email"
               value={email()}
               onInput={e => setEmail(e.target.value)}
               required
               placeholder="email@example.com"
-              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().email ? "border-red-300" : "border-gray-200"}`}
+              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().email ? "border-red-300" : "border-border"}`}
             />
             <Show when={errors().email}>
               <p class="text-xs text-red-600 mt-1">{errors().email}</p>
@@ -305,26 +305,26 @@ export function EditStudentModal(props: EditStudentModalProps) {
         </div>
 
         <label class="block">
-          <span class="block text-sm font-medium text-gray-700 mb-1">Address</span>
+          <span class="block text-sm font-medium text-foreground mb-1">Address</span>
           <input
             type="text"
             value={address()}
             onInput={e => setAddress(e.target.value)}
             required
             placeholder="Street, City, Province"
-            class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           />
         </label>
 
         {/* Education & Employment */}
         <div class="grid grid-cols-2 gap-3">
           <label class="block">
-            <span class="block text-sm font-medium text-gray-700 mb-1">Education</span>
+            <span class="block text-sm font-medium text-foreground mb-1">Education</span>
             <select
               value={educationalAttainment()}
               onChange={e => setEducationalAttainment(e.target.value)}
               required
-              class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             >
               {EDUCATION_LEVELS.map(level => (
                 <option value={level}>{level}</option>
@@ -332,12 +332,12 @@ export function EditStudentModal(props: EditStudentModalProps) {
             </select>
           </label>
           <label class="block">
-            <span class="block text-sm font-medium text-gray-700 mb-1">Employment</span>
+            <span class="block text-sm font-medium text-foreground mb-1">Employment</span>
             <select
               value={employmentStatus()}
               onChange={e => setEmploymentStatus(e.target.value)}
               required
-              class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             >
               {EMPLOYMENT_STATUSES.map(status => (
                 <option value={status}>{status}</option>
@@ -347,12 +347,12 @@ export function EditStudentModal(props: EditStudentModalProps) {
         </div>
 
         <label class="block">
-          <span class="block text-sm font-medium text-gray-700 mb-1">Assign to Batch</span>
+          <span class="block text-sm font-medium text-foreground mb-1">Assign to Batch</span>
           <select
             value={batchId()}
             onChange={e => setBatchId(e.target.value)}
             required
-            class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().batchId ? "border-red-300" : "border-gray-200"}`}
+            class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().batchId ? "border-red-300" : "border-border"}`}
           >
             <For each={batchesQuery.data || []}>
               {batch => (
@@ -368,11 +368,11 @@ export function EditStudentModal(props: EditStudentModalProps) {
         </label>
 
         {/* Certificate Upload */}
-        <div class="pt-4 border-t border-gray-100">
+        <div class="pt-4 border-t border-border">
           <label class="block">
-            <span class="block text-sm font-medium text-gray-700 mb-1">PSA Certificate</span>
+            <span class="block text-sm font-medium text-foreground mb-1">PSA Certificate</span>
             <div class="flex items-center gap-3">
-              <label class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer">
+              <label class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors cursor-pointer">
                 <Icons.upload class="w-4 h-4" />
                 <span>Choose File</span>
                 <input
@@ -384,7 +384,7 @@ export function EditStudentModal(props: EditStudentModalProps) {
                 />
               </label>
               <Show when={certificateUrl()}>
-                <span class="text-sm text-gray-600 flex items-center gap-1">
+                <span class="text-sm text-muted flex items-center gap-1">
                   <Icons.fileText class="w-4 h-4" />
                   File selected
                 </span>
@@ -397,19 +397,19 @@ export function EditStudentModal(props: EditStudentModalProps) {
                 </button>
               </Show>
               <Show when={!certificateUrl()}>
-                <span class="text-sm text-gray-500">No file chosen</span>
+                <span class="text-sm text-muted">No file chosen</span>
               </Show>
             </div>
-            <p class="text-xs text-gray-500 mt-1">Accepts PDF or images (JPG, PNG)</p>
+            <p class="text-xs text-muted mt-1">Accepts PDF or images (JPG, PNG)</p>
           </label>
         </div>
 
         {/* Actions */}
-        <div class="flex justify-end gap-3 pt-4 border-t border-gray-100">
+        <div class="flex justify-end gap-3 pt-4 border-t border-border">
           <button
             type="button"
             onClick={handleClose}
-            class="px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            class="px-4 py-2 text-sm font-medium text-foreground hover:bg-surface-muted rounded-lg transition-colors"
           >
             Cancel
           </button>

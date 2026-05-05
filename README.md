@@ -30,9 +30,19 @@ bun install                    # one-time, links workspaces
 bun run dev:training           # :3001 (also dev:main / dev:procurement / etc.)
 bun run lint                   # biome
 bun run typecheck              # tsc per workspace
+bun run test:e2e               # Playwright dark-mode visual regression (LOCAL ONLY, NOT in CI)
+bun run test:e2e:update        # update snapshots after intentional UI changes
 ```
 
 You also need the backend running locally — see `ark-services/README.md`.
+
+## Theming (dark mode)
+
+- Token system in `packages/design-system/src/globals.css` — `:root[data-theme="dark"]` overrides `--color-background`, `--color-foreground`, `--color-surface`, `--color-surface-muted`, `--color-border`, `--color-muted`. Brand colors (`--color-primary`, `--color-accent`) are identical in both themes.
+- `<ThemeProvider>` from `@ark/ui` wraps every app's `+Layout.tsx`; tracks `light | dark | auto` (default `auto` follows OS) in `localStorage["ark-theme"]`.
+- A no-FOUC inline script in each `+Head.tsx` sets `data-theme` BEFORE first paint.
+- `<ThemeToggle />` lives in the shared `TopBar` (sub-portals) and the main app's `Navbar`.
+- Use semantic utilities: `bg-surface`, `bg-surface-muted`, `text-foreground`, `text-muted`, `border-border`. Avoid `bg-white`, `bg-gray-*`, `text-gray-*`, `border-gray-*` in new code.
 
 ## Deploy
 

@@ -68,13 +68,13 @@ export function AdjustStockModal(props: AdjustStockModalProps) {
   }
 
   const getChangeColor = () => {
-    if (quantity() === 0) return "text-gray-600"
+    if (quantity() === 0) return "text-muted"
     if (quantity() > 0) return "text-green-600"
     return "text-red-600"
   }
 
   const getChangeBg = () => {
-    if (quantity() === 0) return "bg-gray-100"
+    if (quantity() === 0) return "bg-surface-muted"
     if (quantity() > 0) return "bg-green-50"
     return "bg-red-50"
   }
@@ -86,17 +86,17 @@ export function AdjustStockModal(props: AdjustStockModalProps) {
           {/* Scrollable Content */}
           <div class="flex-1 overflow-y-auto space-y-5 pr-2">
             {/* Item Info Card */}
-            <div class="bg-gray-50 rounded-xl p-4">
-              <p class="text-xs text-gray-500 mb-1">Item</p>
-              <p class="text-base font-medium text-gray-900">{itemName()}</p>
+            <div class="bg-surface-muted rounded-xl p-4">
+              <p class="text-xs text-muted mb-1">Item</p>
+              <p class="text-base font-medium text-foreground">{itemName()}</p>
 
               {/* Quantity Comparison */}
               <div class="flex items-center justify-center gap-4 mt-4">
                 <div class="text-center">
-                  <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">Current</p>
-                  <p class="text-2xl text-gray-900">
+                  <p class="text-xs text-muted uppercase tracking-wide mb-1">Current</p>
+                  <p class="text-2xl text-foreground">
                     {currentQuantity()}
-                    <span class="text-sm font-normal text-gray-500 ml-1">{itemUnit()}</span>
+                    <span class="text-sm font-normal text-muted ml-1">{itemUnit()}</span>
                   </p>
                 </div>
 
@@ -104,7 +104,7 @@ export function AdjustStockModal(props: AdjustStockModalProps) {
                   <div
                     class={`w-10 h-10 rounded-full ${getChangeBg()} flex items-center justify-center`}
                   >
-                    <Icons.arrowRight class="w-5 h-5 text-gray-400" />
+                    <Icons.arrowRight class="w-5 h-5 text-muted" />
                   </div>
                   <p class={`text-xs font-medium mt-1 ${getChangeColor()}`}>
                     {quantity() > 0 ? "+" : quantity() < 0 ? "" : ""}
@@ -113,7 +113,7 @@ export function AdjustStockModal(props: AdjustStockModalProps) {
                 </div>
 
                 <div class="text-center">
-                  <p class="text-xs text-gray-500 uppercase tracking-wide mb-1">New</p>
+                  <p class="text-xs text-muted uppercase tracking-wide mb-1">New</p>
                   <p
                     class={`text-2xl ${
                       newQuantity() < 0
@@ -124,7 +124,7 @@ export function AdjustStockModal(props: AdjustStockModalProps) {
                     }`}
                   >
                     {newQuantity()}
-                    <span class="text-sm font-normal text-gray-500 ml-1">{itemUnit()}</span>
+                    <span class="text-sm font-normal text-muted ml-1">{itemUnit()}</span>
                   </p>
                 </div>
               </div>
@@ -132,7 +132,7 @@ export function AdjustStockModal(props: AdjustStockModalProps) {
 
             {/* Quick Adjust Buttons */}
             <div>
-              <p class="text-sm font-medium text-gray-900 mb-3">Quick Adjust</p>
+              <p class="text-sm font-medium text-foreground mb-3">Quick Adjust</p>
               <div class="flex items-center justify-center gap-2 flex-wrap">
                 <button
                   type="button"
@@ -159,7 +159,7 @@ export function AdjustStockModal(props: AdjustStockModalProps) {
                 <button
                   type="button"
                   onClick={() => setQuantity(0)}
-                  class="px-3 py-2 text-sm font-medium text-gray-600 bg-gray-100 border border-gray-200 rounded-lg hover:bg-gray-200 transition-colors"
+                  class="px-3 py-2 text-sm font-medium text-muted bg-surface-muted border border-border rounded-lg hover:bg-surface-muted transition-colors"
                 >
                   Reset
                 </button>
@@ -190,7 +190,7 @@ export function AdjustStockModal(props: AdjustStockModalProps) {
 
             {/* Manual Input */}
             <div>
-              <label for="adjustment-amount" class="block text-sm font-medium text-gray-900 mb-2">
+              <label for="adjustment-amount" class="block text-sm font-medium text-foreground mb-2">
                 Adjustment Amount
               </label>
               <div class="relative">
@@ -199,7 +199,7 @@ export function AdjustStockModal(props: AdjustStockModalProps) {
                   type="number"
                   value={quantity() === 0 ? "" : quantity()}
                   onInput={e => setQuantity(parseInt(e.currentTarget.value, 10) || 0)}
-                  class={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().quantity ? "border-red-300" : "border-gray-200"}`}
+                  class={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().quantity ? "border-red-300" : "border-border"}`}
                   placeholder="Enter amount (use negative to subtract)"
                 />
                 <Show when={errors().quantity}>
@@ -223,14 +223,14 @@ export function AdjustStockModal(props: AdjustStockModalProps) {
 
             {/* Reason Dropdown */}
             <div>
-              <label for="adjustment-reason" class="block text-sm font-medium text-gray-900 mb-2">
+              <label for="adjustment-reason" class="block text-sm font-medium text-foreground mb-2">
                 Reason <span class="text-red-500">*</span>
               </label>
               <select
                 id="adjustment-reason"
                 value={reason()}
                 onChange={e => setReason(e.currentTarget.value)}
-                class={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-white ${errors().reason ? "border-red-300" : "border-gray-200"}`}
+                class={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface ${errors().reason ? "border-red-300" : "border-border"}`}
               >
                 <option value="">Select a reason...</option>
                 {ADJUSTMENT_REASONS.map(r => (
@@ -244,26 +244,26 @@ export function AdjustStockModal(props: AdjustStockModalProps) {
 
             {/* Notes */}
             <div>
-              <label for="adjustment-notes" class="block text-sm font-medium text-gray-900 mb-2">
-                Notes <span class="text-gray-400 font-normal">(Optional)</span>
+              <label for="adjustment-notes" class="block text-sm font-medium text-foreground mb-2">
+                Notes <span class="text-muted font-normal">(Optional)</span>
               </label>
               <textarea
                 id="adjustment-notes"
                 value={notes()}
                 onChange={e => setNotes(e.currentTarget.value)}
                 rows={2}
-                class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+                class="w-full px-4 py-2.5 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
                 placeholder="Add any additional details..."
               />
             </div>
           </div>
 
           {/* Footer Actions */}
-          <div class="flex items-center justify-end gap-3 pt-4 mt-4 border-t border-gray-100">
+          <div class="flex items-center justify-end gap-3 pt-4 mt-4 border-t border-border">
             <button
               type="button"
               onClick={handleClose}
-              class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              class="px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors"
             >
               Cancel
             </button>

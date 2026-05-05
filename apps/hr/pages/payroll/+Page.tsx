@@ -26,8 +26,8 @@ export default function Page() {
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
       <div class="flex items-center justify-between mb-8">
         <div>
-          <h1 class="text-2xl font-semibold text-gray-900">Payroll</h1>
-          <p class="text-sm text-gray-500 mt-1">Semi-monthly payroll periods (15th & 30th)</p>
+          <h1 class="text-2xl font-semibold text-foreground">Payroll</h1>
+          <p class="text-sm text-muted mt-1">Semi-monthly payroll periods (15th & 30th)</p>
         </div>
       </div>
 
@@ -38,15 +38,15 @@ export default function Page() {
               {(period: PayrollPeriod) => (
                 <a
                   href={`/payroll/${period.id}`}
-                  class="block bg-white rounded-lg border border-gray-200 p-5 hover:border-primary/30 transition-colors"
+                  class="block bg-surface rounded-lg border border-border p-5 hover:border-primary/30 transition-colors"
                 >
                   <div class="flex items-start justify-between">
                     <div>
                       <div class="flex items-center gap-3 mb-2">
-                        <h3 class="text-base font-semibold text-gray-900">{period.label}</h3>
+                        <h3 class="text-base font-semibold text-foreground">{period.label}</h3>
                         <PayrollStatusBadge status={period.status} />
                       </div>
-                      <div class="flex items-center gap-4 text-sm text-gray-500">
+                      <div class="flex items-center gap-4 text-sm text-muted">
                         <span>
                           {formatDate(period.periodStart)} — {formatDate(period.periodEnd)}
                         </span>
@@ -54,11 +54,11 @@ export default function Page() {
                       </div>
                     </div>
                     <div class="text-right">
-                      <p class="text-sm text-gray-500">Net Pay</p>
-                      <p class="text-lg font-bold text-gray-900">
+                      <p class="text-sm text-muted">Net Pay</p>
+                      <p class="text-lg font-bold text-foreground">
                         {formatCurrency(Number(period.totalNet || 0))}
                       </p>
-                      <p class="text-xs text-gray-400">
+                      <p class="text-xs text-muted">
                         Gross: {formatCurrency(Number(period.totalGross || 0))}
                       </p>
                     </div>
@@ -68,9 +68,9 @@ export default function Page() {
             </For>
 
             {periods.length === 0 && (
-              <div class="text-center py-12 bg-white rounded-lg border border-gray-200">
+              <div class="text-center py-12 bg-surface rounded-lg border border-border">
                 <Icons.creditCard class="w-12 h-12 mx-auto mb-3 text-gray-300" />
-                <p class="text-sm font-medium text-gray-900">No payroll periods</p>
+                <p class="text-sm font-medium text-foreground">No payroll periods</p>
               </div>
             )}
           </div>

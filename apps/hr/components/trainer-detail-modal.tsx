@@ -44,59 +44,61 @@ export function TrainerDetailModal(props: TrainerDetailModalProps) {
               </div>
               <div class="flex-1">
                 <div class="flex items-center gap-3">
-                  <h3 class="text-lg font-semibold text-gray-900">{trainer().name}</h3>
+                  <h3 class="text-lg font-semibold text-foreground">{trainer().name}</h3>
                   <TrainerStatusBadge status={trainer().status} />
                 </div>
-                <p class="text-sm text-gray-600 mt-1">{trainer().specialization}</p>
+                <p class="text-sm text-muted mt-1">{trainer().specialization}</p>
               </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
               <div>
-                <p class="text-xs text-gray-500 mb-1">Email</p>
-                <p class="text-sm text-gray-900">{trainer().email || "—"}</p>
+                <p class="text-xs text-muted mb-1">Email</p>
+                <p class="text-sm text-foreground">{trainer().email || "—"}</p>
               </div>
               <div>
-                <p class="text-xs text-gray-500 mb-1">Phone</p>
-                <p class="text-sm text-gray-900">{trainer().phone || "—"}</p>
+                <p class="text-xs text-muted mb-1">Phone</p>
+                <p class="text-sm text-foreground">{trainer().phone || "—"}</p>
               </div>
               <div>
-                <p class="text-xs text-gray-500 mb-1">Hourly Rate</p>
-                <p class="text-sm text-gray-900">{formatCurrency(Number(trainer().hourlyRate))}</p>
+                <p class="text-xs text-muted mb-1">Hourly Rate</p>
+                <p class="text-sm text-foreground">
+                  {formatCurrency(Number(trainer().hourlyRate))}
+                </p>
               </div>
               <div>
-                <p class="text-xs text-gray-500 mb-1">Hire Date</p>
-                <p class="text-sm text-gray-900">{formatDate(trainer().hireDate)}</p>
+                <p class="text-xs text-muted mb-1">Hire Date</p>
+                <p class="text-sm text-foreground">{formatDate(trainer().hireDate)}</p>
               </div>
             </div>
 
             <div>
-              <h4 class="text-sm font-semibold text-gray-900 mb-3">Recent Attendance</h4>
+              <h4 class="text-sm font-semibold text-foreground mb-3">Recent Attendance</h4>
               <Show
                 when={recentAttendance().length > 0}
                 fallback={
-                  <p class="text-sm text-gray-500">
+                  <p class="text-sm text-muted">
                     {attendanceQuery.isPending ? "Loading..." : "No attendance records found."}
                   </p>
                 }
               >
-                <div class="bg-gray-50 rounded-lg border border-gray-200 overflow-hidden">
+                <div class="bg-surface-muted rounded-lg border border-border overflow-hidden">
                   <table class="w-full">
-                    <thead class="bg-gray-50 border-b border-gray-200">
+                    <thead class="bg-surface-muted border-b border-border">
                       <tr>
-                        <th class="py-2 px-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <th class="py-2 px-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                           Date
                         </th>
-                        <th class="py-2 px-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <th class="py-2 px-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                           Time In
                         </th>
-                        <th class="py-2 px-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <th class="py-2 px-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                           Time Out
                         </th>
-                        <th class="py-2 px-3 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <th class="py-2 px-3 text-right text-xs font-semibold text-muted uppercase tracking-wider">
                           Hours
                         </th>
-                        <th class="py-2 px-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                        <th class="py-2 px-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
                           Status
                         </th>
                       </tr>
@@ -104,17 +106,17 @@ export function TrainerDetailModal(props: TrainerDetailModalProps) {
                     <tbody>
                       <For each={recentAttendance()}>
                         {record => (
-                          <tr class="border-t border-gray-100">
-                            <td class="py-2 px-3 text-sm text-gray-900">
+                          <tr class="border-t border-border">
+                            <td class="py-2 px-3 text-sm text-foreground">
                               {formatDate(record.date)}
                             </td>
-                            <td class="py-2 px-3 text-sm text-gray-600 font-mono">
+                            <td class="py-2 px-3 text-sm text-muted font-mono">
                               {record.timeIn || "—"}
                             </td>
-                            <td class="py-2 px-3 text-sm text-gray-600 font-mono">
+                            <td class="py-2 px-3 text-sm text-muted font-mono">
                               {record.timeOut || "—"}
                             </td>
-                            <td class="py-2 px-3 text-sm text-gray-900 text-right">
+                            <td class="py-2 px-3 text-sm text-foreground text-right">
                               {record.hoursWorked}
                             </td>
                             <td class="py-2 px-3">

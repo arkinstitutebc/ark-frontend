@@ -103,13 +103,13 @@ export default function CreatePoPage() {
         <button
           type="button"
           onClick={() => (window.location.href = "/orders")}
-          class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+          class="p-2 hover:bg-surface-muted rounded-lg transition-colors"
         >
-          <Icons.arrowLeft class="w-5 h-5 text-gray-600" />
+          <Icons.arrowLeft class="w-5 h-5 text-muted" />
         </button>
         <div>
-          <h1 class="text-2xl font-semibold text-gray-900">Create Purchase Order</h1>
-          <p class="text-sm text-gray-500 mt-1">Generate a PO from an approved purchase request</p>
+          <h1 class="text-2xl font-semibold text-foreground">Create Purchase Order</h1>
+          <p class="text-sm text-muted mt-1">Generate a PO from an approved purchase request</p>
         </div>
       </div>
 
@@ -124,12 +124,12 @@ export default function CreatePoPage() {
           {/* Main Form */}
           <div class="lg:col-span-2 space-y-6">
             {/* PR & Supplier Selection */}
-            <div class="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 class="text-lg font-semibold text-gray-900 mb-4">Order Details</h2>
+            <div class="bg-surface rounded-lg border border-border p-6">
+              <h2 class="text-lg font-semibold text-foreground mb-4">Order Details</h2>
 
               <div class="space-y-4">
                 <div>
-                  <label for="po-pr" class="block text-sm font-medium text-gray-700 mb-1">
+                  <label for="po-pr" class="block text-sm font-medium text-foreground mb-1">
                     Purchase Request <span class="text-red-500">*</span>
                   </label>
                   <select
@@ -138,7 +138,7 @@ export default function CreatePoPage() {
                     onInput={handlePrChange}
                     required
                     disabled={approvedPrsQuery.isPending}
-                    class={`w-full px-3 py-2 border rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:bg-gray-50 disabled:cursor-not-allowed ${errors().prId ? "border-red-300" : "border-gray-200"}`}
+                    class={`w-full px-3 py-2 border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:bg-surface-muted disabled:cursor-not-allowed ${errors().prId ? "border-red-300" : "border-border"}`}
                   >
                     <option value="">
                       {approvedPrsQuery.isPending
@@ -159,7 +159,7 @@ export default function CreatePoPage() {
                 </div>
 
                 <div>
-                  <label for="po-supplier" class="block text-sm font-medium text-gray-700 mb-1">
+                  <label for="po-supplier" class="block text-sm font-medium text-foreground mb-1">
                     Supplier <span class="text-red-500">*</span>
                   </label>
                   <input
@@ -170,7 +170,7 @@ export default function CreatePoPage() {
                     required
                     disabled={!selectedPr()}
                     placeholder="Enter supplier name"
-                    class={`w-full px-3 py-2 border rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:bg-gray-50 disabled:cursor-not-allowed ${errors().supplier ? "border-red-300" : "border-gray-200"}`}
+                    class={`w-full px-3 py-2 border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:bg-surface-muted disabled:cursor-not-allowed ${errors().supplier ? "border-red-300" : "border-border"}`}
                   />
                   <Show when={errors().supplier}>
                     <p class="text-xs text-red-600 mt-1">{errors().supplier}</p>
@@ -178,7 +178,7 @@ export default function CreatePoPage() {
                 </div>
 
                 <div>
-                  <label for="po-delivery" class="block text-sm font-medium text-gray-700 mb-1">
+                  <label for="po-delivery" class="block text-sm font-medium text-foreground mb-1">
                     Estimated Delivery
                   </label>
                   <input
@@ -187,12 +187,12 @@ export default function CreatePoPage() {
                     value={estimatedDelivery()}
                     onInput={e => setEstimatedDelivery(e.currentTarget.value)}
                     min={new Date().toISOString().split("T")[0]}
-                    class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    class="w-full px-3 py-2 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   />
                 </div>
 
                 <div>
-                  <label for="po-notes" class="block text-sm font-medium text-gray-700 mb-1">
+                  <label for="po-notes" class="block text-sm font-medium text-foreground mb-1">
                     Notes
                   </label>
                   <textarea
@@ -201,7 +201,7 @@ export default function CreatePoPage() {
                     onInput={e => setNotes(e.currentTarget.value)}
                     rows={2}
                     placeholder="Additional notes for supplier..."
-                    class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+                    class="w-full px-3 py-2 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
                   />
                 </div>
               </div>
@@ -210,23 +210,23 @@ export default function CreatePoPage() {
             {/* Items from PR */}
             <Show when={selectedPr()}>
               {pr => (
-                <div class="bg-white rounded-lg border border-gray-200 p-6">
-                  <h2 class="text-lg font-semibold text-gray-900 mb-4">Items</h2>
+                <div class="bg-surface rounded-lg border border-border p-6">
+                  <h2 class="text-lg font-semibold text-foreground mb-4">Items</h2>
 
                   <div class="overflow-x-auto">
                     <table class="w-full">
-                      <thead class="bg-gray-50 border-b border-gray-200">
+                      <thead class="bg-surface-muted border-b border-border">
                         <tr>
-                          <th class="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
                             Item
                           </th>
-                          <th class="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
                             Qty
                           </th>
-                          <th class="text-left py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
                             Unit
                           </th>
-                          <th class="text-right py-4 px-6 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                          <th class="text-right py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
                             Total
                           </th>
                         </tr>
@@ -234,26 +234,26 @@ export default function CreatePoPage() {
                       <tbody>
                         <For each={pr().items}>
                           {item => (
-                            <tr class="border-t border-gray-100">
-                              <td class="py-4 px-6 text-sm text-gray-900">{item.name}</td>
-                              <td class="py-4 px-6 text-sm text-gray-900">{item.quantity}</td>
-                              <td class="py-4 px-6 text-sm text-gray-600">{item.unit}</td>
-                              <td class="py-4 px-6 text-sm text-gray-900 text-right">
+                            <tr class="border-t border-border">
+                              <td class="py-4 px-6 text-sm text-foreground">{item.name}</td>
+                              <td class="py-4 px-6 text-sm text-foreground">{item.quantity}</td>
+                              <td class="py-4 px-6 text-sm text-muted">{item.unit}</td>
+                              <td class="py-4 px-6 text-sm text-foreground text-right">
                                 {formatCurrency(item.total)}
                               </td>
                             </tr>
                           )}
                         </For>
                       </tbody>
-                      <tfoot class="border-t border-gray-200">
+                      <tfoot class="border-t border-border">
                         <tr>
                           <td
                             colSpan={3}
-                            class="py-4 px-6 text-right text-sm font-medium text-gray-900"
+                            class="py-4 px-6 text-right text-sm font-medium text-foreground"
                           >
                             Total
                           </td>
-                          <td class="py-4 px-6 text-right text-base text-gray-900">
+                          <td class="py-4 px-6 text-right text-base text-foreground">
                             {formatCurrency(totalAmount())}
                           </td>
                         </tr>
@@ -267,28 +267,28 @@ export default function CreatePoPage() {
 
           {/* Summary Sidebar */}
           <div class="lg:col-span-1">
-            <div class="bg-white rounded-lg border border-gray-200 p-6 sticky top-24">
-              <h2 class="text-lg font-semibold text-gray-900 mb-4">Summary</h2>
+            <div class="bg-surface rounded-lg border border-border p-6 sticky top-24">
+              <h2 class="text-lg font-semibold text-foreground mb-4">Summary</h2>
 
               <Show when={selectedPr()}>
                 {pr => (
                   <div class="space-y-3">
                     <div class="flex justify-between text-sm">
-                      <span class="text-gray-600">PR Reference</span>
-                      <span class="font-mono text-gray-900">{pr().prCode}</span>
+                      <span class="text-muted">PR Reference</span>
+                      <span class="font-mono text-foreground">{pr().prCode}</span>
                     </div>
                     <div class="flex justify-between text-sm">
-                      <span class="text-gray-600">Batch</span>
-                      <span class="text-gray-900">{pr().batchName}</span>
+                      <span class="text-muted">Batch</span>
+                      <span class="text-foreground">{pr().batchName}</span>
                     </div>
                     <div class="flex justify-between text-sm">
-                      <span class="text-gray-600">Category</span>
-                      <span class="text-gray-900">{pr().category}</span>
+                      <span class="text-muted">Category</span>
+                      <span class="text-foreground">{pr().category}</span>
                     </div>
-                    <div class="border-t border-gray-200 pt-3">
+                    <div class="border-t border-border pt-3">
                       <div class="flex justify-between">
-                        <span class="text-gray-900 font-medium">Total Amount</span>
-                        <span class="text-lg text-gray-900">{formatCurrency(totalAmount())}</span>
+                        <span class="text-foreground font-medium">Total Amount</span>
+                        <span class="text-lg text-foreground">{formatCurrency(totalAmount())}</span>
                       </div>
                     </div>
                   </div>
@@ -306,7 +306,7 @@ export default function CreatePoPage() {
                 <button
                   type="button"
                   onClick={() => (window.location.href = "/orders")}
-                  class="w-full px-4 py-2.5 bg-white text-gray-700 border border-gray-200 text-sm font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                  class="w-full px-4 py-2.5 bg-surface text-foreground border border-border text-sm font-medium rounded-lg hover:bg-surface-muted transition-colors"
                 >
                   Cancel
                 </button>

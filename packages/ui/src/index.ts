@@ -13,6 +13,14 @@ export { QueryBoundary } from "./query-boundary"
 export { type NavItem, Sidebar, type SidebarProps } from "./sidebar"
 export { SidebarProvider, useSidebar } from "./sidebar-context"
 export { StatusBadge } from "./status-badge"
+export {
+  type EffectiveTheme,
+  NO_FOUC_SCRIPT,
+  type ThemePreference,
+  ThemeProvider,
+  useTheme,
+} from "./theme"
+export { ThemeToggle } from "./theme-toggle"
 export { type CurrentUser, TopBar, type TopBarProps } from "./topbar"
 
 // Utilities

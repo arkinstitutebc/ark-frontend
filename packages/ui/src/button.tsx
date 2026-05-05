@@ -19,8 +19,8 @@ export function Button(
   const variantClasses = {
     primary: "bg-primary text-white shadow-glow-primary hover:opacity-90 hover:shadow-lg",
     accent: "bg-accent text-white shadow-glow-accent hover:opacity-90 hover:shadow-lg",
-    secondary: "bg-white text-primary border-2 border-primary hover:bg-primary hover:text-white",
-    ghost: "bg-transparent text-gray-600 hover:bg-gray-100",
+    secondary: "bg-surface text-primary border-2 border-primary hover:bg-primary hover:text-white",
+    ghost: "bg-transparent text-muted hover:bg-surface-muted hover:text-foreground",
   }[variant]
 
   return (
