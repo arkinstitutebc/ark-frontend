@@ -333,9 +333,7 @@ function TempPasswordModal(props: {
                   {cred().tempPassword}
                 </code>
                 <Button type="button" variant="secondary" size="sm" onClick={copyPassword}>
-                  <Show when={copied()} fallback={<Icons.upload class="w-4 h-4" />}>
-                    <Icons.check class="w-4 h-4" />
-                  </Show>
+                  {copied() ? <Icons.check class="w-4 h-4" /> : <Icons.upload class="w-4 h-4" />}
                   {copied() ? "Copied" : "Copy"}
                 </Button>
               </div>

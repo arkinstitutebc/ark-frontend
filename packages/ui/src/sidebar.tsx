@@ -141,12 +141,11 @@ export function Sidebar(props: SidebarProps) {
           onClick={toggleCollapsed}
           class="hidden md:flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-muted hover:bg-surface-muted hover:text-foreground transition-colors"
         >
-          <Show
-            when={collapsed()}
-            fallback={<ChevronLeft class="w-[18px] h-[18px] flex-shrink-0" />}
-          >
+          {collapsed() ? (
             <ChevronRight class="w-[18px] h-[18px] flex-shrink-0" />
-          </Show>
+          ) : (
+            <ChevronLeft class="w-[18px] h-[18px] flex-shrink-0" />
+          )}
           <Show when={!collapsed()}>
             <span>Collapse</span>
           </Show>

@@ -154,9 +154,11 @@ export function EditStudentModal(props: EditStudentModalProps) {
         {/* Photo Upload */}
         <div class="flex items-center gap-4 pb-4 border-b border-border">
           <div class="w-20 h-20 rounded-full bg-surface-muted flex items-center justify-center overflow-hidden border-2 border-border">
-            <Show when={photoUrl()} fallback={<Icons.user class="w-10 h-10 text-muted" />}>
+            {photoUrl() ? (
               <img src={photoUrl()} alt="Student" class="w-full h-full object-cover" />
-            </Show>
+            ) : (
+              <Icons.user class="w-10 h-10 text-muted" />
+            )}
           </div>
           <div>
             <label class="block">

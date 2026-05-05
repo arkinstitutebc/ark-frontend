@@ -140,9 +140,11 @@ export default function ProfilePage() {
                   const ok = rule.test(newPassword())
                   return (
                     <li class={`flex items-center gap-2 ${ok ? "text-green-700" : "text-muted"}`}>
-                      <Show when={ok} fallback={<Icons.minus class="w-3.5 h-3.5 text-muted" />}>
+                      {ok ? (
                         <Icons.check class="w-3.5 h-3.5 text-green-600" />
-                      </Show>
+                      ) : (
+                        <Icons.minus class="w-3.5 h-3.5 text-muted" />
+                      )}
                       {rule.label}
                     </li>
                   )
