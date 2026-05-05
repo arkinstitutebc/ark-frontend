@@ -13,9 +13,9 @@ export type {
   TxnCategory,
   TxnType,
 } from "./finance"
-export type { HrAttendance } from "./hr-attendance"
+export type { AttendanceStatus, HrAttendance } from "./hr-attendance"
 export type { StockItem, StockMovement, StockReceipt, StockStatus } from "./inventory"
-export type { PayrollEntry, PayrollPeriod } from "./payroll"
+export type { PayrollEntry, PayrollPeriod, PayrollStatus } from "./payroll"
 export type {
   PoStatus,
   PrItem,
