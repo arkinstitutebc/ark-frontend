@@ -16,7 +16,6 @@
     "isolatedModules": true,
     "verbatimModuleSyntax": false,
     "allowJs": false,
-    "noEmit": true,
-    "types": ["bun-types"]
+    "noEmit": true
   }
 }
