@@ -239,7 +239,7 @@ export default function AdminUsersPage() {
             label="Email"
             value={form().email}
             onInput={e => setForm({ ...form(), email: e.currentTarget.value })}
-            leftIcon={<Icons.mail class="w-5 h-5" />}
+            leftIcon={Icons.mail}
             error={errors().email}
           />
           <div>

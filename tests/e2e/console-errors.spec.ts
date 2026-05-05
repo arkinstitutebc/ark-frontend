@@ -2,18 +2,16 @@ import { expect, test } from "@playwright/test"
 import { setStoredTheme, waitForReady } from "./helpers"
 
 /**
- * Catches runtime crashes that don't break HTML rendering but do throw uncaught
- * errors during hydration. The pre-existing TypeError "e is not a function" in
- * the login chunk is currently allow-listed below — track it via the FOLLOW-UP
- * task and remove from the allow-list once fixed.
+ * Catches runtime crashes during page load + hydration. Any console.error or
+ * pageerror that doesn't match the local-only CORS allow-list will fail.
  *
- * If a NEW console error appears (e.g. a different chunk crash, an uncaught
- * promise rejection, a CORS error), this test fails immediately.
+ * The "TypeError: e is not a function" allow-list entry was removed after
+ * RCA showed it was actually breaking input → signal binding (login form
+ * was submitting empty values). Lesson: never silently allow-list a runtime
+ * error without proving it's truly cosmetic.
  */
 
 const KNOWN_NON_FATAL_ERRORS: RegExp[] = [
-  /TypeError: e is not a function/,
-  /No error page defined/,
   // localhost:4000 CORS errors only occur when VITE_API_URL is unset — local
   // builds without the env var hit this. CI / preview against prod will not.
   /Cross-Origin Request Blocked.*localhost:4000/,

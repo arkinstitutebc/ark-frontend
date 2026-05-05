@@ -1,16 +1,24 @@
-import { createUniqueId, type JSX } from "solid-js"
+import { type Component, createUniqueId, type JSX, Show } from "solid-js"
 import { cn } from "./utils"
+
+// Icon props are Component refs, not JSX.Element values. Solid's hydration
+// breaks when a JSX-as-prop getter contains lucide-solid template factories
+// (V() called without its template arg → "TypeError: e is not a function").
+// Component refs sidestep the getter-revaluation path.
+type IconComponent = Component<{ class?: string }>
 
 type InputProps = JSX.InputHTMLAttributes<HTMLInputElement> & {
   label?: string
   error?: string
-  leftIcon?: JSX.Element
+  leftIcon?: IconComponent
   showPasswordToggle?: boolean
   showPassword?: boolean
   onTogglePassword?: () => void
-  eyeIcon?: JSX.Element
-  eyeOffIcon?: JSX.Element
+  eyeIcon?: IconComponent
+  eyeOffIcon?: IconComponent
 }
+
+const ICON_CLASS = "w-5 h-5"
 
 export function Input(props: InputProps) {
   const fallbackId = createUniqueId()
@@ -26,11 +34,16 @@ export function Input(props: InputProps) {
         </label>
       )}
       <div class="relative">
-        {hasLeftIcon() && (
-          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted">
-            {props.leftIcon}
-          </div>
-        )}
+        <Show when={props.leftIcon}>
+          {LeftIcon => {
+            const Icon = LeftIcon()
+            return (
+              <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-muted">
+                <Icon class={ICON_CLASS} />
+              </div>
+            )
+          }}
+        </Show>
         <input
           {...props}
           id={inputId()}
@@ -48,16 +61,21 @@ export function Input(props: InputProps) {
             props.class
           )}
         />
-        {hasPasswordToggle() && (
+        <Show when={hasPasswordToggle()}>
           <button
             type="button"
             onClick={props.onTogglePassword}
             class="absolute inset-y-0 right-0 pr-3 flex items-center text-muted hover:text-foreground transition-colors"
             aria-label={props.showPassword ? "Hide password" : "Show password"}
           >
-            {props.showPassword ? props.eyeOffIcon : props.eyeIcon}
+            <Show when={props.showPassword ? props.eyeOffIcon : props.eyeIcon}>
+              {IconAccessor => {
+                const Icon = IconAccessor()
+                return <Icon class={ICON_CLASS} />
+              }}
+            </Show>
           </button>
-        )}
+        </Show>
       </div>
       {props.error && <p class="text-sm text-red-500">{props.error}</p>}
     </div>

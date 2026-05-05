@@ -112,12 +112,12 @@ export default function ProfilePage() {
               placeholder="Your current password"
               value={oldPassword()}
               onInput={e => setOldPassword(e.currentTarget.value)}
-              leftIcon={<Icons.lock class="w-5 h-5" />}
+              leftIcon={Icons.lock}
               showPasswordToggle
               showPassword={showOld()}
               onTogglePassword={() => setShowOld(!showOld())}
-              eyeIcon={<Icons.eye class="w-5 h-5" />}
-              eyeOffIcon={<Icons.eyeOff class="w-5 h-5" />}
+              eyeIcon={Icons.eye}
+              eyeOffIcon={Icons.eyeOff}
             />
 
             <Input
@@ -126,12 +126,12 @@ export default function ProfilePage() {
               placeholder="At least 12 characters"
               value={newPassword()}
               onInput={e => setNewPassword(e.currentTarget.value)}
-              leftIcon={<Icons.lock class="w-5 h-5" />}
+              leftIcon={Icons.lock}
               showPasswordToggle
               showPassword={showNew()}
               onTogglePassword={() => setShowNew(!showNew())}
-              eyeIcon={<Icons.eye class="w-5 h-5" />}
-              eyeOffIcon={<Icons.eyeOff class="w-5 h-5" />}
+              eyeIcon={Icons.eye}
+              eyeOffIcon={Icons.eyeOff}
             />
 
             <Show when={newPassword().length > 0}>
@@ -156,7 +156,7 @@ export default function ProfilePage() {
               placeholder="Type the new password again"
               value={confirmPassword()}
               onInput={e => setConfirmPassword(e.currentTarget.value)}
-              leftIcon={<Icons.lock class="w-5 h-5" />}
+              leftIcon={Icons.lock}
               error={
                 confirmPassword().length > 0 && !passwordsMatch()
                   ? "Passwords don't match"

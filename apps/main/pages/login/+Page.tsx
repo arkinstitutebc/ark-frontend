@@ -80,7 +80,7 @@ export default function LoginPage() {
               placeholder="Enter your email"
               value={email()}
               onInput={e => setEmail(e.currentTarget.value)}
-              leftIcon={<UI.mail class="w-5 h-5" />}
+              leftIcon={UI.mail}
             />
 
             {/* Password Input */}
@@ -90,12 +90,12 @@ export default function LoginPage() {
               placeholder="Enter your password"
               value={password()}
               onInput={e => setPassword(e.currentTarget.value)}
-              leftIcon={<UI.lock class="w-5 h-5" />}
+              leftIcon={UI.lock}
               showPasswordToggle
               showPassword={showPassword()}
               onTogglePassword={() => setShowPassword(!showPassword())}
-              eyeIcon={<UI.eye class="w-5 h-5" />}
-              eyeOffIcon={<UI.eyeOff class="w-5 h-5" />}
+              eyeIcon={UI.eye}
+              eyeOffIcon={UI.eyeOff}
             />
 
             {/* Error Message */}
