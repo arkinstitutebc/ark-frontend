@@ -8,7 +8,7 @@ import {
   useResetUserPassword,
   useUpdateUser,
 } from "@ark/api-client"
-import { Button, Icons, Input, Modal } from "@ark/ui"
+import { Button, Icons, Input, Modal, PageLoading, toast } from "@ark/ui"
 import { createEffect, createMemo, createSignal, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
 import { Footer, Navbar } from "@/components"
@@ -28,8 +28,6 @@ export default function AdminUserDetailPage() {
   const [lastName, setLastName] = createSignal("")
   const [role, setRole] = createSignal<AdminRole>("trainer")
   const [hydrated, setHydrated] = createSignal(false)
-  const [error, setError] = createSignal("")
-  const [success, setSuccess] = createSignal("")
   const [tempCredentials, setTempCredentials] = createSignal<UserWithTempPassword | null>(null)
 
   // Auth gate: must be admin.
@@ -57,14 +55,8 @@ export default function AdminUserDetailPage() {
   const isSelf = () => userQuery.data?.id === id()
   const isAdmin = () => userQuery.data?.role === "admin"
 
-  function clearMessages() {
-    setError("")
-    setSuccess("")
-  }
-
   async function saveChanges(e: Event) {
     e.preventDefault()
-    clearMessages()
     const u = target.data
     if (!u) return
     const payload: { firstName?: string; lastName?: string; role?: AdminRole } = {}
@@ -72,59 +64,49 @@ export default function AdminUserDetailPage() {
     if (lastName() !== u.lastName) payload.lastName = lastName()
     if (!isSelf() && role() !== u.role) payload.role = role()
     if (Object.keys(payload).length === 0) {
-      setSuccess("No changes to save.")
+      toast("No changes to save.")
       return
     }
     try {
       await update.mutateAsync({ id: id(), data: payload })
-      setSuccess("Changes saved.")
+      toast.success("Changes saved.")
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not save changes")
+      toast.error(err instanceof Error ? err.message : "Could not save changes")
     }
   }
 
   async function handleDeactivate() {
-    clearMessages()
     if (!confirm("Deactivate this user? They will not be able to log in.")) return
     try {
       await deactivate.mutateAsync(id())
-      setSuccess("User deactivated.")
+      toast.success("User deactivated.")
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not deactivate user")
+      toast.error(err instanceof Error ? err.message : "Could not deactivate user")
     }
   }
 
   async function handleActivate() {
-    clearMessages()
     try {
       await activate.mutateAsync(id())
-      setSuccess("User reactivated.")
+      toast.success("User reactivated.")
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not reactivate user")
+      toast.error(err instanceof Error ? err.message : "Could not reactivate user")
     }
   }
 
   async function handleReset() {
-    clearMessages()
     if (!confirm("Issue a new temporary password? The user will be forced to change it.")) return
     try {
       const result = await reset.mutateAsync(id())
       setTempCredentials(result)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not reset password")
+      toast.error(err instanceof Error ? err.message : "Could not reset password")
     }
   }
 
   return (
     <div class="min-h-screen bg-surface-muted flex flex-col">
-      <Show
-        when={!userQuery.isPending && isAdmin()}
-        fallback={
-          <div class="flex-1 flex items-center justify-center">
-            <div class="animate-pulse text-sm text-muted">Loading…</div>
-          </div>
-        }
-      >
+      <Show when={!userQuery.isPending && isAdmin()} fallback={<PageLoading />}>
         <Navbar
           userName={`${userQuery.data?.firstName ?? ""} ${userQuery.data?.lastName ?? ""}`.trim()}
           userRole={userQuery.data?.role}
@@ -156,118 +138,128 @@ export default function AdminUserDetailPage() {
                   </div>
                 }
               >
-                {user => (
-                  <div class="space-y-6">
-                    <div class="bg-surface rounded-2xl shadow-sm border border-border overflow-hidden">
-                      <div class="px-6 py-5 border-b border-border flex items-start justify-between gap-4">
-                        <div>
-                          <h1 class="text-xl font-bold text-foreground">
-                            {user().firstName} {user().lastName}
-                          </h1>
-                          <p class="text-sm text-muted mt-0.5">{user().email}</p>
-                        </div>
-                        <Show
-                          when={user().isActive}
-                          fallback={
+                {user => {
+                  // Resolve the keyed accessor ONCE so the JSX below has no
+                  // {user().*} interpolations. Multiple inline accessor calls
+                  // in a Show keyed-render-fn body trip a vite-plugin-solid
+                  // hydration template bug; resolving to a const sidesteps it
+                  // while keeping the canonical Solid pattern.
+                  const u = user()
+                  return (
+                    <div class="space-y-6">
+                      <div class="bg-surface rounded-2xl shadow-sm border border-border overflow-hidden">
+                        <div class="px-6 py-5 border-b border-border flex items-start justify-between gap-4">
+                          <div>
+                            <h1 class="text-xl font-bold text-foreground">
+                              {u.firstName} {u.lastName}
+                            </h1>
+                            <p class="text-sm text-muted mt-0.5">{u.email}</p>
+                          </div>
+                          {u.isActive ? (
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs bg-green-50 text-green-700">
+                              <span class="w-1.5 h-1.5 rounded-full bg-green-500" /> Active
+                            </span>
+                          ) : (
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs bg-surface-muted text-muted">
                               <span class="w-1.5 h-1.5 rounded-full bg-muted" /> Inactive
                             </span>
-                          }
-                        >
-                          <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs bg-green-50 text-green-700">
-                            <span class="w-1.5 h-1.5 rounded-full bg-green-500" /> Active
-                          </span>
-                        </Show>
+                          )}
+                        </div>
+
+                        <form onSubmit={saveChanges} class="px-6 py-6 space-y-5">
+                          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <Input
+                              label="First name"
+                              value={firstName()}
+                              onInput={e => setFirstName(e.currentTarget.value)}
+                            />
+                            <Input
+                              label="Last name"
+                              value={lastName()}
+                              onInput={e => setLastName(e.currentTarget.value)}
+                            />
+                          </div>
+                          <div>
+                            <label
+                              for="user-role"
+                              class="block text-sm font-medium text-foreground mb-1.5"
+                            >
+                              Role
+                            </label>
+                            <select
+                              id="user-role"
+                              value={role()}
+                              disabled={isSelf()}
+                              onChange={e => setRole(e.currentTarget.value as AdminRole)}
+                              class="w-full px-4 py-2.5 bg-surface text-foreground border border-border rounded-lg focus:border-primary outline-none transition-colors disabled:bg-surface-muted disabled:cursor-not-allowed"
+                            >
+                              <option value="trainer">Trainer</option>
+                              <option value="director">Director</option>
+                              <option value="admin">Admin</option>
+                            </select>
+                            <Show when={isSelf()}>
+                              <p class="text-xs text-muted mt-1">
+                                You cannot change your own role.
+                              </p>
+                            </Show>
+                          </div>
+
+                          <div class="flex justify-end">
+                            <Button
+                              type="submit"
+                              variant="primary"
+                              size="sm"
+                              disabled={update.isPending}
+                            >
+                              {update.isPending ? "Saving…" : "Save changes"}
+                            </Button>
+                          </div>
+                        </form>
                       </div>
 
-                      <form onSubmit={saveChanges} class="px-6 py-6 space-y-5">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          <Input
-                            label="First name"
-                            value={firstName()}
-                            onInput={e => setFirstName(e.currentTarget.value)}
-                          />
-                          <Input
-                            label="Last name"
-                            value={lastName()}
-                            onInput={e => setLastName(e.currentTarget.value)}
-                          />
+                      <div class="bg-surface rounded-2xl shadow-sm border border-border overflow-hidden">
+                        <div class="px-6 py-5 border-b border-border">
+                          <h2 class="text-base font-semibold text-foreground">Account actions</h2>
                         </div>
-                        <div>
-                          <label
-                            for="user-role"
-                            class="block text-sm font-medium text-foreground mb-1.5"
+                        <div class="px-6 py-5 space-y-3">
+                          <button
+                            type="button"
+                            onClick={handleReset}
+                            disabled={reset.isPending}
+                            class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-border hover:border-primary hover:bg-primary/5 text-left transition-colors disabled:opacity-50"
                           >
-                            Role
-                          </label>
-                          <select
-                            id="user-role"
-                            value={role()}
-                            disabled={isSelf()}
-                            onChange={e => setRole(e.currentTarget.value as AdminRole)}
-                            class="w-full px-4 py-2.5 bg-surface text-foreground border border-border rounded-lg focus:border-primary outline-none transition-colors disabled:bg-surface-muted disabled:cursor-not-allowed"
-                          >
-                            <option value="trainer">Trainer</option>
-                            <option value="director">Director</option>
-                            <option value="admin">Admin</option>
-                          </select>
-                          <Show when={isSelf()}>
-                            <p class="text-xs text-muted mt-1">You cannot change your own role.</p>
-                          </Show>
-                        </div>
-
-                        <Show when={error()}>
-                          <div class="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
-                            <Icons.alert class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                            <p class="text-sm text-red-700">{error()}</p>
-                          </div>
-                        </Show>
-                        <Show when={success()}>
-                          <div class="bg-green-50 border border-green-200 rounded-lg p-3 flex items-start gap-2">
-                            <Icons.checkCircle class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                            <p class="text-sm text-green-700">{success()}</p>
-                          </div>
-                        </Show>
-
-                        <div class="flex justify-end">
-                          <Button
-                            type="submit"
-                            variant="primary"
-                            size="sm"
-                            disabled={update.isPending}
-                          >
-                            {update.isPending ? "Saving…" : "Save changes"}
-                          </Button>
-                        </div>
-                      </form>
-                    </div>
-
-                    <div class="bg-surface rounded-2xl shadow-sm border border-border overflow-hidden">
-                      <div class="px-6 py-5 border-b border-border">
-                        <h2 class="text-base font-semibold text-foreground">Account actions</h2>
-                      </div>
-                      <div class="px-6 py-5 space-y-3">
-                        <button
-                          type="button"
-                          onClick={handleReset}
-                          disabled={reset.isPending}
-                          class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-border hover:border-primary hover:bg-primary/5 text-left transition-colors disabled:opacity-50"
-                        >
-                          <span>
-                            <span class="block text-sm font-medium text-foreground">
-                              Reset password
+                            <span>
+                              <span class="block text-sm font-medium text-foreground">
+                                Reset password
+                              </span>
+                              <span class="block text-xs text-muted mt-0.5">
+                                Generate a new temporary password. The user will be forced to change
+                                it on next login.
+                              </span>
                             </span>
-                            <span class="block text-xs text-muted mt-0.5">
-                              Generate a new temporary password. The user will be forced to change
-                              it on next login.
-                            </span>
-                          </span>
-                          <Icons.lock class="w-5 h-5 text-muted" />
-                        </button>
+                            <Icons.lock class="w-5 h-5 text-muted" />
+                          </button>
 
-                        <Show
-                          when={user().isActive}
-                          fallback={
+                          {u.isActive ? (
+                            <button
+                              type="button"
+                              onClick={handleDeactivate}
+                              disabled={isSelf() || deactivate.isPending}
+                              class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-border hover:border-red-500 hover:bg-red-50 text-left transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              <span>
+                                <span class="block text-sm font-medium text-foreground">
+                                  Deactivate user
+                                </span>
+                                <span class="block text-xs text-muted mt-0.5">
+                                  {isSelf()
+                                    ? "You cannot deactivate yourself."
+                                    : "Block this user from logging in. Their data is preserved."}
+                                </span>
+                              </span>
+                              <Icons.xCircle class="w-5 h-5 text-muted" />
+                            </button>
+                          ) : (
                             <button
                               type="button"
                               onClick={handleActivate}
@@ -284,31 +276,12 @@ export default function AdminUserDetailPage() {
                               </span>
                               <Icons.checkCircle class="w-5 h-5 text-muted" />
                             </button>
-                          }
-                        >
-                          <button
-                            type="button"
-                            onClick={handleDeactivate}
-                            disabled={isSelf() || deactivate.isPending}
-                            class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-border hover:border-red-500 hover:bg-red-50 text-left transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
-                            <span>
-                              <span class="block text-sm font-medium text-foreground">
-                                Deactivate user
-                              </span>
-                              <span class="block text-xs text-muted mt-0.5">
-                                {isSelf()
-                                  ? "You cannot deactivate yourself."
-                                  : "Block this user from logging in. Their data is preserved."}
-                              </span>
-                            </span>
-                            <Icons.xCircle class="w-5 h-5 text-muted" />
-                          </button>
-                        </Show>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
+                  )
+                }}
               </Show>
             </Show>
           </div>

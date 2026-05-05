@@ -1,6 +1,6 @@
-import { performLogout, useChangePassword, useCurrentUser } from "@ark/api-client"
-import { Button, Icons, Input } from "@ark/ui"
-import { createMemo, createSignal, Show } from "solid-js"
+import { type CurrentUser, performLogout, useChangePassword, useCurrentUser } from "@ark/api-client"
+import { Button, Icons, Input, toast } from "@ark/ui"
+import { createMemo, createSignal, onMount, Show } from "solid-js"
 
 interface PasswordRule {
   label: string
@@ -14,6 +14,18 @@ const RULES: PasswordRule[] = [
   { label: "Contains a digit", test: v => /\d/.test(v) },
 ]
 
+// Extracted Component — required so the <Show keyed render-fn> below returns a
+// single Component invocation instead of inline JSX with multiple {user().*}
+// interpolations. The latter trips a vite-plugin-solid hydration template bug.
+function UserMeta(props: { user: CurrentUser }) {
+  return (
+    <p class="text-sm text-muted mt-1">
+      {props.user.firstName} {props.user.lastName} · {props.user.email} ·{" "}
+      <span class="capitalize">{props.user.role}</span>
+    </p>
+  )
+}
+
 export default function ProfilePage() {
   const userQuery = useCurrentUser()
   const mutation = useChangePassword()
@@ -23,8 +35,6 @@ export default function ProfilePage() {
   const [confirmPassword, setConfirmPassword] = createSignal("")
   const [showOld, setShowOld] = createSignal(false)
   const [showNew, setShowNew] = createSignal(false)
-  const [error, setError] = createSignal("")
-  const [success, setSuccess] = createSignal(false)
 
   const passingRules = createMemo(() => RULES.filter(r => r.test(newPassword())))
   const passwordsMatch = createMemo(
@@ -40,7 +50,6 @@ export default function ProfilePage() {
 
   async function handleSubmit(e: Event) {
     e.preventDefault()
-    setError("")
     if (!canSubmit()) return
 
     try {
@@ -48,18 +57,22 @@ export default function ProfilePage() {
         oldPassword: oldPassword(),
         newPassword: newPassword(),
       })
-      setSuccess(true)
+      toast.success("Password changed. Logging you out…")
       // Backend cleared the cookie. Redirect to /login fresh.
       setTimeout(() => performLogout(), 1500)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not change password")
+      toast.error(err instanceof Error ? err.message : "Could not change password")
     }
   }
 
-  const required = () => {
-    if (typeof window === "undefined") return false
-    return new URLSearchParams(window.location.search).get("required") === "1"
-  }
+  // SSR + initial client hydration both default to false. URL is read in
+  // onMount so the DOM tree on first render matches between server and client.
+  // (Reading window.location.search synchronously during render mismatches SSR
+  // and trips a Solid hydration crash that breaks downstream input bindings.)
+  const [required, setRequired] = createSignal(false)
+  onMount(() => {
+    setRequired(new URLSearchParams(window.location.search).get("required") === "1")
+  })
   const mustChange = () => userQuery.data?.mustChangePassword === true
 
   return (
@@ -93,14 +106,7 @@ export default function ProfilePage() {
         <div class="bg-surface rounded-2xl shadow-sm border border-border overflow-hidden">
           <div class="px-8 pt-8 pb-6 border-b border-border">
             <h1 class="text-2xl font-bold text-foreground">Profile</h1>
-            <Show when={userQuery.data}>
-              {user => (
-                <p class="text-sm text-muted mt-1">
-                  {user().firstName} {user().lastName} · {user().email} ·{" "}
-                  <span class="capitalize">{user().role}</span>
-                </p>
-              )}
-            </Show>
+            <Show when={userQuery.data}>{user => <UserMeta user={user()} />}</Show>
           </div>
 
           <form onSubmit={handleSubmit} class="px-8 py-8 space-y-6">
@@ -165,20 +171,6 @@ export default function ProfilePage() {
                   : undefined
               }
             />
-
-            <Show when={error()}>
-              <div class="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
-                <Icons.alert class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-                <p class="text-sm text-red-700">{error()}</p>
-              </div>
-            </Show>
-
-            <Show when={success()}>
-              <div class="bg-green-50 border border-green-200 rounded-lg p-3 flex items-start gap-2">
-                <Icons.checkCircle class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-                <p class="text-sm text-green-700">Password changed. Logging you out…</p>
-              </div>
-            </Show>
 
             <Button type="submit" variant="primary" class="w-full" disabled={!canSubmit()}>
               {mutation.isPending ? "Changing…" : "Change Password"}

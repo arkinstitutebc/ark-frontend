@@ -1,5 +1,5 @@
 import { useCurrentUser } from "@ark/api-client"
-import { Icons } from "@ark/ui"
+import { Icons, PageLoading } from "@ark/ui"
 import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js"
 import { Footer, Navbar, PortalCards } from "@/components"
 
@@ -48,14 +48,7 @@ export default function DashboardPage() {
 
   return (
     <div class="min-h-screen bg-surface-muted flex flex-col">
-      <Show
-        when={!userQuery.isPending}
-        fallback={
-          <div class="flex-1 flex items-center justify-center">
-            <div class="animate-pulse text-sm text-muted">Loading…</div>
-          </div>
-        }
-      >
+      <Show when={!userQuery.isPending} fallback={<PageLoading />}>
         <Navbar userName={fullName()} userRole={role()} userEmail={email()} />
 
         <main class="flex-1 px-6 sm:px-8 lg:px-12 py-8 sm:py-10">

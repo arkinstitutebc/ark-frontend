@@ -7,7 +7,7 @@ import {
   useInviteUser,
   validateForm,
 } from "@ark/api-client"
-import { Button, Icons, Input, Modal } from "@ark/ui"
+import { Button, Icons, Input, Modal, PageLoading, toast } from "@ark/ui"
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { z } from "zod"
 import { Footer, Navbar } from "@/components"
@@ -41,7 +41,6 @@ export default function AdminUsersPage() {
   const [inviteOpen, setInviteOpen] = createSignal(false)
   const [form, setForm] = createSignal<InviteFormState>({ ...emptyInvite })
   const [errors, setErrors] = createSignal<Record<string, string>>({})
-  const [submitError, setSubmitError] = createSignal("")
   const [tempCredentials, setTempCredentials] = createSignal<UserWithTempPassword | null>(null)
 
   // Auth gate: must be admin.
@@ -69,7 +68,6 @@ export default function AdminUsersPage() {
   function resetForm() {
     setForm({ ...emptyInvite })
     setErrors({})
-    setSubmitError("")
   }
 
   function openInvite() {
@@ -83,7 +81,6 @@ export default function AdminUsersPage() {
 
   async function submitInvite(e: Event) {
     e.preventDefault()
-    setSubmitError("")
     const parsed = validateForm(inviteSchema, form())
     if (!parsed.success) {
       setErrors(parsed.errors)
@@ -94,21 +91,15 @@ export default function AdminUsersPage() {
       const result = await invite.mutateAsync(parsed.data)
       setInviteOpen(false)
       setTempCredentials(result)
+      toast.success(`Invited ${result.user.firstName} ${result.user.lastName}`)
     } catch (err) {
-      setSubmitError(err instanceof Error ? err.message : "Could not invite user")
+      toast.error(err instanceof Error ? err.message : "Could not invite user")
     }
   }
 
   return (
     <div class="min-h-screen bg-surface-muted flex flex-col">
-      <Show
-        when={!userQuery.isPending && isAdmin()}
-        fallback={
-          <div class="flex-1 flex items-center justify-center">
-            <div class="animate-pulse text-sm text-muted">Loading…</div>
-          </div>
-        }
-      >
+      <Show when={!userQuery.isPending && isAdmin()} fallback={<PageLoading />}>
         <Navbar
           userName={`${userQuery.data?.firstName ?? ""} ${userQuery.data?.lastName ?? ""}`.trim()}
           userRole={userQuery.data?.role}
@@ -257,13 +248,6 @@ export default function AdminUsersPage() {
               <option value="admin">Admin</option>
             </select>
           </div>
-
-          <Show when={submitError()}>
-            <div class="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
-              <Icons.alert class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-              <p class="text-sm text-red-700">{submitError()}</p>
-            </div>
-          </Show>
 
           <div class="flex items-center justify-end gap-2 pt-2">
             <Button type="button" variant="ghost" size="sm" onClick={closeInvite}>

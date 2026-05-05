@@ -1,8 +1,7 @@
 import { QueryProvider, useCurrentUser } from "@ark/api-client"
-import { AuthGate, ThemeProvider } from "@ark/ui"
+import { AppToaster, AuthGate, ThemeProvider } from "@ark/ui"
 import "@ark/design-system/globals.css"
 import type { JSX } from "solid-js"
-import { Toaster } from "solid-toast"
 import { Sidebar, SidebarProvider, TopBar } from "@/components/layout"
 
 function GatedShell(props: { children: JSX.Element }) {
@@ -26,14 +25,7 @@ export function Layout(props: { children: JSX.Element }) {
   return (
     <ThemeProvider>
       <QueryProvider>
-        <Toaster
-          position="top-right"
-          gutter={8}
-          toastOptions={{
-            duration: 3000,
-            style: { "font-size": "14px", "font-family": "Montserrat, sans-serif" },
-          }}
-        />
+        <AppToaster />
         <GatedShell>{props.children}</GatedShell>
       </QueryProvider>
     </ThemeProvider>
