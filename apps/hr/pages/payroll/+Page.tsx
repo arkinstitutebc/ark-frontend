@@ -69,7 +69,7 @@ export default function Page() {
 
             {periods.length === 0 && (
               <div class="text-center py-12 bg-surface rounded-lg border border-border">
-                <Icons.creditCard class="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                <Icons.creditCard class="w-12 h-12 mx-auto mb-3 text-muted" />
                 <p class="text-sm font-medium text-foreground">No payroll periods</p>
               </div>
             )}

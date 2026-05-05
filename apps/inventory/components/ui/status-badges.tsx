@@ -8,7 +8,7 @@ const prStatusColors: Record<PrStatus, { bg: string; text: string; dot: string }
 }
 
 const poStatusColors: Record<PoStatus, { bg: string; text: string; dot: string }> = {
-  draft: { bg: "bg-surface-muted", text: "text-foreground", dot: "bg-gray-400" },
+  draft: { bg: "bg-surface-muted", text: "text-foreground", dot: "bg-muted" },
   sent: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-400" },
   partial: { bg: "bg-yellow-50", text: "text-yellow-700", dot: "bg-yellow-400" },
   received: { bg: "bg-green-50", text: "text-green-700", dot: "bg-green-400" },

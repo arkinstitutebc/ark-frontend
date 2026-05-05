@@ -300,7 +300,7 @@ export default function ApprovalsPage() {
               const emptyState = getEmptyStateMessage(filter())
               return (
                 <div class="py-16 text-center">
-                  <emptyState.icon class="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <emptyState.icon class="w-12 h-12 mx-auto mb-3 text-muted" />
                   <p class="text-sm font-medium text-foreground">{emptyState.title}</p>
                   <p class="text-sm text-muted mt-1">{emptyState.message}</p>
                 </div>

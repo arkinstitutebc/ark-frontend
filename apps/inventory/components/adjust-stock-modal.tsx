@@ -272,7 +272,7 @@ export function AdjustStockModal(props: AdjustStockModalProps) {
               onClick={handleSubmit}
               disabled={!isValid()}
               class={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${
-                isValid() ? "bg-primary hover:bg-primary/90" : "bg-gray-300 cursor-not-allowed"
+                isValid() ? "bg-primary hover:bg-primary/90" : "bg-muted cursor-not-allowed"
               }`}
             >
               Update Stock

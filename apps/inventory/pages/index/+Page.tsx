@@ -163,7 +163,7 @@ export default function Page() {
                   </th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-200">
+              <tbody class="divide-y divide-border">
                 <For each={filteredStock()}>
                   {(item: StockItem) => (
                     <tr class="hover:bg-surface-muted transition-colors">
@@ -192,7 +192,7 @@ export default function Page() {
                           >
                             Adjust
                           </button>
-                          <span class="text-gray-300">|</span>
+                          <span class="text-muted">|</span>
                           <button
                             type="button"
                             onClick={() => openViewModal(item)}

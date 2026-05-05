@@ -80,7 +80,7 @@ export default function TransfersPage() {
               when={transfers.length > 0}
               fallback={
                 <div class="py-12 text-center">
-                  <Icons.arrowLeftRight class="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <Icons.arrowLeftRight class="w-12 h-12 mx-auto mb-3 text-muted" />
                   <p class="text-sm font-medium text-foreground">No transfers found</p>
                   <p class="text-sm text-muted mt-1">
                     Create a transfer to move funds between banks

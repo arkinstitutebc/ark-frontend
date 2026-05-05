@@ -35,7 +35,7 @@ export function Footer() {
   })
 
   return (
-    <footer class="bg-gradient-to-r from-gray-50 to-gray-100 border-t border-border mt-auto">
+    <footer class="bg-surface-muted border-t border-border mt-auto">
       <div class="px-6 sm:px-8 lg:px-12 py-6">
         <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div class="flex items-center gap-3">

@@ -118,7 +118,7 @@ export default function Page() {
               when={filteredTrainers().length > 0}
               fallback={
                 <div class="py-16 text-center">
-                  <Icons.users class="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <Icons.users class="w-12 h-12 mx-auto mb-3 text-muted" />
                   <p class="text-sm font-medium text-foreground">No trainers found</p>
                 </div>
               }

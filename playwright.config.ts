@@ -9,6 +9,10 @@ import { defineConfig, devices } from "@playwright/test"
  *   bun run test:e2e:ui         # Playwright UI mode
  *
  * Pre-req: backend must be reachable. Frontend is started by `webServer` below.
+ *
+ * Two browser projects so we test BOTH OS color-scheme matrixes — `chromium-light`
+ * and `chromium-dark`. Together with empty-localStorage tests, this exercises the
+ * actual cold-start state that the previous test config silently skipped.
  */
 export default defineConfig({
   testDir: "./tests/e2e",
@@ -24,8 +28,12 @@ export default defineConfig({
   },
   projects: [
     {
-      name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      name: "chromium-light",
+      use: { ...devices["Desktop Chrome"], colorScheme: "light" },
+    },
+    {
+      name: "chromium-dark",
+      use: { ...devices["Desktop Chrome"], colorScheme: "dark" },
     },
   ],
   webServer: {

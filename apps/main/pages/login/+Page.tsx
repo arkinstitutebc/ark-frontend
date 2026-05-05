@@ -49,7 +49,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100 px-4">
+    <div class="min-h-screen flex items-center justify-center bg-background px-4">
       <div class="w-full max-w-md animate-fade-in">
         {/* Card */}
         <div class="bg-surface rounded-2xl shadow-xl border border-border overflow-hidden">

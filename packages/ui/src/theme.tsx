@@ -23,10 +23,10 @@ interface ThemeContextValue {
 const ThemeContext = createContext<ThemeContextValue>()
 
 function readStoredPreference(): ThemePreference {
-  if (typeof window === "undefined") return "auto"
+  if (typeof window === "undefined") return "light"
   const v = window.localStorage.getItem(STORAGE_KEY)
   if (v === "light" || v === "dark" || v === "auto") return v
-  return "auto"
+  return "light"
 }
 
 function systemPrefersDark(): boolean {
@@ -85,8 +85,8 @@ export function useTheme(): ThemeContextValue {
 }
 
 /**
- * Inline script that sets `data-theme` BEFORE first paint to avoid a flash
- * of light when the user's preference is dark.
+ * Inline script that sets `data-theme` BEFORE first paint.
+ * Default is light. Dark/auto are explicit opt-ins via the toggle.
  *
  * Usage: render in <head> via Vike's +Head.tsx:
  *   <script innerHTML={NO_FOUC_SCRIPT} />
@@ -95,9 +95,12 @@ export const NO_FOUC_SCRIPT = `
 (function(){
   try {
     var p = localStorage.getItem('ark-theme');
-    var sysDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
-    var t = (p === 'light' || p === 'dark') ? p : (sysDark ? 'dark' : 'light');
+    var t = 'light';
+    if (p === 'dark') t = 'dark';
+    else if (p === 'auto') t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
     document.documentElement.setAttribute('data-theme', t);
-  } catch (e) {}
+  } catch (e) {
+    document.documentElement.setAttribute('data-theme', 'light');
+  }
 })();
 `.trim()

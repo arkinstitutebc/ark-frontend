@@ -129,7 +129,7 @@ export default function MovementsPage() {
                   </th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-gray-200">
+              <tbody class="divide-y divide-border">
                 <For each={filteredMovements()}>
                   {(m: StockMovement) => (
                     <tr class="hover:bg-surface-muted transition-colors">

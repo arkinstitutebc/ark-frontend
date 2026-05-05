@@ -192,7 +192,7 @@ export default function ReceivingPage() {
                 >
                   <Icons.arrowLeft class="w-4 h-4" /> All Orders
                 </button>
-                <span class="text-gray-300">/</span>
+                <span class="text-muted">/</span>
                 <span class="text-foreground font-medium">{po().poCode}</span>
               </nav>
 
@@ -306,7 +306,7 @@ export default function ReceivingPage() {
                     type="button"
                     onClick={handleCompleteReceipt}
                     disabled={!hasReceivedItems() || receiveMutation.isPending}
-                    class={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${hasReceivedItems() && !receiveMutation.isPending ? "bg-primary hover:bg-primary/90" : "bg-gray-300 cursor-not-allowed"}`}
+                    class={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${hasReceivedItems() && !receiveMutation.isPending ? "bg-primary hover:bg-primary/90" : "bg-muted cursor-not-allowed"}`}
                   >
                     {receiveMutation.isPending
                       ? "Processing..."

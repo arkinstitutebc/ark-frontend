@@ -120,7 +120,7 @@ export default function Page() {
               when={filteredRequests().length > 0}
               fallback={
                 <div class="py-16 text-center">
-                  <Icons.fileText class="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <Icons.fileText class="w-12 h-12 mx-auto mb-3 text-muted" />
                   <p class="text-sm font-medium text-foreground">No purchase requests found</p>
                 </div>
               }

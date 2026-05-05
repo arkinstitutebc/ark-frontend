@@ -83,7 +83,7 @@ export default function PoDetailPage() {
                 <div class="px-6 py-4 border-b border-border">
                   <h2 class="text-lg font-semibold text-foreground">Order Details</h2>
                 </div>
-                <div class="divide-y divide-gray-100">
+                <div class="divide-y divide-border">
                   <div class="flex py-4 px-6">
                     <span class="w-40 text-sm text-muted">Batch</span>
                     <span class="text-sm text-foreground">{p.batchName}</span>
@@ -162,7 +162,7 @@ export default function PoDetailPage() {
                 <div class="px-6 py-4 border-b border-border">
                   <h2 class="text-lg font-semibold text-foreground">Delivery</h2>
                 </div>
-                <div class="divide-y divide-gray-100">
+                <div class="divide-y divide-border">
                   <div class="flex py-4 px-6">
                     <span class="w-40 text-sm text-muted">Status</span>
                     <PoStatusBadge status={p.status} />

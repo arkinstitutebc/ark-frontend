@@ -146,7 +146,7 @@ export default function BatchDetailPage() {
                   <div class="px-4 py-3 border-b border-border">
                     <h2 class="text-sm font-semibold text-foreground">Details</h2>
                   </div>
-                  <div class="divide-y divide-gray-100">
+                  <div class="divide-y divide-border">
                     <div class="flex py-4 px-6">
                       <span class="w-32 text-sm text-muted">Sponsor</span>
                       <span class="text-sm text-foreground">{b().senator}</span>

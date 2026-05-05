@@ -63,7 +63,7 @@ export default function ProfilePage() {
   const mustChange = () => userQuery.data?.mustChangePassword === true
 
   return (
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div class="min-h-screen bg-background">
       <div class="max-w-2xl mx-auto px-4 py-12">
         <Show when={!required() && !mustChange()}>
           <div class="mb-6">

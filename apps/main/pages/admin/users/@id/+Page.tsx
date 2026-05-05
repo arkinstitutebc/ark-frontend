@@ -170,7 +170,7 @@ export default function AdminUserDetailPage() {
                           when={user().isActive}
                           fallback={
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs bg-surface-muted text-muted">
-                              <span class="w-1.5 h-1.5 rounded-full bg-gray-400" /> Inactive
+                              <span class="w-1.5 h-1.5 rounded-full bg-muted" /> Inactive
                             </span>
                           }
                         >

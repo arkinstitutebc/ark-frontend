@@ -123,7 +123,7 @@ export default function Page() {
               when={filteredRecords().length > 0}
               fallback={
                 <div class="py-16 text-center">
-                  <Icons.clock class="w-12 h-12 mx-auto mb-3 text-gray-300" />
+                  <Icons.clock class="w-12 h-12 mx-auto mb-3 text-muted" />
                   <p class="text-sm font-medium text-foreground">No attendance records</p>
                   <p class="text-sm text-muted mt-1">Try adjusting your filters.</p>
                 </div>
