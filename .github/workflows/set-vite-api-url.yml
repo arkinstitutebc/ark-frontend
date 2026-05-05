@@ -33,8 +33,28 @@ jobs:
         run: |
           echo "https://api.arkinstitutebc.com" | vercel env add VITE_API_URL production --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }}
 
+      - name: Wait for Vercel env API to propagate (eventual consistency)
+        run: |
+          for i in 1 2 3 4 5 6 7 8 9 10; do
+            sleep 5
+            if vercel env ls production --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }} | grep -q VITE_API_URL; then
+              echo "VITE_API_URL visible in env list (attempt $i)"
+              break
+            fi
+            echo "not visible yet (attempt $i)"
+          done
+
       - name: Re-pull so the new env var lands in .vercel/.env.production.local
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }}
+
+      - name: Confirm VITE_API_URL ended up in the pulled .env file
+        run: |
+          if ! grep -q "VITE_API_URL=\"https://api.arkinstitutebc.com\"" apps/${{ matrix.app }}/.vercel/.env.production.local; then
+            echo "FAIL: VITE_API_URL not in .vercel/.env.production.local — Vercel env propagation hasn't finished"
+            cat apps/${{ matrix.app }}/.vercel/.env.production.local | grep -i vite || true
+            exit 1
+          fi
+          echo "OK: VITE_API_URL is in the pulled env"
 
       - name: Build with the new env baked in
         run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }}
