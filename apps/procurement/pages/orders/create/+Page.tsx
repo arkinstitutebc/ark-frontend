@@ -1,12 +1,8 @@
-import { api } from "@data/api"
 import { useCreatePo, useRequests } from "@data/hooks"
-import { queryKeys } from "@data/query-keys"
 import { createPoSchema } from "@data/schemas"
 import type { PurchaseRequest } from "@data/types"
 import { validateForm } from "@data/validate"
-import { createQuery } from "@tanstack/solid-query"
 import { createEffect, createMemo, createSignal, For, onMount, Show } from "solid-js"
-import { QueryBoundary } from "@/components/ui"
 import { Icons } from "@/components/ui/icons"
 
 function formatCurrency(amount: number) {
@@ -43,7 +39,7 @@ export default function CreatePoPage() {
   const totalAmount = createMemo(() => {
     const pr = selectedPr()
     if (!pr) return 0
-    return (pr.items as Array<any>).reduce((sum: number, item: any) => sum + (item.total || 0), 0)
+    return pr.items.reduce((sum, item) => sum + (item.total || 0), 0)
   })
 
   // Set default delivery date (2 weeks from now) when PR is selected
@@ -80,7 +76,7 @@ export default function CreatePoPage() {
         batchId: pr.batchId,
         batchName: pr.batchName,
         supplier: supplier(),
-        items: pr.items as any,
+        items: pr.items,
         totalAmount: String(totalAmount()),
         estimatedDelivery: estimatedDelivery() || undefined,
         notes: notes() || undefined,
@@ -236,7 +232,7 @@ export default function CreatePoPage() {
                         </tr>
                       </thead>
                       <tbody>
-                        <For each={pr().items as Array<any>}>
+                        <For each={pr().items}>
                           {item => (
                             <tr class="border-t border-gray-100">
                               <td class="py-4 px-6 text-sm text-gray-900">{item.name}</td>
@@ -279,7 +275,7 @@ export default function CreatePoPage() {
                   <div class="space-y-3">
                     <div class="flex justify-between text-sm">
                       <span class="text-gray-600">PR Reference</span>
-                      <span class="font-mono text-gray-900">{(pr() as any).prCode}</span>
+                      <span class="font-mono text-gray-900">{pr().prCode}</span>
                     </div>
                     <div class="flex justify-between text-sm">
                       <span class="text-gray-600">Batch</span>

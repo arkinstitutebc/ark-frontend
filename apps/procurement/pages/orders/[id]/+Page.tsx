@@ -42,7 +42,7 @@ export default function PoDetailPage() {
               <div class="flex items-start justify-between mb-8">
                 <div>
                   <div class="flex items-center gap-3 mb-2">
-                    <h1 class="text-2xl font-semibold text-gray-900">{(p as any).poCode}</h1>
+                    <h1 class="text-2xl font-semibold text-gray-900">{p.poCode}</h1>
                     <PoStatusBadge status={p.status} />
                   </div>
                   <p class="text-sm text-gray-600">{p.batchName}</p>
@@ -100,9 +100,7 @@ export default function PoDetailPage() {
               {/* Items Table */}
               <div class="bg-white rounded-lg border border-gray-200 mb-8">
                 <div class="px-6 py-4 border-b border-gray-100">
-                  <h2 class="text-lg font-semibold text-gray-900">
-                    Items ({(p.items as Array<any>).length})
-                  </h2>
+                  <h2 class="text-lg font-semibold text-gray-900">Items ({p.items.length})</h2>
                 </div>
                 <div class="overflow-x-auto">
                   <table class="w-full">
@@ -126,7 +124,7 @@ export default function PoDetailPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      <For each={p.items as Array<any>}>
+                      <For each={p.items}>
                         {item => (
                           <tr class="border-t border-gray-100">
                             <td class="py-4 px-6 text-sm text-gray-900">{item.name}</td>

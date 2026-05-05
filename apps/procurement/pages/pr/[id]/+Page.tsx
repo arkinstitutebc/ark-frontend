@@ -100,9 +100,7 @@ export default function PrDetailPage() {
 
               <div class="bg-white rounded-lg border border-gray-200 mb-8">
                 <div class="px-6 py-4 border-b border-gray-100">
-                  <h2 class="text-lg font-semibold text-gray-900">
-                    Items ({(p.items as Array<any>).length})
-                  </h2>
+                  <h2 class="text-lg font-semibold text-gray-900">Items ({p.items.length})</h2>
                 </div>
                 <div class="overflow-x-auto">
                   <table class="w-full">
@@ -126,7 +124,7 @@ export default function PrDetailPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      <For each={p.items as Array<any>}>
+                      <For each={p.items}>
                         {item => (
                           <tr class="border-t border-gray-100">
                             <td class="py-4 px-6 text-sm text-gray-900">{item.name}</td>
@@ -176,10 +174,12 @@ export default function PrDetailPage() {
                       </div>
                     </Show>
                     <Show when={p.approvedAt}>
-                      <div class="flex py-4 px-6">
-                        <span class="w-40 text-sm text-gray-500">Date</span>
-                        <span class="text-sm text-gray-900">{formatDate(p.approvedAt!)}</span>
-                      </div>
+                      {approvedAt => (
+                        <div class="flex py-4 px-6">
+                          <span class="w-40 text-sm text-gray-500">Date</span>
+                          <span class="text-sm text-gray-900">{formatDate(approvedAt())}</span>
+                        </div>
+                      )}
                     </Show>
                     <Show when={p.approvalNotes}>
                       <div class="flex py-4 px-6">

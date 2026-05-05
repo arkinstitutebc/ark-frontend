@@ -154,7 +154,7 @@ export default function ReceivingPage() {
                       <p class="text-lg font-bold text-gray-900">
                         {formatCurrency(Number(po.totalAmount))}
                       </p>
-                      <p class="text-xs text-gray-500">{(po.items as Array<any>).length} items</p>
+                      <p class="text-xs text-gray-500">{po.items.length} items</p>
                     </div>
                   </div>
                 </button>

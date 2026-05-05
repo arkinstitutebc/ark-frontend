@@ -51,7 +51,10 @@ export default function DisbursementsPage() {
         <div class="bg-white rounded-lg border border-gray-200 p-4">
           <p class="text-sm text-gray-500 mb-1">Total Expenses</p>
           <p class="text-2xl text-gray-900 tabular-nums">
-            {totalExpenses() !== null ? formatCurrency(totalExpenses()!) : "-"}
+            {(() => {
+              const v = totalExpenses()
+              return v !== null ? formatCurrency(v) : "-"
+            })()}
           </p>
         </div>
         <div class="bg-white rounded-lg border border-gray-200 p-4">

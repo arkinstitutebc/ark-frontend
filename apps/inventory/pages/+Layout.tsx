@@ -1,4 +1,4 @@
-import { performLogout, QueryProvider, useCurrentUser } from "@ark/api-client"
+import { QueryProvider, useCurrentUser } from "@ark/api-client"
 import { AuthGate } from "@ark/ui"
 import "@ark/design-system/globals.css"
 import type { JSX } from "solid-js"

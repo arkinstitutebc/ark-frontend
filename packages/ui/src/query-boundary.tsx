@@ -9,15 +9,20 @@ interface QueryBoundaryProps<T> {
 }
 
 export function QueryBoundary<T>(props: QueryBoundaryProps<T>) {
+  // Inside <Match when={isError}>, error is non-null. Same for data inside isSuccess.
+  // We narrow via local helpers and cast once each — TS can't track this through `props`.
+  const error = () => props.query.error as Error
+  const data = () => props.query.data as T
+
   return (
     <Switch>
       <Match when={props.query.isPending}>{props.loadingFallback ?? <DefaultSkeleton />}</Match>
       <Match when={props.query.isError}>
-        {props.errorFallback?.(props.query.error!, () => props.query.refetch()) ?? (
-          <DefaultError error={props.query.error!} retry={() => props.query.refetch()} />
+        {props.errorFallback?.(error(), () => props.query.refetch()) ?? (
+          <DefaultError error={error()} retry={() => props.query.refetch()} />
         )}
       </Match>
-      <Match when={props.query.isSuccess}>{props.children(props.query.data!)}</Match>
+      <Match when={props.query.isSuccess}>{props.children(data())}</Match>
     </Switch>
   )
 }

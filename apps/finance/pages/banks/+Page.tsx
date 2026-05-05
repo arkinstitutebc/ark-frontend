@@ -96,9 +96,10 @@ export default function Page() {
                         </div>
                       </div>
                       <p class="text-xl font-semibold text-gray-900 tabular-nums">
-                        {getBalanceFor(bank.id) !== null
-                          ? formatCurrency(getBalanceFor(bank.id)!)
-                          : "-"}
+                        {(() => {
+                          const balance = getBalanceFor(bank.id)
+                          return balance !== null ? formatCurrency(balance) : "-"
+                        })()}
                       </p>
                     </div>
                     <p class="text-xs text-gray-500">{bank.accountNumber}</p>

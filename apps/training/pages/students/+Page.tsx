@@ -23,7 +23,7 @@ export default function StudentsPage() {
     if (searchQuery().trim()) {
       const query = searchQuery().toLowerCase()
       result = result.filter(
-        (s: any) =>
+        s =>
           s.firstName.toLowerCase().includes(query) ||
           s.lastName.toLowerCase().includes(query) ||
           (s.studentId || "").toLowerCase().includes(query)
@@ -33,12 +33,12 @@ export default function StudentsPage() {
   })
 
   const getBatchCode = (batchId: string) => {
-    const batch = (batchesQuery.data || []).find((b: any) => b.id === batchId)
+    const batch = (batchesQuery.data || []).find(b => b.id === batchId)
     return batch?.batchCode || "Unknown"
   }
 
   const getTrainingLevel = (batchId: string) => {
-    const batch = (batchesQuery.data || []).find((b: any) => b.id === batchId)
+    const batch = (batchesQuery.data || []).find(b => b.id === batchId)
     return batch?.trainingLevel || ""
   }
 
@@ -99,7 +99,7 @@ export default function StudentsPage() {
           >
             <option value="all">All Batches</option>
             <For each={batchesQuery.data || []}>
-              {(batch: any) => <option value={batch.id}>{batch.batchCode}</option>}
+              {batch => <option value={batch.id}>{batch.batchCode}</option>}
             </For>
           </select>
         </div>
@@ -149,7 +149,7 @@ export default function StudentsPage() {
                   }
                 >
                   <For each={filteredStudents()}>
-                    {(student: any) => (
+                    {student => (
                       <tr
                         class="border-t border-gray-100 hover:bg-primary/5 transition-colors cursor-pointer"
                         onClick={() => setViewingStudentId(student.id)}

@@ -55,7 +55,7 @@ function ApprovalCard(props: {
   processing: boolean
 }) {
   const itemsSummary = () => {
-    const items = props.pr.items as Array<any>
+    const items = props.pr.items
     const count = items.length
     const first = items[0]
     if (count === 1) {

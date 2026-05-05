@@ -217,7 +217,8 @@ export default function Page() {
         item={selectedItem()}
         onAdjust={() => {
           setViewModalOpen(false)
-          if (selectedItem()) openAdjustModal(selectedItem()!)
+          const item = selectedItem()
+          if (item) openAdjustModal(item)
         }}
       />
 

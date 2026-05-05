@@ -75,7 +75,10 @@ export default function Page() {
         <div class="bg-white rounded-lg border border-gray-200 p-4">
           <p class="text-sm text-gray-500 mb-1">Total Balance</p>
           <p class="text-2xl text-gray-900 tabular-nums tracking-tight">
-            {totalBalance() !== null ? formatCurrency(totalBalance()!) : "-"}
+            {(() => {
+              const v = totalBalance()
+              return v !== null ? formatCurrency(v) : "-"
+            })()}
           </p>
           <p class="text-xs text-gray-400 mt-1">Combined banks</p>
         </div>
@@ -124,7 +127,10 @@ export default function Page() {
             <div class="pt-3 border-t border-gray-100 flex items-center justify-between">
               <p class="text-sm text-gray-600">Total</p>
               <p class="text-sm font-semibold text-gray-900 tabular-nums">
-                {totalBalance() !== null ? formatCurrency(totalBalance()!) : "-"}
+                {(() => {
+                  const v = totalBalance()
+                  return v !== null ? formatCurrency(v) : "-"
+                })()}
               </p>
             </div>
           </div>
