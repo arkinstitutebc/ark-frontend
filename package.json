@@ -1,0 +1,24 @@
+{
+  "name": "ark-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "lint": "biome check .",
+    "format": "biome format --write .",
+    "typecheck": "bun run --filter '*' typecheck",
+    "build": "bun run --filter '*' build",
+    "dev:main": "cd apps/main && bun run dev",
+    "dev:training": "cd apps/training && bun run dev",
+    "dev:procurement": "cd apps/procurement && bun run dev",
+    "dev:inventory": "cd apps/inventory && bun run dev",
+    "dev:finance": "cd apps/finance && bun run dev",
+    "dev:billing": "cd apps/billing && bun run dev",
+    "dev:hr": "cd apps/hr && bun run dev"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.13",
+    "typescript": "^5.9.3"
+  }
+}
