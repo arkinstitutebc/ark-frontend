@@ -1,0 +1,173 @@
+import { performLogout, useChangePassword, useCurrentUser } from "@ark/api-client"
+import { Button, Icons, Input } from "@ark/ui"
+import { createMemo, createSignal, Show } from "solid-js"
+
+interface PasswordRule {
+  label: string
+  test: (v: string) => boolean
+}
+
+const RULES: PasswordRule[] = [
+  { label: "At least 12 characters", test: v => v.length >= 12 },
+  { label: "Contains an uppercase letter", test: v => /[A-Z]/.test(v) },
+  { label: "Contains a lowercase letter", test: v => /[a-z]/.test(v) },
+  { label: "Contains a digit", test: v => /\d/.test(v) },
+]
+
+export default function ProfilePage() {
+  const userQuery = useCurrentUser()
+  const mutation = useChangePassword()
+
+  const [oldPassword, setOldPassword] = createSignal("")
+  const [newPassword, setNewPassword] = createSignal("")
+  const [confirmPassword, setConfirmPassword] = createSignal("")
+  const [showOld, setShowOld] = createSignal(false)
+  const [showNew, setShowNew] = createSignal(false)
+  const [error, setError] = createSignal("")
+  const [success, setSuccess] = createSignal(false)
+
+  const passingRules = createMemo(() => RULES.filter(r => r.test(newPassword())))
+  const passwordsMatch = createMemo(
+    () => newPassword().length > 0 && newPassword() === confirmPassword()
+  )
+  const canSubmit = createMemo(
+    () =>
+      oldPassword().length > 0 &&
+      passingRules().length === RULES.length &&
+      passwordsMatch() &&
+      !mutation.isPending
+  )
+
+  async function handleSubmit(e: Event) {
+    e.preventDefault()
+    setError("")
+    if (!canSubmit()) return
+
+    try {
+      await mutation.mutateAsync({
+        oldPassword: oldPassword(),
+        newPassword: newPassword(),
+      })
+      setSuccess(true)
+      // Backend cleared the cookie. Redirect to /login fresh.
+      setTimeout(() => performLogout(), 1500)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not change password")
+    }
+  }
+
+  return (
+    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div class="max-w-2xl mx-auto px-4 py-12">
+        <div class="mb-6">
+          <a
+            href="/"
+            class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-primary"
+          >
+            <Icons.arrowLeft class="w-4 h-4" /> Dashboard
+          </a>
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
+          <div class="px-8 pt-8 pb-6 border-b border-gray-100">
+            <h1 class="text-2xl font-bold text-gray-900">Profile</h1>
+            <Show when={userQuery.data}>
+              {user => (
+                <p class="text-sm text-gray-500 mt-1">
+                  {user().firstName} {user().lastName} · {user().email} ·{" "}
+                  <span class="capitalize">{user().role}</span>
+                </p>
+              )}
+            </Show>
+          </div>
+
+          <form onSubmit={handleSubmit} class="px-8 py-8 space-y-6">
+            <h2 class="text-lg font-semibold text-gray-900">Change Password</h2>
+
+            <Input
+              type={showOld() ? "text" : "password"}
+              label="Current Password"
+              placeholder="Your current password"
+              value={oldPassword()}
+              onInput={e => setOldPassword(e.currentTarget.value)}
+              leftIcon={<Icons.lock class="w-5 h-5" />}
+              showPasswordToggle
+              showPassword={showOld()}
+              onTogglePassword={() => setShowOld(!showOld())}
+              eyeIcon={<Icons.eye class="w-5 h-5" />}
+              eyeOffIcon={<Icons.eyeOff class="w-5 h-5" />}
+            />
+
+            <Input
+              type={showNew() ? "text" : "password"}
+              label="New Password"
+              placeholder="At least 12 characters"
+              value={newPassword()}
+              onInput={e => setNewPassword(e.currentTarget.value)}
+              leftIcon={<Icons.lock class="w-5 h-5" />}
+              showPasswordToggle
+              showPassword={showNew()}
+              onTogglePassword={() => setShowNew(!showNew())}
+              eyeIcon={<Icons.eye class="w-5 h-5" />}
+              eyeOffIcon={<Icons.eyeOff class="w-5 h-5" />}
+            />
+
+            <Show when={newPassword().length > 0}>
+              <ul class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                {RULES.map(rule => {
+                  const ok = rule.test(newPassword())
+                  return (
+                    <li
+                      class={`flex items-center gap-2 ${ok ? "text-green-700" : "text-gray-500"}`}
+                    >
+                      <Show when={ok} fallback={<Icons.minus class="w-3.5 h-3.5 text-gray-400" />}>
+                        <Icons.check class="w-3.5 h-3.5 text-green-600" />
+                      </Show>
+                      {rule.label}
+                    </li>
+                  )
+                })}
+              </ul>
+            </Show>
+
+            <Input
+              type="password"
+              label="Confirm New Password"
+              placeholder="Type the new password again"
+              value={confirmPassword()}
+              onInput={e => setConfirmPassword(e.currentTarget.value)}
+              leftIcon={<Icons.lock class="w-5 h-5" />}
+              error={
+                confirmPassword().length > 0 && !passwordsMatch()
+                  ? "Passwords don't match"
+                  : undefined
+              }
+            />
+
+            <Show when={error()}>
+              <div class="bg-red-50 border border-red-200 rounded-lg p-3 flex items-start gap-2">
+                <Icons.alert class="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                <p class="text-sm text-red-700">{error()}</p>
+              </div>
+            </Show>
+
+            <Show when={success()}>
+              <div class="bg-green-50 border border-green-200 rounded-lg p-3 flex items-start gap-2">
+                <Icons.checkCircle class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                <p class="text-sm text-green-700">Password changed. Logging you out…</p>
+              </div>
+            </Show>
+
+            <Button type="submit" variant="primary" class="w-full" disabled={!canSubmit()}>
+              {mutation.isPending ? "Changing…" : "Change Password"}
+            </Button>
+
+            <p class="text-xs text-gray-500 text-center">
+              You'll be logged out after a successful password change.
+            </p>
+          </form>
+        </div>
+      </div>
+    </div>
+  )
+}
