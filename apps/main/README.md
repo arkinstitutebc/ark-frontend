@@ -33,3 +33,5 @@ npm run preview
 Copy `.env.example` to `.env` and configure:
 - API endpoints
 - Auth configuration
+
+<!-- monorepo CI test -->

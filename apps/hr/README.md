@@ -39,3 +39,5 @@ npm run preview
 - Hours calculation
 - Payroll export
 - Employee records
+
+<!-- monorepo CI test -->

@@ -66,3 +66,5 @@ Located in `/ark-portals/data/`:
 - ✅ Reference linking (PO, batch, AR)
 - ✅ CSV export for accounting
 - ✅ High-value approval notes (≥₱50,000)
+
+<!-- monorepo CI test -->

@@ -114,3 +114,5 @@ inventory-portal/
 - [ ] Delete stock items
 - [ ] Export to Excel
 - [ ] Backend API integration
+
+<!-- monorepo CI test -->

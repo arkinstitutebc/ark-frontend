@@ -47,3 +47,5 @@ npm run preview
 - ✅ Purchase Order (PO) generation
 - ✅ Budget tracking per batch
 - ✅ Category-based organization
+
+<!-- monorepo CI test -->

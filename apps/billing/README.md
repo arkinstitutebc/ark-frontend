@@ -39,3 +39,5 @@ npm run preview
 - Payment recording
 - Batch completion % calculation
 - PDF generation for billing
+
+<!-- monorepo CI test -->
