@@ -57,8 +57,6 @@ jobs:
       fail-fast: false
       matrix:
         app: ${{ fromJSON(needs.detect.outputs.apps) }}
-    env:
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
     steps:
       - uses: actions/checkout@v5
         with:
