@@ -56,17 +56,39 @@ export default function ProfilePage() {
     }
   }
 
+  const required = () => {
+    if (typeof window === "undefined") return false
+    return new URLSearchParams(window.location.search).get("required") === "1"
+  }
+  const mustChange = () => userQuery.data?.mustChangePassword === true
+
   return (
     <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div class="max-w-2xl mx-auto px-4 py-12">
-        <div class="mb-6">
-          <a
-            href="/"
-            class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-primary"
-          >
-            <Icons.arrowLeft class="w-4 h-4" /> Dashboard
-          </a>
-        </div>
+        <Show when={!required() && !mustChange()}>
+          <div class="mb-6">
+            <a
+              href="/"
+              class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-primary"
+            >
+              <Icons.arrowLeft class="w-4 h-4" /> Dashboard
+            </a>
+          </div>
+        </Show>
+
+        <Show when={required() || mustChange()}>
+          <div class="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4 flex items-start gap-3">
+            <Icons.alert class="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+            <div class="flex-1">
+              <p class="text-sm font-medium text-amber-900">
+                You must change your password before using the system.
+              </p>
+              <p class="text-xs text-amber-700 mt-1">
+                You won't be able to access any portal until you set a new password.
+              </p>
+            </div>
+          </div>
+        </Show>
 
         <div class="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
           <div class="px-8 pt-8 pb-6 border-b border-gray-100">

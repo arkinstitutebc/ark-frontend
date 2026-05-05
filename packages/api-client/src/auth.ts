@@ -7,6 +7,7 @@ export interface CurrentUser {
   role: string
   firstName: string
   lastName: string
+  mustChangePassword?: boolean
 }
 
 const MAIN_PORTAL_URL =

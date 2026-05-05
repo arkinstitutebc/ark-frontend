@@ -8,3 +8,4 @@ export {
 } from "./auth"
 export { queryClient } from "./query-client"
 export { QueryProvider } from "./query-provider"
+export { validateForm } from "./validate"

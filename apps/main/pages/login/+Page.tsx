@@ -27,7 +27,20 @@ export default function LoginPage() {
         throw new Error(body.error || "Invalid credentials")
       }
 
-      window.location.href = "/"
+      const user = await res.json().catch(() => ({}))
+
+      // Honor ?return= query (e.g., from sub-portal AuthGate redirect)
+      // unless the user must change their password — that takes priority
+      const params = new URLSearchParams(window.location.search)
+      const returnTo = params.get("return")
+
+      if (user.mustChangePassword) {
+        window.location.href = "/profile?required=1"
+      } else if (returnTo) {
+        window.location.href = returnTo
+      } else {
+        window.location.href = "/"
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed")
     } finally {
