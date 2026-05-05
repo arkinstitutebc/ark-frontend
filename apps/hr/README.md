@@ -1,39 +1,25 @@
-# HR & Payroll Portal
+# apps/hr
 
-Trainer profiles, attendance, semi-monthly payroll.
-
-**Production**: https://hr.arkinstitutebc.com
-**Part of**: [`ark-frontend`](../../README.md) monorepo
+→ https://hr.arkinstitutebc.com
 
 ## Pages
 
-| Route | Purpose |
-|---|---|
-| `/` | Trainer roster |
-| `/attendance` | Attendance sheet (biometric or manual) |
-| `/payroll` | Payroll periods |
-| `/payroll/[period]` | Period detail with entries + export |
+`/` trainers, `/attendance`, `/payroll`, `/payroll/[period]`
 
-## Develop
+## Dev
 
-From the monorepo root:
-```bash
-bun install                # one-time
-bun run dev:hr           # this app on its dedicated port
-```
-
-You also need the backend running — see [`ark-services`](https://github.com/arkinstitutebc/ark-services).
+From monorepo root: `bun install && bun run dev:hr`. Backend must also be running ([`ark-services`](https://github.com/arkinstitutebc/ark-services)).
 
 ## What's app-specific vs shared
 
-- **App-specific**: `pages/` (vike routes), `components/modals/`, `components/layout/sidebar.tsx` (just the navItems), `data/hooks/` (per-domain TanStack Query hooks)
-- **Shared from `@ark/ui`**: Sidebar shell, TopBar, Modal, Input, Button, Card, Icons, AuthGate, QueryBoundary
-- **Shared from `@ark/api-client`**: `api()`, `useCurrentUser()`, `useLogin()`, `performLogout()`, query client
-- **Shared from `@ark/data-types`**: type definitions
-- **Shared from `@ark/design-system`**: `globals.css`, Tailwind theme
+- **Local**: `pages/`, `components/modals/`, `components/layout/sidebar.tsx` (just `navItems`), `data/hooks/` (per-domain)
+- **Shared (`@ark/ui`)**: Sidebar shell, TopBar, AuthGate, Modal, Input, Button, Card, Icons, QueryBoundary
+- **Shared (`@ark/api-client`)**: `api()`, auth hooks, query client
+- **Shared (`@ark/data-types`)**: types
+- **Shared (`@ark/design-system`)**: globals.css
 
-To fix something shared (Sidebar styling, Input behavior, etc.) → edit `packages/<name>/` once → all apps inherit.
+To fix something shared → edit `packages/<name>/` once, all apps inherit.
 
 ## Deploy
 
-`git push` to monorepo main. CI matrix detects which apps changed and only deploys those.
+`git push` to monorepo main. CI deploys only changed apps.

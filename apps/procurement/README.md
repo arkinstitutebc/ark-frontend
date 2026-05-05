@@ -1,42 +1,25 @@
-# Procurement Portal
+# apps/procurement
 
-Purchase Request → Purchase Order workflow with director approvals.
-
-**Production**: https://procurement.arkinstitutebc.com
-**Part of**: [`ark-frontend`](../../README.md) monorepo
+→ https://procurement.arkinstitutebc.com
 
 ## Pages
 
-| Route | Purpose |
-|---|---|
-| `/` | PR list |
-| `/pr/create` | Create new PR |
-| `/pr/[id]` | PR detail + document |
-| `/orders` | PO list |
-| `/orders/create` | Create PO from approved PR |
-| `/orders/[id]` | PO detail + document |
-| `/approvals` | Director's PR approval queue |
+`/` PR list, `/pr/[id]`, `/pr/create`, `/orders`, `/orders/[id]`, `/orders/create`, `/approvals`
 
-## Develop
+## Dev
 
-From the monorepo root:
-```bash
-bun install                # one-time
-bun run dev:procurement           # this app on its dedicated port
-```
-
-You also need the backend running — see [`ark-services`](https://github.com/arkinstitutebc/ark-services).
+From monorepo root: `bun install && bun run dev:procurement`. Backend must also be running ([`ark-services`](https://github.com/arkinstitutebc/ark-services)).
 
 ## What's app-specific vs shared
 
-- **App-specific**: `pages/` (vike routes), `components/modals/`, `components/layout/sidebar.tsx` (just the navItems), `data/hooks/` (per-domain TanStack Query hooks)
-- **Shared from `@ark/ui`**: Sidebar shell, TopBar, Modal, Input, Button, Card, Icons, AuthGate, QueryBoundary
-- **Shared from `@ark/api-client`**: `api()`, `useCurrentUser()`, `useLogin()`, `performLogout()`, query client
-- **Shared from `@ark/data-types`**: type definitions
-- **Shared from `@ark/design-system`**: `globals.css`, Tailwind theme
+- **Local**: `pages/`, `components/modals/`, `components/layout/sidebar.tsx` (just `navItems`), `data/hooks/` (per-domain)
+- **Shared (`@ark/ui`)**: Sidebar shell, TopBar, AuthGate, Modal, Input, Button, Card, Icons, QueryBoundary
+- **Shared (`@ark/api-client`)**: `api()`, auth hooks, query client
+- **Shared (`@ark/data-types`)**: types
+- **Shared (`@ark/design-system`)**: globals.css
 
-To fix something shared (Sidebar styling, Input behavior, etc.) → edit `packages/<name>/` once → all apps inherit.
+To fix something shared → edit `packages/<name>/` once, all apps inherit.
 
 ## Deploy
 
-`git push` to monorepo main. CI matrix detects which apps changed and only deploys those.
+`git push` to monorepo main. CI deploys only changed apps.

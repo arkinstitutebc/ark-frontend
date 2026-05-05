@@ -1,53 +1,34 @@
 # @ark/ui
 
-Shared SolidJS UI components used by all 7 portals.
+Shared SolidJS components used by all 7 portals.
 
-## Components
+## Exports
 
-| Export | What | Notes |
-|---|---|---|
-| `Sidebar` | Sidebar shell | Each app passes `brandIcon`, `brandTitle`, `navItems` |
-| `SidebarProvider`, `useSidebar` | Collapse + mobile-open state | localStorage-persisted |
-| `TopBar` | Top header | Wraps user dropdown + logout button |
-| `AuthGate` | Wraps app, redirects on 401 | Pass `userQuery` from `@ark/api-client` |
-| `Modal` | Standard modal shell | |
-| `Input`, `Textarea` | Inputs with labels + error states | Auto-IDs via `createUniqueId` |
-| `Button` | Variant-based button | |
-| `Card` | Standard card container | |
-| `QueryBoundary` | Loading/error/success states | Wraps TanStack Query results |
-| `StatusBadge` | Generic status pill | |
-| `Icons` | Curated camelCase icon namespace | `Icons.bell`, `Icons.user`, etc. |
-| `PortalIcons` | Icons keyed by portal name | Used in main-portal card grid |
-| `cn` | tailwind-merge + clsx wrapper | |
-
-## Usage
-
-```tsx
-import { Sidebar, type NavItem } from "@ark/ui"
-import { Folder, Users } from "lucide-solid"
-
-const navItems: NavItem[] = [
-  { id: "batches", label: "Batches", href: "/", icon: Folder },
-  { id: "students", label: "Students", href: "/students", icon: Users },
-]
-
-<Sidebar
-  brandIcon={Folder}
-  brandTitle="Training"
-  brandSubtitle="Batches & Enrollments"
-  navItems={navItems}
-/>
+```ts
+import {
+  Sidebar, SidebarProvider, useSidebar, type NavItem, type SidebarProps,
+  TopBar, type CurrentUser, type TopBarProps,
+  AuthGate, type AuthGateProps,
+  Modal, Input, Textarea, Button, Card, QueryBoundary, StatusBadge,
+  Icons, PortalIcons,
+  cn,
+} from "@ark/ui"
 ```
 
-## Adding a new icon
+| Export | Notes |
+|---|---|
+| `Sidebar` | parameterized — pass `brandIcon`, `brandTitle`, `navItems` |
+| `TopBar` | takes `user` + `onLogout` |
+| `AuthGate` | wraps app, redirects to portal/login on 401 |
+| `Input` / `Textarea` | auto-IDs via `createUniqueId` |
+| `Icons` | curated camelCase namespace (`Icons.bell`, `Icons.user`, …) |
+| `PortalIcons` | mapping of portal name → icon (used in main-portal card grid) |
+| `cn` | tailwind-merge + clsx |
 
-Edit `src/icons.tsx`:
-1. Import the icon from `lucide-solid`
-2. Add to the `Icons` object with a camelCase key
+## Add an icon
 
-Then `bun install` from monorepo root to refresh the symlink (usually unnecessary, only on dep changes).
+`src/icons.tsx`: import from `lucide-solid`, add camelCase key to the `Icons` object.
 
-## When to put something here vs in an app
+## When to add here
 
-- **Here**: anything that 2+ apps would benefit from sharing (UI primitives, layout shells, helpers)
-- **In the app**: pages, app-specific modals, domain-specific components (e.g., `PrStatusBadge` lives in procurement-portal)
+If 2+ apps would share it. Domain-specific stuff (e.g. `PrStatusBadge` for procurement) stays in the app.
