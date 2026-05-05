@@ -1,5 +1,5 @@
-import { Folder, GraduationCap, Users } from "lucide-solid"
 import { type NavItem, Sidebar as SharedSidebar } from "@ark/ui"
+import { Folder, GraduationCap, Users } from "lucide-solid"
 
 const navItems: NavItem[] = [
   { id: "batches", label: "Batches", href: "/", icon: Folder },

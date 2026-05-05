@@ -1,2 +1,2 @@
 // Re-export from shared package — kept for backward-compat
-export { useCurrentUser, type CurrentUser } from "@ark/api-client"
+export { type CurrentUser, useCurrentUser } from "@ark/api-client"
