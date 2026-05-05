@@ -1,42 +1,43 @@
 name: Set VITE_API_URL on all 7 Vercel projects
 
 # One-off workflow. Trigger manually from the Actions tab or via `gh workflow run`.
-# Removes the localhost:4000 fallback bug by setting VITE_API_URL=https://api.arkinstitutebc.com
-# in the Production environment for every monorepo app's Vercel project.
+# Sets VITE_API_URL=https://api.arkinstitutebc.com on every monorepo Vercel
+# project AND force-redeploys all 7 apps (bypasses paths-filter).
 # Delete this file once verified.
 
 on:
   workflow_dispatch:
 
 jobs:
-  set-env:
+  set-and-deploy:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         app: [main, training, procurement, inventory, finance, billing, hr]
     steps:
       - uses: actions/checkout@v5
       - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.13
       - run: bun install -g vercel@latest
-      - name: Pull project link (sets up .vercel/project.json from secret)
+
+      - name: Pull project link
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }}
+
       - name: Remove existing VITE_API_URL if any (idempotent)
         run: |
           vercel env rm VITE_API_URL production --yes --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }} || true
+
       - name: Add VITE_API_URL=https://api.arkinstitutebc.com (production)
         run: |
           echo "https://api.arkinstitutebc.com" | vercel env add VITE_API_URL production --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }}
-      - name: Verify env var is now set
-        run: vercel env ls production --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }}
 
-  redeploy:
-    needs: set-env
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - name: Trigger redeploy via empty commit
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit --allow-empty -m "ci: redeploy with VITE_API_URL env"
-          git push
+      - name: Re-pull so the new env var lands in .vercel/.env.production.local
+        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }}
+
+      - name: Build with the new env baked in
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }}
+
+      - name: Deploy
+        run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }}
