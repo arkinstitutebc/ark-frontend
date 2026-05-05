@@ -1,4 +1,4 @@
-import { type CreateQueryResult } from "@tanstack/solid-query"
+import type { CreateQueryResult } from "@tanstack/solid-query"
 import { type JSX, Show } from "solid-js"
 
 const DEFAULT_PORTAL_URL =

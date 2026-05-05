@@ -1,10 +1,10 @@
-export { api, API_URL } from "./api"
+export { API_URL, api } from "./api"
 export {
+  type CurrentUser,
+  performLogout,
+  useChangePassword,
   useCurrentUser,
   useLogin,
-  useChangePassword,
-  performLogout,
-  type CurrentUser,
 } from "./auth"
 export { queryClient } from "./query-client"
 export { QueryProvider } from "./query-provider"

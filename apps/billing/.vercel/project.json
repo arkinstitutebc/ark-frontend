@@ -1,1 +1,16 @@
-{"projectId":"prj_Bdh0R0LzAXVmA93pR7Pc91qk6EPY","orgId":"team_G4Ggk0JE9ft7xQT1jGqBtUa1","projectName":"billing-portal"}
+{
+  "projectId": "prj_Bdh0R0LzAXVmA93pR7Pc91qk6EPY",
+  "orgId": "team_G4Ggk0JE9ft7xQT1jGqBtUa1",
+  "projectName": "billing-portal",
+  "settings": {
+    "createdAt": 1770633807296,
+    "framework": "vite",
+    "devCommand": null,
+    "installCommand": null,
+    "buildCommand": null,
+    "outputDirectory": null,
+    "rootDirectory": null,
+    "directoryListing": false,
+    "nodeVersion": "24.x"
+  }
+}

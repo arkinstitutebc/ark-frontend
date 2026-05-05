@@ -1,4 +1,4 @@
-import { type JSX, createUniqueId } from "solid-js"
+import { createUniqueId, type JSX } from "solid-js"
 import { cn } from "./utils"
 
 type InputProps = JSX.InputHTMLAttributes<HTMLInputElement> & {

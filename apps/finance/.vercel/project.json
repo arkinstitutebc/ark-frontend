@@ -1,1 +1,16 @@
-{"projectId":"prj_iLUZnDLCTxLdZhlAqeEZ5Rr770Fo","orgId":"team_G4Ggk0JE9ft7xQT1jGqBtUa1","projectName":"finance-portal"}
+{
+  "projectId": "prj_iLUZnDLCTxLdZhlAqeEZ5Rr770Fo",
+  "orgId": "team_G4Ggk0JE9ft7xQT1jGqBtUa1",
+  "projectName": "finance-portal",
+  "settings": {
+    "createdAt": 1770612052355,
+    "framework": "vite",
+    "devCommand": null,
+    "installCommand": null,
+    "buildCommand": null,
+    "outputDirectory": null,
+    "rootDirectory": null,
+    "directoryListing": false,
+    "nodeVersion": "24.x"
+  }
+}

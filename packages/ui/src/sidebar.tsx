@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronLeft, ChevronRight, Folder, LogOut } from "lucide-solid"
+import { ArrowLeft, ChevronLeft, ChevronRight, type Folder, LogOut } from "lucide-solid"
 import { type Component, createMemo, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
 import { useSidebar } from "./sidebar-context"
@@ -42,8 +42,7 @@ export function Sidebar(props: SidebarProps) {
   const { collapsed, toggleCollapsed, mobileOpen, setMobileOpen } = useSidebar()
   const currentPath = createMemo(() => pageContext.urlPathname)
   const portalUrl = () => props.mainPortalUrl ?? DEFAULT_PORTAL_URL
-  const isActiveFn = (item: NavItem) =>
-    (props.isActive ?? defaultIsActive)(item, currentPath())
+  const isActiveFn = (item: NavItem) => (props.isActive ?? defaultIsActive)(item, currentPath())
 
   const sidebarContent = () => (
     <div class="flex flex-col h-full bg-white border-r border-gray-200">
