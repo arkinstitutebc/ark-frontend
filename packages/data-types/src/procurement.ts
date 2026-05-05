@@ -11,6 +11,7 @@ export interface PrItem {
 
 export interface PurchaseRequest {
   id: string
+  prCode: string
   batchId: string
   batchName: string
   batchCode: string
