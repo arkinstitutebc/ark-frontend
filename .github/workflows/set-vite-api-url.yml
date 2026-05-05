@@ -1,9 +1,13 @@
 name: Set VITE_API_URL on all 7 Vercel projects
 
-# One-off workflow. Trigger manually from the Actions tab or via `gh workflow run`.
-# Sets VITE_API_URL=https://api.arkinstitutebc.com on every monorepo Vercel
-# project AND force-redeploys all 7 apps (bypasses paths-filter).
-# Delete this file once verified.
+# One-off workflow. Trigger via `gh workflow run` or the Actions tab.
+# Bypasses the broken `vercel env add` (saves empty values from stdin in CI)
+# by writing directly to the per-project .vercel/.env.production.local file
+# AFTER `vercel pull` and BEFORE `vercel build`.
+#
+# This patches the in-build env only — the persistent Vercel project env still
+# needs to be set in the dashboard for FUTURE deploys via the regular CI flow.
+# Delete this file once the dashboard env is set up properly.
 
 on:
   workflow_dispatch:
@@ -25,41 +29,31 @@ jobs:
       - name: Pull project link
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }}
 
-      - name: Remove existing VITE_API_URL if any (idempotent)
+      - name: Inject VITE_API_URL into pulled .env (overwrite empty value)
         run: |
-          vercel env rm VITE_API_URL production --yes --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }} || true
+          ENV_FILE=apps/${{ matrix.app }}/.vercel/.env.production.local
+          # Remove any existing VITE_API_URL line (might be empty), then append the right value.
+          if [ -f "$ENV_FILE" ]; then
+            grep -v '^VITE_API_URL=' "$ENV_FILE" > "$ENV_FILE.tmp" || true
+            mv "$ENV_FILE.tmp" "$ENV_FILE"
+          fi
+          echo 'VITE_API_URL="https://api.arkinstitutebc.com"' >> "$ENV_FILE"
+          echo "--- final $ENV_FILE (vite vars) ---"
+          grep -i vite "$ENV_FILE" || true
 
-      - name: Add VITE_API_URL=https://api.arkinstitutebc.com (production)
+      - name: Build with the injected env
+        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }}
+
+      - name: Verify built chunks contain api.arkinstitutebc.com (not localhost)
         run: |
-          # echo via pipe was producing an empty value. Use printf + file redirect instead.
-          printf "%s" "https://api.arkinstitutebc.com" > /tmp/vite_api_url.txt
-          vercel env add VITE_API_URL production --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }} < /tmp/vite_api_url.txt
-
-      - name: Wait for Vercel env API to propagate (eventual consistency)
-        run: |
-          for i in 1 2 3 4 5 6 7 8 9 10; do
-            sleep 5
-            if vercel env ls production --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }} | grep -q VITE_API_URL; then
-              echo "VITE_API_URL visible in env list (attempt $i)"
-              break
-            fi
-            echo "not visible yet (attempt $i)"
-          done
-
-      - name: Re-pull so the new env var lands in .vercel/.env.production.local
-        run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }}
-
-      - name: Confirm VITE_API_URL ended up in the pulled .env file
-        run: |
-          if ! grep -q "VITE_API_URL=\"https://api.arkinstitutebc.com\"" apps/${{ matrix.app }}/.vercel/.env.production.local; then
-            echo "FAIL: VITE_API_URL not in .vercel/.env.production.local — Vercel env propagation hasn't finished"
-            cat apps/${{ matrix.app }}/.vercel/.env.production.local | grep -i vite || true
+          set -e
+          DIST=apps/${{ matrix.app }}/.vercel/output/static/assets
+          if grep -rq "localhost:4000" "$DIST" 2>/dev/null; then
+            echo "FAIL: built bundle still contains localhost:4000"
+            grep -rln "localhost:4000" "$DIST" | head -3
             exit 1
           fi
-          echo "OK: VITE_API_URL is in the pulled env"
-
-      - name: Build with the new env baked in
-        run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }}
+          echo "OK: no localhost:4000 in built bundle"
 
       - name: Deploy
         run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }}
