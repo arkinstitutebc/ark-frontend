@@ -44,3 +44,5 @@ npm run preview
 - ✅ Attendance tracking
 - ✅ Certificate management
 - ✅ Student status tracking (enrolled, in training, certified, dropped)
+
+<!-- monorepo CI test -->
