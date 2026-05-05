@@ -1,0 +1,10 @@
+{
+  "name": "@ark/design-system",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./globals.css": "./src/globals.css"
+  },
+  "scripts": {}
+}
