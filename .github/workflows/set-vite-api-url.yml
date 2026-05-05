@@ -31,7 +31,9 @@ jobs:
 
       - name: Add VITE_API_URL=https://api.arkinstitutebc.com (production)
         run: |
-          echo "https://api.arkinstitutebc.com" | vercel env add VITE_API_URL production --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }}
+          # echo via pipe was producing an empty value. Use printf + file redirect instead.
+          printf "%s" "https://api.arkinstitutebc.com" > /tmp/vite_api_url.txt
+          vercel env add VITE_API_URL production --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }} < /tmp/vite_api_url.txt
 
       - name: Wait for Vercel env API to propagate (eventual consistency)
         run: |
