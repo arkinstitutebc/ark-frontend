@@ -5,7 +5,10 @@ node_modules/
 dist/
 build/
 .vite/
-.vercel/
+
+# Vercel — ignore output/cache but commit project.json so CI knows which project to deploy to
+.vercel/*
+!.vercel/project.json
 
 # env
 .env
