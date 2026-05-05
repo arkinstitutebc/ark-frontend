@@ -29,3 +29,7 @@ yarn-error.log*
 
 # Bun
 bun.lockb
+
+# Playwright (test artifacts; commit only the snapshots dir under tests/)
+test-results/
+playwright-report/

@@ -186,7 +186,7 @@ export function Navbar(props: NavbarProps) {
                   <div class="h-px bg-surface-muted my-1" />
                   <a
                     href="/login"
-                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-accent hover:bg-accent/50"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-accent hover:bg-accent/5"
                   >
                     <UI.logout class="w-4 h-4" />
                     <span>Logout</span>

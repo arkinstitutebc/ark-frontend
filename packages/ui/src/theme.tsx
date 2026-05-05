@@ -1,5 +1,6 @@
 import {
   createContext,
+  createEffect,
   createMemo,
   createSignal,
   type JSX,
@@ -49,21 +50,18 @@ export function ThemeProvider(props: { children: JSX.Element }) {
 
   const effective = createMemo<EffectiveTheme>(() => resolveEffective(preference(), systemDark()))
 
-  // Sync data-theme attribute with effective theme; runs on mount + whenever it changes.
+  // Subscribe to OS color-scheme changes so `auto` mode flips live.
   onMount(() => {
-    applyDataTheme(effective())
-
     const mq = window.matchMedia("(prefers-color-scheme: dark)")
     const onChange = (e: MediaQueryListEvent) => setSystemDark(e.matches)
     mq.addEventListener("change", onChange)
     onCleanup(() => mq.removeEventListener("change", onChange))
   })
 
-  // Re-apply attribute whenever effective theme changes after mount.
-  // (createMemo + applyDataTheme call inside an effect-style accessor keeps it reactive.)
-  const _trackEffective = createMemo(() => {
+  // Reactive DOM side effect: keep <html data-theme> in sync with the effective theme.
+  // (The no-FOUC inline script in +Head.tsx already set the initial value before paint.)
+  createEffect(() => {
     if (typeof document !== "undefined") applyDataTheme(effective())
-    return effective()
   })
 
   const setTheme = (pref: ThemePreference) => {
@@ -74,7 +72,7 @@ export function ThemeProvider(props: { children: JSX.Element }) {
   }
 
   return (
-    <ThemeContext.Provider value={{ preference, effective: _trackEffective, setTheme }}>
+    <ThemeContext.Provider value={{ preference, effective, setTheme }}>
       {props.children}
     </ThemeContext.Provider>
   )

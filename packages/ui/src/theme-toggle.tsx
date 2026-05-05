@@ -14,6 +14,7 @@ export function ThemeToggle(props: { compact?: boolean }) {
 
   return (
     <fieldset class="inline-flex items-center gap-0.5 rounded-lg border border-border bg-surface-muted p-0.5">
+      <legend class="sr-only">Theme</legend>
       <For each={OPTIONS}>
         {opt => {
           const active = () => preference() === opt.value

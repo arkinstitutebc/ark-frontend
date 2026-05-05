@@ -205,7 +205,7 @@ export default function AdminUserDetailPage() {
                             value={role()}
                             disabled={isSelf()}
                             onChange={e => setRole(e.currentTarget.value as AdminRole)}
-                            class="w-full px-4 py-2.5 border border-border rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none disabled:bg-surface-muted disabled:cursor-not-allowed"
+                            class="w-full px-4 py-2.5 bg-surface text-foreground border border-border rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none disabled:bg-surface-muted disabled:cursor-not-allowed"
                           >
                             <option value="trainer">Trainer</option>
                             <option value="director">Director</option>

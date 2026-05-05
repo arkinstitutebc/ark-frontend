@@ -22,9 +22,9 @@ export default function DashboardPage() {
 
   const getGreeting = () => {
     const hour = currentTime().getHours()
-    if (hour < 12) return { text: "Good Morning", emoji: "🌅" }
-    if (hour < 17) return { text: "Good Afternoon", emoji: "☀️" }
-    return { text: "Good Evening", emoji: "🌙" }
+    if (hour < 12) return { text: "Good Morning", Icon: Icons.sunrise }
+    if (hour < 17) return { text: "Good Afternoon", Icon: Icons.sun }
+    return { text: "Good Evening", Icon: Icons.moon }
   }
 
   const firstName = () => userQuery.data?.firstName ?? "—"
@@ -61,8 +61,14 @@ export default function DashboardPage() {
         <main class="flex-1 px-6 sm:px-8 lg:px-12 py-8 sm:py-10">
           <div class="max-w-6xl mx-auto mt-8">
             <div class="mb-8">
-              <h2 class="text-xl sm:text-2xl text-foreground font-medium">
-                {getGreeting().text}, {firstName()} {getGreeting().emoji}
+              <h2 class="text-xl sm:text-2xl text-foreground font-medium flex items-center gap-2">
+                <span>
+                  {getGreeting().text}, {firstName()}
+                </span>
+                {(() => {
+                  const { Icon } = getGreeting()
+                  return <Icon class="w-6 h-6 text-primary" />
+                })()}
               </h2>
             </div>
 

@@ -44,7 +44,7 @@
   --color-foreground: #e5e7eb;
   --color-surface: #0f172a;
   --color-surface-muted: #1e293b;
-  --color-border: #1e293b;
+  --color-border: #334155; /* one step lighter than surface-muted so borders are visible */
   --color-muted: #94a3b8;
 }
 
