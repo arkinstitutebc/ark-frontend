@@ -156,8 +156,8 @@ export function Navbar(props: NavbarProps) {
                 class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-muted/80 transition-colors"
               >
                 <div class="text-left hidden sm:block">
-                  <p class="text-sm font-semibold text-foreground">{props.userName || "Camille"}</p>
-                  <p class="text-xs text-muted">{props.userRole || "Administrator"}</p>
+                  <p class="text-sm font-semibold text-foreground">{props.userName || "—"}</p>
+                  <p class="text-xs text-muted">{props.userRole || "—"}</p>
                 </div>
                 <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm">
                   <UI.user class="w-5 h-5 text-white" />
@@ -170,11 +170,9 @@ export function Navbar(props: NavbarProps) {
                 <div class="absolute right-0 top-full mt-2 w-52 bg-surface rounded-xl shadow-lg border border-border py-2 z-50">
                   <div class="px-4 py-3 border-b border-border">
                     <p class="text-sm font-semibold text-foreground">
-                      {props.userName || "Camille"} {props.userRole || "Administrator"}
+                      {props.userName || "—"} {props.userRole ? `· ${props.userRole}` : ""}
                     </p>
-                    <p class="text-xs text-muted">
-                      {props.userEmail || "camille@arkinstitutebc.com"}
-                    </p>
+                    <p class="text-xs text-muted">{props.userEmail || "—"}</p>
                   </div>
                   <button
                     type="button"

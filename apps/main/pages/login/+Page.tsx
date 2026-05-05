@@ -148,15 +148,13 @@ export default function LoginPage() {
 
           {/* Footer */}
           <div class="px-10 pb-8 pt-5 border-t border-border bg-surface-muted/50">
-            <p class="text-center text-xs text-muted">Secure admin access</p>
+            <p class="text-center text-xs text-muted">Secure portal access</p>
           </div>
         </div>
 
-        {/* Help text */}
         <p class="text-center text-sm text-muted mt-6">
-          Need help? Contact{" "}
-          <a href="mailto:info@arkinstitutebc.com" class="text-primary hover:underline font-medium">
-            IT Support
+          <a href="https://arkinstitutebc.com" class="text-primary hover:underline font-medium">
+            arkinstitutebc.com
           </a>
         </p>
       </div>

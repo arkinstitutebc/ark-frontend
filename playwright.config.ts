@@ -36,11 +36,17 @@ export default defineConfig({
       use: { ...devices["Desktop Chrome"], colorScheme: "dark" },
     },
   ],
+  /**
+   * Build apps/main first, then serve via `vike preview`. Tests run against
+   * the production build — same code path users hit on prod, including the
+   * Tailwind class-generation pipeline. Catches missing-class bugs that
+   * `vike dev` (JIT) would silently mask.
+   */
   webServer: {
-    command: "bun run dev:main",
+    command: "cd apps/main && bun run build && bun run preview --port 3000",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
-    timeout: 60_000,
+    timeout: 180_000,
   },
   expect: {
     toHaveScreenshot: {

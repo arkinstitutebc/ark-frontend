@@ -3,11 +3,15 @@
 
 @import "tailwindcss";
 
-@source "../pages/**/*.tsx";
-@source "../components/**/*.tsx";
-@source "../components/layout/**/*.tsx";
-@source "../context/**/*.tsx";
-@source "../data/**/*.tsx";
+/* Scan all consuming workspace packages so utility classes used INSIDE @ark/ui
+   (Input, Modal, Sidebar, ThemeToggle, etc.) are generated in the production CSS.
+   Without this, classes like `absolute inset-y-0 pl-10 bg-primary text-white` that
+   only appear in packages/ui/src never reach the prod stylesheet, leaving icons
+   misplaced and buttons unstyled. */
+@source "../../../packages/ui/src/**/*.tsx";
+@source "../../../packages/api-client/src/**/*.tsx";
+@source "../../../apps/*/pages/**/*.tsx";
+@source "../../../apps/*/components/**/*.tsx";
 
 @theme {
   /* Ark Institute Design System — semantic tokens (flip per theme) */
