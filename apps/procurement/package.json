@@ -1,0 +1,36 @@
+{
+  "name": "ark-procurement-portal",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vike dev",
+    "start": "bun run dev",
+    "build": "vike build",
+    "preview": "vike preview",
+    "lint": "biome check",
+    "format": "biome format --write",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@tanstack/solid-query": "^5.90.19",
+    "clsx": "^2.1.1",
+    "lucide-solid": "^0.562.0",
+    "solid-js": "^1.9.10",
+    "solid-toast": "^0.5.0",
+    "tailwind-merge": "^2.6.0",
+    "vike": "^0.4.250",
+    "vike-solid": "^0.7.18",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.13",
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@vite-plugin-vercel/vike": "^9.1.0",
+    "tailwindcss": "^4",
+    "typescript": "^5",
+    "vite": "^7.3.0",
+    "vite-plugin-vercel": "^9.1.1"
+  }
+}

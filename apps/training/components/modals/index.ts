@@ -1,0 +1,5 @@
+export { AddBatchModal } from "./add-batch"
+export { AddStudentModal } from "./add-student"
+export { EditBatchModal } from "./edit-batch"
+export { EditStudentModal } from "./edit-student"
+export { ViewStudentModal } from "./view-student"

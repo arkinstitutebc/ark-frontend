@@ -1,0 +1,253 @@
+import type { PrStatus, PurchaseRequest } from "@data/types"
+import { createSignal, Show } from "solid-js"
+import { Modal } from "./ui/modal"
+
+const statusColors: Record<PrStatus, { bg: string; text: string; dot: string }> = {
+  pending: { bg: "bg-yellow-50", text: "text-yellow-700", dot: "bg-yellow-400" },
+  approved: { bg: "bg-green-50", text: "text-green-700", dot: "bg-green-400" },
+  rejected: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-400" },
+  ordered: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-400" },
+}
+
+function StatusBadge(props: { status: PrStatus }) {
+  const colors = statusColors[props.status]
+  const label = props.status.charAt(0).toUpperCase() + props.status.slice(1)
+  return (
+    <span
+      class={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${colors.bg} ${colors.text}`}
+    >
+      <span class={`w-1.5 h-1.5 rounded-full ${colors.dot}`} />
+      {label}
+    </span>
+  )
+}
+
+function formatCurrency(amount: number) {
+  return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(amount)
+}
+
+function formatDate(dateStr: string) {
+  return new Intl.DateTimeFormat("en-PH", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  }).format(new Date(dateStr))
+}
+
+interface ApprovalDetailsModalProps {
+  open: boolean
+  onClose: () => void
+  pr: PurchaseRequest | null
+  onApprove: (id: string, notes?: string) => void
+  onReject: (id: string, notes?: string) => void
+  processing: boolean
+}
+
+export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
+  const [notes, setNotes] = createSignal("")
+
+  const handleApprove = () => {
+    if (props.pr) {
+      props.onApprove(props.pr.id, notes())
+      setNotes("")
+    }
+  }
+
+  const handleReject = () => {
+    if (props.pr) {
+      props.onReject(props.pr.id, notes())
+      setNotes("")
+    }
+  }
+
+  const handleClose = () => {
+    setNotes("")
+    props.onClose()
+  }
+
+  return (
+    <Modal open={props.open} onClose={handleClose} title="Purchase Request Details" size="lg">
+      <Show when={props.pr}>
+        {pr => (
+          <div class="flex flex-col max-h-[70vh]">
+            {/* Scrollable Content */}
+            <div class="flex-1 overflow-y-auto space-y-5 pr-2">
+              {/* Header Section */}
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <span class="font-mono text-sm font-medium text-gray-900">
+                    {pr().prCode || pr().id}
+                  </span>
+                  <StatusBadge status={pr().status} />
+                </div>
+                <span class="text-lg font-semibold text-gray-900">
+                  {formatCurrency(Number(pr().totalAmount))}
+                </span>
+              </div>
+
+              {/* Details Grid - improved with subtle cards */}
+              <div class="grid grid-cols-2 gap-3">
+                <div class="bg-gray-50 rounded-lg px-4 py-3">
+                  <p class="text-xs text-gray-500 mb-1">Batch Name</p>
+                  <p class="text-sm font-semibold text-gray-900">{pr().batchName}</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg px-4 py-3">
+                  <p class="text-xs text-gray-500 mb-1">Batch Code</p>
+                  <p class="text-sm font-mono font-medium text-gray-900">{pr().batchCode}</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg px-4 py-3">
+                  <p class="text-xs text-gray-500 mb-1">Category</p>
+                  <p class="text-sm font-medium text-gray-900">{pr().category}</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg px-4 py-3">
+                  <p class="text-xs text-gray-500 mb-1">Created Date</p>
+                  <p class="text-sm font-medium text-gray-900">{formatDate(pr().createdAt)}</p>
+                </div>
+                <div class="bg-primary/5 rounded-lg px-4 py-3 col-span-2 border border-primary/10">
+                  <p class="text-xs text-primary/70 mb-1">Created By</p>
+                  <p class="text-sm font-semibold text-gray-900">{pr().createdBy}</p>
+                </div>
+              </div>
+
+              {/* Purpose Section */}
+              <div>
+                <p class="text-xs text-gray-500 mb-2">Purpose</p>
+                <p class="text-sm text-gray-900 whitespace-pre-wrap">{pr().purpose}</p>
+              </div>
+
+              {/* Items Table */}
+              <div>
+                <p class="text-xs text-gray-500 mb-2">Items</p>
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                  <table class="w-full">
+                    <thead class="bg-gray-50 border-b border-gray-200">
+                      <tr>
+                        <th class="text-left px-4 py-2 text-xs font-semibold text-gray-600 uppercase">
+                          Item
+                        </th>
+                        <th class="text-center px-4 py-2 text-xs font-semibold text-gray-600 uppercase">
+                          Qty
+                        </th>
+                        <th class="text-right px-4 py-2 text-xs font-semibold text-gray-600 uppercase">
+                          Price
+                        </th>
+                        <th class="text-right px-4 py-2 text-xs font-semibold text-gray-600 uppercase">
+                          Total
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {pr().items.map(item => (
+                        <tr class="border-b border-gray-100 last:border-b-0">
+                          <td class="px-4 py-3 text-sm text-gray-900">{item.name}</td>
+                          <td class="px-4 py-3 text-sm text-gray-900 text-center">
+                            {item.quantity} {item.unit}
+                          </td>
+                          <td class="px-4 py-3 text-sm text-gray-900 text-right">
+                            {formatCurrency(item.unitPrice)}
+                          </td>
+                          <td class="px-4 py-3 text-sm text-gray-900 text-right">
+                            {formatCurrency(item.total)}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                    <tfoot class="bg-gray-50 border-t border-gray-200">
+                      <tr>
+                        <td
+                          colSpan={3}
+                          class="px-4 py-3 text-sm font-semibold text-gray-900 text-right"
+                        >
+                          Grand Total
+                        </td>
+                        <td class="px-4 py-3 text-sm font-semibold text-gray-900 text-right">
+                          {formatCurrency(Number(pr().totalAmount))}
+                        </td>
+                      </tr>
+                    </tfoot>
+                  </table>
+                </div>
+              </div>
+
+              {/* Approval Info */}
+              <Show when={pr().status !== "pending"}>
+                <div class="bg-gray-50 rounded-lg p-4">
+                  <p class="text-xs text-gray-500 mb-2">Approval Details</p>
+                  <div class="grid grid-cols-2 gap-4">
+                    <Show when={pr().approvedBy}>
+                      <div>
+                        <p class="text-xs text-gray-500 mb-1">Approved By</p>
+                        <p class="text-sm font-medium text-gray-900">{pr().approvedBy}</p>
+                      </div>
+                    </Show>
+                    <Show when={pr().approvedAt}>
+                      <div>
+                        <p class="text-xs text-gray-500 mb-1">Approved Date</p>
+                        <p class="text-sm font-medium text-gray-900">
+                          {formatDate(pr().approvedAt ?? "")}
+                        </p>
+                      </div>
+                    </Show>
+                    <Show when={pr().approvalNotes}>
+                      <div class="col-span-2">
+                        <p class="text-xs text-gray-500 mb-1">Notes</p>
+                        <p class="text-sm text-gray-900">{pr().approvalNotes}</p>
+                      </div>
+                    </Show>
+                  </div>
+                </div>
+              </Show>
+
+              {/* Notes Section - only for pending */}
+              <Show when={pr().status === "pending"}>
+                <div>
+                  <label for="approval-notes" class="text-xs text-gray-500 mb-2 block">
+                    Approval notes (optional)
+                  </label>
+                  <textarea
+                    id="approval-notes"
+                    value={notes()}
+                    onInput={e => setNotes(e.currentTarget.value)}
+                    placeholder="Add notes for this approval..."
+                    rows={2}
+                    class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+                  />
+                </div>
+              </Show>
+            </div>
+
+            {/* Fixed Action Buttons */}
+            <div class="flex items-center justify-end gap-3 pt-4 mt-4 border-t border-gray-100">
+              <button
+                type="button"
+                onClick={handleClose}
+                disabled={props.processing}
+                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <Show when={pr().status === "pending"}>
+                <button
+                  type="button"
+                  onClick={handleReject}
+                  disabled={props.processing}
+                  class="px-4 py-2 text-sm font-medium text-white bg-accent hover:bg-accent/90 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  Reject
+                </button>
+                <button
+                  type="button"
+                  onClick={handleApprove}
+                  disabled={props.processing}
+                  class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  Approve
+                </button>
+              </Show>
+            </div>
+          </div>
+        )}
+      </Show>
+    </Modal>
+  )
+}
