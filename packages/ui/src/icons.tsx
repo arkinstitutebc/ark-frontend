@@ -12,8 +12,11 @@ import {
   ChevronDown,
   Clock,
   CreditCard,
+  DollarSign,
   Download,
   Edit,
+  Eye,
+  EyeOff,
   FileText,
   Folder,
   GraduationCap,
@@ -22,6 +25,7 @@ import {
   Landmark,
   Lock,
   LogOut,
+  Mail,
   Menu,
   Minus,
   Package,
@@ -56,6 +60,8 @@ export const Icons = {
   creditCard: CreditCard,
   download: Download,
   edit: Edit,
+  eye: Eye,
+  eyeOff: EyeOff,
   fileText: FileText,
   folder: Folder,
   graduationCap: GraduationCap,
@@ -64,6 +70,7 @@ export const Icons = {
   landmark: Landmark,
   lock: Lock,
   logout: LogOut,
+  mail: Mail,
   menu: Menu,
   minus: Minus,
   package: Package,
@@ -78,4 +85,16 @@ export const Icons = {
   users: Users,
   wallet: Wallet,
   xCircle: XCircle,
+} as const
+
+/** Mapping of portal IDs to their canonical icon (used in main-portal card grid) */
+export const PortalIcons = {
+  batches: Folder,
+  students: Users,
+  training: GraduationCap,
+  procurement: ShoppingBag,
+  inventory: Package,
+  finance: DollarSign,
+  billing: Receipt,
+  hr: Users,
 } as const

@@ -12,8 +12,8 @@ export { Modal } from "./modal"
 export { QueryBoundary } from "./query-boundary"
 export { StatusBadge } from "./status-badge"
 
-// Icons (curated set as { Icons } object)
-export { Icons } from "./icons"
+// Icons (curated set as { Icons } object) + portal-specific PortalIcons
+export { Icons, PortalIcons } from "./icons"
 
 // Utilities
 export { cn } from "./utils"

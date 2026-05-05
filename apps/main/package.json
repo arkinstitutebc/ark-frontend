@@ -8,11 +8,13 @@
     "start": "bun run dev",
     "build": "vike build",
     "preview": "vike preview",
-    "lint": "biome check",
-    "format": "biome format --write",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@ark/api-client": "workspace:*",
+    "@ark/data-types": "workspace:*",
+    "@ark/design-system": "workspace:*",
+    "@ark/ui": "workspace:*",
     "@tanstack/solid-query": "^5.90.19",
     "clsx": "^2.1.1",
     "lucide-solid": "^0.562.0",
@@ -23,7 +25,6 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.4.13",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@vite-plugin-vercel/vike": "^9.1.0",
