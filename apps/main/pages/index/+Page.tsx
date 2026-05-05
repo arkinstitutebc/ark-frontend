@@ -1,4 +1,5 @@
 import { useCurrentUser } from "@ark/api-client"
+import { Icons } from "@ark/ui"
 import { createEffect, createSignal, onCleanup, onMount, Show } from "solid-js"
 import { Footer, Navbar, PortalCards } from "@/components"
 
@@ -66,6 +67,39 @@ export default function DashboardPage() {
             </div>
 
             <PortalCards userRole={userRole()} />
+
+            <Show when={userRole() === "admin"}>
+              <div class="mt-10">
+                <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
+                  Administration
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <a
+                    href="/admin/users"
+                    class="group block bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl hover:border-primary/30 transition-all"
+                  >
+                    <div class="flex items-start justify-between mb-5">
+                      <div class="p-4 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
+                        <Icons.users class="w-8 h-8 text-primary" />
+                      </div>
+                      <span class="px-3 py-1 bg-accent/10 text-accent text-xs font-semibold rounded-full">
+                        Admin
+                      </span>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-900 group-hover:text-primary transition-colors">
+                      User Management
+                    </h3>
+                    <p class="text-sm text-gray-500 mt-1.5">
+                      Invite, edit, deactivate, and reset passwords for portal users.
+                    </p>
+                    <div class="flex items-center gap-2 mt-5 text-primary font-medium text-sm group-hover:gap-3 transition-all">
+                      <span>Manage users</span>
+                      <Icons.arrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </a>
+                </div>
+              </div>
+            </Show>
           </div>
         </main>
 
