@@ -11,6 +11,11 @@ export { Icons, PortalIcons } from "./icons"
 // Primitives
 export { Input, Textarea } from "./input"
 export { Modal } from "./modal"
+export {
+  NotificationBell,
+  type NotificationBellProps,
+  type NotificationItem,
+} from "./notification-bell"
 export { PageLoading } from "./page-loading"
 export { QueryBoundary } from "./query-boundary"
 export { RolePill } from "./role-pill"

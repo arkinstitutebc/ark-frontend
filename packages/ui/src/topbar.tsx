@@ -1,5 +1,6 @@
-import { Bell, ChevronDown, LogOut, Menu, User } from "lucide-solid"
+import { ChevronDown, LogOut, Menu, User } from "lucide-solid"
 import { createSignal, onCleanup, onMount, Show } from "solid-js"
+import { NotificationBell, type NotificationBellProps } from "./notification-bell"
 import { RolePill } from "./role-pill"
 import { useSidebar } from "./sidebar-context"
 import { ThemeToggle } from "./theme-toggle"
@@ -17,6 +18,8 @@ export interface TopBarProps {
   onLogout?: () => void
   /** Optional href for the Profile menu item (e.g., main portal /profile). */
   profileHref?: string
+  /** Wire to render the notification bell. Omit to hide the bell. */
+  notifications?: NotificationBellProps
 }
 
 export function TopBar(props: TopBarProps) {
@@ -66,13 +69,7 @@ export function TopBar(props: TopBarProps) {
 
         <div class="flex items-center gap-3">
           <ThemeToggle compact />
-          <button
-            type="button"
-            aria-label="Notifications"
-            class="relative p-2 rounded-lg text-muted hover:bg-surface-muted transition-colors"
-          >
-            <Bell class="w-5 h-5" />
-          </button>
+          <Show when={props.notifications}>{binding => <NotificationBell {...binding()} />}</Show>
 
           <div class="relative" ref={dropdownRef}>
             <button
