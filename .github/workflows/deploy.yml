@@ -1,4 +1,12 @@
-name: Deploy
+name: Quality
+
+# Lint + typecheck on every push/PR. Deploys are now handled by Vercel's
+# native Git integration (each portal project links directly to this repo and
+# deploys on push to main, gated by per-project "Ignored Build Step" so only
+# changed apps rebuild). The previous matrix-deploy step was removed because:
+#   1. The Vercel free-tier 100/day CLI deploy cap blocked rapid iteration
+#   2. Vercel-Git integration uses a separate (more generous) per-hour quota
+#   3. PR previews + per-commit deploy logs in the Vercel dashboard come for free
 
 on:
   push:
@@ -10,27 +18,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  detect:
-    runs-on: ubuntu-latest
-    outputs:
-      apps: ${{ steps.filter.outputs.changes }}
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          persist-credentials: false
-          fetch-depth: 0
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            main: ['apps/main/**', 'packages/**', 'package.json', 'bun.lock']
-            training: ['apps/training/**', 'packages/**', 'package.json', 'bun.lock']
-            procurement: ['apps/procurement/**', 'packages/**', 'package.json', 'bun.lock']
-            inventory: ['apps/inventory/**', 'packages/**', 'package.json', 'bun.lock']
-            finance: ['apps/finance/**', 'packages/**', 'package.json', 'bun.lock']
-            billing: ['apps/billing/**', 'packages/**', 'package.json', 'bun.lock']
-            hr: ['apps/hr/**', 'packages/**', 'package.json', 'bun.lock']
-
   quality:
     runs-on: ubuntu-latest
     steps:
@@ -43,24 +30,3 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bunx biome check .
       - run: bun run --filter '*' typecheck
-
-  deploy:
-    name: deploy / ${{ matrix.app }}
-    needs: [detect, quality]
-    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect.outputs.apps != '[]' }}
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        app: ${{ fromJSON(needs.detect.outputs.apps) }}
-    steps:
-      - uses: actions/checkout@v5
-        with:
-          persist-credentials: false
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: 1.3.13
-      - run: bun install -g vercel@latest
-      - run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }}
-      - run: vercel build --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }}
-      - run: vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }} --cwd=apps/${{ matrix.app }}
