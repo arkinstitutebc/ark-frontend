@@ -1,0 +1,16 @@
+[Unit]
+Description=Ark Portal — main (portal.arkinstitutebc.com)
+After=network.target
+
+[Service]
+Type=simple
+User=ark
+Group=ark
+WorkingDirectory=/opt/ark-portals/repo/apps/main
+ExecStart=/home/ark/.bun/bin/bun dist/server/index.mjs
+EnvironmentFile=/opt/ark-portals/repo/apps/main/.env.production
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
