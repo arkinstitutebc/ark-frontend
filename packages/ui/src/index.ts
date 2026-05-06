@@ -23,6 +23,7 @@ export { Select, type SelectOption, type SelectProps } from "./select"
 export { type NavItem, Sidebar, type SidebarProps } from "./sidebar"
 export { SidebarProvider, useSidebar } from "./sidebar-context"
 export { StatusBadge } from "./status-badge"
+export { SubPortalShell, type SubPortalShellProps } from "./sub-portal-shell"
 export { TableSkeleton } from "./table-skeleton"
 export {
   type EffectiveTheme,

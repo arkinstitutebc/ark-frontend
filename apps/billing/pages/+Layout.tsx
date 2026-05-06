@@ -1,33 +1,19 @@
-import { QueryProvider, useCurrentUser } from "@ark/api-client"
-import { AppToaster, AuthGate, ThemeProvider } from "@ark/ui"
+import { QueryProvider } from "@ark/api-client"
+import { AppToaster, SubPortalShell, ThemeProvider, TopProgressBar } from "@ark/ui"
 import "@ark/design-system/globals.css"
 import "@fontsource-variable/montserrat"
 import type { JSX } from "solid-js"
-import { Sidebar, SidebarProvider, TopBar } from "@/components/layout"
-
-function GatedShell(props: { children: JSX.Element }) {
-  const userQuery = useCurrentUser()
-  return (
-    <AuthGate userQuery={userQuery}>
-      <SidebarProvider>
-        <div class="flex h-screen overflow-hidden">
-          <Sidebar />
-          <div class="flex-1 flex flex-col overflow-hidden">
-            <TopBar />
-            <main class="flex-1 overflow-y-auto bg-background">{props.children}</main>
-          </div>
-        </div>
-      </SidebarProvider>
-    </AuthGate>
-  )
-}
+import { Sidebar, TopBar } from "@/components/layout"
 
 export function Layout(props: { children: JSX.Element }) {
   return (
     <ThemeProvider>
       <QueryProvider>
+        <TopProgressBar />
         <AppToaster />
-        <GatedShell>{props.children}</GatedShell>
+        <SubPortalShell sidebar={<Sidebar />} topBar={<TopBar />}>
+          {props.children}
+        </SubPortalShell>
       </QueryProvider>
     </ThemeProvider>
   )
