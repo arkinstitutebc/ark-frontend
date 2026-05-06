@@ -3,6 +3,7 @@ import {
   createEffect,
   createMemo,
   createSignal,
+  createUniqueId,
   For,
   type JSX,
   onCleanup,
@@ -41,8 +42,17 @@ export interface SelectProps<T> {
 export function Select<T>(props: SelectProps<T>): JSX.Element {
   const [open, setOpen] = createSignal(false)
   const [highlight, setHighlight] = createSignal(-1)
+  const baseId = createUniqueId()
+  const optionId = (i: number) => `${props.id ?? baseId}-option-${i}`
+  const listboxId = `${props.id ?? baseId}-listbox`
   let containerRef: HTMLDivElement | undefined
+  let triggerRef: HTMLButtonElement | undefined
   let listboxRef: HTMLDivElement | undefined
+
+  function close(returnFocus = true) {
+    setOpen(false)
+    if (returnFocus) triggerRef?.focus()
+  }
 
   const selectedOption = createMemo(
     () => props.options.find(o => Object.is(o.value, props.value)) ?? null
@@ -55,9 +65,10 @@ export function Select<T>(props: SelectProps<T>): JSX.Element {
     if (!open()) return
     const idx = props.options.findIndex(o => Object.is(o.value, props.value))
     setHighlight(idx >= 0 ? idx : 0)
-    // Scroll the highlighted option into view next tick.
+    // Scroll the highlighted option into view next tick. Guard for SSR.
+    if (typeof window === "undefined") return
     queueMicrotask(() => {
-      listboxRef?.querySelector<HTMLLIElement>('[data-highlighted="true"]')?.scrollIntoView({
+      listboxRef?.querySelector<HTMLElement>('[data-highlighted="true"]')?.scrollIntoView({
         block: "nearest",
       })
     })
@@ -67,7 +78,7 @@ export function Select<T>(props: SelectProps<T>): JSX.Element {
     const opt = props.options[idx]
     if (!opt || opt.disabled) return
     props.onChange(opt.value)
-    setOpen(false)
+    close()
   }
 
   function nextEnabled(from: number, dir: 1 | -1): number {
@@ -100,6 +111,18 @@ export function Select<T>(props: SelectProps<T>): JSX.Element {
       }
     } else if (e.key === "Escape" && open()) {
       e.preventDefault()
+      close()
+    }
+  }
+
+  function onContainerFocusOut(e: FocusEvent) {
+    // Close when focus moves out of the entire control (e.g. user pressed Tab).
+    // The relatedTarget is the next focused element; if it's outside the
+    // container, close. If null (focus lost entirely), also close.
+    const next = e.relatedTarget as Node | null
+    if (!containerRef) return
+    if (!next || !containerRef.contains(next)) {
+      // Don't return focus on Tab-out — that would fight the user's intent.
       setOpen(false)
     }
   }
@@ -107,6 +130,8 @@ export function Select<T>(props: SelectProps<T>): JSX.Element {
   onMount(() => {
     const onClickOutside = (e: MouseEvent) => {
       if (containerRef && !containerRef.contains(e.target as Node)) {
+        // Don't return focus on outside click — focus should follow what the
+        // user clicked.
         setOpen(false)
       }
     }
@@ -115,14 +140,22 @@ export function Select<T>(props: SelectProps<T>): JSX.Element {
   })
 
   return (
-    <div ref={containerRef} class={`relative ${props.class ?? ""}`}>
+    <div
+      ref={containerRef}
+      class={`relative ${props.class ?? ""}`}
+      onFocusOut={onContainerFocusOut}
+    >
       <button
+        ref={triggerRef}
         type="button"
         id={props.id}
+        role="combobox"
         disabled={props.disabled}
         aria-haspopup="listbox"
+        aria-controls={listboxId}
         aria-expanded={open()}
         aria-label={props.ariaLabel}
+        aria-activedescendant={open() && highlight() >= 0 ? optionId(highlight()) : undefined}
         onClick={() => !props.disabled && setOpen(o => !o)}
         onKeyDown={onTriggerKeyDown}
         class="w-full px-4 py-2.5 bg-surface text-foreground border border-border rounded-lg text-left flex items-center justify-between gap-2 transition-colors focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary disabled:bg-surface-muted disabled:cursor-not-allowed disabled:text-muted"
@@ -138,6 +171,7 @@ export function Select<T>(props: SelectProps<T>): JSX.Element {
       <Show when={open()}>
         <div
           ref={listboxRef}
+          id={listboxId}
           role="listbox"
           tabindex="-1"
           class="absolute z-50 left-0 right-0 mt-1 bg-surface border border-border rounded-lg shadow-lg py-1 max-h-64 overflow-y-auto"
@@ -147,26 +181,27 @@ export function Select<T>(props: SelectProps<T>): JSX.Element {
               const isSelected = () => Object.is(opt.value, props.value)
               const isHighlighted = () => highlight() === i()
               return (
-                <button
-                  type="button"
+                // biome-ignore lint/a11y/useKeyWithClickEvents: keyboard handled at trigger via aria-activedescendant pattern
+                // biome-ignore lint/a11y/useFocusableInteractive: focus stays on trigger; aria-activedescendant conveys highlighted option
+                <div
+                  id={optionId(i())}
                   role="option"
                   aria-selected={isSelected()}
                   aria-disabled={opt.disabled}
                   data-highlighted={isHighlighted()}
-                  disabled={opt.disabled}
                   onMouseEnter={() => !opt.disabled && setHighlight(i())}
                   onClick={() => commit(i())}
-                  class={`w-full px-4 py-2 text-sm flex items-center justify-between gap-2 text-left ${
+                  class={`px-4 py-2 text-sm flex items-center justify-between gap-2 ${
                     opt.disabled
                       ? "text-muted cursor-not-allowed"
                       : isHighlighted()
-                        ? "bg-surface-muted text-foreground"
-                        : "text-foreground hover:bg-surface-muted"
+                        ? "bg-surface-muted text-foreground cursor-pointer"
+                        : "text-foreground hover:bg-surface-muted cursor-pointer"
                   }`}
                 >
                   <span class="truncate">{opt.label}</span>
                   {isSelected() && <Check class="w-3.5 h-3.5 text-primary flex-shrink-0" />}
-                </button>
+                </div>
               )
             }}
           </For>
