@@ -7,7 +7,7 @@ import {
   useInviteUser,
   validateForm,
 } from "@ark/api-client"
-import { Button, Icons, Input, Modal, PageLoading, TableSkeleton, toast } from "@ark/ui"
+import { Button, Icons, Input, Modal, PageLoading, Select, TableSkeleton, toast } from "@ark/ui"
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { z } from "zod"
 import { Footer, Navbar } from "@/components"
@@ -91,9 +91,9 @@ export default function AdminUsersPage() {
       const result = await invite.mutateAsync(parsed.data)
       setInviteOpen(false)
       setTempCredentials(result)
-      toast.success(`Invited ${result.user.firstName} ${result.user.lastName}`)
+      toast.success(`Created ${result.user.firstName} ${result.user.lastName}`)
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Could not invite user")
+      toast.error(err instanceof Error ? err.message : "Could not create user")
     }
   }
 
@@ -122,7 +122,7 @@ export default function AdminUsersPage() {
                 </p>
               </div>
               <Button variant="primary" size="md" onClick={openInvite}>
-                <Icons.plus class="w-4 h-4" /> Invite user
+                <Icons.plus class="w-4 h-4" /> Create user
               </Button>
             </div>
 
@@ -206,7 +206,7 @@ export default function AdminUsersPage() {
         <Footer />
       </Show>
 
-      <Modal open={inviteOpen()} onClose={closeInvite} title="Invite a new user">
+      <Modal open={inviteOpen()} onClose={closeInvite} title="Create user">
         <form onSubmit={submitInvite} class="space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
@@ -234,16 +234,17 @@ export default function AdminUsersPage() {
             <label for="invite-role" class="block text-sm font-medium text-foreground mb-1.5">
               Role
             </label>
-            <select
+            <Select<AdminRole>
               id="invite-role"
+              ariaLabel="Role"
+              options={[
+                { label: "Trainer", value: "trainer" },
+                { label: "Director", value: "director" },
+                { label: "Admin", value: "admin" },
+              ]}
               value={form().role}
-              onChange={e => setForm({ ...form(), role: e.currentTarget.value as AdminRole })}
-              class="w-full px-4 py-2.5 bg-surface text-foreground border border-border rounded-lg focus:border-primary outline-none transition-colors"
-            >
-              <option value="trainer">Trainer</option>
-              <option value="director">Director</option>
-              <option value="admin">Admin</option>
-            </select>
+              onChange={role => setForm({ ...form(), role })}
+            />
           </div>
 
           <div class="flex items-center justify-end gap-2 pt-2">
@@ -251,7 +252,7 @@ export default function AdminUsersPage() {
               Cancel
             </Button>
             <Button type="submit" variant="primary" size="sm" disabled={invite.isPending}>
-              {invite.isPending ? "Inviting…" : "Send invite"}
+              {invite.isPending ? "Creating…" : "Create user"}
             </Button>
           </div>
         </form>

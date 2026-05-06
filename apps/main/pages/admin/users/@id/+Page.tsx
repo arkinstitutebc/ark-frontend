@@ -8,7 +8,7 @@ import {
   useResetUserPassword,
   useUpdateUser,
 } from "@ark/api-client"
-import { Button, Icons, Input, Modal, PageLoading, toast } from "@ark/ui"
+import { Button, Icons, Input, Modal, PageLoading, Select, toast } from "@ark/ui"
 import { createEffect, createMemo, createSignal, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
 import { Footer, Navbar } from "@/components"
@@ -186,17 +186,18 @@ export default function AdminUserDetailPage() {
                             >
                               Role
                             </label>
-                            <select
+                            <Select<AdminRole>
                               id="user-role"
-                              value={role()}
+                              ariaLabel="Role"
                               disabled={isSelf()}
-                              onChange={e => setRole(e.currentTarget.value as AdminRole)}
-                              class="w-full px-4 py-2.5 bg-surface text-foreground border border-border rounded-lg focus:border-primary outline-none transition-colors disabled:bg-surface-muted disabled:cursor-not-allowed"
-                            >
-                              <option value="trainer">Trainer</option>
-                              <option value="director">Director</option>
-                              <option value="admin">Admin</option>
-                            </select>
+                              options={[
+                                { label: "Trainer", value: "trainer" },
+                                { label: "Director", value: "director" },
+                                { label: "Admin", value: "admin" },
+                              ]}
+                              value={role()}
+                              onChange={setRole}
+                            />
                             <Show when={isSelf()}>
                               <p class="text-xs text-muted mt-1">
                                 You cannot change your own role.
