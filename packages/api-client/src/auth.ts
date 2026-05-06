@@ -8,6 +8,12 @@ export interface CurrentUser {
   firstName: string
   lastName: string
   mustChangePassword?: boolean
+  photoUrl?: string
+}
+
+export interface UpdateMeInput {
+  firstName?: string
+  lastName?: string
 }
 
 const MAIN_PORTAL_URL =
@@ -60,5 +66,44 @@ export function useChangePassword() {
         method: "POST",
         body: JSON.stringify(data),
       }),
+  }))
+}
+
+export function useUpdateMe() {
+  const qc = useQueryClient()
+  return createMutation(() => ({
+    mutationFn: (data: UpdateMeInput) =>
+      api<CurrentUser>("/api/auth/me", {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["auth", "me"] })
+    },
+  }))
+}
+
+export function useUploadAvatar() {
+  const qc = useQueryClient()
+  return createMutation(() => ({
+    mutationFn: async (file: File): Promise<CurrentUser> => {
+      const form = new FormData()
+      form.append("file", file)
+      // Direct fetch — DO NOT set Content-Type, the browser must add the
+      // multipart boundary itself. The shared api() helper forces JSON.
+      const res = await fetch(`${API_URL}/api/auth/me/avatar`, {
+        method: "POST",
+        credentials: "include",
+        body: form,
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}))
+        throw new Error(body.error || `Upload failed (${res.status})`)
+      }
+      return res.json() as Promise<CurrentUser>
+    },
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["auth", "me"] })
+    },
   }))
 }

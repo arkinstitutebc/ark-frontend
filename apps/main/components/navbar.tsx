@@ -50,12 +50,23 @@ interface NavbarProps {
 export function Navbar(props: NavbarProps) {
   const [adminDropdownOpen, setAdminDropdownOpen] = createSignal(false)
   const [notifDropdownOpen, setNotifDropdownOpen] = createSignal(false)
+  // SSR-safe: starts as plain /profile; onMount appends ?return=current-url so
+  // the profile page can route back after edits without forcing a window.* read
+  // during render (hydration mismatch trap).
+  const [profileHref, setProfileHref] = createSignal("/profile")
   let notifDropdownRef: HTMLDivElement | undefined
   let adminDropdownRef: HTMLDivElement | undefined
 
   const unreadCount = () => mockNotifications.filter(n => n.unread).length
 
   onMount(() => {
+    // Capture the URL the user was on when they opened the menu so we can
+    // return them after profile edits.
+    const here = window.location.pathname + window.location.search
+    if (here !== "/profile" && !here.startsWith("/profile?")) {
+      setProfileHref(`/profile?return=${encodeURIComponent(here)}`)
+    }
+
     const handleClickOutside = (e: MouseEvent) => {
       if (notifDropdownRef && !notifDropdownRef.contains(e.target as Node)) {
         setNotifDropdownOpen(false)
@@ -187,13 +198,13 @@ export function Navbar(props: NavbarProps) {
                       <RolePill role={props.userRole || "—"} showAdminLabel />
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-surface-muted w-full text-left"
+                  <a
+                    href={profileHref()}
+                    class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-surface-muted"
                   >
                     <UI.user class="w-4 h-4 text-muted" />
-                    <span>Profile</span>
-                  </button>
+                    <span>Manage profile</span>
+                  </a>
                   <div class="h-px bg-border my-1" />
                   <a
                     href="/login"
