@@ -1,6 +1,7 @@
-import { ArrowLeft, ChevronLeft, ChevronRight, type Folder, LogOut } from "lucide-solid"
+import { ArrowLeft, type Folder, LogOut } from "lucide-solid"
 import { type Component, createMemo, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
+import { Icons } from "./icons"
 import { useSidebar } from "./sidebar-context"
 
 export interface NavItem {
@@ -45,7 +46,7 @@ export function Sidebar(props: SidebarProps) {
   const isActiveFn = (item: NavItem) => (props.isActive ?? defaultIsActive)(item, currentPath())
 
   const sidebarContent = () => (
-    <div class="flex flex-col h-full bg-surface border-r border-border">
+    <div class="relative flex flex-col h-full bg-surface border-r border-border">
       {/* Portal branding */}
       <div class="flex items-center gap-3 px-4 h-14 border-b border-border flex-shrink-0">
         <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -90,7 +91,7 @@ export function Sidebar(props: SidebarProps) {
         </For>
       </nav>
 
-      {/* Bottom section */}
+      {/* Bottom section: Back + Logout grouped under separator */}
       <div class="border-t border-border px-2 py-3 space-y-1 flex-shrink-0">
         <a
           href={portalUrl()}
@@ -111,7 +112,7 @@ export function Sidebar(props: SidebarProps) {
           <button
             type="button"
             onClick={props.onLogout}
-            class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-accent hover:bg-accent/5 transition-colors w-full text-left"
+            class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-accent hover:bg-surface-muted transition-colors w-full text-left"
           >
             <LogOut class="w-[18px] h-[18px] flex-shrink-0" />
             <Show when={!collapsed()}>
@@ -126,7 +127,7 @@ export function Sidebar(props: SidebarProps) {
         ) : (
           <a
             href={`${portalUrl()}/login`}
-            class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-accent hover:bg-accent/5 transition-colors"
+            class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-accent hover:bg-surface-muted transition-colors"
           >
             <LogOut class="w-[18px] h-[18px] flex-shrink-0" />
             <Show when={!collapsed()}>
@@ -134,23 +135,31 @@ export function Sidebar(props: SidebarProps) {
             </Show>
           </a>
         )}
+      </div>
 
-        {/* Collapse toggle */}
+      {/* Collapse toggle — desktop only. Expanded: absolute pin bottom-right.
+          Collapsed: inline centered row so the narrow rail still has an expand affordance. */}
+      {collapsed() ? (
         <button
           type="button"
           onClick={toggleCollapsed}
-          class="hidden md:flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-muted hover:bg-surface-muted hover:text-foreground transition-colors"
+          aria-label="Expand sidebar"
+          title="Expand sidebar"
+          class="hidden md:flex items-center justify-center w-full h-9 border-t border-border text-muted hover:text-foreground hover:bg-surface-muted transition-colors flex-shrink-0"
         >
-          {collapsed() ? (
-            <ChevronRight class="w-[18px] h-[18px] flex-shrink-0" />
-          ) : (
-            <ChevronLeft class="w-[18px] h-[18px] flex-shrink-0" />
-          )}
-          <Show when={!collapsed()}>
-            <span>Collapse</span>
-          </Show>
+          <Icons.panelLeftOpen class="w-4 h-4" />
         </button>
-      </div>
+      ) : (
+        <button
+          type="button"
+          onClick={toggleCollapsed}
+          aria-label="Collapse sidebar"
+          title="Collapse sidebar"
+          class="hidden md:flex items-center justify-center w-7 h-7 rounded-md absolute bottom-2 right-2 bg-surface-muted text-muted hover:text-foreground hover:bg-border transition-colors"
+        >
+          <Icons.panelLeftClose class="w-4 h-4" />
+        </button>
+      )}
     </div>
   )
 
