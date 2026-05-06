@@ -14,7 +14,7 @@ export function PageLoading(props: { label?: string; class?: string }) {
       aria-busy="true"
     >
       <svg
-        class="w-6 h-6 animate-spin text-primary/70"
+        class="w-6 h-6 animate-spin text-foreground/60"
         viewBox="0 0 24 24"
         fill="none"
         role="img"
@@ -26,7 +26,7 @@ export function PageLoading(props: { label?: string; class?: string }) {
           cy="12"
           r="9"
           stroke="currentColor"
-          stroke-width="2"
+          stroke-width="2.5"
           stroke-linecap="round"
           stroke-dasharray="6 6"
         />

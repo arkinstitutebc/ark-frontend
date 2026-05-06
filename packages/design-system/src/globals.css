@@ -24,7 +24,7 @@
   --color-border: #e5e7eb;
   --color-muted: #6b7280;
 
-  /* Brand Colors — identical in both themes */
+  /* Brand Colors — light-mode values; flip lighter in dark mode below for contrast */
   --color-primary: #193a7a;
   --color-accent: #c80100;
 
@@ -46,7 +46,8 @@
   --font-sans: "Montserrat Variable", "Montserrat", ui-sans-serif, system-ui, sans-serif;
 }
 
-/* Dark mode overrides — flips semantic tokens; brand stays. */
+/* Dark mode overrides — flips semantic tokens AND brand to lighter same-hue
+   shades so primary/accent text + buttons stay readable on the dark surface. */
 :root[data-theme="dark"] {
   --color-background: #0b1220;
   --color-foreground: #e5e7eb;
@@ -54,6 +55,19 @@
   --color-surface-muted: #1e293b;
   --color-border: #334155; /* one step lighter than surface-muted so borders are visible */
   --color-muted: #94a3b8;
+  /* Brand: same hue, higher lightness — still recognizably Ark, no longer
+     dark-blue-on-dark-blue. */
+  --color-primary: #5378d6; /* light: #193a7a (220° 64% 29%) → dark: 220° 60% 58% */
+  --color-accent: #ef4444; /* light: #c80100 (1° 100% 39%) → dark: 0° 84% 60% */
+}
+
+/* Brighter glow shadows for dark mode to match the lighter brand tints. */
+:root[data-theme="dark"] .shadow-glow-primary {
+  box-shadow: 0 4px 14px rgba(83, 120, 214, 0.35);
+}
+
+:root[data-theme="dark"] .shadow-glow-accent {
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
 }
 
 body {
