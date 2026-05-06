@@ -6,7 +6,7 @@ import {
   useUpdateMe,
   useUploadAvatar,
 } from "@ark/api-client"
-import { Button, Icons, Input, RolePill, toast } from "@ark/ui"
+import { AvatarCropper, Button, Icons, Input, RolePill, toast } from "@ark/ui"
 import { createEffect, createMemo, createSignal, onCleanup, onMount, Show } from "solid-js"
 
 interface PasswordRule {
@@ -118,12 +118,15 @@ export default function ProfilePage() {
 
   // ── Photo card state ─────────────────────────────────────────────
   let fileInputRef: HTMLInputElement | undefined
+  // File picked by the user; passed to <AvatarCropper> for circle-crop preview
+  // before the actual upload.
+  const [pendingFile, setPendingFile] = createSignal<File | null>(null)
 
   function pickPhoto() {
     fileInputRef?.click()
   }
 
-  async function onFilePicked(e: Event) {
+  function onFilePicked(e: Event) {
     const target = e.currentTarget as HTMLInputElement
     const file = target.files?.[0]
     target.value = "" // allow re-upload of the same filename
@@ -136,8 +139,16 @@ export default function ProfilePage() {
       toast.error("Avatar must be 2 MB or smaller")
       return
     }
+    // Open the cropper. Actual upload happens in onCropConfirmed below.
+    setPendingFile(file)
+  }
+
+  async function onCropConfirmed(blob: Blob) {
+    setPendingFile(null)
+    // Repackage as a File so multer on the backend sees a filename.
+    const cropped = new File([blob], "avatar.png", { type: "image/png" })
     try {
-      await uploadAvatar.mutateAsync(file)
+      await uploadAvatar.mutateAsync(cropped)
       toast.success("Photo uploaded")
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not upload photo")
@@ -378,6 +389,12 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      <AvatarCropper
+        file={pendingFile()}
+        onCropped={onCropConfirmed}
+        onCancel={() => setPendingFile(null)}
+      />
     </div>
   )
 }
