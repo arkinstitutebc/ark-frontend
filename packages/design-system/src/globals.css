@@ -1,5 +1,7 @@
-/* Montserrat Font - must be first */
-@import url("https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap");
+/* Montserrat is self-hosted via @fontsource-variable/montserrat (one woff2,
+   same-origin, brotli + immutable cache from Vercel). The JS-side import is
+   in each app's +Layout.tsx — globals.css is plain CSS, so the font's
+   @font-face rules ship via the JS bundle, not @import. */
 
 @import "tailwindcss";
 
@@ -38,8 +40,10 @@
   --color-gray-800: #1f2937;
   --color-gray-900: #111827;
 
-  /* Font */
-  --font-sans: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  /* Font — "Montserrat Variable" is the family name fontsource exposes for
+     the variable woff2; falls through to plain "Montserrat" if some legacy
+     non-bundled context loads. */
+  --font-sans: "Montserrat Variable", "Montserrat", ui-sans-serif, system-ui, sans-serif;
 }
 
 /* Dark mode overrides — flips semantic tokens; brand stays. */
@@ -53,7 +57,7 @@
 }
 
 body {
-  font-family: "Montserrat", ui-sans-serif, system-ui, sans-serif;
+  font-family: "Montserrat Variable", "Montserrat", ui-sans-serif, system-ui, sans-serif;
   background-color: var(--color-background);
   color: var(--color-foreground);
 }

@@ -18,6 +18,7 @@
         "@ark/data-types": "workspace:*",
         "@ark/design-system": "workspace:*",
         "@ark/ui": "workspace:*",
+        "@fontsource-variable/montserrat": "^5.2.5",
         "@tanstack/solid-query": "^5.90.19",
         "clsx": "^2.1.1",
         "lucide-solid": "^0.562.0",
@@ -46,6 +47,7 @@
         "@ark/data-types": "workspace:*",
         "@ark/design-system": "workspace:*",
         "@ark/ui": "workspace:*",
+        "@fontsource-variable/montserrat": "^5.2.5",
         "@tanstack/solid-query": "^5.90.19",
         "clsx": "^2.1.1",
         "exceljs": "^4.4.0",
@@ -75,6 +77,7 @@
         "@ark/data-types": "workspace:*",
         "@ark/design-system": "workspace:*",
         "@ark/ui": "workspace:*",
+        "@fontsource-variable/montserrat": "^5.2.5",
         "@tanstack/solid-query": "^5.90.19",
         "clsx": "^2.1.1",
         "lucide-solid": "^0.562.0",
@@ -103,6 +106,7 @@
         "@ark/data-types": "workspace:*",
         "@ark/design-system": "workspace:*",
         "@ark/ui": "workspace:*",
+        "@fontsource-variable/montserrat": "^5.2.5",
         "@tanstack/solid-query": "^5.90.19",
         "clsx": "^2.1.1",
         "lucide-solid": "^0.562.0",
@@ -131,6 +135,7 @@
         "@ark/data-types": "workspace:*",
         "@ark/design-system": "workspace:*",
         "@ark/ui": "workspace:*",
+        "@fontsource-variable/montserrat": "^5.2.5",
         "@tanstack/solid-query": "^5.90.19",
         "clsx": "^2.1.1",
         "lucide-solid": "^0.562.0",
@@ -159,6 +164,7 @@
         "@ark/data-types": "workspace:*",
         "@ark/design-system": "workspace:*",
         "@ark/ui": "workspace:*",
+        "@fontsource-variable/montserrat": "^5.2.5",
         "@tanstack/solid-query": "^5.90.19",
         "clsx": "^2.1.1",
         "lucide-solid": "^0.562.0",
@@ -187,6 +193,7 @@
         "@ark/data-types": "workspace:*",
         "@ark/design-system": "workspace:*",
         "@ark/ui": "workspace:*",
+        "@fontsource-variable/montserrat": "^5.2.5",
         "@tanstack/solid-query": "^5.90.19",
         "clsx": "^2.1.1",
         "lucide-solid": "^0.562.0",
@@ -232,6 +239,7 @@
       "name": "@ark/design-system",
       "version": "0.1.0",
       "dependencies": {
+        "@fontsource-variable/montserrat": "^5.2.5",
         "tailwindcss": "^4",
       },
     },
@@ -391,6 +399,8 @@
     "@fast-csv/format": ["@fast-csv/format@4.3.5", "", { "dependencies": { "@types/node": "^14.0.1", "lodash.escaperegexp": "^4.1.2", "lodash.isboolean": "^3.0.3", "lodash.isequal": "^4.5.0", "lodash.isfunction": "^3.0.9", "lodash.isnil": "^4.0.0" } }, "sha512-8iRn6QF3I8Ak78lNAa+Gdl5MJJBM5vRHivFtMRUWINdevNo00K7OXxS2PshawLKTejVwieIlPmK5YlLu6w4u8A=="],
 
     "@fast-csv/parse": ["@fast-csv/parse@4.3.6", "", { "dependencies": { "@types/node": "^14.0.1", "lodash.escaperegexp": "^4.1.2", "lodash.groupby": "^4.6.0", "lodash.isfunction": "^3.0.9", "lodash.isnil": "^4.0.0", "lodash.isundefined": "^3.0.1", "lodash.uniq": "^4.5.0" } }, "sha512-uRsLYksqpbDmWaSmzvJcuApSEe38+6NQZBUsuAyMZKqHxH0g1wcJgsKUvN3WC8tewaqFjBMMGrkHmC+T7k8LvA=="],
+
+    "@fontsource-variable/montserrat": ["@fontsource-variable/montserrat@5.2.8", "", {}, "sha512-d8wykq7GCKhEOlLwEuQIOK3w3qsXNxwDlH0meru4AZZzQ4/+rZyvHWKL6BBtHdmbovSHEEQDkwkD8qYUKlcFtQ=="],
 
     "@isaacs/balanced-match": ["@isaacs/balanced-match@4.0.1", "", {}, "sha512-yzMTt9lEb8Gv7zRioUilSglI0c0smZ9k5D65677DLWLtWJaXIS3CqcGyUFByYKlnUj6TkjLVs54fBl6+TiGQDQ=="],
 
