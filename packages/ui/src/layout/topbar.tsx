@@ -1,9 +1,9 @@
 import { ChevronDown, LogOut, Menu, User } from "lucide-solid"
 import { createSignal, onCleanup, onMount, Show } from "solid-js"
-import { NotificationBell, type NotificationBellProps } from "./notification-bell"
-import { RolePill } from "./role-pill"
+import { NotificationBell, type NotificationBellProps } from "../display/notification-bell"
+import { RolePill } from "../display/role-pill"
+import { ThemeToggle } from "../theme/theme-toggle"
 import { useSidebar } from "./sidebar-context"
-import { ThemeToggle } from "./theme-toggle"
 
 export interface CurrentUser {
   id: string

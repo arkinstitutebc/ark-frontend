@@ -1,5 +1,5 @@
 import { type Component, createUniqueId, type JSX, Show } from "solid-js"
-import { cn } from "./utils"
+import { cn } from "../utils"
 
 // Icon props are Component refs, not JSX.Element values. Solid's hydration
 // breaks when a JSX-as-prop getter contains lucide-solid template factories

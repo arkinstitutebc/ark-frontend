@@ -1,4 +1,4 @@
-import { cn } from "./utils"
+import { cn } from "../utils"
 
 export interface CardProps {
   children: import("solid-js").JSX.Element

@@ -1,7 +1,7 @@
 import { ArrowLeft, type Folder, LogOut } from "lucide-solid"
 import { type Component, createMemo, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
-import { Icons } from "./icons"
+import { Icons } from "../icons"
 import { useSidebar } from "./sidebar-context"
 
 export interface NavItem {

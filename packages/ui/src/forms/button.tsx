@@ -1,5 +1,5 @@
 import type { JSX } from "solid-js"
-import { cn } from "./utils"
+import { cn } from "../utils"
 
 export function Button(
   props: JSX.ButtonHTMLAttributes<HTMLButtonElement> & {

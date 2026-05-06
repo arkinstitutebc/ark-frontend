@@ -1,7 +1,7 @@
 import { Monitor, Moon, Sun } from "lucide-solid"
 import { For } from "solid-js"
+import { cn } from "../utils"
 import { type ThemePreference, useTheme } from "./theme"
-import { cn } from "./utils"
 
 const OPTIONS: { value: ThemePreference; label: string; Icon: typeof Sun }[] = [
   { value: "light", label: "Light", Icon: Sun },
