@@ -69,6 +69,10 @@ export function TopBar(props: TopBarProps) {
 
         <div class="flex items-center gap-3">
           <ThemeToggle compact />
+          {/* Bell only renders when the consumer wires the bindings. The
+              spread is evaluated once at mount; the bindings inside should be
+              accessor functions (signals), not raw values, so they stay
+              reactive. */}
           <Show when={props.notifications}>{binding => <NotificationBell {...binding()} />}</Show>
 
           <div class="relative" ref={dropdownRef}>

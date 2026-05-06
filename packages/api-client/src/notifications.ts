@@ -21,8 +21,10 @@ export interface NotificationListResponse {
 const NOTIFICATIONS_KEY = ["notifications"] as const
 
 /**
- * Polls every 30s. Auto-pauses when the tab is hidden (TanStack Query's
- * default `refetchOnWindowFocus` + `refetchInterval` interaction).
+ * Polls every 30s. TanStack Query's default `refetchIntervalInBackground=false`
+ * pauses the interval when the tab is hidden, so closed laptops don't burn
+ * requests. Mutations (mark-read / mark-all-read) invalidate the prefix
+ * `["notifications"]`, which covers any param-shape variants.
  */
 export function useNotifications(opts?: { unreadOnly?: () => boolean; limit?: number }) {
   return createQuery(() => {
