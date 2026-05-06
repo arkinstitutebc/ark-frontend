@@ -1,5 +1,5 @@
-import { ThemeToggle } from "@ark/ui"
-import { createSignal, For, onCleanup, onMount } from "solid-js"
+import { RolePill, ThemeToggle } from "@ark/ui"
+import { createSignal, For, onCleanup, onMount, Show } from "solid-js"
 import { UI } from "./ui"
 
 interface Notification {
@@ -91,13 +91,14 @@ export function Navbar(props: NavbarProps) {
           </div>
 
           {/* Right: Theme toggle + Notifications + Admin dropdown */}
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-3">
             <ThemeToggle compact />
             {/* Notification bell */}
             <div class="relative" ref={notifDropdownRef}>
               <button
                 type="button"
                 onClick={() => setNotifDropdownOpen(!notifDropdownOpen())}
+                aria-label="Notifications"
                 class="relative w-10 h-10 rounded-lg hover:bg-surface-muted flex items-center justify-center transition-colors"
               >
                 <UI.bell class="w-5 h-5 text-muted" />
@@ -108,7 +109,7 @@ export function Navbar(props: NavbarProps) {
                 )}
               </button>
 
-              {notifDropdownOpen() && (
+              <Show when={notifDropdownOpen()}>
                 <div class="absolute right-0 top-full mt-2 w-80 bg-surface rounded-xl shadow-lg border border-border py-2 z-50">
                   <div class="px-4 py-3 border-b border-border flex items-center justify-between">
                     <p class="text-sm font-semibold text-foreground">Notifications</p>
@@ -145,7 +146,7 @@ export function Navbar(props: NavbarProps) {
                     </button>
                   </div>
                 </div>
-              )}
+              </Show>
             </div>
 
             {/* Admin dropdown */}
@@ -153,12 +154,10 @@ export function Navbar(props: NavbarProps) {
               <button
                 type="button"
                 onClick={() => setAdminDropdownOpen(!adminDropdownOpen())}
-                class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-surface-muted/80 transition-colors"
+                title={props.userName ? props.userName : "Account"}
+                aria-label={props.userName ? `Account menu for ${props.userName}` : "Account menu"}
+                class="flex items-center gap-2 p-1 rounded-lg hover:bg-surface-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
-                <div class="text-left hidden sm:block">
-                  <p class="text-sm font-semibold text-foreground">{props.userName || "—"}</p>
-                  <p class="text-xs text-muted">{props.userRole || "—"}</p>
-                </div>
                 <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm">
                   <UI.user class="w-5 h-5 text-white" />
                 </div>
@@ -166,13 +165,17 @@ export function Navbar(props: NavbarProps) {
               </button>
 
               {/* Dropdown menu */}
-              {adminDropdownOpen() && (
-                <div class="absolute right-0 top-full mt-2 w-52 bg-surface rounded-xl shadow-lg border border-border py-2 z-50">
+              <Show when={adminDropdownOpen()}>
+                <div class="absolute right-0 top-full mt-2 w-56 bg-surface rounded-xl shadow-lg border border-border py-2 z-50">
                   <div class="px-4 py-3 border-b border-border">
-                    <p class="text-sm font-semibold text-foreground">
-                      {props.userName || "—"} {props.userRole ? `· ${props.userRole}` : ""}
-                    </p>
-                    <p class="text-xs text-muted">{props.userEmail || "—"}</p>
+                    <p class="text-sm font-semibold text-foreground">{props.userName || "—"}</p>
+                    <p class="text-xs text-muted mt-0.5 truncate">{props.userEmail || "—"}</p>
+                    <div class="mt-2 flex items-center gap-2">
+                      <RolePill role={props.userRole || "—"} />
+                      {props.userRole === "admin" && (
+                        <span class="text-[11px] text-muted">Viewing as admin</span>
+                      )}
+                    </div>
                   </div>
                   <button
                     type="button"
@@ -181,7 +184,7 @@ export function Navbar(props: NavbarProps) {
                     <UI.user class="w-4 h-4 text-muted" />
                     <span>Profile</span>
                   </button>
-                  <div class="h-px bg-surface-muted my-1" />
+                  <div class="h-px bg-border my-1" />
                   <a
                     href="/login"
                     class="flex items-center gap-3 px-4 py-2.5 text-sm text-accent hover:bg-accent/5"
@@ -190,7 +193,7 @@ export function Navbar(props: NavbarProps) {
                     <span>Logout</span>
                   </a>
                 </div>
-              )}
+              </Show>
             </div>
           </div>
         </div>

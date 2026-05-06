@@ -1,5 +1,6 @@
 import { Bell, ChevronDown, LogOut, Menu, User } from "lucide-solid"
-import { createSignal, onCleanup, onMount } from "solid-js"
+import { createSignal, onCleanup, onMount, Show } from "solid-js"
+import { RolePill } from "./role-pill"
 import { useSidebar } from "./sidebar-context"
 import { ThemeToggle } from "./theme-toggle"
 
@@ -54,10 +55,11 @@ export function TopBar(props: TopBarProps) {
           </button>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-3">
           <ThemeToggle compact />
           <button
             type="button"
+            aria-label="Notifications"
             class="relative p-2 rounded-lg text-muted hover:bg-surface-muted transition-colors"
           >
             <Bell class="w-5 h-5" />
@@ -67,23 +69,27 @@ export function TopBar(props: TopBarProps) {
             <button
               type="button"
               onClick={() => setUserDropdownOpen(!userDropdownOpen())}
-              class="flex items-center gap-3 pl-3 pr-2 py-1.5 rounded-lg hover:bg-surface-muted transition-colors"
+              title={props.user ? displayName() : "Account"}
+              aria-label={props.user ? `Account menu for ${displayName()}` : "Account menu"}
+              class="flex items-center gap-2 p-1 rounded-lg hover:bg-surface-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
-              <div class="text-left hidden sm:block">
-                <p class="text-sm font-semibold text-foreground leading-tight">{displayName()}</p>
-                <p class="text-xs text-muted leading-tight mt-0.5 capitalize">{displayRole()}</p>
-              </div>
               <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm flex-shrink-0">
                 <User class="w-4 h-4 text-white" />
               </div>
               <ChevronDown class="w-4 h-4 text-muted flex-shrink-0" />
             </button>
 
-            {userDropdownOpen() && (
-              <div class="absolute right-0 top-full mt-2 w-48 bg-surface rounded-xl shadow-lg border border-border py-2 z-50">
+            <Show when={userDropdownOpen()}>
+              <div class="absolute right-0 top-full mt-2 w-56 bg-surface rounded-xl shadow-lg border border-border py-2 z-50">
                 <div class="px-4 py-3 border-b border-border">
                   <p class="text-sm font-semibold text-foreground">{displayName()}</p>
                   <p class="text-xs text-muted mt-0.5 truncate">{displayEmail()}</p>
+                  <div class="mt-2 flex items-center gap-2">
+                    <RolePill role={displayRole()} />
+                    {props.user?.role === "admin" && (
+                      <span class="text-[11px] text-muted">Viewing as admin</span>
+                    )}
+                  </div>
                 </div>
                 {props.profileHref ? (
                   <a
@@ -112,7 +118,7 @@ export function TopBar(props: TopBarProps) {
                   <span>Logout</span>
                 </button>
               </div>
-            )}
+            </Show>
           </div>
         </div>
       </div>
