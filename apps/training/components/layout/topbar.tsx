@@ -1,3 +1,5 @@
+// TODO(M9+): all 6 sub-portal topbar.tsx files are byte-identical. Extract to
+// a shared `<PortalTopBar />` in `@ark/ui` so we delete 5 copies of this file.
 import {
   performLogout,
   useCurrentUser,
