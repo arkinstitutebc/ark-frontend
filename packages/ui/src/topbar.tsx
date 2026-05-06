@@ -38,8 +38,17 @@ export function TopBar(props: TopBarProps) {
         setUserDropdownOpen(false)
       }
     }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && userDropdownOpen()) {
+        setUserDropdownOpen(false)
+      }
+    }
     document.addEventListener("click", handleClickOutside)
-    onCleanup(() => document.removeEventListener("click", handleClickOutside))
+    document.addEventListener("keydown", handleKeyDown)
+    onCleanup(() => {
+      document.removeEventListener("click", handleClickOutside)
+      document.removeEventListener("keydown", handleKeyDown)
+    })
   })
 
   return (
@@ -71,6 +80,8 @@ export function TopBar(props: TopBarProps) {
               onClick={() => setUserDropdownOpen(!userDropdownOpen())}
               title={props.user ? displayName() : "Account"}
               aria-label={props.user ? `Account menu for ${displayName()}` : "Account menu"}
+              aria-haspopup="menu"
+              aria-expanded={userDropdownOpen()}
               class="flex items-center gap-2 p-1 rounded-lg hover:bg-surface-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm flex-shrink-0">
@@ -84,11 +95,8 @@ export function TopBar(props: TopBarProps) {
                 <div class="px-4 py-3 border-b border-border">
                   <p class="text-sm font-semibold text-foreground">{displayName()}</p>
                   <p class="text-xs text-muted mt-0.5 truncate">{displayEmail()}</p>
-                  <div class="mt-2 flex items-center gap-2">
-                    <RolePill role={displayRole()} />
-                    {props.user?.role === "admin" && (
-                      <span class="text-[11px] text-muted">Viewing as admin</span>
-                    )}
+                  <div class="mt-2">
+                    <RolePill role={displayRole()} showAdminLabel />
                   </div>
                 </div>
                 {props.profileHref ? (

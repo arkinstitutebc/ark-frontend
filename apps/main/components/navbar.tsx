@@ -64,8 +64,17 @@ export function Navbar(props: NavbarProps) {
         setAdminDropdownOpen(false)
       }
     }
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return
+      if (notifDropdownOpen()) setNotifDropdownOpen(false)
+      if (adminDropdownOpen()) setAdminDropdownOpen(false)
+    }
     document.addEventListener("click", handleClickOutside)
-    onCleanup(() => document.removeEventListener("click", handleClickOutside))
+    document.addEventListener("keydown", handleKeyDown)
+    onCleanup(() => {
+      document.removeEventListener("click", handleClickOutside)
+      document.removeEventListener("keydown", handleKeyDown)
+    })
   })
 
   return (
@@ -99,7 +108,9 @@ export function Navbar(props: NavbarProps) {
                 type="button"
                 onClick={() => setNotifDropdownOpen(!notifDropdownOpen())}
                 aria-label="Notifications"
-                class="relative w-10 h-10 rounded-lg hover:bg-surface-muted flex items-center justify-center transition-colors"
+                aria-haspopup="menu"
+                aria-expanded={notifDropdownOpen()}
+                class="relative w-10 h-10 rounded-lg hover:bg-surface-muted flex items-center justify-center transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 <UI.bell class="w-5 h-5 text-muted" />
                 {unreadCount() > 0 && (
@@ -156,6 +167,8 @@ export function Navbar(props: NavbarProps) {
                 onClick={() => setAdminDropdownOpen(!adminDropdownOpen())}
                 title={props.userName ? props.userName : "Account"}
                 aria-label={props.userName ? `Account menu for ${props.userName}` : "Account menu"}
+                aria-haspopup="menu"
+                aria-expanded={adminDropdownOpen()}
                 class="flex items-center gap-2 p-1 rounded-lg hover:bg-surface-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
                 <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm">
@@ -170,11 +183,8 @@ export function Navbar(props: NavbarProps) {
                   <div class="px-4 py-3 border-b border-border">
                     <p class="text-sm font-semibold text-foreground">{props.userName || "—"}</p>
                     <p class="text-xs text-muted mt-0.5 truncate">{props.userEmail || "—"}</p>
-                    <div class="mt-2 flex items-center gap-2">
-                      <RolePill role={props.userRole || "—"} />
-                      {props.userRole === "admin" && (
-                        <span class="text-[11px] text-muted">Viewing as admin</span>
-                      )}
+                    <div class="mt-2">
+                      <RolePill role={props.userRole || "—"} showAdminLabel />
                     </div>
                   </div>
                   <button
