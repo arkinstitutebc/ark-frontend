@@ -17,6 +17,7 @@ export {
   type NotificationItem,
 } from "./notification-bell"
 export { PageLoading } from "./page-loading"
+export { PortalTopBar, type PortalTopBarProps } from "./portal-topbar"
 export { QueryBoundary } from "./query-boundary"
 export { RolePill } from "./role-pill"
 export { Select, type SelectOption, type SelectProps } from "./select"

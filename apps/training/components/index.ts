@@ -1,2 +1,2 @@
-export { Sidebar, SidebarProvider, TopBar } from "./layout"
+export { Sidebar, SidebarProvider } from "./layout"
 export { Card, Icons, Modal } from "./ui"

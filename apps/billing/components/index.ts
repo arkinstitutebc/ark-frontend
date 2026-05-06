@@ -1,1 +1,1 @@
-export { Sidebar, SidebarProvider, TopBar } from "./layout"
+export { Sidebar, SidebarProvider } from "./layout"
