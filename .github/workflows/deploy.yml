@@ -1,12 +1,4 @@
-name: Quality
-
-# Lint + typecheck on every push/PR. Deploys are now handled by Vercel's
-# native Git integration (each portal project links directly to this repo and
-# deploys on push to main, gated by per-project "Ignored Build Step" so only
-# changed apps rebuild). The previous matrix-deploy step was removed because:
-#   1. The Vercel free-tier 100/day CLI deploy cap blocked rapid iteration
-#   2. Vercel-Git integration uses a separate (more generous) per-hour quota
-#   3. PR previews + per-commit deploy logs in the Vercel dashboard come for free
+name: Deploy
 
 on:
   push:
@@ -14,8 +6,8 @@ on:
   pull_request:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
 
 jobs:
   quality:
@@ -30,3 +22,42 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bunx biome check .
       - run: bun run --filter '*' typecheck
+
+  deploy:
+    needs: quality
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: webfactory/ssh-agent@v0.9.1
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: pull, path-filter build, restart
+        run: |
+          ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null \
+            ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} bash <<'EOF'
+            set -euo pipefail
+            cd /opt/ark-portals/repo
+            PREV_SHA=$(sudo -u ark git rev-parse HEAD)
+            sudo -u ark git pull --ff-only origin main
+            NEW_SHA=$(sudo -u ark git rev-parse HEAD)
+            PREV_SHA="$PREV_SHA" NEW_SHA="$NEW_SHA" bash infra/deploy.sh
+          EOF
+      - name: health check (all 7 portals)
+        run: |
+          PORTALS="portal training procurement inventory finance billing hr"
+          for h in $PORTALS; do
+            ok=0
+            for i in 1 2 3 4 5; do
+              sleep 3
+              if curl -sfk "https://$h.arkinstitutebc.com" -o /dev/null; then
+                echo "OK $h.arkinstitutebc.com healthy"
+                ok=1
+                break
+              fi
+              echo "[$h] attempt $i failed, retrying..."
+            done
+            if [ "$ok" -ne 1 ]; then
+              echo "FAIL $h.arkinstitutebc.com health check failed — check 'ssh ark-api journalctl -u ark-portal-$h -n 50'"
+              exit 1
+            fi
+          done

@@ -49,11 +49,22 @@ export function TopProgressBar() {
       if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return
       const href = target.getAttribute("href") ?? ""
       if (!href || href.startsWith("#") || href.startsWith("mailto:")) return
-      // External link → browser handles, no bar
+      // Same-origin → Vike client router handles. Cross-origin → only show
+      // bar if it's a sibling portal in the *.arkinstitutebc.com family
+      // (or localhost in dev). Real external links still get no bar.
       try {
         const url = new URL(href, window.location.href)
-        if (url.origin !== window.location.origin) return
-        if (url.pathname === window.location.pathname) return
+        if (url.origin === window.location.origin) {
+          if (url.pathname === window.location.pathname) return
+        } else {
+          const host = url.hostname
+          const isPortalFamily =
+            host.endsWith(".arkinstitutebc.com") ||
+            host === "arkinstitutebc.com" ||
+            host === "localhost" ||
+            host.startsWith("127.0.0.1")
+          if (!isPortalFamily) return
+        }
       } catch {
         return
       }
