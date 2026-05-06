@@ -29,6 +29,6 @@
     "typescript": "^5.9.3"
   },
   "overrides": {
-    "vike": "0.4.252"
+    "vike": "0.4.258"
   }
 }

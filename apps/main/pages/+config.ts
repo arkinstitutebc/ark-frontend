@@ -4,6 +4,7 @@ import vikeSolid from "vike-solid/config"
 export default {
   extends: [vikeSolid],
   ssr: true,
+  server: true,
   // Global defaults (can be overridden per page)
   title: "Ark Institute Portal",
   description:
