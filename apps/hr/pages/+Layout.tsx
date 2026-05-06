@@ -1,11 +1,5 @@
 import { QueryProvider } from "@ark/api-client"
-import {
-  AppToaster,
-  PortalTopBar,
-  SubPortalShell,
-  ThemeProvider,
-  TopProgressBar,
-} from "@ark/ui"
+import { AppToaster, PortalTopBar, SubPortalShell, ThemeProvider, TopProgressBar } from "@ark/ui"
 import "@ark/design-system/globals.css"
 import "@fontsource-variable/montserrat"
 import type { JSX } from "solid-js"
