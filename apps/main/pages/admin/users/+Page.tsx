@@ -7,7 +7,7 @@ import {
   useInviteUser,
   validateForm,
 } from "@ark/api-client"
-import { Button, Icons, Input, Modal, PageLoading, toast } from "@ark/ui"
+import { Button, Icons, Input, Modal, PageLoading, TableSkeleton, toast } from "@ark/ui"
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { z } from "zod"
 import { Footer, Navbar } from "@/components"
@@ -127,10 +127,7 @@ export default function AdminUsersPage() {
             </div>
 
             <div class="bg-surface rounded-2xl shadow-sm border border-border overflow-hidden">
-              <Show
-                when={!usersQuery.isPending}
-                fallback={<div class="p-12 text-center text-sm text-muted">Loading users…</div>}
-              >
+              <Show when={!usersQuery.isPending} fallback={<TableSkeleton rows={6} cols={5} />}>
                 <Show
                   when={usersQuery.isError}
                   fallback={

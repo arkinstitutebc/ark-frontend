@@ -16,6 +16,7 @@ export { QueryBoundary } from "./query-boundary"
 export { type NavItem, Sidebar, type SidebarProps } from "./sidebar"
 export { SidebarProvider, useSidebar } from "./sidebar-context"
 export { StatusBadge } from "./status-badge"
+export { TableSkeleton } from "./table-skeleton"
 export {
   type EffectiveTheme,
   NO_FOUC_SCRIPT,
@@ -24,6 +25,7 @@ export {
   useTheme,
 } from "./theme"
 export { ThemeToggle } from "./theme-toggle"
+export { TopProgressBar } from "./top-progress-bar"
 export { type CurrentUser, TopBar, type TopBarProps } from "./topbar"
 
 // Utilities
