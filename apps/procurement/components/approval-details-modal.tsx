@@ -1,6 +1,6 @@
+import { Modal } from "@ark/ui"
 import type { PrStatus, PurchaseRequest } from "@data/types"
 import { createSignal, Show } from "solid-js"
-import { Modal } from "./ui/modal"
 
 const statusColors: Record<PrStatus, { bg: string; text: string; dot: string }> = {
   pending: { bg: "bg-yellow-50", text: "text-yellow-700", dot: "bg-yellow-400" },

@@ -1,9 +1,9 @@
+import { Icons } from "@ark/ui"
 import { useBatch, useBatchStudents } from "@data/hooks"
 import type { Batch } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
 import { AddStudentModal, EditBatchModal } from "@/components/modals"
-import { Icons } from "@/components/ui/icons"
 
 export default function BatchDetailPage() {
   const pageContext = usePageContext()

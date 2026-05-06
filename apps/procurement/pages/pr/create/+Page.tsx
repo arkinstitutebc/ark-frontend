@@ -1,3 +1,4 @@
+import { Icons } from "@ark/ui"
 import { api } from "@data/api"
 import { useCreatePr } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
@@ -6,7 +7,6 @@ import type { Batch } from "@data/types"
 import { validateForm } from "@data/validate"
 import { createQuery } from "@tanstack/solid-query"
 import { createMemo, createSignal, For, Index, Show } from "solid-js"
-import { Icons } from "@/components/ui/icons"
 
 const categories = [
   "Training Supplies",

@@ -1,8 +1,8 @@
+import { Modal } from "@ark/ui"
 import { useAttendance } from "@data/hooks"
 import type { Trainer } from "@data/types"
 import { For, Show } from "solid-js"
 import { AttendanceStatusBadge, Icons, TrainerStatusBadge } from "@/components/ui"
-import { Modal } from "@/components/ui/modal"
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(amount)

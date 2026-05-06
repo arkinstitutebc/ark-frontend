@@ -1,8 +1,8 @@
+import { Modal } from "@ark/ui"
 import { useBatches } from "@data/hooks"
 import { createStudentSchema } from "@data/schemas"
 import { validateForm } from "@data/validate"
 import { createSignal, For, Show } from "solid-js"
-import { Modal } from "@/components/ui/modal"
 
 interface AddStudentModalProps {
   open: boolean

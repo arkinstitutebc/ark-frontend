@@ -1,8 +1,7 @@
+import { Icons, Modal } from "@ark/ui"
 import { useMovements } from "@data/hooks"
 import type { StockItem } from "@data/types"
 import { For, Show } from "solid-js"
-import { Icons } from "./ui/icons"
-import { Modal } from "./ui/modal"
 
 interface ViewItemModalProps {
   open: boolean

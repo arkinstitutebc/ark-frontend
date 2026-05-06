@@ -1,9 +1,9 @@
+import { Icons } from "@ark/ui"
 import { useCreatePo, useRequests } from "@data/hooks"
 import { createPoSchema } from "@data/schemas"
 import type { PurchaseRequest } from "@data/types"
 import { validateForm } from "@data/validate"
 import { createEffect, createMemo, createSignal, For, onMount, Show } from "solid-js"
-import { Icons } from "@/components/ui/icons"
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(amount)

@@ -1,8 +1,8 @@
+import { Icons } from "@ark/ui"
 import { useBatches } from "@data/hooks"
 import type { Student } from "@data/types"
 import { Show } from "solid-js"
 import { Modal, StatusBadge } from "@/components/ui"
-import { Icons } from "@/components/ui/icons"
 
 interface ViewStudentModalProps {
   open: boolean

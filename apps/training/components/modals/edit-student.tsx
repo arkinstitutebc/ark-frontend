@@ -1,10 +1,9 @@
+import { Icons, Modal } from "@ark/ui"
 import { useBatches, useUpdateStudent } from "@data/hooks"
 import { updateStudentSchema } from "@data/schemas"
 import type { Student } from "@data/types"
 import { validateForm } from "@data/validate"
 import { createSignal, For, Show } from "solid-js"
-import { Icons } from "@/components/ui/icons"
-import { Modal } from "@/components/ui/modal"
 
 interface EditStudentModalProps {
   open: boolean

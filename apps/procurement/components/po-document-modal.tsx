@@ -1,6 +1,6 @@
+import { Modal } from "@ark/ui"
 import type { PurchaseOrder } from "@data/types"
 import { Show } from "solid-js"
-import { Modal } from "./ui/modal"
 import { PoStatusBadge } from "./ui/status-badges"
 
 function formatCurrency(amount: number) {
