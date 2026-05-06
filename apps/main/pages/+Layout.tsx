@@ -15,4 +15,3 @@ export function Layout(props: { children: JSX.Element }) {
     </ThemeProvider>
   )
 }
-

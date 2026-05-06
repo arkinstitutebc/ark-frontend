@@ -4,6 +4,7 @@ import vikeSolid from "vike-solid/config"
 export default {
   extends: [vikeSolid],
   ssr: true,
+  server: true,
   title: "Inventory Portal | Ark Institute",
   description: "Stock tracking and receiving",
 } satisfies Config

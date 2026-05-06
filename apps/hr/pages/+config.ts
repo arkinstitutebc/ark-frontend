@@ -4,6 +4,7 @@ import vikeSolid from "vike-solid/config"
 export default {
   extends: [vikeSolid],
   ssr: true,
+  server: true,
   title: "HR Portal | Ark Institute",
   description: "Biometric sync and payroll management",
 } satisfies Config
