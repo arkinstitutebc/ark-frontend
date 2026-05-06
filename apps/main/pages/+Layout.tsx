@@ -15,5 +15,4 @@ export function Layout(props: { children: JSX.Element }) {
     </ThemeProvider>
   )
 }
-// vercel-git pipeline live: 1778047479
 
