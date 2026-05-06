@@ -20,7 +20,8 @@ interface InvitedUser {
 let invited: InvitedUser | null = null
 
 test.describe("Notifications fan-out + bell", () => {
-  test.beforeEach(async (_, testInfo) => {
+  // biome-ignore lint/correctness/noEmptyPattern: Playwright requires the first argument to be a destructured fixture object — empty {} omits all fixtures while still satisfying the API.
+  test.beforeEach(async ({}, testInfo) => {
     await requireBackend(testInfo)
     invited = null
   })
