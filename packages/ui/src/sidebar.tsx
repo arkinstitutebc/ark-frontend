@@ -46,7 +46,7 @@ export function Sidebar(props: SidebarProps) {
   const isActiveFn = (item: NavItem) => (props.isActive ?? defaultIsActive)(item, currentPath())
 
   const sidebarContent = () => (
-    <div class="relative flex flex-col h-full bg-surface border-r border-border">
+    <div class="flex flex-col h-full bg-surface border-r border-border">
       {/* Portal branding */}
       <div class="flex items-center gap-3 px-4 h-14 border-b border-border flex-shrink-0">
         <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -137,29 +137,25 @@ export function Sidebar(props: SidebarProps) {
         )}
       </div>
 
-      {/* Collapse toggle — desktop only. Expanded: absolute pin bottom-right.
-          Collapsed: inline centered row so the narrow rail still has an expand affordance. */}
-      {collapsed() ? (
+      {/* Collapse toggle footer — desktop only. Right-aligned when expanded,
+          centered when collapsed. Inline (not absolute) so it never overlaps Logout. */}
+      <div class="hidden md:flex border-t border-border px-2 py-2 flex-shrink-0">
         <button
           type="button"
           onClick={toggleCollapsed}
-          aria-label="Expand sidebar"
-          title="Expand sidebar"
-          class="hidden md:flex items-center justify-center w-full h-9 border-t border-border text-muted hover:text-foreground hover:bg-surface-muted transition-colors flex-shrink-0"
+          aria-label={collapsed() ? "Expand sidebar" : "Collapse sidebar"}
+          title={collapsed() ? "Expand sidebar" : "Collapse sidebar"}
+          class={`flex items-center justify-center w-7 h-7 rounded-md text-muted hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+            collapsed() ? "mx-auto" : "ml-auto"
+          }`}
         >
-          <Icons.panelLeftOpen class="w-4 h-4" />
+          {collapsed() ? (
+            <Icons.panelLeftOpen class="w-4 h-4" />
+          ) : (
+            <Icons.panelLeftClose class="w-4 h-4" />
+          )}
         </button>
-      ) : (
-        <button
-          type="button"
-          onClick={toggleCollapsed}
-          aria-label="Collapse sidebar"
-          title="Collapse sidebar"
-          class="hidden md:flex items-center justify-center w-7 h-7 rounded-md absolute bottom-2 right-2 bg-surface-muted text-muted hover:text-foreground hover:bg-border transition-colors"
-        >
-          <Icons.panelLeftClose class="w-4 h-4" />
-        </button>
-      )}
+      </div>
     </div>
   )
 
