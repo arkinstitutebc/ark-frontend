@@ -1,27 +1,8 @@
-import { toast } from "@ark/ui"
-import { createMutation, createQuery, useQueryClient } from "@tanstack/solid-query"
+import { createCrudHooks, toast } from "@ark/ui"
+import { createMutation, useQueryClient } from "@tanstack/solid-query"
 import { api } from "../api"
 import { queryKeys } from "../query-keys"
 import type { PrItem, PurchaseRequest } from "../types"
-
-export function useRequests(query?: () => { status?: string }) {
-  return createQuery(() => {
-    const status = query?.()?.status
-    const params = status ? `?status=${status}` : ""
-    return {
-      queryKey: queryKeys.requests.byStatus(status),
-      queryFn: () => api<PurchaseRequest[]>(`/api/procurement/requests${params}`),
-    }
-  })
-}
-
-export function useRequest(id: () => string) {
-  return createQuery(() => ({
-    queryKey: queryKeys.requests.detail(id()),
-    queryFn: () => api<PurchaseRequest>(`/api/procurement/requests/${id()}`),
-    enabled: !!id(),
-  }))
-}
 
 interface CreatePrInput {
   prCode: string
@@ -35,22 +16,28 @@ interface CreatePrInput {
   createdBy?: string
 }
 
-export function useCreatePr() {
-  const qc = useQueryClient()
-  return createMutation(() => ({
-    mutationFn: (data: CreatePrInput) =>
-      api<PurchaseRequest>("/api/procurement/requests", {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.requests.all })
-      toast.success("Request submitted")
-    },
-    onError: (err: Error) => toast.error(err.message),
-  }))
+interface RequestsListQuery {
+  status?: string
 }
 
+const crud = createCrudHooks<
+  PurchaseRequest,
+  PurchaseRequest,
+  CreatePrInput,
+  Partial<PurchaseRequest>,
+  RequestsListQuery
+>({
+  basePath: "/api/procurement/requests",
+  domain: "requests",
+  label: "Request",
+  messages: { create: "Request submitted" },
+})
+
+export const useRequests = crud.useList
+export const useRequest = crud.useOne
+export const useCreatePr = crud.useCreate
+
+// Bespoke: approve / reject action endpoints
 export function useApprovePr() {
   const qc = useQueryClient()
   return createMutation(() => ({
@@ -62,6 +49,7 @@ export function useApprovePr() {
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: queryKeys.requests.all })
       qc.invalidateQueries({ queryKey: queryKeys.requests.detail(variables.id) })
+      qc.invalidateQueries({ queryKey: ["requests"] })
       toast.success("Request approved")
     },
     onError: (err: Error) => toast.error(err.message),
@@ -79,6 +67,7 @@ export function useRejectPr() {
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: queryKeys.requests.all })
       qc.invalidateQueries({ queryKey: queryKeys.requests.detail(variables.id) })
+      qc.invalidateQueries({ queryKey: ["requests"] })
       toast.success("Request rejected")
     },
     onError: (err: Error) => toast.error(err.message),

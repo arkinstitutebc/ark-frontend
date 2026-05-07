@@ -1,5 +1,5 @@
-import { toast } from "@ark/ui"
-import { createMutation, createQuery, useQueryClient } from "@tanstack/solid-query"
+import { createCrudHooks, toast } from "@ark/ui"
+import { createMutation, useQueryClient } from "@tanstack/solid-query"
 import { api } from "../api"
 import { queryKeys } from "../query-keys"
 import type { AccountReceivable } from "../types"
@@ -12,64 +12,35 @@ interface CreateArInput {
 }
 
 interface UpdateArInput {
-  id: string
   status?: string
   billedAt?: string
   dueDate?: string
   notes?: string
 }
 
-export function useReceivables(query?: () => { status?: string }) {
-  return createQuery(() => {
-    const status = query?.()?.status
-    const params = status ? `?status=${status}` : ""
-    return {
-      queryKey: queryKeys.receivables.byStatus(status),
-      queryFn: () => api<AccountReceivable[]>(`/api/billing/receivables${params}`),
-    }
-  })
+interface ReceivablesListQuery {
+  status?: string
 }
 
-export function useReceivable(id: () => string) {
-  return createQuery(() => ({
-    queryKey: queryKeys.receivables.detail(id()),
-    queryFn: () => api<AccountReceivable>(`/api/billing/receivables/${id()}`),
-    enabled: !!id(),
-  }))
-}
+const crud = createCrudHooks<
+  AccountReceivable,
+  AccountReceivable,
+  CreateArInput,
+  UpdateArInput,
+  ReceivablesListQuery
+>({
+  basePath: "/api/billing/receivables",
+  domain: "receivables",
+  label: "Receivable",
+  messages: { create: "Billing created", update: "Receivable updated" },
+})
 
-export function useCreateAr() {
-  const qc = useQueryClient()
-  return createMutation(() => ({
-    mutationFn: (data: CreateArInput) =>
-      api<AccountReceivable>("/api/billing/receivables", {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.receivables.all })
-      toast.success("Billing created")
-    },
-    onError: (err: Error) => toast.error(err.message),
-  }))
-}
+export const useReceivables = crud.useList
+export const useReceivable = crud.useOne
+export const useCreateAr = crud.useCreate
+export const useUpdateAr = crud.useUpdate
 
-export function useUpdateAr() {
-  const qc = useQueryClient()
-  return createMutation(() => ({
-    mutationFn: ({ id, ...data }: UpdateArInput) =>
-      api<AccountReceivable>(`/api/billing/receivables/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(data),
-      }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.receivables.all })
-      toast.success("Receivable updated")
-    },
-    onError: (err: Error) => toast.error(err.message),
-  }))
-}
-
+// Bespoke: payment endpoint nested under the AR
 export function useRecordPayment() {
   const qc = useQueryClient()
   return createMutation(() => ({
@@ -80,6 +51,7 @@ export function useRecordPayment() {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.receivables.all })
+      qc.invalidateQueries({ queryKey: ["receivables"] })
       toast.success("Payment recorded")
     },
     onError: (err: Error) => toast.error(err.message),

@@ -1,15 +1,8 @@
-import { toast } from "@ark/ui"
-import { createMutation, createQuery, useQueryClient } from "@tanstack/solid-query"
+import { createCrudHooks, toast } from "@ark/ui"
+import { createMutation, useQueryClient } from "@tanstack/solid-query"
 import { api } from "../api"
 import { queryKeys } from "../query-keys"
 import type { Transfer } from "../types"
-
-export function useTransfers() {
-  return createQuery(() => ({
-    queryKey: queryKeys.transfers.all,
-    queryFn: () => api<Transfer[]>("/api/finance/transfers"),
-  }))
-}
 
 interface CreateTransferInput {
   fromBankId: string
@@ -20,6 +13,16 @@ interface CreateTransferInput {
   description?: string
 }
 
+const crud = createCrudHooks<Transfer, Transfer, CreateTransferInput, Partial<Transfer>, void>({
+  basePath: "/api/finance/transfers",
+  domain: "transfers",
+  label: "Transfer",
+  // bespoke create cross-invalidates banks + transactions
+  messages: { create: false },
+})
+
+export const useTransfers = crud.useList
+
 export function useCreateTransfer() {
   const qc = useQueryClient()
   return createMutation(() => ({
@@ -29,6 +32,7 @@ export function useCreateTransfer() {
       qc.invalidateQueries({ queryKey: queryKeys.transfers.all })
       qc.invalidateQueries({ queryKey: queryKeys.banks.all })
       qc.invalidateQueries({ queryKey: queryKeys.transactions.all })
+      qc.invalidateQueries({ queryKey: ["transfers"] })
       toast.success("Transfer created")
     },
     onError: (err: Error) => toast.error(err.message),

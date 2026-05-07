@@ -20,6 +20,8 @@
  * into their own `@ark/ui-smart` package then.
  */
 
+// Data — CRUD hook factory
+export { type CrudConfig, createCrudHooks } from "./data/create-crud-hooks"
 // Display
 export { Card } from "./display/card"
 export {

@@ -1,27 +1,8 @@
-import { toast } from "@ark/ui"
-import { createMutation, createQuery, useQueryClient } from "@tanstack/solid-query"
+import { createCrudHooks, toast } from "@ark/ui"
+import { createMutation, useQueryClient } from "@tanstack/solid-query"
 import { api } from "../api"
 import { queryKeys } from "../query-keys"
 import type { PrItem, PurchaseOrder } from "../types"
-
-export function useOrders(query?: () => { status?: string }) {
-  return createQuery(() => {
-    const status = query?.()?.status
-    const params = status ? `?status=${status}` : ""
-    return {
-      queryKey: queryKeys.orders.byStatus(status),
-      queryFn: () => api<PurchaseOrder[]>(`/api/procurement/orders${params}`),
-    }
-  })
-}
-
-export function useOrder(id: () => string) {
-  return createQuery(() => ({
-    queryKey: queryKeys.orders.detail(id()),
-    queryFn: () => api<PurchaseOrder>(`/api/procurement/orders/${id()}`),
-    enabled: !!id(),
-  }))
-}
 
 interface CreatePoInput {
   poCode: string
@@ -35,6 +16,36 @@ interface CreatePoInput {
   notes?: string
 }
 
+interface UpdatePoInput {
+  supplier?: string
+  notes?: string
+  estimatedDelivery?: string
+  status?: string
+}
+
+interface OrdersListQuery {
+  status?: string
+}
+
+const crud = createCrudHooks<
+  PurchaseOrder,
+  PurchaseOrder,
+  CreatePoInput,
+  UpdatePoInput,
+  OrdersListQuery
+>({
+  basePath: "/api/procurement/orders",
+  domain: "orders",
+  label: "Order",
+  // useCreatePo overrides the default toast + cross-invalidates requests, so silence the factory's
+  messages: { create: false },
+})
+
+export const useOrders = crud.useList
+export const useOrder = crud.useOne
+export const useUpdatePo = crud.useUpdate
+
+// Bespoke create — also invalidates requests since creating a PO marks PR as "ordered"
 export function useCreatePo() {
   const qc = useQueryClient()
   return createMutation(() => ({
@@ -43,31 +54,8 @@ export function useCreatePo() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.orders.all })
       qc.invalidateQueries({ queryKey: queryKeys.requests.all })
+      qc.invalidateQueries({ queryKey: ["orders"] })
       toast.success("Order created")
-    },
-    onError: (err: Error) => toast.error(err.message),
-  }))
-}
-
-interface UpdatePoInput {
-  id: string
-  supplier?: string
-  notes?: string
-  estimatedDelivery?: string
-  status?: string
-}
-
-export function useUpdatePo() {
-  const qc = useQueryClient()
-  return createMutation(() => ({
-    mutationFn: ({ id, ...data }: UpdatePoInput) =>
-      api<PurchaseOrder>(`/api/procurement/orders/${id}`, {
-        method: "PUT",
-        body: JSON.stringify(data),
-      }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.orders.all })
-      toast.success("Order updated")
     },
     onError: (err: Error) => toast.error(err.message),
   }))

@@ -1,15 +1,8 @@
-import { toast } from "@ark/ui"
-import { createMutation, createQuery, useQueryClient } from "@tanstack/solid-query"
+import { createCrudHooks, toast } from "@ark/ui"
+import { createMutation, useQueryClient } from "@tanstack/solid-query"
 import { api } from "../api"
 import { queryKeys } from "../query-keys"
 import type { Transaction } from "../types"
-
-export function useDisbursements() {
-  return createQuery(() => ({
-    queryKey: queryKeys.disbursements.all,
-    queryFn: () => api<Transaction[]>("/api/finance/disbursements"),
-  }))
-}
 
 interface CreateDisbursementInput {
   bankId: string
@@ -19,6 +12,21 @@ interface CreateDisbursementInput {
   batchId?: string
   referenceId?: string
 }
+
+const crud = createCrudHooks<
+  Transaction,
+  Transaction,
+  CreateDisbursementInput,
+  Partial<Transaction>,
+  void
+>({
+  basePath: "/api/finance/disbursements",
+  domain: "disbursements",
+  label: "Disbursement",
+  messages: { create: false },
+})
+
+export const useDisbursements = crud.useList
 
 export function useCreateDisbursement() {
   const qc = useQueryClient()
@@ -32,6 +40,7 @@ export function useCreateDisbursement() {
       qc.invalidateQueries({ queryKey: queryKeys.disbursements.all })
       qc.invalidateQueries({ queryKey: queryKeys.banks.all })
       qc.invalidateQueries({ queryKey: queryKeys.transactions.all })
+      qc.invalidateQueries({ queryKey: ["disbursements"] })
       toast.success("Disbursement recorded")
     },
     onError: (err: Error) => toast.error(err.message),

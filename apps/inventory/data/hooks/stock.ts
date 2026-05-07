@@ -1,28 +1,29 @@
-import { toast } from "@ark/ui"
-import { createMutation, createQuery, useQueryClient } from "@tanstack/solid-query"
+import { createCrudHooks, toast } from "@ark/ui"
+import { createMutation, useQueryClient } from "@tanstack/solid-query"
 import { api } from "../api"
 import { queryKeys } from "../query-keys"
 import type { StockItem, StockMovement } from "../types"
 
-export function useStock(query?: () => { batchId?: string }) {
-  return createQuery(() => {
-    const batchId = query?.()?.batchId
-    const params = batchId ? `?batchId=${batchId}` : ""
-    return {
-      queryKey: queryKeys.stock.byBatch(batchId),
-      queryFn: () => api<StockItem[]>(`/api/inventory/stock${params}`),
-    }
-  })
+interface StockListQuery {
+  batchId?: string
 }
 
-export function useStockItem(id: () => string) {
-  return createQuery(() => ({
-    queryKey: queryKeys.stock.detail(id()),
-    queryFn: () => api<StockItem>(`/api/inventory/stock/${id()}`),
-    enabled: !!id(),
-  }))
-}
+const crud = createCrudHooks<
+  StockItem,
+  StockItem,
+  Partial<StockItem>,
+  Partial<StockItem>,
+  StockListQuery
+>({
+  basePath: "/api/inventory/stock",
+  domain: "stock",
+  label: "Stock item",
+})
 
+export const useStock = crud.useList
+export const useStockItem = crud.useOne
+
+// Bespoke: special adjust endpoint, multi-invalidation
 interface AdjustStockInput {
   id: string
   quantity: number
@@ -41,6 +42,7 @@ export function useAdjustStock() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.stock.all })
       qc.invalidateQueries({ queryKey: queryKeys.movements.all })
+      qc.invalidateQueries({ queryKey: ["stock"] })
       toast.success("Stock adjusted")
     },
     onError: (err: Error) => toast.error(err.message),
@@ -61,6 +63,7 @@ export function useReceivePo() {
       qc.invalidateQueries({ queryKey: queryKeys.stock.all })
       qc.invalidateQueries({ queryKey: queryKeys.movements.all })
       qc.invalidateQueries({ queryKey: queryKeys.orders.all })
+      qc.invalidateQueries({ queryKey: ["stock"] })
       toast.success("Receipt completed")
     },
     onError: (err: Error) => toast.error(err.message),
