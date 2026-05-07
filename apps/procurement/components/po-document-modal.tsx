@@ -1,20 +1,8 @@
-import { Modal } from "@ark/ui"
+import { API_URL } from "@ark/api-client"
+import { formatDatePH, formatPeso, Modal } from "@ark/ui"
 import type { PurchaseOrder } from "@data/types"
 import { Show } from "solid-js"
 import { PoStatusBadge } from "./ui/status-badges"
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(amount)
-}
-
-function formatDate(dateStr?: string) {
-  if (!dateStr) return "-"
-  return new Intl.DateTimeFormat("en-PH", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(new Date(dateStr))
-}
 
 interface PoDocumentModalProps {
   open: boolean
@@ -39,7 +27,7 @@ export function PoDocumentModal(props: PoDocumentModalProps) {
                   <PoStatusBadge status={po().status} />
                 </div>
                 <span class="text-lg font-semibold text-foreground">
-                  {formatCurrency(Number(po().totalAmount))}
+                  {formatPeso(Number(po().totalAmount))}
                 </span>
               </div>
 
@@ -59,7 +47,7 @@ export function PoDocumentModal(props: PoDocumentModalProps) {
                 </div>
                 <div class="bg-surface-muted rounded-lg px-4 py-3">
                   <p class="text-xs text-muted mb-1">Created Date</p>
-                  <p class="text-sm font-medium text-foreground">{formatDate(po().createdAt)}</p>
+                  <p class="text-sm font-medium text-foreground">{formatDatePH(po().createdAt)}</p>
                 </div>
               </div>
 
@@ -100,10 +88,10 @@ export function PoDocumentModal(props: PoDocumentModalProps) {
                             {item.quantity} {item.unit}
                           </td>
                           <td class="px-4 py-3 text-sm text-foreground text-right">
-                            {formatCurrency(item.unitPrice)}
+                            {formatPeso(item.unitPrice)}
                           </td>
                           <td class="px-4 py-3 text-sm text-foreground text-right">
-                            {formatCurrency(item.total)}
+                            {formatPeso(item.total)}
                           </td>
                         </tr>
                       ))}
@@ -117,7 +105,7 @@ export function PoDocumentModal(props: PoDocumentModalProps) {
                           Grand Total
                         </td>
                         <td class="px-4 py-3 text-sm font-semibold text-foreground text-right">
-                          {formatCurrency(Number(po().totalAmount))}
+                          {formatPeso(Number(po().totalAmount))}
                         </td>
                       </tr>
                     </tfoot>
@@ -132,14 +120,14 @@ export function PoDocumentModal(props: PoDocumentModalProps) {
                   <div>
                     <p class="text-xs text-muted mb-1">Estimated Delivery</p>
                     <p class="text-sm font-medium text-foreground">
-                      {formatDate(po().estimatedDelivery)}
+                      {formatDatePH(po().estimatedDelivery)}
                     </p>
                   </div>
                   <Show when={po().actualDelivery}>
                     <div>
                       <p class="text-xs text-muted mb-1">Actual Delivery</p>
                       <p class="text-sm font-medium text-foreground">
-                        {formatDate(po().actualDelivery)}
+                        {formatDatePH(po().actualDelivery)}
                       </p>
                     </div>
                   </Show>
@@ -156,13 +144,14 @@ export function PoDocumentModal(props: PoDocumentModalProps) {
               >
                 Close
               </button>
-              <button
-                type="button"
-                onClick={() => window.print()}
+              <a
+                href={`${API_URL}/api/procurement/orders/${po().id}/pdf`}
+                target="_blank"
+                rel="noopener noreferrer"
                 class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
               >
-                Print / Export PDF
-              </button>
+                Download PDF
+              </a>
             </div>
           </div>
         )}

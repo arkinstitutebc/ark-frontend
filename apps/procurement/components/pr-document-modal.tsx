@@ -1,19 +1,8 @@
-import { Modal } from "@ark/ui"
+import { API_URL } from "@ark/api-client"
+import { formatDatePH, formatPeso, Modal } from "@ark/ui"
 import type { PurchaseRequest } from "@data/types"
 import { Show } from "solid-js"
 import { PrStatusBadge } from "./ui/status-badges"
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(amount)
-}
-
-function formatDate(dateStr: string) {
-  return new Intl.DateTimeFormat("en-PH", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(new Date(dateStr))
-}
 
 interface PrDocumentModalProps {
   open: boolean
@@ -38,7 +27,7 @@ export function PrDocumentModal(props: PrDocumentModalProps) {
                   <PrStatusBadge status={pr().status} />
                 </div>
                 <span class="text-lg font-semibold text-foreground">
-                  {formatCurrency(Number(pr().totalAmount))}
+                  {formatPeso(Number(pr().totalAmount))}
                 </span>
               </div>
 
@@ -58,7 +47,7 @@ export function PrDocumentModal(props: PrDocumentModalProps) {
                 </div>
                 <div class="bg-surface-muted rounded-lg px-4 py-3">
                   <p class="text-xs text-muted mb-1">Created Date</p>
-                  <p class="text-sm font-medium text-foreground">{formatDate(pr().createdAt)}</p>
+                  <p class="text-sm font-medium text-foreground">{formatDatePH(pr().createdAt)}</p>
                 </div>
                 <div class="bg-primary/5 rounded-lg px-4 py-3 col-span-2 border border-primary/10">
                   <p class="text-xs text-primary/70 mb-1">Created By</p>
@@ -101,10 +90,10 @@ export function PrDocumentModal(props: PrDocumentModalProps) {
                             {item.quantity} {item.unit}
                           </td>
                           <td class="px-4 py-3 text-sm text-foreground text-right">
-                            {formatCurrency(item.unitPrice)}
+                            {formatPeso(item.unitPrice)}
                           </td>
                           <td class="px-4 py-3 text-sm text-foreground text-right">
-                            {formatCurrency(item.total)}
+                            {formatPeso(item.total)}
                           </td>
                         </tr>
                       ))}
@@ -118,7 +107,7 @@ export function PrDocumentModal(props: PrDocumentModalProps) {
                           Grand Total
                         </td>
                         <td class="px-4 py-3 text-sm font-semibold text-foreground text-right">
-                          {formatCurrency(Number(pr().totalAmount))}
+                          {formatPeso(Number(pr().totalAmount))}
                         </td>
                       </tr>
                     </tfoot>
@@ -141,7 +130,7 @@ export function PrDocumentModal(props: PrDocumentModalProps) {
                       <div>
                         <p class="text-xs text-muted mb-1">Approved Date</p>
                         <p class="text-sm font-medium text-foreground">
-                          {formatDate(pr().approvedAt ?? "")}
+                          {formatDatePH(pr().approvedAt ?? "")}
                         </p>
                       </div>
                     </Show>
@@ -165,13 +154,14 @@ export function PrDocumentModal(props: PrDocumentModalProps) {
               >
                 Close
               </button>
-              <button
-                type="button"
-                onClick={() => window.print()}
+              <a
+                href={`${API_URL}/api/procurement/requests/${pr().id}/pdf`}
+                target="_blank"
+                rel="noopener noreferrer"
                 class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"
               >
-                Print / Export PDF
-              </button>
+                Download PDF
+              </a>
             </div>
           </div>
         )}
