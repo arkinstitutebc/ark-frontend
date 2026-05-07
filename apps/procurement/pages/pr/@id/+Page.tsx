@@ -54,7 +54,11 @@ export default function PrDetailPage() {
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               <div class="bg-surface rounded-lg border border-border p-4">
                 <p class="text-xs text-muted mb-1">Category</p>
-                <p class="text-sm text-foreground">{p.category}</p>
+                <Show when={p.category} fallback={<p class="text-sm text-muted">—</p>}>
+                  <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-primary/10 text-primary">
+                    {p.category}
+                  </span>
+                </Show>
               </div>
               <div class="bg-surface rounded-lg border border-border p-4">
                 <p class="text-xs text-muted mb-1">Total Amount</p>

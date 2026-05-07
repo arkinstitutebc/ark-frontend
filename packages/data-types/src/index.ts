@@ -24,6 +24,7 @@ export type {
   PurchaseOrder,
   PurchaseRequest,
 } from "./procurement"
+export type { ProcurementCategory } from "./procurement-category"
 export type { Report, ReportType } from "./report"
 export type { Gender, Student, StudentStatus } from "./student"
 export type { Trainer, TrainerStatus } from "./trainer"

@@ -158,7 +158,16 @@ export default function Page() {
                             <p class="text-sm text-foreground">{pr.batchName}</p>
                             <p class="text-xs text-muted">{pr.batchCode}</p>
                           </td>
-                          <td class="py-4 px-6 text-sm text-foreground">{pr.category}</td>
+                          <td class="py-4 px-6">
+                            <Show
+                              when={pr.category}
+                              fallback={<span class="text-sm text-muted">—</span>}
+                            >
+                              <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-primary/10 text-primary">
+                                {pr.category}
+                              </span>
+                            </Show>
+                          </td>
                           <td class="py-4 px-6 text-right text-sm text-foreground">
                             {formatPeso(Number(pr.totalAmount))}
                           </td>

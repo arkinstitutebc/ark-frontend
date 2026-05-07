@@ -1,6 +1,6 @@
 import { formatPeso, Icons, PageContainer, Select } from "@ark/ui"
 import { api } from "@data/api"
-import { useCreatePr } from "@data/hooks"
+import { useCategories, useCreatePr } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
 import { createPrSchema } from "@data/schemas"
 import type { Batch } from "@data/types"
@@ -8,17 +8,7 @@ import { validateForm } from "@data/validate"
 import { createQuery } from "@tanstack/solid-query"
 import { createMemo, createSignal, Index, Show } from "solid-js"
 import { navigate } from "vike/client/router"
-
-const categories = [
-  "Training Supplies",
-  "Equipment",
-  "Trainer Fees",
-  "Facility",
-  "Transportation",
-  "Meals & Allowances",
-  "Office Supplies",
-  "Other",
-]
+import { ManageCategoriesModal } from "@/components/manage-categories-modal"
 
 interface PrItemInput {
   id: string
@@ -35,12 +25,14 @@ export default function CreatePrPage() {
     queryKey: queryKeys.batches.all,
     queryFn: () => api<Batch[]>("/api/training/batches"),
   }))
+  const categoriesQuery = useCategories()
   const createPrMutation = useCreatePr()
 
   const [errors, setErrors] = createSignal<Record<string, string>>({})
   const [selectedBatchId, setSelectedBatchId] = createSignal("")
   const [category, setCategory] = createSignal("")
   const [purpose, setPurpose] = createSignal("")
+  const [showManageCategories, setShowManageCategories] = createSignal(false)
   const [items, setItems] = createSignal<PrItemInput[]>([
     { id: "1", name: "", quantity: 1, unit: "pcs", unitPrice: 0 },
   ])
@@ -141,7 +133,9 @@ export default function CreatePrPage() {
     }))
   )
 
-  const categoryOptions = createMemo(() => categories.map(c => ({ label: c, value: c })))
+  const categoryOptions = createMemo(() =>
+    (categoriesQuery.data ?? []).map(c => ({ label: c.name, value: c.name }))
+  )
   const unitOptions = createMemo(() => units.map(u => ({ label: u, value: u })))
 
   return (
@@ -200,14 +194,30 @@ export default function CreatePrPage() {
                 </div>
 
                 <div>
-                  <span class="block text-sm font-medium text-foreground mb-1">
-                    Category <span class="text-red-500">*</span>
-                  </span>
+                  <div class="flex items-center justify-between mb-1">
+                    <span class="block text-sm font-medium text-foreground">
+                      Category <span class="text-red-500">*</span>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setShowManageCategories(true)}
+                      class="text-xs font-normal text-primary hover:text-primary/80 transition-colors"
+                    >
+                      Manage categories
+                    </button>
+                  </div>
                   <Select
                     options={categoryOptions()}
                     value={category() || undefined}
                     onChange={v => setCategory(v)}
-                    placeholder="Select category"
+                    placeholder={
+                      categoriesQuery.isLoading
+                        ? "Loading categories…"
+                        : categoryOptions().length
+                          ? "Select category"
+                          : "No categories — use Manage categories to add one"
+                    }
+                    disabled={categoriesQuery.isLoading}
                     ariaLabel="Category"
                   />
                   <Show when={errors().category}>
@@ -404,6 +414,10 @@ export default function CreatePrPage() {
           </div>
         </div>
       </form>
+      <ManageCategoriesModal
+        open={showManageCategories()}
+        onClose={() => setShowManageCategories(false)}
+      />
     </PageContainer>
   )
 }
