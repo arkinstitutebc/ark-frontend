@@ -1,8 +1,8 @@
-import { Modal, toast } from "@ark/ui"
+import { Modal, Select, toast } from "@ark/ui"
 import { useBatches, useCreateStudent } from "@data/hooks"
 import { createStudentSchema } from "@data/schemas"
 import { validateForm } from "@data/validate"
-import { createSignal, For, Show } from "solid-js"
+import { createMemo, createSignal, Index, Show } from "solid-js"
 
 interface AddStudentModalProps {
   open: boolean
@@ -37,6 +37,13 @@ export function AddStudentModal(props: AddStudentModalProps) {
   const [rows, setRows] = createSignal<BulkRow[]>([emptyRow(), emptyRow(), emptyRow()])
   const [bulkBatchId, setBulkBatchId] = createSignal(props.defaultBatchId || "")
   const [submitting, setSubmitting] = createSignal(false)
+
+  const batchOptions = createMemo(() =>
+    (batchesQuery.data ?? []).map(b => ({
+      label: `${b.batchCode} — ${b.trainingName} — ${b.studentsEnrolled}/${b.studentsCapacity}`,
+      value: b.id,
+    }))
+  )
 
   const inputClass = (field: string) =>
     `w-full px-3 py-2 border rounded-lg text-sm bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors()[field] ? "border-red-400 dark:border-red-500" : "border-border"}`
@@ -197,26 +204,20 @@ export function AddStudentModal(props: AddStudentModalProps) {
             </label>
           </div>
 
-          <label class="block">
+          <div>
             <span class="block text-sm font-medium text-foreground mb-1">Assign to Batch</span>
-            <select
-              value={batchId()}
-              onChange={e => setBatchId(e.target.value)}
-              class={inputClass("batchId")}
-            >
-              <option value="">Select batch</option>
-              <For each={batchesQuery.data || []}>
-                {batch => (
-                  <option value={batch.id}>
-                    {batch.batchCode} - {batch.trainingName}
-                  </option>
-                )}
-              </For>
-            </select>
+            <Select
+              options={batchOptions()}
+              value={batchId() || undefined}
+              onChange={v => setBatchId(v)}
+              placeholder={batchesQuery.isLoading ? "Loading batches…" : "Select a batch"}
+              disabled={batchesQuery.isLoading}
+              ariaLabel="Assign to batch"
+            />
             <Show when={errors().batchId}>
               <p class={errorClass}>{errors().batchId}</p>
             </Show>
-          </label>
+          </div>
 
           <div class="flex justify-end gap-3 pt-4 border-t border-border">
             <button
@@ -239,26 +240,20 @@ export function AddStudentModal(props: AddStudentModalProps) {
 
       <Show when={mode() === "bulk"}>
         <form onSubmit={handleBulkSubmit} class="space-y-4" noValidate>
-          <label class="block">
+          <div>
             <span class="block text-sm font-medium text-foreground mb-1">Assign to Batch</span>
-            <select
-              value={bulkBatchId()}
-              onChange={e => setBulkBatchId(e.target.value)}
-              class={inputClass("batchId")}
-            >
-              <option value="">Select batch</option>
-              <For each={batchesQuery.data || []}>
-                {batch => (
-                  <option value={batch.id}>
-                    {batch.batchCode} - {batch.trainingName}
-                  </option>
-                )}
-              </For>
-            </select>
+            <Select
+              options={batchOptions()}
+              value={bulkBatchId() || undefined}
+              onChange={v => setBulkBatchId(v)}
+              placeholder={batchesQuery.isLoading ? "Loading batches…" : "Select a batch"}
+              disabled={batchesQuery.isLoading}
+              ariaLabel="Assign to batch"
+            />
             <Show when={errors().batchId}>
               <p class={errorClass}>{errors().batchId}</p>
             </Show>
-          </label>
+          </div>
 
           <div>
             <div class="flex items-center justify-between mb-2">
@@ -285,14 +280,14 @@ export function AddStudentModal(props: AddStudentModalProps) {
                   </tr>
                 </thead>
                 <tbody>
-                  <For each={rows()}>
+                  <Index each={rows()}>
                     {(row, i) => (
                       <tr class="border-t border-border">
                         <td class="p-1.5">
                           <input
                             type="text"
-                            value={row.firstName}
-                            onInput={e => updateRow(i(), "firstName", e.target.value)}
+                            value={row().firstName}
+                            onInput={e => updateRow(i, "firstName", e.target.value)}
                             placeholder="Juan"
                             class="w-full px-2 py-1.5 text-sm bg-transparent text-foreground focus:outline-none focus:bg-surface-muted rounded"
                           />
@@ -300,8 +295,8 @@ export function AddStudentModal(props: AddStudentModalProps) {
                         <td class="p-1.5">
                           <input
                             type="text"
-                            value={row.lastName}
-                            onInput={e => updateRow(i(), "lastName", e.target.value)}
+                            value={row().lastName}
+                            onInput={e => updateRow(i, "lastName", e.target.value)}
                             placeholder="Dela Cruz"
                             class="w-full px-2 py-1.5 text-sm bg-transparent text-foreground focus:outline-none focus:bg-surface-muted rounded"
                           />
@@ -309,7 +304,7 @@ export function AddStudentModal(props: AddStudentModalProps) {
                         <td class="p-1.5 text-right">
                           <button
                             type="button"
-                            onClick={() => removeRow(i())}
+                            onClick={() => removeRow(i)}
                             class="text-muted hover:text-red-500 transition-colors text-xs px-1"
                             aria-label="Remove row"
                           >
@@ -318,7 +313,7 @@ export function AddStudentModal(props: AddStudentModalProps) {
                         </td>
                       </tr>
                     )}
-                  </For>
+                  </Index>
                 </tbody>
               </table>
             </div>

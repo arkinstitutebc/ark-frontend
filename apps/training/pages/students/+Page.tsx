@@ -1,11 +1,7 @@
+import { Select } from "@ark/ui"
 import { useBatches, useStudent, useStudents } from "@data/hooks"
 import { createMemo, createSignal, For, Show } from "solid-js"
-import {
-  AddStudentModal,
-  ConfirmDeleteStudentModal,
-  EditStudentModal,
-  ViewStudentModal,
-} from "@/components/modals"
+import { AddStudentModal, ConfirmDeleteStudentModal, EditStudentModal } from "@/components/modals"
 import { Icons, StatusBadge } from "@/components/ui"
 
 export default function StudentsPage() {
@@ -13,7 +9,6 @@ export default function StudentsPage() {
   const [searchQuery, setSearchQuery] = createSignal("")
   const [showAddModal, setShowAddModal] = createSignal(false)
   const [editingStudentId, setEditingStudentId] = createSignal<string | null>(null)
-  const [viewingStudentId, setViewingStudentId] = createSignal<string | null>(null)
   const [deletingStudentId, setDeletingStudentId] = createSignal<string | null>(null)
 
   const batchesQuery = useBatches()
@@ -22,7 +17,6 @@ export default function StudentsPage() {
   )
 
   const editingStudentQuery = useStudent(() => editingStudentId() || "")
-  const viewingStudentQuery = useStudent(() => viewingStudentId() || "")
   const deletingStudentQuery = useStudent(() => deletingStudentId() || "")
 
   const filteredStudents = createMemo(() => {
@@ -44,6 +38,14 @@ export default function StudentsPage() {
     setFilterBatch("all")
     setSearchQuery("")
   }
+
+  const batchFilterOptions = createMemo(() => [
+    { label: "All Batches", value: "all" },
+    ...(batchesQuery.data ?? []).map(b => ({
+      label: `${b.batchCode} — ${b.trainingName}`,
+      value: b.id,
+    })),
+  ])
 
   const getBatchCode = (batchId: string) => {
     const batch = (batchesQuery.data || []).find(b => b.id === batchId)
@@ -84,15 +86,6 @@ export default function StudentsPage() {
             />
           )}
         </Show>
-        <Show when={viewingStudentQuery.data}>
-          {student => (
-            <ViewStudentModal
-              open={viewingStudentId() !== null}
-              onClose={() => setViewingStudentId(null)}
-              student={student()}
-            />
-          )}
-        </Show>
         <ConfirmDeleteStudentModal
           open={deletingStudentId() !== null}
           onClose={() => setDeletingStudentId(null)}
@@ -110,16 +103,15 @@ export default function StudentsPage() {
               class="pl-9 pr-3 py-2 w-full border border-border rounded-lg text-sm bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
           </div>
-          <select
-            value={filterBatch()}
-            onChange={e => setFilterBatch(e.target.value)}
-            class="px-3 py-2 border border-border rounded-lg text-sm bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-          >
-            <option value="all">All Batches</option>
-            <For each={batchesQuery.data || []}>
-              {batch => <option value={batch.id}>{batch.batchCode}</option>}
-            </For>
-          </select>
+          <div class="w-56">
+            <Select
+              options={batchFilterOptions()}
+              value={filterBatch()}
+              onChange={v => setFilterBatch(v)}
+              placeholder="All Batches"
+              ariaLabel="Filter by batch"
+            />
+          </div>
           <Show when={filtersActive()}>
             <button
               type="button"
@@ -179,10 +171,11 @@ export default function StudentsPage() {
                     {student => (
                       <tr
                         class="border-t border-border hover:bg-primary/5 transition-colors cursor-pointer"
-                        onClick={() => setViewingStudentId(student.id)}
+                        onClick={() => setEditingStudentId(student.id)}
+                        title="Click to edit"
                       >
                         <td class="py-4 px-6 text-sm text-foreground font-mono">
-                          {student.studentId}
+                          {student.studentId || "—"}
                         </td>
                         <td class="py-4 px-6 text-sm text-foreground">
                           {student.firstName} {student.lastName}
@@ -197,30 +190,17 @@ export default function StudentsPage() {
                           <StatusBadge status={student.status} />
                         </td>
                         <td class="py-4 px-6 text-right">
-                          <div class="inline-flex items-center gap-1">
-                            <button
-                              type="button"
-                              onClick={e => {
-                                e.stopPropagation()
-                                setEditingStudentId(student.id)
-                              }}
-                              class="text-muted hover:text-primary transition-colors p-1"
-                              title="Edit student"
-                            >
-                              <Icons.edit class="w-4 h-4" />
-                            </button>
-                            <button
-                              type="button"
-                              onClick={e => {
-                                e.stopPropagation()
-                                setDeletingStudentId(student.id)
-                              }}
-                              class="text-muted hover:text-red-500 transition-colors p-1"
-                              title="Delete student"
-                            >
-                              <Icons.trash class="w-4 h-4" />
-                            </button>
-                          </div>
+                          <button
+                            type="button"
+                            onClick={e => {
+                              e.stopPropagation()
+                              setDeletingStudentId(student.id)
+                            }}
+                            class="text-muted hover:text-red-500 transition-colors p-1"
+                            title="Delete student"
+                          >
+                            <Icons.trash class="w-4 h-4" />
+                          </button>
                         </td>
                       </tr>
                     )}

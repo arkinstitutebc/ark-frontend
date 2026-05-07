@@ -1,22 +1,23 @@
 import { toast as rawToast, Toaster } from "solid-toast"
 
 const baseStyle = {
-  "font-size": "14px",
+  "font-size": "13px",
   "font-family": "Montserrat, sans-serif",
+  "font-weight": "500",
   background: "var(--color-surface)",
   color: "var(--color-foreground)",
   border: "1px solid var(--color-border)",
-  "box-shadow": "0 4px 12px rgba(0, 0, 0, 0.08)",
-  "border-radius": "10px",
-  padding: "10px 14px",
+  "box-shadow": "0 2px 8px rgba(0, 0, 0, 0.06)",
+  "border-radius": "8px",
+  padding: "8px 12px",
 } as const
 
 const successAccent = {
-  "border-left": "4px solid var(--color-primary)",
+  "border-left": "3px solid var(--color-primary)",
 } as const
 
 const errorAccent = {
-  "border-left": "4px solid var(--color-accent)",
+  "border-left": "3px solid var(--color-accent)",
 } as const
 
 type ToastFn<K extends "success" | "error"> = (typeof rawToast)[K]
@@ -47,15 +48,14 @@ export const toast = Object.assign(callable, rawToast, {
  *
  * Uses CSS variables (`--color-surface`, `--color-foreground`, `--color-border`,
  * `--color-primary`, `--color-accent`) so toasts automatically theme correctly
- * in both light and dark modes. Success and error toasts get a colored
+ * in both light and dark modes. Success and error toasts get a 3px colored
  * left-border accent via the wrapped `toast` export above.
- * Place once near the top of each portal's `+Layout.tsx`.
  */
 export function AppToaster() {
   return (
     <Toaster
       position="top-right"
-      gutter={8}
+      gutter={6}
       toastOptions={{
         duration: 3000,
         style: baseStyle,

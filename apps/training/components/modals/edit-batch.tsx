@@ -1,10 +1,11 @@
-import { Modal } from "@ark/ui"
+import { Modal, Select } from "@ark/ui"
 import { TRAINING_TYPES } from "@data/constants"
-import { useUpdateBatch } from "@data/hooks"
+import { useInstructors, useUpdateBatch, useVenues } from "@data/hooks"
 import { updateBatchSchema } from "@data/schemas"
 import type { Batch } from "@data/types"
 import { validateForm } from "@data/validate"
-import { createSignal, Show } from "solid-js"
+import { createMemo, createSignal, Show } from "solid-js"
+import { ManageVenuesModal } from "./manage-venues"
 
 interface EditBatchModalProps {
   open: boolean
@@ -14,10 +15,14 @@ interface EditBatchModalProps {
 
 const TRAINING_LEVELS = ["NC I", "NC II", "NC III", "NC IV", "NC V"] as const
 const STATUSES: Batch["status"][] = ["Not Started", "In Progress", "Completed", "On Hold"]
+const OTHER_INSTRUCTOR = "__other__"
 
 export function EditBatchModal(props: EditBatchModalProps) {
   const mutation = useUpdateBatch()
+  const venuesQuery = useVenues()
+  const instructorsQuery = useInstructors()
   const [errors, setErrors] = createSignal<Record<string, string>>({})
+  const [showManageVenues, setShowManageVenues] = createSignal(false)
 
   const [trainingName, setTrainingName] = createSignal(props.batch.trainingName)
   const [trainingLevel, setTrainingLevel] = createSignal(props.batch.trainingLevel)
@@ -25,8 +30,48 @@ export function EditBatchModal(props: EditBatchModalProps) {
   const [startDate, setStartDate] = createSignal(props.batch.startDate)
   const [endDate, setEndDate] = createSignal(props.batch.endDate)
   const [venue, setVenue] = createSignal(props.batch.venue)
-  const [instructor, setInstructor] = createSignal(props.batch.instructor)
+  const [instructorOther, setInstructorOther] = createSignal("")
+  const [instructorChoice, setInstructorChoice] = createSignal<string>(OTHER_INSTRUCTOR)
   const [status, setStatus] = createSignal(props.batch.status)
+
+  // Derive instructor choice + free-text on mount based on whether existing
+  // instructor name matches one in the directory.
+  createMemo(() => {
+    if (!instructorsQuery.data) return
+    const existing = props.batch.instructor
+    const match = instructorsQuery.data.find(i => i.name === existing)
+    if (match) {
+      setInstructorChoice(match.id)
+      setInstructorOther("")
+    } else {
+      setInstructorChoice(OTHER_INSTRUCTOR)
+      setInstructorOther(existing ?? "")
+    }
+  })
+
+  const trainingTypeOptions = createMemo(() => TRAINING_TYPES.map(t => ({ label: t, value: t })))
+
+  const trainingLevelOptions = createMemo(() => TRAINING_LEVELS.map(l => ({ label: l, value: l })))
+
+  const statusOptions = createMemo(() => STATUSES.map(s => ({ label: s, value: s })))
+
+  const venueOptions = createMemo(() =>
+    (venuesQuery.data ?? []).map(v => ({ label: v.name, value: v.name }))
+  )
+
+  const instructorOptions = createMemo(() => [
+    ...(instructorsQuery.data ?? []).map(i => ({
+      label: i.specialization ? `${i.name} — ${i.specialization}` : i.name,
+      value: i.id,
+    })),
+    { label: "Other (type below)", value: OTHER_INSTRUCTOR },
+  ])
+
+  const resolvedInstructor = createMemo(() => {
+    if (instructorChoice() === OTHER_INSTRUCTOR) return instructorOther().trim()
+    const match = instructorsQuery.data?.find(i => i.id === instructorChoice())
+    return match?.name ?? ""
+  })
 
   const handleSubmit = (e: Event) => {
     e.preventDefault()
@@ -37,7 +82,7 @@ export function EditBatchModal(props: EditBatchModalProps) {
       startDate: startDate(),
       endDate: endDate(),
       venue: venue(),
-      instructor: instructor(),
+      instructor: resolvedInstructor(),
       status: status(),
     }
 
@@ -61,141 +106,164 @@ export function EditBatchModal(props: EditBatchModalProps) {
     setStartDate(props.batch.startDate)
     setEndDate(props.batch.endDate)
     setVenue(props.batch.venue)
-    setInstructor(props.batch.instructor)
     setStatus(props.batch.status)
     setErrors({})
     props.onClose()
   }
 
+  const inputClass = (field: string) =>
+    `w-full px-3 py-2 border rounded-lg text-sm bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors()[field] ? "border-red-400 dark:border-red-500" : "border-border"}`
+
+  const errorClass = "text-xs text-red-600 dark:text-red-400 mt-1"
+  const labelClass = "block text-sm font-medium text-foreground mb-1"
+
   return (
     <Modal open={props.open} onClose={handleClose} title="Edit Batch">
-      <form onSubmit={handleSubmit} class="space-y-4">
-        <label class="block">
-          <span class="block text-sm font-medium text-foreground mb-1">Training Type</span>
-          <select
+      <form onSubmit={handleSubmit} class="space-y-4" noValidate>
+        <div>
+          <span class={labelClass}>Training Type</span>
+          <Select
+            options={trainingTypeOptions()}
             value={trainingName()}
-            onChange={e => setTrainingName(e.target.value)}
-            required
-            class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().trainingName ? "border-red-300" : "border-border"}`}
-          >
-            {TRAINING_TYPES.map(type => (
-              <option value={type}>{type}</option>
-            ))}
-          </select>
+            onChange={v => setTrainingName(v)}
+            placeholder="Select training type"
+            ariaLabel="Training type"
+          />
           <Show when={errors().trainingName}>
-            <p class="text-xs text-red-600 mt-1">{errors().trainingName}</p>
+            <p class={errorClass}>{errors().trainingName}</p>
           </Show>
-        </label>
+        </div>
 
         <div class="grid grid-cols-2 gap-3">
-          <label class="block">
-            <span class="block text-sm font-medium text-foreground mb-1">Level</span>
-            <select
-              value={trainingLevel()}
-              onChange={e => setTrainingLevel(e.target.value as Batch["trainingLevel"])}
-              required
-              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().trainingLevel ? "border-red-300" : "border-border"}`}
-            >
-              {TRAINING_LEVELS.map(level => (
-                <option value={level}>{level}</option>
-              ))}
-            </select>
+          <div>
+            <span class={labelClass}>Level</span>
+            <Select
+              options={trainingLevelOptions()}
+              value={trainingLevel() ?? undefined}
+              onChange={v => setTrainingLevel(v as Batch["trainingLevel"])}
+              placeholder="Select level"
+              ariaLabel="Training level"
+            />
             <Show when={errors().trainingLevel}>
-              <p class="text-xs text-red-600 mt-1">{errors().trainingLevel}</p>
+              <p class={errorClass}>{errors().trainingLevel}</p>
             </Show>
-          </label>
-          <label class="block">
-            <span class="block text-sm font-medium text-foreground mb-1">Status</span>
-            <select
+          </div>
+          <div>
+            <span class={labelClass}>Status</span>
+            <Select
+              options={statusOptions()}
               value={status()}
-              onChange={e => setStatus(e.target.value as Batch["status"])}
-              required
-              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().status ? "border-red-300" : "border-border"}`}
-            >
-              {STATUSES.map(s => (
-                <option value={s}>{s}</option>
-              ))}
-            </select>
+              onChange={v => setStatus(v as Batch["status"])}
+              placeholder="Select status"
+              ariaLabel="Status"
+            />
             <Show when={errors().status}>
-              <p class="text-xs text-red-600 mt-1">{errors().status}</p>
+              <p class={errorClass}>{errors().status}</p>
             </Show>
-          </label>
+          </div>
         </div>
 
         <label class="block">
-          <span class="block text-sm font-medium text-foreground mb-1">Sponsor</span>
+          <span class={labelClass}>Sponsor</span>
           <input
             type="text"
-            value={senator()}
+            value={senator() ?? ""}
             onInput={e => setSenator(e.target.value)}
-            required
-            placeholder="e.g., Sen. Juan Dela Cruz"
-            class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().senator ? "border-red-300" : "border-border"}`}
+            placeholder="e.g., Sen. Alan Cayetano or Juan Dela Cruz"
+            class={inputClass("senator")}
           />
           <Show when={errors().senator}>
-            <p class="text-xs text-red-600 mt-1">{errors().senator}</p>
+            <p class={errorClass}>{errors().senator}</p>
           </Show>
         </label>
 
         <div class="grid grid-cols-2 gap-3">
           <label class="block">
-            <span class="block text-sm font-medium text-foreground mb-1">Start Date</span>
+            <span class={labelClass}>Start Date</span>
             <input
               type="date"
-              value={startDate()}
+              value={startDate() ?? ""}
               onInput={e => setStartDate(e.target.value)}
-              required
-              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().startDate ? "border-red-300" : "border-border"}`}
+              class={inputClass("startDate")}
             />
             <Show when={errors().startDate}>
-              <p class="text-xs text-red-600 mt-1">{errors().startDate}</p>
+              <p class={errorClass}>{errors().startDate}</p>
             </Show>
           </label>
           <label class="block">
-            <span class="block text-sm font-medium text-foreground mb-1">End Date</span>
+            <span class="text-sm font-medium text-foreground mb-1 flex items-center justify-between">
+              <span>End Date</span>
+              <span class="text-xs text-muted font-normal">Optional</span>
+            </span>
             <input
               type="date"
-              value={endDate()}
+              value={endDate() ?? ""}
               onInput={e => setEndDate(e.target.value)}
-              required
-              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().endDate ? "border-red-300" : "border-border"}`}
+              min={startDate() || undefined}
+              class={inputClass("endDate")}
             />
             <Show when={errors().endDate}>
-              <p class="text-xs text-red-600 mt-1">{errors().endDate}</p>
+              <p class={errorClass}>{errors().endDate}</p>
             </Show>
           </label>
         </div>
 
-        <label class="block">
-          <span class="block text-sm font-medium text-foreground mb-1">Venue</span>
-          <input
-            type="text"
-            value={venue()}
-            onInput={e => setVenue(e.target.value)}
-            required
-            class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().venue ? "border-red-300" : "border-border"}`}
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="block text-sm font-medium text-foreground">Venue</span>
+            <button
+              type="button"
+              onClick={() => setShowManageVenues(true)}
+              class="text-xs font-normal text-primary hover:text-primary/80 transition-colors"
+            >
+              Manage venues
+            </button>
+          </div>
+          <Select
+            options={venueOptions()}
+            value={venue() ?? undefined}
+            onChange={v => setVenue(v)}
+            placeholder={
+              venuesQuery.isLoading
+                ? "Loading venues…"
+                : venueOptions().length
+                  ? "Select a venue"
+                  : "No venues — use Manage venues to add one"
+            }
+            disabled={venuesQuery.isLoading}
+            ariaLabel="Venue"
           />
           <Show when={errors().venue}>
-            <p class="text-xs text-red-600 mt-1">{errors().venue}</p>
+            <p class={errorClass}>{errors().venue}</p>
           </Show>
-        </label>
+        </div>
 
-        <label class="block">
-          <span class="block text-sm font-medium text-foreground mb-1">Instructor</span>
-          <input
-            type="text"
-            value={instructor()}
-            onInput={e => setInstructor(e.target.value)}
-            required
-            class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().instructor ? "border-red-300" : "border-border"}`}
+        <div>
+          <span class={labelClass}>Instructor</span>
+          <Select
+            options={instructorOptions()}
+            value={instructorChoice()}
+            onChange={v => setInstructorChoice(v)}
+            placeholder={instructorsQuery.isLoading ? "Loading instructors…" : "Select instructor"}
+            disabled={instructorsQuery.isLoading}
+            ariaLabel="Instructor"
           />
-          <Show when={errors().instructor}>
-            <p class="text-xs text-red-600 mt-1">{errors().instructor}</p>
+          <Show when={instructorChoice() === OTHER_INSTRUCTOR}>
+            <input
+              type="text"
+              value={instructorOther()}
+              onInput={e => setInstructorOther(e.target.value)}
+              placeholder="e.g., Chef Maria Santos"
+              class={`${inputClass("instructor")} mt-2`}
+            />
           </Show>
-        </label>
+          <Show when={errors().instructor}>
+            <p class={errorClass}>{errors().instructor}</p>
+          </Show>
+        </div>
 
         <Show when={mutation.isError}>
-          <p class="text-sm text-red-600">{mutation.error?.message}</p>
+          <p class="text-sm text-red-600 dark:text-red-400">{mutation.error?.message}</p>
         </Show>
 
         <div class="flex justify-end gap-3 pt-4 border-t border-border">
@@ -215,6 +283,7 @@ export function EditBatchModal(props: EditBatchModalProps) {
           </button>
         </div>
       </form>
+      <ManageVenuesModal open={showManageVenues()} onClose={() => setShowManageVenues(false)} />
     </Modal>
   )
 }

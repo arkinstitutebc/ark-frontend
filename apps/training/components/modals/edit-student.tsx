@@ -1,9 +1,9 @@
-import { Icons, Modal } from "@ark/ui"
+import { Icons, Modal, Select } from "@ark/ui"
 import { useBatches, useUpdateStudent } from "@data/hooks"
 import { updateStudentSchema } from "@data/schemas"
 import type { Student } from "@data/types"
 import { validateForm } from "@data/validate"
-import { createSignal, For, Show } from "solid-js"
+import { createMemo, createSignal, Show } from "solid-js"
 
 interface EditStudentModalProps {
   open: boolean
@@ -63,6 +63,21 @@ export function EditStudentModal(props: EditStudentModalProps) {
   const [photoUrl, setPhotoUrl] = createSignal<string | undefined>(undefined)
   const [certificateUrl, setCertificateUrl] = createSignal<string | undefined>(undefined)
 
+  const batchOptions = createMemo(() =>
+    (batchesQuery.data ?? []).map(b => ({
+      label: `${b.batchCode} — ${b.trainingName} — ${b.studentsEnrolled}/${b.studentsCapacity}`,
+      value: b.id,
+    }))
+  )
+
+  const genderOptions = createMemo(() => GENDERS.map(g => ({ label: g ?? "", value: g ?? "" })))
+
+  const statusOptions = createMemo(() => STATUSES.map(s => ({ label: s, value: s })))
+
+  const educationOptions = createMemo(() => EDUCATION_LEVELS.map(l => ({ label: l, value: l })))
+
+  const employmentOptions = createMemo(() => EMPLOYMENT_STATUSES.map(s => ({ label: s, value: s })))
+
   const handlePhotoUpload = (e: Event) => {
     const input = e.target as HTMLInputElement
     const file = input.files?.[0]
@@ -81,13 +96,8 @@ export function EditStudentModal(props: EditStudentModalProps) {
     }
   }
 
-  const handleRemovePhoto = () => {
-    setPhotoUrl(undefined)
-  }
-
-  const handleRemoveCertificate = () => {
-    setCertificateUrl(undefined)
-  }
+  const handleRemovePhoto = () => setPhotoUrl(undefined)
+  const handleRemoveCertificate = () => setCertificateUrl(undefined)
 
   const handleSubmit = (e: Event) => {
     e.preventDefault()
@@ -128,7 +138,6 @@ export function EditStudentModal(props: EditStudentModalProps) {
   }
 
   const handleClose = () => {
-    // Reset to original values
     setFirstName(props.student.firstName)
     setMiddleName(props.student.middleName || "")
     setLastName(props.student.lastName)
@@ -147,10 +156,16 @@ export function EditStudentModal(props: EditStudentModalProps) {
     props.onClose()
   }
 
+  const inputClass = (field?: string) =>
+    `w-full px-3 py-2 border rounded-lg text-sm bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${field && errors()[field] ? "border-red-400 dark:border-red-500" : "border-border"}`
+
+  const errorClass = "text-xs text-red-600 dark:text-red-400 mt-1"
+  const labelClass = "block text-sm font-medium text-foreground mb-1"
+
   return (
-    <Modal open={props.open} onClose={handleClose} title="Edit Student" size="lg">
-      <form onSubmit={handleSubmit} class="space-y-4 max-h-[70vh] overflow-y-auto pr-2">
-        {/* Photo Upload */}
+    <Modal open={props.open} onClose={handleClose} title="Edit Student" size="xl">
+      <form onSubmit={handleSubmit} class="space-y-5" noValidate>
+        {/* Header: photo + ID */}
         <div class="flex items-center gap-4 pb-4 border-b border-border">
           <div class="w-20 h-20 rounded-full bg-surface-muted flex items-center justify-center overflow-hidden border-2 border-border">
             {photoUrl() ? (
@@ -159,23 +174,23 @@ export function EditStudentModal(props: EditStudentModalProps) {
               <Icons.user class="w-10 h-10 text-muted" />
             )}
           </div>
-          <div>
-            <label class="block">
-              <span class="sr-only">Upload photo</span>
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handlePhotoUpload}
-                class="hidden"
-                id="photo-upload"
-              />
-              <label
-                for="photo-upload"
-                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/5 rounded-lg transition-colors cursor-pointer"
-              >
-                <Icons.upload class="w-4 h-4" />
-                Upload Photo
-              </label>
+          <div class="flex-1">
+            <Show when={props.student.studentId}>
+              <p class="text-xs text-muted font-mono mb-1">{props.student.studentId}</p>
+            </Show>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handlePhotoUpload}
+              class="hidden"
+              id="photo-upload"
+            />
+            <label
+              for="photo-upload"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/5 rounded-lg transition-colors cursor-pointer"
+            >
+              <Icons.upload class="w-4 h-4" />
+              Upload Photo
             </label>
             <Show when={photoUrl()}>
               <button
@@ -186,223 +201,196 @@ export function EditStudentModal(props: EditStudentModalProps) {
                 Remove
               </button>
             </Show>
-            <p class="text-xs text-muted mt-1">Recommended: 2x2 photo, JPG or PNG</p>
+            <p class="text-xs text-muted mt-1">2x2 photo, JPG or PNG</p>
           </div>
         </div>
 
         {/* Name */}
         <div class="grid grid-cols-3 gap-3">
           <label class="block">
-            <span class="block text-sm font-medium text-foreground mb-1">First Name</span>
+            <span class={labelClass}>First Name</span>
             <input
               type="text"
               value={firstName()}
               onInput={e => setFirstName(e.target.value)}
-              required
-              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().firstName ? "border-red-300" : "border-border"}`}
+              class={inputClass("firstName")}
             />
             <Show when={errors().firstName}>
-              <p class="text-xs text-red-600 mt-1">{errors().firstName}</p>
+              <p class={errorClass}>{errors().firstName}</p>
             </Show>
           </label>
           <label class="block">
-            <span class="block text-sm font-medium text-foreground mb-1">Middle Name</span>
+            <span class={labelClass}>Middle Name</span>
             <input
               type="text"
               value={middleName()}
               onInput={e => setMiddleName(e.target.value)}
               placeholder="Optional"
-              class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              class={inputClass()}
             />
           </label>
           <label class="block">
-            <span class="block text-sm font-medium text-foreground mb-1">Last Name</span>
+            <span class={labelClass}>Last Name</span>
             <input
               type="text"
               value={lastName()}
               onInput={e => setLastName(e.target.value)}
-              required
-              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().lastName ? "border-red-300" : "border-border"}`}
+              class={inputClass("lastName")}
             />
             <Show when={errors().lastName}>
-              <p class="text-xs text-red-600 mt-1">{errors().lastName}</p>
+              <p class={errorClass}>{errors().lastName}</p>
             </Show>
           </label>
         </div>
 
-        {/* Personal Info */}
+        {/* Personal */}
         <div class="grid grid-cols-3 gap-3">
           <label class="block">
-            <span class="block text-sm font-medium text-foreground mb-1">Date of Birth</span>
+            <span class={labelClass}>Date of Birth</span>
             <input
               type="date"
-              value={dateOfBirth()}
+              value={dateOfBirth() ?? ""}
               onInput={e => setDateOfBirth(e.target.value)}
-              required
-              class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              class={inputClass()}
             />
           </label>
-          <label class="block">
-            <span class="block text-sm font-medium text-foreground mb-1">Gender</span>
-            <select
-              value={gender()}
-              onChange={e => setGender(e.target.value as Student["gender"])}
-              required
-              class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            >
-              {GENDERS.map(g => (
-                <option value={g}>{g}</option>
-              ))}
-            </select>
-          </label>
-          <label class="block">
-            <span class="block text-sm font-medium text-foreground mb-1">Status</span>
-            <select
+          <div>
+            <span class={labelClass}>Gender</span>
+            <Select
+              options={genderOptions()}
+              value={gender() ?? undefined}
+              onChange={v => setGender(v as Student["gender"])}
+              placeholder="Select gender"
+              ariaLabel="Gender"
+            />
+          </div>
+          <div>
+            <span class={labelClass}>Status</span>
+            <Select
+              options={statusOptions()}
               value={status()}
-              onChange={e => setStatus(e.target.value as Student["status"])}
-              required
-              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().status ? "border-red-300" : "border-border"}`}
-            >
-              {STATUSES.map(s => (
-                <option value={s}>{s}</option>
-              ))}
-            </select>
+              onChange={v => setStatus(v as Student["status"])}
+              placeholder="Select status"
+              ariaLabel="Status"
+            />
             <Show when={errors().status}>
-              <p class="text-xs text-red-600 mt-1">{errors().status}</p>
+              <p class={errorClass}>{errors().status}</p>
             </Show>
-          </label>
+          </div>
         </div>
 
-        {/* Contact Info */}
+        {/* Contact */}
         <div class="grid grid-cols-2 gap-3">
           <label class="block">
-            <span class="block text-sm font-medium text-foreground mb-1">Contact Number</span>
+            <span class={labelClass}>Contact Number</span>
             <input
               type="tel"
-              value={contactNumber()}
+              value={contactNumber() ?? ""}
               onInput={e => setContactNumber(e.target.value)}
-              required
               placeholder="09XXXXXXXXX"
-              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().contactNumber ? "border-red-300" : "border-border"}`}
+              class={inputClass("contactNumber")}
             />
             <Show when={errors().contactNumber}>
-              <p class="text-xs text-red-600 mt-1">{errors().contactNumber}</p>
+              <p class={errorClass}>{errors().contactNumber}</p>
             </Show>
           </label>
           <label class="block">
-            <span class="block text-sm font-medium text-foreground mb-1">Email</span>
+            <span class={labelClass}>Email</span>
             <input
               type="email"
-              value={email()}
+              value={email() ?? ""}
               onInput={e => setEmail(e.target.value)}
-              required
               placeholder="email@example.com"
-              class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().email ? "border-red-300" : "border-border"}`}
+              class={inputClass("email")}
             />
             <Show when={errors().email}>
-              <p class="text-xs text-red-600 mt-1">{errors().email}</p>
+              <p class={errorClass}>{errors().email}</p>
             </Show>
           </label>
         </div>
 
         <label class="block">
-          <span class="block text-sm font-medium text-foreground mb-1">Address</span>
+          <span class={labelClass}>Address</span>
           <input
             type="text"
-            value={address()}
+            value={address() ?? ""}
             onInput={e => setAddress(e.target.value)}
-            required
             placeholder="Street, City, Province"
-            class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            class={inputClass()}
           />
         </label>
 
         {/* Education & Employment */}
         <div class="grid grid-cols-2 gap-3">
-          <label class="block">
-            <span class="block text-sm font-medium text-foreground mb-1">Education</span>
-            <select
-              value={educationalAttainment()}
-              onChange={e => setEducationalAttainment(e.target.value)}
-              required
-              class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            >
-              {EDUCATION_LEVELS.map(level => (
-                <option value={level}>{level}</option>
-              ))}
-            </select>
-          </label>
-          <label class="block">
-            <span class="block text-sm font-medium text-foreground mb-1">Employment</span>
-            <select
-              value={employmentStatus()}
-              onChange={e => setEmploymentStatus(e.target.value)}
-              required
-              class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            >
-              {EMPLOYMENT_STATUSES.map(status => (
-                <option value={status}>{status}</option>
-              ))}
-            </select>
-          </label>
+          <div>
+            <span class={labelClass}>Education</span>
+            <Select
+              options={educationOptions()}
+              value={educationalAttainment() ?? undefined}
+              onChange={v => setEducationalAttainment(v)}
+              placeholder="Select education level"
+              ariaLabel="Education"
+            />
+          </div>
+          <div>
+            <span class={labelClass}>Employment</span>
+            <Select
+              options={employmentOptions()}
+              value={employmentStatus() ?? undefined}
+              onChange={v => setEmploymentStatus(v)}
+              placeholder="Select employment status"
+              ariaLabel="Employment"
+            />
+          </div>
         </div>
 
-        <label class="block">
-          <span class="block text-sm font-medium text-foreground mb-1">Assign to Batch</span>
-          <select
+        <div>
+          <span class={labelClass}>Assign to Batch</span>
+          <Select
+            options={batchOptions()}
             value={batchId()}
-            onChange={e => setBatchId(e.target.value)}
-            required
-            class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().batchId ? "border-red-300" : "border-border"}`}
-          >
-            <For each={batchesQuery.data || []}>
-              {batch => (
-                <option value={batch.id}>
-                  {batch.batchCode} - {batch.trainingName}
-                </option>
-              )}
-            </For>
-          </select>
+            onChange={v => setBatchId(v)}
+            placeholder={batchesQuery.isLoading ? "Loading batches…" : "Select a batch"}
+            disabled={batchesQuery.isLoading}
+            ariaLabel="Batch"
+          />
           <Show when={errors().batchId}>
-            <p class="text-xs text-red-600 mt-1">{errors().batchId}</p>
+            <p class={errorClass}>{errors().batchId}</p>
           </Show>
-        </label>
+        </div>
 
-        {/* Certificate Upload */}
+        {/* Certificate */}
         <div class="pt-4 border-t border-border">
-          <label class="block">
-            <span class="block text-sm font-medium text-foreground mb-1">PSA Certificate</span>
-            <div class="flex items-center gap-3">
-              <label class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors cursor-pointer">
-                <Icons.upload class="w-4 h-4" />
-                <span>Choose File</span>
-                <input
-                  type="file"
-                  accept=".pdf,image/*"
-                  onChange={handleCertificateUpload}
-                  class="hidden"
-                  id="certificate-upload"
-                />
-              </label>
-              <Show when={certificateUrl()}>
-                <span class="text-sm text-muted flex items-center gap-1">
-                  <Icons.fileText class="w-4 h-4" />
-                  File selected
-                </span>
-                <button
-                  type="button"
-                  onClick={handleRemoveCertificate}
-                  class="text-sm text-red-600 hover:text-red-700"
-                >
-                  Remove
-                </button>
-              </Show>
-              <Show when={!certificateUrl()}>
-                <span class="text-sm text-muted">No file chosen</span>
-              </Show>
-            </div>
-            <p class="text-xs text-muted mt-1">Accepts PDF or images (JPG, PNG)</p>
-          </label>
+          <span class={labelClass}>PSA Certificate</span>
+          <div class="flex items-center gap-3">
+            <label class="inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors cursor-pointer">
+              <Icons.upload class="w-4 h-4" />
+              <span>Choose File</span>
+              <input
+                type="file"
+                accept=".pdf,image/*"
+                onChange={handleCertificateUpload}
+                class="hidden"
+              />
+            </label>
+            <Show when={certificateUrl()}>
+              <span class="text-sm text-muted flex items-center gap-1">
+                <Icons.fileText class="w-4 h-4" />
+                File selected
+              </span>
+              <button
+                type="button"
+                onClick={handleRemoveCertificate}
+                class="text-sm text-red-600 hover:text-red-700"
+              >
+                Remove
+              </button>
+            </Show>
+            <Show when={!certificateUrl()}>
+              <span class="text-sm text-muted">No file chosen</span>
+            </Show>
+          </div>
+          <p class="text-xs text-muted mt-1">Accepts PDF or images (JPG, PNG)</p>
         </div>
 
         {/* Actions */}
@@ -416,9 +404,10 @@ export function EditStudentModal(props: EditStudentModalProps) {
           </button>
           <button
             type="submit"
-            class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors"
+            disabled={mutation.isPending}
+            class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50"
           >
-            Save Changes
+            {mutation.isPending ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </form>
