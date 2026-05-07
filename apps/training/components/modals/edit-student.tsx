@@ -205,158 +205,172 @@ export function EditStudentModal(props: EditStudentModalProps) {
           </div>
         </div>
 
-        {/* Name */}
-        <div class="grid grid-cols-3 gap-3">
-          <label class="block">
-            <span class={labelClass}>First Name</span>
-            <input
-              type="text"
-              value={firstName()}
-              onInput={e => setFirstName(e.target.value)}
-              class={inputClass("firstName")}
-            />
-            <Show when={errors().firstName}>
-              <p class={errorClass}>{errors().firstName}</p>
-            </Show>
-          </label>
-          <label class="block">
-            <span class={labelClass}>Middle Name</span>
-            <input
-              type="text"
-              value={middleName()}
-              onInput={e => setMiddleName(e.target.value)}
-              placeholder="Optional"
-              class={inputClass()}
-            />
-          </label>
-          <label class="block">
-            <span class={labelClass}>Last Name</span>
-            <input
-              type="text"
-              value={lastName()}
-              onInput={e => setLastName(e.target.value)}
-              class={inputClass("lastName")}
-            />
-            <Show when={errors().lastName}>
-              <p class={errorClass}>{errors().lastName}</p>
-            </Show>
-          </label>
+        {/* Basic Info */}
+        <div class="space-y-3">
+          <h3 class="text-xs font-semibold text-muted uppercase tracking-wider">Basic Info</h3>
+          <div class="grid grid-cols-3 gap-3">
+            <label class="block">
+              <span class={labelClass}>First Name</span>
+              <input
+                type="text"
+                value={firstName()}
+                onInput={e => setFirstName(e.target.value)}
+                class={inputClass("firstName")}
+              />
+              <Show when={errors().firstName}>
+                <p class={errorClass}>{errors().firstName}</p>
+              </Show>
+            </label>
+            <label class="block">
+              <span class={labelClass}>Middle Name</span>
+              <input
+                type="text"
+                value={middleName()}
+                onInput={e => setMiddleName(e.target.value)}
+                placeholder="Optional"
+                class={inputClass()}
+              />
+            </label>
+            <label class="block">
+              <span class={labelClass}>Last Name</span>
+              <input
+                type="text"
+                value={lastName()}
+                onInput={e => setLastName(e.target.value)}
+                class={inputClass("lastName")}
+              />
+              <Show when={errors().lastName}>
+                <p class={errorClass}>{errors().lastName}</p>
+              </Show>
+            </label>
+          </div>
         </div>
 
         {/* Personal */}
-        <div class="grid grid-cols-3 gap-3">
-          <label class="block">
-            <span class={labelClass}>Date of Birth</span>
-            <input
-              type="date"
-              value={dateOfBirth() ?? ""}
-              onInput={e => setDateOfBirth(e.target.value)}
-              class={inputClass()}
-            />
-          </label>
-          <div>
-            <span class={labelClass}>Gender</span>
-            <Select
-              options={genderOptions()}
-              value={gender() ?? undefined}
-              onChange={v => setGender(v as Student["gender"])}
-              placeholder="Select gender"
-              ariaLabel="Gender"
-            />
-          </div>
-          <div>
-            <span class={labelClass}>Status</span>
-            <Select
-              options={statusOptions()}
-              value={status()}
-              onChange={v => setStatus(v as Student["status"])}
-              placeholder="Select status"
-              ariaLabel="Status"
-            />
-            <Show when={errors().status}>
-              <p class={errorClass}>{errors().status}</p>
-            </Show>
+        <div class="space-y-3 pt-2">
+          <h3 class="text-xs font-semibold text-muted uppercase tracking-wider">Personal</h3>
+          <div class="grid grid-cols-3 gap-3">
+            <label class="block">
+              <span class={labelClass}>Date of Birth</span>
+              <input
+                type="date"
+                value={dateOfBirth() ?? ""}
+                onInput={e => setDateOfBirth(e.target.value)}
+                class={inputClass()}
+              />
+            </label>
+            <div>
+              <span class={labelClass}>Gender</span>
+              <Select
+                options={genderOptions()}
+                value={gender() ?? undefined}
+                onChange={v => setGender(v as Student["gender"])}
+                placeholder="Select gender"
+                ariaLabel="Gender"
+              />
+            </div>
+            <div>
+              <span class={labelClass}>Status</span>
+              <Select
+                options={statusOptions()}
+                value={status()}
+                onChange={v => setStatus(v as Student["status"])}
+                placeholder="Select status"
+                ariaLabel="Status"
+              />
+              <Show when={errors().status}>
+                <p class={errorClass}>{errors().status}</p>
+              </Show>
+            </div>
           </div>
         </div>
 
         {/* Contact */}
-        <div class="grid grid-cols-2 gap-3">
+        <div class="space-y-3 pt-2">
+          <h3 class="text-xs font-semibold text-muted uppercase tracking-wider">Contact</h3>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="block">
+              <span class={labelClass}>Contact Number</span>
+              <input
+                type="tel"
+                value={contactNumber() ?? ""}
+                onInput={e => setContactNumber(e.target.value)}
+                placeholder="09XXXXXXXXX"
+                class={inputClass("contactNumber")}
+              />
+              <Show when={errors().contactNumber}>
+                <p class={errorClass}>{errors().contactNumber}</p>
+              </Show>
+            </label>
+            <label class="block">
+              <span class={labelClass}>Email</span>
+              <input
+                type="email"
+                value={email() ?? ""}
+                onInput={e => setEmail(e.target.value)}
+                placeholder="email@example.com"
+                class={inputClass("email")}
+              />
+              <Show when={errors().email}>
+                <p class={errorClass}>{errors().email}</p>
+              </Show>
+            </label>
+          </div>
+
           <label class="block">
-            <span class={labelClass}>Contact Number</span>
+            <span class={labelClass}>Address</span>
             <input
-              type="tel"
-              value={contactNumber() ?? ""}
-              onInput={e => setContactNumber(e.target.value)}
-              placeholder="09XXXXXXXXX"
-              class={inputClass("contactNumber")}
+              type="text"
+              value={address() ?? ""}
+              onInput={e => setAddress(e.target.value)}
+              placeholder="Street, City, Province"
+              class={inputClass()}
             />
-            <Show when={errors().contactNumber}>
-              <p class={errorClass}>{errors().contactNumber}</p>
-            </Show>
-          </label>
-          <label class="block">
-            <span class={labelClass}>Email</span>
-            <input
-              type="email"
-              value={email() ?? ""}
-              onInput={e => setEmail(e.target.value)}
-              placeholder="email@example.com"
-              class={inputClass("email")}
-            />
-            <Show when={errors().email}>
-              <p class={errorClass}>{errors().email}</p>
-            </Show>
           </label>
         </div>
-
-        <label class="block">
-          <span class={labelClass}>Address</span>
-          <input
-            type="text"
-            value={address() ?? ""}
-            onInput={e => setAddress(e.target.value)}
-            placeholder="Street, City, Province"
-            class={inputClass()}
-          />
-        </label>
 
         {/* Education & Employment */}
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <span class={labelClass}>Education</span>
-            <Select
-              options={educationOptions()}
-              value={educationalAttainment() ?? undefined}
-              onChange={v => setEducationalAttainment(v)}
-              placeholder="Select education level"
-              ariaLabel="Education"
-            />
+        <div class="space-y-3 pt-2">
+          <h3 class="text-xs font-semibold text-muted uppercase tracking-wider">
+            Education & Employment
+          </h3>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <span class={labelClass}>Education</span>
+              <Select
+                options={educationOptions()}
+                value={educationalAttainment() ?? undefined}
+                onChange={v => setEducationalAttainment(v)}
+                placeholder="Select education level"
+                ariaLabel="Education"
+              />
+            </div>
+            <div>
+              <span class={labelClass}>Employment</span>
+              <Select
+                options={employmentOptions()}
+                value={employmentStatus() ?? undefined}
+                onChange={v => setEmploymentStatus(v)}
+                placeholder="Select employment status"
+                ariaLabel="Employment"
+              />
+            </div>
           </div>
-          <div>
-            <span class={labelClass}>Employment</span>
-            <Select
-              options={employmentOptions()}
-              value={employmentStatus() ?? undefined}
-              onChange={v => setEmploymentStatus(v)}
-              placeholder="Select employment status"
-              ariaLabel="Employment"
-            />
-          </div>
-        </div>
 
-        <div>
-          <span class={labelClass}>Assign to Batch</span>
-          <Select
-            options={batchOptions()}
-            value={batchId()}
-            onChange={v => setBatchId(v)}
-            placeholder={batchesQuery.isLoading ? "Loading batches…" : "Select a batch"}
-            disabled={batchesQuery.isLoading}
-            ariaLabel="Batch"
-          />
-          <Show when={errors().batchId}>
-            <p class={errorClass}>{errors().batchId}</p>
-          </Show>
+          <div>
+            <span class={labelClass}>Assign to Batch</span>
+            <Select
+              options={batchOptions()}
+              value={batchId()}
+              onChange={v => setBatchId(v)}
+              placeholder={batchesQuery.isLoading ? "Loading batches…" : "Select a batch"}
+              disabled={batchesQuery.isLoading}
+              ariaLabel="Batch"
+            />
+            <Show when={errors().batchId}>
+              <p class={errorClass}>{errors().batchId}</p>
+            </Show>
+          </div>
         </div>
 
         {/* Certificate */}

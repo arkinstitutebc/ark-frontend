@@ -1,7 +1,10 @@
 import { Modal, Select, toast } from "@ark/ui"
+import { api } from "@data/api"
 import { useBatches, useCreateStudent } from "@data/hooks"
 import { createStudentSchema } from "@data/schemas"
+import type { Student } from "@data/types"
 import { validateForm } from "@data/validate"
+import { useQueryClient } from "@tanstack/solid-query"
 import { createMemo, createSignal, Index, Show } from "solid-js"
 
 interface AddStudentModalProps {
@@ -24,6 +27,7 @@ function emptyRow(): BulkRow {
 export function AddStudentModal(props: AddStudentModalProps) {
   const batchesQuery = useBatches()
   const createMutation = useCreateStudent()
+  const qc = useQueryClient()
 
   const [mode, setMode] = createSignal<Mode>("single")
   const [errors, setErrors] = createSignal<Record<string, string>>({})
@@ -116,14 +120,20 @@ export function AddStudentModal(props: AddStudentModalProps) {
     }
     setErrors({})
     setSubmitting(true)
+    // Bulk mode bypasses useCreateStudent so we don't fire one toast per row.
+    // We invalidate the relevant queries once at the end and emit a single
+    // summary toast.
     let added = 0
     let failed = 0
     for (const row of valid) {
       try {
-        await createMutation.mutateAsync({
-          firstName: row.firstName.trim(),
-          lastName: row.lastName.trim(),
-          batchId: bulkBatchId(),
+        await api<Student>("/api/training/students", {
+          method: "POST",
+          body: JSON.stringify({
+            firstName: row.firstName.trim(),
+            lastName: row.lastName.trim(),
+            batchId: bulkBatchId(),
+          }),
         })
         added++
       } catch {
@@ -131,6 +141,10 @@ export function AddStudentModal(props: AddStudentModalProps) {
       }
     }
     setSubmitting(false)
+    if (added > 0) {
+      qc.invalidateQueries({ queryKey: ["students"] })
+      qc.invalidateQueries({ queryKey: ["batches"] })
+    }
     if (failed > 0) toast.error(`Added ${added}, ${failed} failed`)
     else toast.success(`Added ${added} student${added === 1 ? "" : "s"}`)
     if (added > 0) {

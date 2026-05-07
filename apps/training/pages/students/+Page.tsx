@@ -94,16 +94,16 @@ export default function StudentsPage() {
 
         <div class="bg-surface border border-border rounded-lg p-3 mb-6 flex flex-wrap items-center gap-3">
           <div class="relative flex-1 min-w-[220px]">
-            <Icons.search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
+            <Icons.search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
             <input
               type="text"
               placeholder="Search by name or student ID..."
               value={searchQuery()}
               onInput={e => setSearchQuery(e.target.value)}
-              class="pl-9 pr-3 py-2 w-full border border-border rounded-lg text-sm bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              class="pl-9 pr-3 py-2.5 w-full border border-border rounded-lg text-sm bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
           </div>
-          <div class="w-56">
+          <div class="w-64">
             <Select
               options={batchFilterOptions()}
               value={filterBatch()}
@@ -116,7 +116,7 @@ export default function StudentsPage() {
             <button
               type="button"
               onClick={clearFilters}
-              class="text-sm font-medium text-muted hover:text-primary transition-colors px-2"
+              class="text-sm font-medium text-muted hover:text-primary transition-colors px-2 py-2.5"
             >
               Clear
             </button>
