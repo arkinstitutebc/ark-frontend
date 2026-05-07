@@ -1,9 +1,9 @@
-import { Modal } from "@ark/ui"
+import { Modal, Select } from "@ark/ui"
 import { TRAINING_TYPES } from "@data/constants"
 import { useCreateBatch, useInstructors, useVenues } from "@data/hooks"
 import { createBatchSchema } from "@data/schemas"
 import { validateForm } from "@data/validate"
-import { createMemo, createSignal, For, Show } from "solid-js"
+import { createMemo, createSignal, Show } from "solid-js"
 import { ManageVenuesModal } from "./manage-venues"
 
 interface AddBatchModalProps {
@@ -27,6 +27,20 @@ export function AddBatchModal(props: AddBatchModalProps) {
   const [venue, setVenue] = createSignal("")
   const [instructorId, setInstructorId] = createSignal("")
   const [instructorOther, setInstructorOther] = createSignal("")
+
+  const trainingTypeOptions = createMemo(() => TRAINING_TYPES.map(t => ({ label: t, value: t })))
+
+  const venueOptions = createMemo(() =>
+    (venuesQuery.data ?? []).map(v => ({ label: v.name, value: v.name }))
+  )
+
+  const instructorOptions = createMemo(() => [
+    ...(instructorsQuery.data ?? []).map(i => ({
+      label: i.specialization ? `${i.name} — ${i.specialization}` : i.name,
+      value: i.id,
+    })),
+    { label: "Other (type below)", value: OTHER_INSTRUCTOR },
+  ])
 
   const resolvedInstructor = createMemo(() => {
     if (instructorId() === OTHER_INSTRUCTOR) return instructorOther().trim()
@@ -80,39 +94,37 @@ export function AddBatchModal(props: AddBatchModalProps) {
     props.onClose()
   }
 
-  const fieldClass = (field: string) =>
+  const inputClass = (field: string) =>
     `w-full px-3 py-2 border rounded-lg text-sm bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors()[field] ? "border-red-400 dark:border-red-500" : "border-border"}`
 
   const errorClass = "text-xs text-red-600 dark:text-red-400 mt-1"
+  const labelClass = "block text-sm font-medium text-foreground mb-1"
 
   return (
     <Modal open={props.open} onClose={handleClose} title="Add New Batch">
       <form onSubmit={handleSubmit} class="space-y-4" noValidate>
-        <label class="block">
-          <span class="block text-sm font-medium text-foreground mb-1">Training Type</span>
-          <select
-            value={trainingName()}
-            onChange={e => setTrainingName(e.target.value)}
-            class={fieldClass("trainingName")}
-          >
-            <option value="">Select training type</option>
-            {TRAINING_TYPES.map(type => (
-              <option value={type}>{type}</option>
-            ))}
-          </select>
+        <div>
+          <span class={labelClass}>Training Type</span>
+          <Select
+            options={trainingTypeOptions()}
+            value={trainingName() || undefined}
+            onChange={v => setTrainingName(v)}
+            placeholder="Select training type"
+            ariaLabel="Training type"
+          />
           <Show when={errors().trainingName}>
             <p class={errorClass}>{errors().trainingName}</p>
           </Show>
-        </label>
+        </div>
 
         <label class="block">
-          <span class="block text-sm font-medium text-foreground mb-1">Sponsor</span>
+          <span class={labelClass}>Sponsor</span>
           <input
             type="text"
             value={senator()}
             onInput={e => setSenator(e.target.value)}
             placeholder="e.g., Sen. Alan Cayetano or Juan Dela Cruz"
-            class={fieldClass("senator")}
+            class={inputClass("senator")}
           />
           <Show when={errors().senator}>
             <p class={errorClass}>{errors().senator}</p>
@@ -121,12 +133,12 @@ export function AddBatchModal(props: AddBatchModalProps) {
 
         <div class="grid grid-cols-2 gap-3">
           <label class="block">
-            <span class="block text-sm font-medium text-foreground mb-1">Start Date</span>
+            <span class={labelClass}>Start Date</span>
             <input
               type="date"
               value={startDate()}
               onInput={e => setStartDate(e.target.value)}
-              class={fieldClass("startDate")}
+              class={inputClass("startDate")}
             />
             <Show when={errors().startDate}>
               <p class={errorClass}>{errors().startDate}</p>
@@ -142,7 +154,7 @@ export function AddBatchModal(props: AddBatchModalProps) {
               value={endDate()}
               onInput={e => setEndDate(e.target.value)}
               min={startDate() || undefined}
-              class={fieldClass("endDate")}
+              class={inputClass("endDate")}
             />
             <Show when={errors().endDate}>
               <p class={errorClass}>{errors().endDate}</p>
@@ -150,9 +162,9 @@ export function AddBatchModal(props: AddBatchModalProps) {
           </label>
         </div>
 
-        <label class="block">
-          <span class="text-sm font-medium text-foreground mb-1 flex items-center justify-between">
-            <span>Venue</span>
+        <div>
+          <div class="flex items-center justify-between mb-1">
+            <span class="block text-sm font-medium text-foreground">Venue</span>
             <button
               type="button"
               onClick={() => setShowManageVenues(true)}
@@ -160,54 +172,49 @@ export function AddBatchModal(props: AddBatchModalProps) {
             >
               Manage venues
             </button>
-          </span>
-          <input
-            type="text"
-            value={venue()}
-            onInput={e => setVenue(e.target.value)}
-            placeholder="Pick a venue or type a new one"
-            list="venue-suggestions"
-            class={fieldClass("venue")}
+          </div>
+          <Select
+            options={venueOptions()}
+            value={venue() || undefined}
+            onChange={v => setVenue(v)}
+            placeholder={
+              venuesQuery.isLoading
+                ? "Loading venues…"
+                : venueOptions().length
+                  ? "Select a venue"
+                  : "No venues — use Manage venues to add one"
+            }
+            disabled={venuesQuery.isLoading}
+            ariaLabel="Venue"
           />
-          <datalist id="venue-suggestions">
-            <For each={venuesQuery.data || []}>{v => <option value={v.name} />}</For>
-          </datalist>
           <Show when={errors().venue}>
             <p class={errorClass}>{errors().venue}</p>
           </Show>
-        </label>
+        </div>
 
-        <label class="block">
-          <span class="block text-sm font-medium text-foreground mb-1">Instructor</span>
-          <select
-            value={instructorId()}
-            onChange={e => setInstructorId(e.target.value)}
-            class={fieldClass("instructor")}
-          >
-            <option value="">Select instructor</option>
-            <For each={instructorsQuery.data || []}>
-              {i => (
-                <option value={i.id}>
-                  {i.name}
-                  {i.specialization ? ` — ${i.specialization}` : ""}
-                </option>
-              )}
-            </For>
-            <option value={OTHER_INSTRUCTOR}>Other (type below)</option>
-          </select>
+        <div>
+          <span class={labelClass}>Instructor</span>
+          <Select
+            options={instructorOptions()}
+            value={instructorId() || undefined}
+            onChange={v => setInstructorId(v)}
+            placeholder={instructorsQuery.isLoading ? "Loading instructors…" : "Select instructor"}
+            disabled={instructorsQuery.isLoading}
+            ariaLabel="Instructor"
+          />
           <Show when={instructorId() === OTHER_INSTRUCTOR}>
             <input
               type="text"
               value={instructorOther()}
               onInput={e => setInstructorOther(e.target.value)}
               placeholder="e.g., Chef Maria Santos"
-              class={`${fieldClass("instructor")} mt-2`}
+              class={`${inputClass("instructor")} mt-2`}
             />
           </Show>
           <Show when={errors().instructor}>
             <p class={errorClass}>{errors().instructor}</p>
           </Show>
-        </label>
+        </div>
 
         <Show when={mutation.isError}>
           <p class="text-sm text-red-600 dark:text-red-400">{mutation.error?.message}</p>

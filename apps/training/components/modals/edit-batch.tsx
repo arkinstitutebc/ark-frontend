@@ -123,7 +123,7 @@ export function EditBatchModal(props: EditBatchModalProps) {
         </div>
 
         <label class="block">
-          <span class="block text-sm font-medium text-foreground mb-1">Senator Sponsor</span>
+          <span class="block text-sm font-medium text-foreground mb-1">Sponsor</span>
           <input
             type="text"
             value={senator()}
