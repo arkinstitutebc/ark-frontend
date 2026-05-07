@@ -3,11 +3,12 @@ import { api } from "@data/api"
 import { useCategories, useCreatePr } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
 import { createPrSchema } from "@data/schemas"
-import type { Batch } from "@data/types"
+import type { Batch, PrAttachment } from "@data/types"
 import { validateForm } from "@data/validate"
 import { createQuery } from "@tanstack/solid-query"
 import { createMemo, createSignal, Index, Show } from "solid-js"
 import { navigate } from "vike/client/router"
+import { AttachmentUploader } from "@/components/attachment-uploader"
 import { ManageCategoriesModal } from "@/components/manage-categories-modal"
 
 interface PrItemInput {
@@ -36,6 +37,7 @@ export default function CreatePrPage() {
   const [items, setItems] = createSignal<PrItemInput[]>([
     { id: "1", name: "", quantity: 1, unit: "pcs", unitPrice: 0 },
   ])
+  const [attachments, setAttachments] = createSignal<PrAttachment[]>([])
 
   const batches = createMemo(() => {
     return (batchesQuery.data || []) as Batch[]
@@ -116,6 +118,7 @@ export default function CreatePrPage() {
         category: category(),
         purpose: purpose(),
         items: prItems,
+        attachments: attachments().length > 0 ? attachments() : undefined,
         totalAmount: String(totalAmount()),
       },
       {
@@ -412,6 +415,13 @@ export default function CreatePrPage() {
               </div>
             </div>
           </div>
+        </div>
+        <div class="mt-6 bg-surface rounded-lg border border-border p-6">
+          <h2 class="text-lg font-semibold text-foreground mb-2">Attachments</h2>
+          <p class="text-xs text-muted mb-3">
+            Optional — attach receipts, supplier quotes, or invoices to support this request.
+          </p>
+          <AttachmentUploader attachments={attachments()} onChange={setAttachments} />
         </div>
       </form>
       <ManageCategoriesModal

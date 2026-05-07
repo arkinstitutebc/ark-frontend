@@ -19,6 +19,7 @@ export type { StockItem, StockMovement, StockReceipt, StockStatus } from "./inve
 export type { PayrollEntry, PayrollPeriod, PayrollStatus } from "./payroll"
 export type {
   PoStatus,
+  PrAttachment,
   PrItem,
   PrStatus,
   PurchaseOrder,

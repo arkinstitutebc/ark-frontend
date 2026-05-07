@@ -2,7 +2,7 @@ import { createCrudHooks, toast } from "@ark/ui"
 import { createMutation, useQueryClient } from "@tanstack/solid-query"
 import { api } from "../api"
 import { queryKeys } from "../query-keys"
-import type { PrItem, PurchaseRequest } from "../types"
+import type { PrAttachment, PrItem, PurchaseRequest } from "../types"
 
 interface CreatePrInput {
   prCode: string
@@ -12,6 +12,7 @@ interface CreatePrInput {
   category: string
   purpose: string
   items: PrItem[]
+  attachments?: PrAttachment[]
   totalAmount: string
   createdBy?: string
 }

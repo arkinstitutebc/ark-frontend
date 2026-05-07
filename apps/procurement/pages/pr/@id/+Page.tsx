@@ -149,6 +149,39 @@ export default function PrDetailPage() {
               </div>
             </div>
 
+            <Show when={p.attachments && p.attachments.length > 0}>
+              <div class="bg-surface rounded-lg border border-border mb-8">
+                <div class="px-6 py-4 border-b border-border">
+                  <h2 class="text-lg font-semibold text-foreground">
+                    Attachments ({p.attachments?.length ?? 0})
+                  </h2>
+                </div>
+                <ul class="divide-y divide-border">
+                  <For each={p.attachments ?? []}>
+                    {att => (
+                      <li class="flex items-center gap-2 px-6 py-3">
+                        <Icons.fileText class="w-4 h-4 text-muted flex-shrink-0" />
+                        <a
+                          href={att.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          class="flex-1 text-sm text-foreground hover:text-primary truncate"
+                          title={att.name}
+                        >
+                          {att.name}
+                        </a>
+                        <Show when={att.size}>
+                          <span class="text-xs text-muted flex-shrink-0">
+                            {((att.size ?? 0) / 1024).toFixed(0)} KB
+                          </span>
+                        </Show>
+                      </li>
+                    )}
+                  </For>
+                </ul>
+              </div>
+            </Show>
+
             <Show when={p.status !== "pending"}>
               <div class="bg-surface rounded-lg border border-border">
                 <div class="px-6 py-4 border-b border-border">

@@ -9,6 +9,19 @@ export interface PrItem {
   total: number
 }
 
+export interface PrAttachment {
+  /** Original filename. */
+  name: string
+  /** Cloudinary `secure_url`. */
+  url: string
+  /** Cloudinary `resource_type` (image / raw). */
+  type?: string
+  /** Bytes (informational only). */
+  size?: number
+  /** ISO timestamp of when the upload completed. */
+  uploadedAt?: string
+}
+
 export interface PurchaseRequest {
   id: string
   prCode: string
@@ -18,6 +31,7 @@ export interface PurchaseRequest {
   category: string
   purpose: string
   items: PrItem[]
+  attachments?: PrAttachment[] | null
   totalAmount: number
   status: PrStatus
   createdBy: string
