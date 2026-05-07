@@ -49,7 +49,12 @@ export default function DashboardPage() {
   return (
     <div class="min-h-screen bg-surface-muted flex flex-col">
       <Show when={!userQuery.isPending} fallback={<PageLoading />}>
-        <Navbar userName={fullName()} userRole={role()} userEmail={email()} />
+        <Navbar
+          userName={fullName()}
+          userRole={role()}
+          userEmail={email()}
+          userPhotoUrl={userQuery.data?.photoUrl}
+        />
 
         <main class="flex-1 px-6 sm:px-8 lg:px-12 py-8 sm:py-10">
           <div class="max-w-6xl mx-auto mt-8">

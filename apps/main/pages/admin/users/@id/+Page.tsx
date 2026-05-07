@@ -111,6 +111,7 @@ export default function AdminUserDetailPage() {
           userName={`${userQuery.data?.firstName ?? ""} ${userQuery.data?.lastName ?? ""}`.trim()}
           userRole={userQuery.data?.role}
           userEmail={userQuery.data?.email}
+          userPhotoUrl={userQuery.data?.photoUrl}
         />
 
         <main class="flex-1 px-6 sm:px-8 lg:px-12 py-8 sm:py-10">

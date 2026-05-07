@@ -7,6 +7,7 @@ interface NavbarProps {
   userName?: string
   userRole?: string
   userEmail?: string
+  userPhotoUrl?: string
 }
 
 export function Navbar(props: NavbarProps) {
@@ -90,9 +91,20 @@ export function Navbar(props: NavbarProps) {
                 aria-expanded={adminDropdownOpen()}
                 class="flex items-center gap-2 p-1 rounded-lg hover:bg-surface-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
-                <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm">
-                  <UI.user class="w-5 h-5 text-white" />
-                </div>
+                <Show
+                  when={props.userPhotoUrl}
+                  fallback={
+                    <div class="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm">
+                      <UI.user class="w-5 h-5 text-white" />
+                    </div>
+                  }
+                >
+                  <img
+                    src={props.userPhotoUrl}
+                    alt={props.userName ?? "Profile photo"}
+                    class="w-9 h-9 rounded-full object-cover shadow-sm"
+                  />
+                </Show>
                 <UI.chevronDown class="w-4 h-4 text-muted" />
               </button>
 
