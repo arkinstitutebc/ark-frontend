@@ -1,5 +1,5 @@
+import { toast } from "@ark/ui"
 import { createMutation, createQuery, useQueryClient } from "@tanstack/solid-query"
-import toast from "solid-toast"
 import { api } from "../api"
 import { queryKeys } from "../query-keys"
 import type { Transaction } from "../types"

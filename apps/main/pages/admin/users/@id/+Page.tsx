@@ -64,7 +64,7 @@ export default function AdminUserDetailPage() {
     if (lastName() !== u.lastName) payload.lastName = lastName()
     if (!isSelf() && role() !== u.role) payload.role = role()
     if (Object.keys(payload).length === 0) {
-      toast("No changes to save.")
+      toast.info("No changes to save.")
       return
     }
     try {
