@@ -1,20 +1,10 @@
+import { formatDatePH, formatPeso, PageContainer, PageHeader } from "@ark/ui"
 import { useRequests } from "@data/hooks"
 import type { PrStatus, PurchaseRequest } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
+import { navigate } from "vike/client/router"
 import { PrDocumentModal } from "@/components/pr-document-modal"
 import { Icons, PrStatusBadge, QueryBoundary } from "@/components/ui"
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(amount)
-}
-
-function formatDate(dateStr: string) {
-  return new Intl.DateTimeFormat("en-PH", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(new Date(dateStr))
-}
 
 export default function Page() {
   const query = useRequests()
@@ -47,19 +37,19 @@ export default function Page() {
   })
 
   return (
-    <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <h1 class="text-2xl font-semibold text-foreground">Purchase Requests</h1>
-          <p class="text-sm text-muted mt-1">Manage procurement requests and approvals</p>
-        </div>
-        <a
-          href="/pr/create"
-          class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
-        >
-          + Create PR
-        </a>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title="Purchase Requests"
+        subtitle="Manage procurement requests and approvals"
+        action={
+          <a
+            href="/pr/create"
+            class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            + Create PR
+          </a>
+        }
+      />
 
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
         <div class="bg-surface rounded-lg border border-border p-4">
@@ -125,80 +115,82 @@ export default function Page() {
                 </div>
               }
             >
-              <table class="w-full">
-                <thead class="bg-surface-muted border-b border-border">
-                  <tr>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      PR Code
-                    </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Batch
-                    </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Category
-                    </th>
-                    <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                      Amount
-                    </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Created
-                    </th>
-                    <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <For each={filteredRequests()}>
-                    {(pr: PurchaseRequest) => (
-                      <tr
-                        onClick={() => (window.location.href = `/pr/${pr.id}`)}
-                        class="border-t border-border hover:bg-surface-muted cursor-pointer transition-colors"
-                      >
-                        <td class="py-4 px-6">
-                          <span class="font-mono text-sm font-medium text-foreground">
-                            {pr.prCode}
-                          </span>
-                        </td>
-                        <td class="py-4 px-6">
-                          <p class="text-sm text-foreground">{pr.batchName}</p>
-                          <p class="text-xs text-muted">{pr.batchCode}</p>
-                        </td>
-                        <td class="py-4 px-6 text-sm text-foreground">{pr.category}</td>
-                        <td class="py-4 px-6 text-right text-sm text-foreground">
-                          {formatCurrency(Number(pr.totalAmount))}
-                        </td>
-                        <td class="py-4 px-6">
-                          <PrStatusBadge status={pr.status} />
-                        </td>
-                        <td class="py-4 px-6 text-sm text-muted">{formatDate(pr.createdAt)}</td>
-                        <td class="py-4 px-6 text-right">
-                          <button
-                            type="button"
-                            onClick={e => {
-                              e.stopPropagation()
-                              setSelectedPr(pr)
-                              setModalOpen(true)
-                            }}
-                            class="text-primary hover:text-primary/80 text-sm font-medium"
-                          >
-                            View
-                          </button>
-                        </td>
-                      </tr>
-                    )}
-                  </For>
-                </tbody>
-              </table>
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead class="bg-surface-muted border-b border-border">
+                    <tr>
+                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+                        PR Code
+                      </th>
+                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+                        Batch
+                      </th>
+                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+                        Category
+                      </th>
+                      <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
+                        Amount
+                      </th>
+                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+                        Created
+                      </th>
+                      <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <For each={filteredRequests()}>
+                      {(pr: PurchaseRequest) => (
+                        <tr
+                          onClick={() => navigate(`/pr/${pr.id}`)}
+                          class="border-t border-border hover:bg-surface-muted cursor-pointer transition-colors"
+                        >
+                          <td class="py-4 px-6">
+                            <span class="font-mono text-sm font-medium text-foreground">
+                              {pr.prCode}
+                            </span>
+                          </td>
+                          <td class="py-4 px-6">
+                            <p class="text-sm text-foreground">{pr.batchName}</p>
+                            <p class="text-xs text-muted">{pr.batchCode}</p>
+                          </td>
+                          <td class="py-4 px-6 text-sm text-foreground">{pr.category}</td>
+                          <td class="py-4 px-6 text-right text-sm text-foreground">
+                            {formatPeso(Number(pr.totalAmount))}
+                          </td>
+                          <td class="py-4 px-6">
+                            <PrStatusBadge status={pr.status} />
+                          </td>
+                          <td class="py-4 px-6 text-sm text-muted">{formatDatePH(pr.createdAt)}</td>
+                          <td class="py-4 px-6 text-right">
+                            <button
+                              type="button"
+                              onClick={e => {
+                                e.stopPropagation()
+                                setSelectedPr(pr)
+                                setModalOpen(true)
+                              }}
+                              class="text-primary hover:text-primary/80 text-sm font-medium"
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      )}
+                    </For>
+                  </tbody>
+                </table>
+              </div>
             </Show>
           </div>
         )}
       </QueryBoundary>
 
       <PrDocumentModal open={modalOpen()} onClose={() => setModalOpen(false)} pr={selectedPr()} />
-    </div>
+    </PageContainer>
   )
 }

@@ -1,13 +1,10 @@
-import { Icons } from "@ark/ui"
+import { formatPeso, Icons, PageContainer, Select } from "@ark/ui"
 import { useCreatePo, useRequests } from "@data/hooks"
 import { createPoSchema } from "@data/schemas"
 import type { PurchaseRequest } from "@data/types"
 import { validateForm } from "@data/validate"
 import { createEffect, createMemo, createSignal, For, onMount, Show } from "solid-js"
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(amount)
-}
+import { navigate } from "vike/client/router"
 
 export default function CreatePoPage() {
   const approvedPrsQuery = useRequests(() => ({ status: "approved" }))
@@ -83,26 +80,32 @@ export default function CreatePoPage() {
       },
       {
         onSuccess: () => {
-          window.location.href = "/orders"
+          navigate("/orders")
         },
       }
     )
   }
 
-  const handlePrChange = (e: Event) => {
-    const target = e.currentTarget as HTMLSelectElement
-    setPrId(target.value)
+  const handlePrChange = (id: string) => {
+    setPrId(id)
     setSupplier("")
     setNotes("")
   }
 
+  const prOptions = createMemo(() =>
+    approvedPrs().map(pr => ({
+      label: `${pr.prCode} — ${pr.batchName} (${formatPeso(pr.totalAmount)})`,
+      value: pr.id,
+    }))
+  )
+
   return (
-    <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
+    <PageContainer>
       {/* Header */}
       <div class="flex items-center gap-4 mb-8">
         <button
           type="button"
-          onClick={() => (window.location.href = "/orders")}
+          onClick={() => navigate("/orders")}
           class="p-2 hover:bg-surface-muted rounded-lg transition-colors"
         >
           <Icons.arrowLeft class="w-5 h-5 text-muted" />
@@ -129,30 +132,19 @@ export default function CreatePoPage() {
 
               <div class="space-y-4">
                 <div>
-                  <label for="po-pr" class="block text-sm font-medium text-foreground mb-1">
+                  <span class="block text-sm font-medium text-foreground mb-1">
                     Purchase Request <span class="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="po-pr"
-                    value={prId()}
-                    onInput={handlePrChange}
-                    required
+                  </span>
+                  <Select
+                    options={prOptions()}
+                    value={prId() || undefined}
+                    onChange={handlePrChange}
+                    placeholder={
+                      approvedPrsQuery.isPending ? "Loading approved PRs…" : "Select an approved PR"
+                    }
                     disabled={approvedPrsQuery.isPending}
-                    class={`w-full px-3 py-2 border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:bg-surface-muted disabled:cursor-not-allowed ${errors().prId ? "border-red-300" : "border-border"}`}
-                  >
-                    <option value="">
-                      {approvedPrsQuery.isPending
-                        ? "Loading approved PRs..."
-                        : "Select an approved PR"}
-                    </option>
-                    <For each={approvedPrs()}>
-                      {pr => (
-                        <option value={pr.id}>
-                          {pr.prCode} - {pr.batchName} ({formatCurrency(Number(pr.totalAmount))})
-                        </option>
-                      )}
-                    </For>
-                  </select>
+                    ariaLabel="Purchase request"
+                  />
                   <Show when={errors().prId}>
                     <p class="text-xs text-red-600 mt-1">{errors().prId}</p>
                   </Show>
@@ -239,7 +231,7 @@ export default function CreatePoPage() {
                               <td class="py-4 px-6 text-sm text-foreground">{item.quantity}</td>
                               <td class="py-4 px-6 text-sm text-muted">{item.unit}</td>
                               <td class="py-4 px-6 text-sm text-foreground text-right">
-                                {formatCurrency(item.total)}
+                                {formatPeso(item.total)}
                               </td>
                             </tr>
                           )}
@@ -254,7 +246,7 @@ export default function CreatePoPage() {
                             Total
                           </td>
                           <td class="py-4 px-6 text-right text-base text-foreground">
-                            {formatCurrency(totalAmount())}
+                            {formatPeso(totalAmount())}
                           </td>
                         </tr>
                       </tfoot>
@@ -288,7 +280,7 @@ export default function CreatePoPage() {
                     <div class="border-t border-border pt-3">
                       <div class="flex justify-between">
                         <span class="text-foreground font-medium">Total Amount</span>
-                        <span class="text-lg text-foreground">{formatCurrency(totalAmount())}</span>
+                        <span class="text-lg text-foreground">{formatPeso(totalAmount())}</span>
                       </div>
                     </div>
                   </div>
@@ -305,7 +297,7 @@ export default function CreatePoPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => (window.location.href = "/orders")}
+                  onClick={() => navigate("/orders")}
                   class="w-full px-4 py-2.5 bg-surface text-foreground border border-border text-sm font-medium rounded-lg hover:bg-surface-muted transition-colors"
                 >
                   Cancel
@@ -315,6 +307,6 @@ export default function CreatePoPage() {
           </div>
         </div>
       </form>
-    </div>
+    </PageContainer>
   )
 }

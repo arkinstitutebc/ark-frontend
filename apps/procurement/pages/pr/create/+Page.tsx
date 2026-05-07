@@ -1,4 +1,4 @@
-import { Icons } from "@ark/ui"
+import { formatPeso, Icons, PageContainer, Select } from "@ark/ui"
 import { api } from "@data/api"
 import { useCreatePr } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
@@ -6,7 +6,8 @@ import { createPrSchema } from "@data/schemas"
 import type { Batch } from "@data/types"
 import { validateForm } from "@data/validate"
 import { createQuery } from "@tanstack/solid-query"
-import { createMemo, createSignal, For, Index, Show } from "solid-js"
+import { createMemo, createSignal, Index, Show } from "solid-js"
+import { navigate } from "vike/client/router"
 
 const categories = [
   "Training Supplies",
@@ -25,10 +26,6 @@ interface PrItemInput {
   quantity: number
   unit: string
   unitPrice: number
-}
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(amount)
 }
 
 const units = ["pcs", "units", "sets", "pairs", "boxes", "kg", "liters", "hours", "days", "months"]
@@ -131,19 +128,29 @@ export default function CreatePrPage() {
       },
       {
         onSuccess: () => {
-          window.location.href = "/"
+          navigate("/")
         },
       }
     )
   }
 
+  const batchOptions = createMemo(() =>
+    batches().map(b => ({
+      label: `${b.batchCode} — ${b.trainingName}`,
+      value: b.id,
+    }))
+  )
+
+  const categoryOptions = createMemo(() => categories.map(c => ({ label: c, value: c })))
+  const unitOptions = createMemo(() => units.map(u => ({ label: u, value: u })))
+
   return (
-    <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
+    <PageContainer>
       {/* Header */}
       <div class="flex items-center gap-4 mb-8">
         <button
           type="button"
-          onClick={() => (window.location.href = "/")}
+          onClick={() => navigate("/")}
           class="p-2 hover:bg-surface-muted rounded-lg transition-colors"
         >
           <Icons.arrowLeft class="w-5 h-5 text-muted" />
@@ -170,53 +177,39 @@ export default function CreatePrPage() {
 
               <div class="space-y-4">
                 <div>
-                  <label for="pr-batch" class="block text-sm font-medium text-foreground mb-1">
+                  <span class="block text-sm font-medium text-foreground mb-1">
                     Batch <span class="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="pr-batch"
-                    value={selectedBatchId()}
-                    onInput={e => setSelectedBatchId(e.currentTarget.value)}
-                    required
+                  </span>
+                  <Select
+                    options={batchOptions()}
+                    value={selectedBatchId() || undefined}
+                    onChange={v => setSelectedBatchId(v)}
+                    placeholder={batchesQuery.isPending ? "Loading batches…" : "Select a batch"}
                     disabled={batchesQuery.isPending}
-                    class={`w-full px-3 py-2 border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:bg-surface-muted disabled:cursor-not-allowed ${errors().batchId ? "border-red-300" : "border-border"}`}
-                  >
-                    <option value="">
-                      {batchesQuery.isPending ? "Loading batches..." : "Select a batch"}
-                    </option>
-                    <For each={batches()}>
-                      {batch => (
-                        <option value={batch.id}>
-                          {batch.batchCode} - {batch.trainingName}
-                        </option>
-                      )}
-                    </For>
-                  </select>
+                    ariaLabel="Batch"
+                  />
                   <Show when={errors().batchId}>
                     <p class="text-xs text-red-600 mt-1">{errors().batchId}</p>
                   </Show>
                   <Show when={selectedBatch()}>
                     <p class="text-xs text-muted mt-1">
-                      Budget: {formatCurrency(selectedBatch()?.budget || 0)} | Used:{" "}
-                      {formatCurrency(selectedBatch()?.budgetUsed || 0)}
+                      Budget: {formatPeso(selectedBatch()?.budget || 0)} | Used:{" "}
+                      {formatPeso(selectedBatch()?.budgetUsed || 0)}
                     </p>
                   </Show>
                 </div>
 
                 <div>
-                  <label for="pr-category" class="block text-sm font-medium text-foreground mb-1">
+                  <span class="block text-sm font-medium text-foreground mb-1">
                     Category <span class="text-red-500">*</span>
-                  </label>
-                  <select
-                    id="pr-category"
-                    value={category()}
-                    onInput={e => setCategory(e.currentTarget.value)}
-                    required
-                    class={`w-full px-3 py-2 border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().category ? "border-red-300" : "border-border"}`}
-                  >
-                    <option value="">Select category</option>
-                    <For each={categories}>{cat => <option value={cat}>{cat}</option>}</For>
-                  </select>
+                  </span>
+                  <Select
+                    options={categoryOptions()}
+                    value={category() || undefined}
+                    onChange={v => setCategory(v)}
+                    placeholder="Select category"
+                    ariaLabel="Category"
+                  />
                   <Show when={errors().category}>
                     <p class="text-xs text-red-600 mt-1">{errors().category}</p>
                   </Show>
@@ -302,16 +295,16 @@ export default function CreatePrPage() {
                             class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                           />
                         </label>
-                        <label class="block">
+                        <div>
                           <span class="block text-xs text-muted mb-1">Unit</span>
-                          <select
+                          <Select
+                            options={unitOptions()}
                             value={item().unit}
-                            onInput={e => updateItem(item().id, "unit", e.currentTarget.value)}
-                            class="w-full px-3 py-2 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                          >
-                            <For each={units}>{unit => <option value={unit}>{unit}</option>}</For>
-                          </select>
-                        </label>
+                            onChange={v => updateItem(item().id, "unit", v)}
+                            placeholder="Unit"
+                            ariaLabel="Unit"
+                          />
+                        </div>
                         <label class="block">
                           <span class="block text-xs text-muted mb-1">Unit Price (P)</span>
                           <input
@@ -333,7 +326,7 @@ export default function CreatePrPage() {
 
                       <Show when={item().name && item().quantity > 0 && item().unitPrice > 0}>
                         <p class="text-sm text-muted text-right">
-                          Item Total: {formatCurrency(item().quantity * item().unitPrice)}
+                          Item Total: {formatPeso(item().quantity * item().unitPrice)}
                         </p>
                       </Show>
                     </div>
@@ -366,7 +359,7 @@ export default function CreatePrPage() {
                 <div class="border-t border-border pt-3">
                   <div class="flex justify-between">
                     <span class="text-foreground font-medium">Total Amount</span>
-                    <span class="text-lg text-foreground">{formatCurrency(totalAmount())}</span>
+                    <span class="text-lg text-foreground">{formatPeso(totalAmount())}</span>
                   </div>
                 </div>
 
@@ -374,7 +367,7 @@ export default function CreatePrPage() {
                   <div class="border-t border-border pt-3">
                     <p class="text-xs text-muted mb-1">Budget Remaining</p>
                     <p class="text-sm font-medium text-foreground">
-                      {formatCurrency(
+                      {formatPeso(
                         (selectedBatch()?.budget || 0) -
                           (selectedBatch()?.budgetUsed || 0) -
                           totalAmount()
@@ -394,7 +387,7 @@ export default function CreatePrPage() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => (window.location.href = "/")}
+                  onClick={() => navigate("/")}
                   class="w-full px-4 py-2.5 bg-surface text-foreground border border-border text-sm font-medium rounded-lg hover:bg-surface-muted transition-colors"
                 >
                   Cancel
@@ -411,6 +404,6 @@ export default function CreatePrPage() {
           </div>
         </div>
       </form>
-    </div>
+    </PageContainer>
   )
 }

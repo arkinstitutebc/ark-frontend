@@ -1,22 +1,11 @@
+import { formatDatePH, formatPeso, PageContainer, PageHeader } from "@ark/ui"
 import { useApprovePr, useRejectPr, useRequests } from "@data/hooks"
 import type { PrStatus, PurchaseRequest } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { ApprovalDetailsModal } from "@/components/approval-details-modal"
 import { Icons, PrStatusBadge, QueryBoundary } from "@/components/ui"
 
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(amount)
-}
-
 const StatusBadge = PrStatusBadge
-
-function formatDate(dateStr: string) {
-  return new Intl.DateTimeFormat("en-PH", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(new Date(dateStr))
-}
 
 function getEmptyStateMessage(filter: PrStatus | "all") {
   switch (filter) {
@@ -49,7 +38,7 @@ function getEmptyStateMessage(filter: PrStatus | "all") {
 
 function ApprovalCard(props: {
   pr: PurchaseRequest
-  onApprove: (id: string) => void
+  onApprove: (pr: PurchaseRequest) => void
   onReject: (pr: PurchaseRequest) => void
   onViewDetails: (pr: PurchaseRequest) => void
   processing: boolean
@@ -109,11 +98,11 @@ function ApprovalCard(props: {
       <div class="flex items-center justify-between pt-4 border-t border-border">
         <div>
           <span class="text-sm font-medium text-foreground">
-            {formatCurrency(Number(props.pr.totalAmount))}
+            {formatPeso(Number(props.pr.totalAmount))}
           </span>
           <span class="text-muted mx-2">|</span>
           <span class="text-xs text-muted">
-            Created {formatDate(props.pr.createdAt)} by {props.pr.createdBy}
+            Created {formatDatePH(props.pr.createdAt)} by {props.pr.createdBy}
           </span>
         </div>
 
@@ -141,7 +130,7 @@ function ApprovalCard(props: {
             <button
               type="button"
               disabled={props.processing}
-              onClick={() => props.onApprove(props.pr.id)}
+              onClick={() => props.onApprove(props.pr)}
               class="px-3 py-1.5 text-xs font-medium text-white bg-primary hover:bg-primary/90 hover:scale-105 active:scale-95 rounded transition-all disabled:opacity-50 cursor-pointer"
             >
               Approve
@@ -188,8 +177,11 @@ export default function ApprovalsPage() {
     }
   })
 
-  const handleApprove = (id: string) => {
-    approveMutation.mutate({ id, approvalNotes: "Approved for procurement." })
+  // Both approve + reject open the details modal so the user can write notes
+  // before recording the action — captured as approvalNotes on the request.
+  const handleApprove = (pr: PurchaseRequest) => {
+    setSelectedPr(pr)
+    setModalOpen(true)
   }
 
   const handleReject = (pr: PurchaseRequest) => {
@@ -221,14 +213,8 @@ export default function ApprovalsPage() {
   }
 
   return (
-    <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
-      {/* Header */}
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <h1 class="text-2xl font-semibold text-foreground">Approvals</h1>
-          <p class="text-sm text-muted mt-1">Review and approve purchase requests</p>
-        </div>
-      </div>
+    <PageContainer>
+      <PageHeader title="Approvals" subtitle="Review and approve purchase requests" />
 
       {/* Error banner */}
       <Show when={approveMutation.isError || rejectMutation.isError}>
@@ -333,6 +319,6 @@ export default function ApprovalsPage() {
         onReject={handleModalReject}
         processing={isProcessing()}
       />
-    </div>
+    </PageContainer>
   )
 }

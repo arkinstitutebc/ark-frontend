@@ -2,6 +2,7 @@ import { formatDatePH, formatPeso, PageContainer, PageHeader } from "@ark/ui"
 import { useOrders } from "@data/hooks"
 import type { PoStatus, PurchaseOrder } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
+import { navigate } from "vike/client/router"
 import { PoDocumentModal } from "@/components/po-document-modal"
 import { Icons, PoStatusBadge, QueryBoundary } from "@/components/ui"
 
@@ -138,84 +139,88 @@ export default function OrdersPage() {
                 </div>
               }
             >
-              <table class="w-full">
-                <thead class="bg-surface-muted border-b border-border">
-                  <tr>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      PO Code
-                    </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      PR Ref
-                    </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Batch
-                    </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Supplier
-                    </th>
-                    <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                      Amount
-                    </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Est. Delivery
-                    </th>
-                    <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <For each={filteredOrders()}>
-                    {(po: PurchaseOrder) => (
-                      <tr
-                        onClick={() => (window.location.href = `/orders/${po.id}`)}
-                        class="border-t border-border hover:bg-primary/5 cursor-pointer transition-colors"
-                      >
-                        <td class="py-4 px-6">
-                          <span class="font-mono text-sm font-medium text-foreground">
-                            {po.poCode}
-                          </span>
-                        </td>
-                        <td class="py-4 px-6">
-                          <span class="text-sm text-muted">{po.prId}</span>
-                        </td>
-                        <td class="py-4 px-6">
-                          <p class="text-sm text-foreground">{po.batchName}</p>
-                        </td>
-                        <td class="py-4 px-6">
-                          <span class="text-sm text-foreground">{po.supplier}</span>
-                        </td>
-                        <td class="py-4 px-6 text-right">
-                          <span class="text-sm text-foreground">{formatPeso(po.totalAmount)}</span>
-                        </td>
-                        <td class="py-4 px-6">
-                          <PoStatusBadge status={po.status} />
-                        </td>
-                        <td class="py-4 px-6">
-                          <span class="text-sm text-muted">
-                            {formatDatePH(po.estimatedDelivery)}
-                          </span>
-                        </td>
-                        <td class="py-4 px-6 text-right">
-                          <button
-                            type="button"
-                            onClick={e => {
-                              e.stopPropagation()
-                              handleViewPo(po)
-                            }}
-                            class="text-primary hover:text-primary/80 text-sm font-medium"
-                          >
-                            View
-                          </button>
-                        </td>
-                      </tr>
-                    )}
-                  </For>
-                </tbody>
-              </table>
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead class="bg-surface-muted border-b border-border">
+                    <tr>
+                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+                        PO Code
+                      </th>
+                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+                        PR Ref
+                      </th>
+                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+                        Batch
+                      </th>
+                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+                        Supplier
+                      </th>
+                      <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
+                        Amount
+                      </th>
+                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+                        Status
+                      </th>
+                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
+                        Est. Delivery
+                      </th>
+                      <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <For each={filteredOrders()}>
+                      {(po: PurchaseOrder) => (
+                        <tr
+                          onClick={() => navigate(`/orders/${po.id}`)}
+                          class="border-t border-border hover:bg-primary/5 cursor-pointer transition-colors"
+                        >
+                          <td class="py-4 px-6">
+                            <span class="font-mono text-sm font-medium text-foreground">
+                              {po.poCode}
+                            </span>
+                          </td>
+                          <td class="py-4 px-6">
+                            <span class="text-sm text-muted">{po.prId}</span>
+                          </td>
+                          <td class="py-4 px-6">
+                            <p class="text-sm text-foreground">{po.batchName}</p>
+                          </td>
+                          <td class="py-4 px-6">
+                            <span class="text-sm text-foreground">{po.supplier}</span>
+                          </td>
+                          <td class="py-4 px-6 text-right">
+                            <span class="text-sm text-foreground">
+                              {formatPeso(po.totalAmount)}
+                            </span>
+                          </td>
+                          <td class="py-4 px-6">
+                            <PoStatusBadge status={po.status} />
+                          </td>
+                          <td class="py-4 px-6">
+                            <span class="text-sm text-muted">
+                              {formatDatePH(po.estimatedDelivery)}
+                            </span>
+                          </td>
+                          <td class="py-4 px-6 text-right">
+                            <button
+                              type="button"
+                              onClick={e => {
+                                e.stopPropagation()
+                                handleViewPo(po)
+                              }}
+                              class="text-primary hover:text-primary/80 text-sm font-medium"
+                            >
+                              View
+                            </button>
+                          </td>
+                        </tr>
+                      )}
+                    </For>
+                  </tbody>
+                </table>
+              </div>
             </Show>
           </div>
         )}
