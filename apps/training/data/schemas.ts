@@ -2,9 +2,9 @@ import { z } from "zod"
 
 export const createBatchSchema = z.object({
   trainingName: z.string().min(1, "Training type is required"),
-  senator: z.string().min(1, "Senator sponsor is required"),
+  senator: z.string().min(1, "Sponsor is required"),
   startDate: z.string().min(1, "Start date is required"),
-  endDate: z.string().min(1, "End date is required"),
+  endDate: z.string().optional().or(z.literal("")),
   venue: z.string().min(1, "Venue is required"),
   instructor: z.string().min(1, "Instructor is required"),
 })

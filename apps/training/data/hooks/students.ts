@@ -1,5 +1,5 @@
+import { toast } from "@ark/ui"
 import { createMutation, createQuery, useQueryClient } from "@tanstack/solid-query"
-import toast from "solid-toast"
 import { api } from "../api"
 import type { Student } from "../types"
 
@@ -44,6 +44,19 @@ export function useUpdateStudent() {
       qc.invalidateQueries({ queryKey: ["students"] })
       qc.invalidateQueries({ queryKey: ["batches"] })
       toast.success("Student updated")
+    },
+    onError: (err: Error) => toast.error(err.message),
+  }))
+}
+
+export function useDeleteStudent() {
+  const qc = useQueryClient()
+  return createMutation(() => ({
+    mutationFn: (id: string) => api<void>(`/api/training/students/${id}`, { method: "DELETE" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["students"] })
+      qc.invalidateQueries({ queryKey: ["batches"] })
+      toast.success("Student deleted")
     },
     onError: (err: Error) => toast.error(err.message),
   }))

@@ -1,5 +1,5 @@
+import { toast } from "@ark/ui"
 import { createMutation, createQuery, useQueryClient } from "@tanstack/solid-query"
-import toast from "solid-toast"
 import { api } from "../api"
 import type { Batch, Student } from "../types"
 

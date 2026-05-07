@@ -1,5 +1,7 @@
 export { AddBatchModal } from "./add-batch"
 export { AddStudentModal } from "./add-student"
+export { ConfirmDeleteStudentModal } from "./confirm-delete-student"
 export { EditBatchModal } from "./edit-batch"
 export { EditStudentModal } from "./edit-student"
+export { ManageVenuesModal } from "./manage-venues"
 export { ViewStudentModal } from "./view-student"

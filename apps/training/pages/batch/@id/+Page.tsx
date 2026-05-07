@@ -1,20 +1,23 @@
 import { Icons } from "@ark/ui"
-import { useBatch, useBatchStudents } from "@data/hooks"
+import { useBatch, useBatchStudents, useStudent } from "@data/hooks"
 import type { Batch } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
-import { AddStudentModal, EditBatchModal } from "@/components/modals"
+import { AddStudentModal, ConfirmDeleteStudentModal, EditBatchModal } from "@/components/modals"
 
 export default function BatchDetailPage() {
   const pageContext = usePageContext()
   const [showAddStudentModal, setShowAddStudentModal] = createSignal(false)
   const [showEditModal, setShowEditModal] = createSignal(false)
+  const [deletingStudentId, setDeletingStudentId] = createSignal<string | null>(null)
 
   const id = createMemo(() => pageContext.routeParams.id as string)
   const batchQuery = useBatch(id)
   const studentsQuery = useBatchStudents(id)
+  const deletingStudentQuery = useStudent(() => deletingStudentId() || "")
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = (dateStr: string | null | undefined) => {
+    if (!dateStr) return "TBD"
     return new Date(dateStr).toLocaleDateString("en-US", {
       month: "short",
       day: "numeric",
@@ -186,6 +189,11 @@ export default function BatchDetailPage() {
                     onClose={() => setShowEditModal(false)}
                     batch={b()}
                   />
+                  <ConfirmDeleteStudentModal
+                    open={deletingStudentId() !== null}
+                    onClose={() => setDeletingStudentId(null)}
+                    student={deletingStudentQuery.data ?? null}
+                  />
 
                   <Show
                     when={!studentsQuery.isLoading}
@@ -204,6 +212,9 @@ export default function BatchDetailPage() {
                             <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
                               Status
                             </th>
+                            <th class="text-right py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
+                              Actions
+                            </th>
                           </tr>
                         </thead>
                         <tbody>
@@ -211,7 +222,7 @@ export default function BatchDetailPage() {
                             when={(studentsQuery.data?.length ?? 0) > 0}
                             fallback={
                               <tr>
-                                <td colSpan={3} class="py-12 text-center text-muted text-sm">
+                                <td colSpan={4} class="py-12 text-center text-muted text-sm">
                                   No students enrolled yet.
                                 </td>
                               </tr>
@@ -232,6 +243,16 @@ export default function BatchDetailPage() {
                                     >
                                       {student.status}
                                     </span>
+                                  </td>
+                                  <td class="py-4 px-6 text-right">
+                                    <button
+                                      type="button"
+                                      onClick={() => setDeletingStudentId(student.id)}
+                                      class="text-muted hover:text-red-500 transition-colors p-1"
+                                      title="Delete student"
+                                    >
+                                      <Icons.trash class="w-4 h-4" />
+                                    </button>
                                   </td>
                                 </tr>
                               )}

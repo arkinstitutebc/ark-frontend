@@ -1,4 +1,5 @@
 import { Modal } from "@ark/ui"
+import { TRAINING_TYPES } from "@data/constants"
 import { useUpdateBatch } from "@data/hooks"
 import { updateBatchSchema } from "@data/schemas"
 import type { Batch } from "@data/types"
@@ -10,15 +11,6 @@ interface EditBatchModalProps {
   onClose: () => void
   batch: Batch
 }
-
-const TRAINING_TYPES = [
-  "Cookery NC II",
-  "Housekeeping NC II",
-  "Food & Beverage Services NC II",
-  "Bartending NC II",
-  "Bread & Pastry Production NC II",
-  "Front Office Services NC II",
-]
 
 const TRAINING_LEVELS = ["NC I", "NC II", "NC III", "NC IV", "NC V"] as const
 const STATUSES: Batch["status"][] = ["Not Started", "In Progress", "Completed", "On Hold"]

@@ -22,6 +22,9 @@ export function AppToaster() {
           background: "var(--color-surface)",
           color: "var(--color-foreground)",
           border: "1px solid var(--color-border)",
+          "box-shadow": "0 4px 12px rgba(0, 0, 0, 0.08)",
+          "border-radius": "10px",
+          padding: "10px 14px",
         },
       }}
     />

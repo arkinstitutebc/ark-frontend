@@ -14,6 +14,7 @@ export type {
   TxnType,
 } from "./finance"
 export type { AttendanceStatus, HrAttendance } from "./hr-attendance"
+export type { Instructor } from "./instructor"
 export type { StockItem, StockMovement, StockReceipt, StockStatus } from "./inventory"
 export type { PayrollEntry, PayrollPeriod, PayrollStatus } from "./payroll"
 export type {
@@ -26,3 +27,4 @@ export type {
 export type { Report, ReportType } from "./report"
 export type { Gender, Student, StudentStatus } from "./student"
 export type { Trainer, TrainerStatus } from "./trainer"
+export type { Venue } from "./venue"

@@ -1,6 +1,11 @@
 import { useBatches, useStudent, useStudents } from "@data/hooks"
 import { createMemo, createSignal, For, Show } from "solid-js"
-import { AddStudentModal, EditStudentModal, ViewStudentModal } from "@/components/modals"
+import {
+  AddStudentModal,
+  ConfirmDeleteStudentModal,
+  EditStudentModal,
+  ViewStudentModal,
+} from "@/components/modals"
 import { Icons, StatusBadge } from "@/components/ui"
 
 export default function StudentsPage() {
@@ -9,6 +14,7 @@ export default function StudentsPage() {
   const [showAddModal, setShowAddModal] = createSignal(false)
   const [editingStudentId, setEditingStudentId] = createSignal<string | null>(null)
   const [viewingStudentId, setViewingStudentId] = createSignal<string | null>(null)
+  const [deletingStudentId, setDeletingStudentId] = createSignal<string | null>(null)
 
   const batchesQuery = useBatches()
   const studentsQuery = useStudents(() =>
@@ -17,6 +23,7 @@ export default function StudentsPage() {
 
   const editingStudentQuery = useStudent(() => editingStudentId() || "")
   const viewingStudentQuery = useStudent(() => viewingStudentId() || "")
+  const deletingStudentQuery = useStudent(() => deletingStudentId() || "")
 
   const filteredStudents = createMemo(() => {
     let result = studentsQuery.data || []
@@ -31,6 +38,12 @@ export default function StudentsPage() {
     }
     return result
   })
+
+  const filtersActive = createMemo(() => filterBatch() !== "all" || searchQuery().trim().length > 0)
+  const clearFilters = () => {
+    setFilterBatch("all")
+    setSearchQuery("")
+  }
 
   const getBatchCode = (batchId: string) => {
     const batch = (batchesQuery.data || []).find(b => b.id === batchId)
@@ -80,28 +93,42 @@ export default function StudentsPage() {
             />
           )}
         </Show>
+        <ConfirmDeleteStudentModal
+          open={deletingStudentId() !== null}
+          onClose={() => setDeletingStudentId(null)}
+          student={deletingStudentQuery.data ?? null}
+        />
 
-        <div class="flex items-center gap-3 mb-6">
-          <div class="relative">
+        <div class="bg-surface border border-border rounded-lg p-3 mb-6 flex flex-wrap items-center gap-3">
+          <div class="relative flex-1 min-w-[220px]">
             <Icons.search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
             <input
               type="text"
-              placeholder="Search students..."
+              placeholder="Search by name or student ID..."
               value={searchQuery()}
               onInput={e => setSearchQuery(e.target.value)}
-              class="pl-9 pr-4 py-2 w-64 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              class="pl-9 pr-3 py-2 w-full border border-border rounded-lg text-sm bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
           </div>
           <select
             value={filterBatch()}
             onChange={e => setFilterBatch(e.target.value)}
-            class="px-3 py-2 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+            class="px-3 py-2 border border-border rounded-lg text-sm bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           >
             <option value="all">All Batches</option>
             <For each={batchesQuery.data || []}>
               {batch => <option value={batch.id}>{batch.batchCode}</option>}
             </For>
           </select>
+          <Show when={filtersActive()}>
+            <button
+              type="button"
+              onClick={clearFilters}
+              class="text-sm font-medium text-muted hover:text-primary transition-colors px-2"
+            >
+              Clear
+            </button>
+          </Show>
         </div>
 
         <Show
@@ -170,17 +197,30 @@ export default function StudentsPage() {
                           <StatusBadge status={student.status} />
                         </td>
                         <td class="py-4 px-6 text-right">
-                          <button
-                            type="button"
-                            onClick={e => {
-                              e.stopPropagation()
-                              setEditingStudentId(student.id)
-                            }}
-                            class="text-muted hover:text-primary transition-colors p-1"
-                            title="Edit student"
-                          >
-                            <Icons.edit class="w-4 h-4" />
-                          </button>
+                          <div class="inline-flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={e => {
+                                e.stopPropagation()
+                                setEditingStudentId(student.id)
+                              }}
+                              class="text-muted hover:text-primary transition-colors p-1"
+                              title="Edit student"
+                            >
+                              <Icons.edit class="w-4 h-4" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={e => {
+                                e.stopPropagation()
+                                setDeletingStudentId(student.id)
+                              }}
+                              class="text-muted hover:text-red-500 transition-colors p-1"
+                              title="Delete student"
+                            >
+                              <Icons.trash class="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     )}
