@@ -17,6 +17,17 @@ interface CreatePrInput {
   createdBy?: string
 }
 
+interface UpdatePrInput {
+  batchId?: string
+  batchName?: string
+  batchCode?: string
+  category?: string
+  purpose?: string
+  items?: PrItem[]
+  attachments?: PrAttachment[]
+  totalAmount?: string
+}
+
 interface RequestsListQuery {
   status?: string
 }
@@ -25,18 +36,19 @@ const crud = createCrudHooks<
   PurchaseRequest,
   PurchaseRequest,
   CreatePrInput,
-  Partial<PurchaseRequest>,
+  UpdatePrInput,
   RequestsListQuery
 >({
   basePath: "/api/procurement/requests",
   domain: "requests",
   label: "Request",
-  messages: { create: "Request submitted" },
+  messages: { create: "Request submitted", update: "Request updated" },
 })
 
 export const useRequests = crud.useList
 export const useRequest = crud.useOne
 export const useCreatePr = crud.useCreate
+export const useUpdatePr = crud.useUpdate
 
 // Bespoke: approve / reject action endpoints
 export function useApprovePr() {

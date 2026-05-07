@@ -6,4 +6,11 @@ export {
   useUpdateCategory,
 } from "./categories"
 export { useCreatePo, useOrder, useOrders, useUpdatePo } from "./orders"
-export { useApprovePr, useCreatePr, useRejectPr, useRequest, useRequests } from "./requests"
+export {
+  useApprovePr,
+  useCreatePr,
+  useRejectPr,
+  useRequest,
+  useRequests,
+  useUpdatePr,
+} from "./requests"

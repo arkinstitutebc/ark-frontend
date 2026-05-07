@@ -33,6 +33,14 @@ export default function PrDetailPage() {
                 <p class="text-sm text-muted">{p.batchName}</p>
               </div>
               <div class="flex items-center gap-2">
+                <Show when={p.status === "pending"}>
+                  <a
+                    href={`/pr/${p.id}/edit`}
+                    class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors"
+                  >
+                    <Icons.edit class="w-4 h-4" /> Edit
+                  </a>
+                </Show>
                 <Show when={p.status === "approved"}>
                   <a
                     href={`/orders/create?prId=${p.id}`}

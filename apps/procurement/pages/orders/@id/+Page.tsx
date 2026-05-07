@@ -3,6 +3,7 @@ import { useOrder } from "@data/hooks"
 import type { PurchaseOrder } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
+import { EditPoModal } from "@/components/edit-po-modal"
 import { PoDocumentModal } from "@/components/po-document-modal"
 import { Icons, PoStatusBadge, QueryBoundary } from "@/components/ui"
 
@@ -11,6 +12,7 @@ export default function PoDetailPage() {
   const id = createMemo(() => pageContext.routeParams.id as string)
   const query = useOrder(id)
   const [documentModalOpen, setDocumentModalOpen] = createSignal(false)
+  const [editModalOpen, setEditModalOpen] = createSignal(false)
 
   return (
     <PageContainer>
@@ -35,6 +37,15 @@ export default function PoDetailPage() {
                 <p class="text-sm text-muted">{p.batchName}</p>
               </div>
               <div class="flex items-center gap-2">
+                <Show when={p.status !== "received" && p.status !== "cancelled"}>
+                  <button
+                    type="button"
+                    onClick={() => setEditModalOpen(true)}
+                    class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors"
+                  >
+                    <Icons.edit class="w-4 h-4" /> Edit
+                  </button>
+                </Show>
                 <button
                   type="button"
                   onClick={() => setDocumentModalOpen(true)}
@@ -173,6 +184,9 @@ export default function PoDetailPage() {
               onClose={() => setDocumentModalOpen(false)}
               po={p}
             />
+
+            {/* Edit Modal */}
+            <EditPoModal open={editModalOpen()} onClose={() => setEditModalOpen(false)} po={p} />
           </>
         )}
       </QueryBoundary>
