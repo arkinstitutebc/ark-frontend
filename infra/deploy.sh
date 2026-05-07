@@ -6,12 +6,20 @@
 # Expects (from env, set by the calling workflow):
 #   PREV_SHA — git SHA before pull (for path-filter diff)
 #   NEW_SHA  — git SHA after  pull (current HEAD)
-# Falls back to HEAD~1..HEAD if missing (allows manual invocation).
+# Optional:
+#   BUILD_CONCURRENCY — number of parallel builds (default: 3)
+# Falls back to HEAD~1..HEAD if SHAs missing (allows manual invocation).
 #
 # Path-filter rules:
 #   - changes under packages/* → rebuild + restart ALL 7 portals
 #   - changes under apps/<name>/ → rebuild + restart THAT portal only
 #   - root-level / docs / infra-only changes → no rebuild
+#
+# Optimizations:
+#   - bun install only when bun.lock or any package.json changed
+#   - portal builds run in parallel, capped at $BUILD_CONCURRENCY (default 3)
+#   - per-app build logs are written to a temp file then prefixed into the
+#     main deploy log so concurrent output stays readable
 #
 # This script does NOT git-pull. The caller pulls first; we just inspect the
 # diff. Keeps the script idempotent + safely re-executable.
@@ -24,12 +32,13 @@ LOG_DIR="/var/log/ark-portals"
 LOG_FILE="$LOG_DIR/deploy.log"
 ALL_APPS=(main training procurement inventory finance billing hr)
 BUN="/home/ark/.bun/bin/bun"
+CONCURRENCY="${BUILD_CONCURRENCY:-3}"
 
 mkdir -p "$LOG_DIR"
 exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "============================================================"
-echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] deploy.sh start (uid=$EUID)"
+echo "[$(date -u '+%Y-%m-%dT%H:%M:%SZ')] deploy.sh start (uid=$EUID, concurrency=$CONCURRENCY)"
 echo "============================================================"
 
 cd "$REPO_DIR"
@@ -67,21 +76,81 @@ fi
 
 echo "apps to rebuild: ${APPS[*]}"
 
+# Skip bun install when lockfile + package manifests are unchanged. Saves
+# ~30s on common deploys.
+LOCK_CHANGED=0
+if echo "$CHANGED_FILES" | grep -qE '^(bun\.lock|package\.json|apps/[^/]+/package\.json|packages/[^/]+/package\.json)$'; then
+  LOCK_CHANGED=1
+fi
+
 echo ""
-echo "[$(date -u '+%H:%M:%S')] bun install --frozen-lockfile (as ark)"
-sudo -u ark "$BUN" install --cwd "$REPO_DIR" --frozen-lockfile
+if (( LOCK_CHANGED )); then
+  echo "[$(date -u '+%H:%M:%S')] bun.lock or package.json changed → bun install --frozen-lockfile (as ark)"
+  sudo -u ark "$BUN" install --cwd "$REPO_DIR" --frozen-lockfile
+else
+  echo "[$(date -u '+%H:%M:%S')] lockfile + package manifests unchanged → skipping bun install"
+fi
 
-for app in "${APPS[@]}"; do
+# Parallel build runner with bounded concurrency.
+LOG_TMP=$(mktemp -d)
+trap 'rm -rf "$LOG_TMP"' EXIT
+
+build_app() {
+  local app=$1
+  local logfile="$LOG_TMP/$app.log"
   if [[ ! -d "$REPO_DIR/apps/$app" ]]; then
-    echo "skip: apps/$app does not exist"
-    continue
+    echo "[$app] skip: apps/$app does not exist"
+    return 0
   fi
-  echo ""
-  echo "------------------------------------------------------------"
-  echo "[$(date -u '+%H:%M:%S')] $app: build (as ark)"
-  echo "------------------------------------------------------------"
-  sudo -u ark bash -c "cd '$REPO_DIR/apps/$app' && '$BUN' run build"
+  local start
+  start=$(date +%s)
+  if sudo -u ark bash -c "cd '$REPO_DIR/apps/$app' && '$BUN' run build" >"$logfile" 2>&1; then
+    local elapsed=$(( $(date +%s) - start ))
+    echo "[$app] OK in ${elapsed}s"
+    sed "s/^/[$app] /" "$logfile" >> "$LOG_FILE"
+    return 0
+  else
+    local elapsed=$(( $(date +%s) - start ))
+    echo "[$app] FAIL after ${elapsed}s"
+    # Emit the failed app's log inline so the workflow output captures it.
+    sed "s/^/[$app] /" "$logfile"
+    sed "s/^/[$app] /" "$logfile" >> "$LOG_FILE"
+    return 1
+  fi
+}
 
+echo ""
+echo "------------------------------------------------------------"
+echo "[$(date -u '+%H:%M:%S')] building ${#APPS[@]} app(s) with concurrency=$CONCURRENCY"
+echo "------------------------------------------------------------"
+
+# Cap concurrency using `wait -n` (bash 4.3+).
+running=0
+fail=0
+for app in "${APPS[@]}"; do
+  if (( running >= CONCURRENCY )); then
+    if ! wait -n; then fail=1; fi
+    running=$(( running - 1 ))
+  fi
+  build_app "$app" &
+  running=$(( running + 1 ))
+done
+while (( running > 0 )); do
+  if ! wait -n; then fail=1; fi
+  running=$(( running - 1 ))
+done
+
+if (( fail )); then
+  echo ""
+  echo "[$(date -u '+%H:%M:%S')] one or more builds failed — NOT restarting any portals"
+  exit 1
+fi
+
+# Restarts are quick and side-effecting; keep them sequential and serial so
+# systemd / Caddy don't collide on burst SIGTERMs.
+echo ""
+echo "[$(date -u '+%H:%M:%S')] restarting affected portals"
+for app in "${APPS[@]}"; do
   echo "[$(date -u '+%H:%M:%S')] $app: restart ark-portal-$app"
   systemctl restart "ark-portal-$app"
 done
