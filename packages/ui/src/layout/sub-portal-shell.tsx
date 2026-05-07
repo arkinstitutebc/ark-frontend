@@ -26,7 +26,10 @@ export function SubPortalShell(props: SubPortalShellProps) {
   return (
     <AuthGate userQuery={userQuery}>
       <SidebarProvider>
-        <div class="flex h-screen overflow-hidden">
+        {/* Outer overflow stays hidden vertically (so child scroll boundaries
+            work) but allows horizontal overflow so the sidebar's mid-edge
+            collapse handle can protrude over the content area. */}
+        <div class="flex h-screen overflow-y-hidden overflow-x-visible">
           {props.sidebar}
           <div class="flex-1 flex flex-col overflow-hidden">
             {props.topBar}

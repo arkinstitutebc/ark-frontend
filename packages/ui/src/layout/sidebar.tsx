@@ -1,7 +1,6 @@
-import { ArrowLeft, type Folder, LogOut } from "lucide-solid"
+import { ArrowLeft, ChevronLeft, type Folder, LogOut } from "lucide-solid"
 import { type Component, createMemo, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
-import { Icons } from "../icons"
 import { useSidebar } from "./sidebar-context"
 
 export interface NavItem {
@@ -136,37 +135,34 @@ export function Sidebar(props: SidebarProps) {
           </a>
         )}
       </div>
-
-      {/* Collapse toggle footer — desktop only. Right-aligned when expanded,
-          centered when collapsed. Inline (not absolute) so it never overlaps Logout. */}
-      <div class="hidden md:flex border-t border-border px-2 py-2 flex-shrink-0">
-        <button
-          type="button"
-          onClick={toggleCollapsed}
-          aria-label={collapsed() ? "Expand sidebar" : "Collapse sidebar"}
-          title={collapsed() ? "Expand sidebar" : "Collapse sidebar"}
-          class={`flex items-center justify-center w-7 h-7 rounded-md text-muted hover:text-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
-            collapsed() ? "mx-auto" : "ml-auto"
-          }`}
-        >
-          {collapsed() ? (
-            <Icons.panelLeftOpen class="w-4 h-4" />
-          ) : (
-            <Icons.panelLeftClose class="w-4 h-4" />
-          )}
-        </button>
-      </div>
     </div>
   )
 
   return (
     <>
       <aside
-        class={`hidden md:block flex-shrink-0 h-screen transition-all duration-200 ${
+        class={`relative hidden md:block flex-shrink-0 h-screen transition-[width] duration-300 ease-in-out ${
           collapsed() ? "w-14" : "w-56"
         }`}
       >
         {sidebarContent()}
+
+        {/* Floating collapse toggle — anchored mid-edge of the sidebar's right
+            boundary. Half overlaps the content area so it reads as a divider
+            handle. Animates the chevron 180° on collapse. */}
+        <button
+          type="button"
+          onClick={toggleCollapsed}
+          aria-label={collapsed() ? "Expand sidebar" : "Collapse sidebar"}
+          title={collapsed() ? "Expand sidebar" : "Collapse sidebar"}
+          class="group absolute top-1/2 -right-3 -translate-y-1/2 z-30 flex items-center justify-center w-6 h-6 rounded-full bg-surface border border-border shadow-sm text-muted hover:text-primary hover:border-primary hover:shadow-md hover:scale-110 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+        >
+          <ChevronLeft
+            class={`w-3.5 h-3.5 transition-transform duration-300 ease-in-out ${
+              collapsed() ? "rotate-180" : ""
+            }`}
+          />
+        </button>
       </aside>
 
       <Show when={mobileOpen()}>
