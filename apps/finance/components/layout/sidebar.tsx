@@ -1,5 +1,13 @@
 import { type NavItem, Sidebar as SharedSidebar } from "@ark/ui"
-import { ArrowLeftRight, FileText, Landmark, Receipt, TrendingUp, Wallet } from "lucide-solid"
+import {
+  ArrowLeftRight,
+  FileText,
+  HelpCircle,
+  Landmark,
+  Receipt,
+  TrendingUp,
+  Wallet,
+} from "lucide-solid"
 
 const navItems: NavItem[] = [
   { id: "overview", label: "Overview", href: "/", icon: TrendingUp },
@@ -7,6 +15,7 @@ const navItems: NavItem[] = [
   { id: "transfers", label: "Transfers", href: "/transfers", icon: ArrowLeftRight },
   { id: "disbursements", label: "Disbursements", href: "/disbursements", icon: Receipt },
   { id: "pnl", label: "P&L Report", href: "/pnl", icon: FileText },
+  { id: "tutorials", label: "How To", href: "/tutorials", icon: HelpCircle },
 ]
 
 export function Sidebar() {

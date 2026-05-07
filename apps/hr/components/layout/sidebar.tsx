@@ -1,10 +1,11 @@
 import { type NavItem, Sidebar as SharedSidebar } from "@ark/ui"
-import { Clock, CreditCard, Users } from "lucide-solid"
+import { Clock, CreditCard, HelpCircle, Users } from "lucide-solid"
 
 const navItems: NavItem[] = [
   { id: "trainers", label: "Trainers", href: "/", icon: Users },
   { id: "attendance", label: "Attendance", href: "/attendance", icon: Clock },
   { id: "payroll", label: "Payroll", href: "/payroll", icon: CreditCard },
+  { id: "tutorials", label: "How To", href: "/tutorials", icon: HelpCircle },
 ]
 
 export function Sidebar() {

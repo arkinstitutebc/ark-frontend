@@ -59,6 +59,11 @@ export { type NavItem, Sidebar, type SidebarProps } from "./layout/sidebar"
 export { SidebarProvider, useSidebar } from "./layout/sidebar-context"
 export { SubPortalShell, type SubPortalShellProps } from "./layout/sub-portal-shell"
 export { type CurrentUser, TopBar, type TopBarProps } from "./layout/topbar"
+export {
+  type TutorialSection,
+  TutorialShell,
+  type TutorialShellProps,
+} from "./layout/tutorial-shell"
 // Theme
 export {
   type EffectiveTheme,
