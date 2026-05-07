@@ -1,4 +1,4 @@
-import { Modal, ModalFooter } from "@ark/ui"
+import { ConfirmDialog } from "@ark/ui"
 import { useDeleteStudent } from "@data/hooks"
 import type { Student } from "@data/types"
 
@@ -8,6 +8,10 @@ interface ConfirmDeleteStudentModalProps {
   student: Student | null
 }
 
+/**
+ * Thin wrapper around `ConfirmDialog` that wires the delete-student mutation
+ * + the contextual student name. Other portals use `ConfirmDialog` directly.
+ */
 export function ConfirmDeleteStudentModal(props: ConfirmDeleteStudentModalProps) {
   const mutation = useDeleteStudent()
 
@@ -17,22 +21,22 @@ export function ConfirmDeleteStudentModal(props: ConfirmDeleteStudentModalProps)
   }
 
   return (
-    <Modal open={props.open} onClose={props.onClose} title="Delete student?">
-      <div class="space-y-4">
-        <p class="text-sm text-foreground">
+    <ConfirmDialog
+      open={props.open}
+      onClose={props.onClose}
+      title="Delete student?"
+      description={
+        <>
           This will permanently remove{" "}
           <strong>
             {props.student?.firstName} {props.student?.lastName}
           </strong>{" "}
           and any related attendance and assessment records. This can't be undone.
-        </p>
-        <ModalFooter
-          onCancel={props.onClose}
-          onSubmit={handleDelete}
-          submitting={mutation.isPending}
-          danger
-        />
-      </div>
-    </Modal>
+        </>
+      }
+      danger
+      pending={mutation.isPending}
+      onConfirm={handleDelete}
+    />
   )
 }

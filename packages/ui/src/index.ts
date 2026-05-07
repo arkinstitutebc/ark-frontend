@@ -32,6 +32,7 @@ export { StatusBadge } from "./display/status-badge"
 // Feedback
 export { AppToaster, toast } from "./feedback/app-toaster"
 export { AvatarCropper, type AvatarCropperProps } from "./feedback/avatar-cropper"
+export { ConfirmDialog, type ConfirmDialogProps } from "./feedback/confirm-dialog"
 export { CrossPortalLoadingOverlay } from "./feedback/cross-portal-loading-overlay"
 export { EmptyState, type EmptyStateProps } from "./feedback/empty-state"
 export { Modal } from "./feedback/modal"
@@ -42,6 +43,7 @@ export { TableSkeleton } from "./feedback/table-skeleton"
 export { TopProgressBar } from "./feedback/top-progress-bar"
 // Forms
 export { Button } from "./forms/button"
+export { formErrorClass, formInputClass, formLabelClass } from "./forms/form-styles"
 export { Input, Textarea } from "./forms/input"
 export { Select, type SelectOption, type SelectProps } from "./forms/select"
 // Primitives

@@ -1,4 +1,4 @@
-import { Modal, ModalFooter, Select, toast } from "@ark/ui"
+import { formErrorClass, formInputClass, Modal, ModalFooter, Select, toast } from "@ark/ui"
 import { api } from "@data/api"
 import { useBatches, useCreateStudent } from "@data/hooks"
 import { createStudentSchema } from "@data/schemas"
@@ -49,10 +49,8 @@ export function AddStudentModal(props: AddStudentModalProps) {
     }))
   )
 
-  const inputClass = (field: string) =>
-    `w-full px-3 py-2 border rounded-lg text-sm bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors()[field] ? "border-red-400 dark:border-red-500" : "border-border"}`
-
-  const errorClass = "text-xs text-red-600 dark:text-red-400 mt-1"
+  const inputClass = (field: string) => formInputClass({ error: !!errors()[field] })
+  const errorClass = formErrorClass
 
   // ---------------- single mode ----------------
 
