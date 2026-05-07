@@ -1,4 +1,4 @@
-import { Select } from "@ark/ui"
+import { PageContainer, PageHeader, Select } from "@ark/ui"
 import { useBatches, useStudent, useStudents } from "@data/hooks"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { AddStudentModal, ConfirmDeleteStudentModal, EditStudentModal } from "@/components/modals"
@@ -58,15 +58,11 @@ export default function StudentsPage() {
   }
 
   return (
-    <div class="px-6 sm:px-8 lg:px-12 py-8">
-      <div class="max-w-6xl mx-auto">
-        <div class="flex items-center justify-between mb-8">
-          <div>
-            <h1 class="text-2xl font-semibold text-foreground">Students</h1>
-            <p class="text-sm text-muted mt-1">
-              {filteredStudents().length} student{filteredStudents().length !== 1 ? "s" : ""}
-            </p>
-          </div>
+    <PageContainer>
+      <PageHeader
+        title="Students"
+        subtitle={`${filteredStudents().length} student${filteredStudents().length !== 1 ? "s" : ""}`}
+        action={
           <button
             type="button"
             onClick={() => setShowAddModal(true)}
@@ -74,143 +70,141 @@ export default function StudentsPage() {
           >
             + Add Student
           </button>
+        }
+      />
+
+      <AddStudentModal open={showAddModal()} onClose={() => setShowAddModal(false)} />
+      <Show when={editingStudentQuery.data}>
+        {student => (
+          <EditStudentModal
+            open={editingStudentId() !== null}
+            onClose={() => setEditingStudentId(null)}
+            student={student()}
+          />
+        )}
+      </Show>
+      <ConfirmDeleteStudentModal
+        open={deletingStudentId() !== null}
+        onClose={() => setDeletingStudentId(null)}
+        student={deletingStudentQuery.data ?? null}
+      />
+
+      <div class="bg-surface border border-border rounded-lg p-3 mb-6 flex flex-wrap items-center gap-3">
+        <div class="relative flex-1 min-w-[220px]">
+          <Icons.search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
+          <input
+            type="text"
+            placeholder="Search by name or student ID..."
+            value={searchQuery()}
+            onInput={e => setSearchQuery(e.target.value)}
+            class="pl-9 pr-3 py-2.5 w-full border border-border rounded-lg text-sm bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+          />
         </div>
-
-        <AddStudentModal open={showAddModal()} onClose={() => setShowAddModal(false)} />
-        <Show when={editingStudentQuery.data}>
-          {student => (
-            <EditStudentModal
-              open={editingStudentId() !== null}
-              onClose={() => setEditingStudentId(null)}
-              student={student()}
-            />
-          )}
-        </Show>
-        <ConfirmDeleteStudentModal
-          open={deletingStudentId() !== null}
-          onClose={() => setDeletingStudentId(null)}
-          student={deletingStudentQuery.data ?? null}
-        />
-
-        <div class="bg-surface border border-border rounded-lg p-3 mb-6 flex flex-wrap items-center gap-3">
-          <div class="relative flex-1 min-w-[220px]">
-            <Icons.search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
-            <input
-              type="text"
-              placeholder="Search by name or student ID..."
-              value={searchQuery()}
-              onInput={e => setSearchQuery(e.target.value)}
-              class="pl-9 pr-3 py-2.5 w-full border border-border rounded-lg text-sm bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-            />
-          </div>
-          <div class="w-64">
-            <Select
-              options={batchFilterOptions()}
-              value={filterBatch()}
-              onChange={v => setFilterBatch(v)}
-              placeholder="All Batches"
-              ariaLabel="Filter by batch"
-            />
-          </div>
-          <Show when={filtersActive()}>
-            <button
-              type="button"
-              onClick={clearFilters}
-              class="text-sm font-medium text-muted hover:text-primary transition-colors px-2 py-2.5"
-            >
-              Clear
-            </button>
-          </Show>
+        <div class="w-64">
+          <Select
+            options={batchFilterOptions()}
+            value={filterBatch()}
+            onChange={v => setFilterBatch(v)}
+            placeholder="All Batches"
+            ariaLabel="Filter by batch"
+          />
         </div>
-
-        <Show
-          when={!studentsQuery.isLoading}
-          fallback={
-            <div class="animate-pulse space-y-3">
-              <div class="h-12 bg-surface-muted rounded" />
-              <div class="h-64 bg-surface-muted rounded" />
-            </div>
-          }
-        >
-          <div class="bg-surface rounded-lg border border-border overflow-hidden">
-            <table class="w-full">
-              <thead class="bg-surface-muted border-b border-border">
-                <tr>
-                  <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                    Student ID
-                  </th>
-                  <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                    Name
-                  </th>
-                  <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                    Batch
-                  </th>
-                  <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                    Level
-                  </th>
-                  <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th class="text-right py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <Show
-                  when={filteredStudents().length > 0}
-                  fallback={
-                    <tr>
-                      <td colSpan={6} class="py-12 text-center text-muted text-sm">
-                        No students found.
-                      </td>
-                    </tr>
-                  }
-                >
-                  <For each={filteredStudents()}>
-                    {student => (
-                      <tr
-                        class="border-t border-border hover:bg-primary/5 transition-colors cursor-pointer"
-                        onClick={() => setEditingStudentId(student.id)}
-                        title="Click to edit"
-                      >
-                        <td class="py-4 px-6 text-sm text-foreground font-mono">
-                          {student.studentId || "—"}
-                        </td>
-                        <td class="py-4 px-6 text-sm text-foreground">
-                          {student.firstName} {student.lastName}
-                        </td>
-                        <td class="py-4 px-6 text-sm text-muted">
-                          {getBatchCode(student.batchId)}
-                        </td>
-                        <td class="py-4 px-6 text-sm text-primary font-medium">
-                          {getTrainingLevel(student.batchId)}
-                        </td>
-                        <td class="py-4 px-6">
-                          <StatusBadge status={student.status} />
-                        </td>
-                        <td class="py-4 px-6 text-right">
-                          <button
-                            type="button"
-                            onClick={e => {
-                              e.stopPropagation()
-                              setDeletingStudentId(student.id)
-                            }}
-                            class="text-muted hover:text-red-500 transition-colors p-1"
-                            title="Delete student"
-                          >
-                            <Icons.trash class="w-4 h-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    )}
-                  </For>
-                </Show>
-              </tbody>
-            </table>
-          </div>
+        <Show when={filtersActive()}>
+          <button
+            type="button"
+            onClick={clearFilters}
+            class="text-sm font-medium text-muted hover:text-primary transition-colors px-2 py-2.5"
+          >
+            Clear
+          </button>
         </Show>
       </div>
-    </div>
+
+      <Show
+        when={!studentsQuery.isLoading}
+        fallback={
+          <div class="animate-pulse space-y-3">
+            <div class="h-12 bg-surface-muted rounded" />
+            <div class="h-64 bg-surface-muted rounded" />
+          </div>
+        }
+      >
+        <div class="bg-surface rounded-lg border border-border overflow-hidden">
+          <table class="w-full">
+            <thead class="bg-surface-muted border-b border-border">
+              <tr>
+                <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
+                  Student ID
+                </th>
+                <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
+                  Name
+                </th>
+                <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
+                  Batch
+                </th>
+                <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
+                  Level
+                </th>
+                <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
+                  Status
+                </th>
+                <th class="text-right py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <Show
+                when={filteredStudents().length > 0}
+                fallback={
+                  <tr>
+                    <td colSpan={6} class="py-12 text-center text-muted text-sm">
+                      No students found.
+                    </td>
+                  </tr>
+                }
+              >
+                <For each={filteredStudents()}>
+                  {student => (
+                    <tr
+                      class="border-t border-border hover:bg-primary/5 transition-colors cursor-pointer"
+                      onClick={() => setEditingStudentId(student.id)}
+                      title="Click to edit"
+                    >
+                      <td class="py-4 px-6 text-sm text-foreground font-mono">
+                        {student.studentId || "—"}
+                      </td>
+                      <td class="py-4 px-6 text-sm text-foreground">
+                        {student.firstName} {student.lastName}
+                      </td>
+                      <td class="py-4 px-6 text-sm text-muted">{getBatchCode(student.batchId)}</td>
+                      <td class="py-4 px-6 text-sm text-primary font-medium">
+                        {getTrainingLevel(student.batchId)}
+                      </td>
+                      <td class="py-4 px-6">
+                        <StatusBadge status={student.status} />
+                      </td>
+                      <td class="py-4 px-6 text-right">
+                        <button
+                          type="button"
+                          onClick={e => {
+                            e.stopPropagation()
+                            setDeletingStudentId(student.id)
+                          }}
+                          class="text-muted hover:text-red-500 transition-colors p-1"
+                          title="Delete student"
+                        >
+                          <Icons.trash class="w-4 h-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  )}
+                </For>
+              </Show>
+            </tbody>
+          </table>
+        </div>
+      </Show>
+    </PageContainer>
   )
 }

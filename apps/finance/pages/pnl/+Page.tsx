@@ -1,14 +1,7 @@
+import { formatPeso, PageContainer } from "@ark/ui"
 import { type PnlReport, usePnl } from "@data/hooks"
 import { createSignal, For, Show } from "solid-js"
 import { Icons, QueryBoundary } from "@/components/ui"
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
 
 function downloadBlob(content: BlobPart, filename: string, mimeType: string) {
   const blob = new Blob([content], { type: mimeType })
@@ -98,7 +91,7 @@ export default function PnlPage() {
   }
 
   return (
-    <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
+    <PageContainer>
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h1 class="text-2xl font-semibold text-foreground">Profit & Loss Statement</h1>
@@ -188,14 +181,14 @@ export default function PnlPage() {
                             <td
                               class={`py-3 px-5 text-right text-sm tabular-nums ${row.isHeader || row.isSubtotal ? "font-semibold text-foreground" : row.indent ? "text-muted" : "text-foreground"}`}
                             >
-                              {row.values[b.id] ? formatCurrency(row.values[b.id]) : "-"}
+                              {row.values[b.id] ? formatPeso(row.values[b.id]) : "-"}
                             </td>
                           )}
                         </For>
                         <td
                           class={`py-3 px-5 text-right text-sm tabular-nums font-semibold ${row.isSubtotal ? "text-foreground" : "text-foreground"}`}
                         >
-                          {row.values.total ? formatCurrency(row.values.total) : "-"}
+                          {row.values.total ? formatPeso(row.values.total) : "-"}
                         </td>
                         <td class="py-3 px-5 text-right text-sm tabular-nums text-muted">
                           {row.values.ratio !== undefined ? `${row.values.ratio}%` : ""}
@@ -209,6 +202,6 @@ export default function PnlPage() {
           </div>
         )}
       </QueryBoundary>
-    </div>
+    </PageContainer>
   )
 }

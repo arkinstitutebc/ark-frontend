@@ -1,23 +1,8 @@
+import { formatDatePH, formatPeso, PageContainer } from "@ark/ui"
 import { useReceivables, useRecordPayment, useUpdateAr } from "@data/hooks"
 import type { AccountReceivable, ArStatus } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { Icons, Modal, QueryBoundary, StatusBadge } from "@/components/ui"
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("en-PH", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  })
-}
 
 type FilterStatus = "all" | ArStatus
 
@@ -83,9 +68,9 @@ export default function ReceivablesPage() {
       ar.batchCode,
       ar.amount,
       ar.status,
-      ar.billedAt ? formatDate(ar.billedAt) : "",
+      ar.billedAt ? formatDatePH(ar.billedAt) : "",
       ar.paidAmount || 0,
-      formatDate(ar.createdAt),
+      formatDatePH(ar.createdAt),
     ])
     const csv = [headers.join(","), ...rows.map(r => r.join(","))].join("\n")
     const blob = new Blob([csv], { type: "text/csv" })
@@ -98,7 +83,7 @@ export default function ReceivablesPage() {
   }
 
   return (
-    <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
+    <PageContainer>
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
           <h1 class="text-2xl font-semibold text-foreground">Accounts Receivable</h1>
@@ -120,19 +105,19 @@ export default function ReceivablesPage() {
         <div class="bg-surface rounded-lg border border-border p-4">
           <p class="text-sm text-muted mb-1">Total Amount</p>
           <p class="text-2xl text-foreground tabular-nums">
-            {query.data ? formatCurrency(stats().totalAmount) : "-"}
+            {query.data ? formatPeso(stats().totalAmount) : "-"}
           </p>
         </div>
         <div class="bg-surface rounded-lg border border-border p-4">
           <p class="text-sm text-muted mb-1">Collected</p>
           <p class="text-2xl text-green-700 tabular-nums">
-            {query.data ? formatCurrency(stats().collected) : "-"}
+            {query.data ? formatPeso(stats().collected) : "-"}
           </p>
         </div>
         <div class="bg-surface rounded-lg border border-border p-4">
           <p class="text-sm text-muted mb-1">Outstanding</p>
           <p class="text-2xl text-primary tabular-nums">
-            {query.data ? formatCurrency(stats().outstanding) : "-"}
+            {query.data ? formatPeso(stats().outstanding) : "-"}
           </p>
         </div>
       </div>
@@ -222,7 +207,7 @@ export default function ReceivablesPage() {
                         <tr class="border-t border-border hover:bg-surface-muted transition-colors">
                           <td class="py-4 px-6 text-sm text-foreground">{ar.batchCode}</td>
                           <td class="py-4 px-6 text-right text-sm font-semibold text-foreground tabular-nums">
-                            {formatCurrency(Number(ar.amount))}
+                            {formatPeso(Number(ar.amount))}
                           </td>
                           <td class="py-4 px-6 text-center">
                             <StatusBadge status={ar.status} />
@@ -230,7 +215,7 @@ export default function ReceivablesPage() {
                           <td class="py-4 px-6 text-right text-sm tabular-nums">
                             {Number(ar.paidAmount || 0) > 0 ? (
                               <span class="text-green-700 font-medium">
-                                {formatCurrency(Number(ar.paidAmount))}
+                                {formatPeso(Number(ar.paidAmount))}
                               </span>
                             ) : (
                               <span class="text-muted">—</span>
@@ -297,18 +282,18 @@ export default function ReceivablesPage() {
                   </div>
                   <div>
                     <p class="text-muted">Total</p>
-                    <p class="font-medium text-foreground">{formatCurrency(Number(ar().amount))}</p>
+                    <p class="font-medium text-foreground">{formatPeso(Number(ar().amount))}</p>
                   </div>
                   <div>
                     <p class="text-muted">Paid</p>
                     <p class="font-medium text-foreground">
-                      {formatCurrency(Number(ar().paidAmount || 0))}
+                      {formatPeso(Number(ar().paidAmount || 0))}
                     </p>
                   </div>
                   <div>
                     <p class="text-muted">Remaining</p>
                     <p class="font-semibold text-primary">
-                      {formatCurrency(Number(ar().amount) - Number(ar().paidAmount || 0))}
+                      {formatPeso(Number(ar().amount) - Number(ar().paidAmount || 0))}
                     </p>
                   </div>
                 </div>
@@ -370,6 +355,6 @@ export default function ReceivablesPage() {
           )}
         </Show>
       </Modal>
-    </div>
+    </PageContainer>
   )
 }

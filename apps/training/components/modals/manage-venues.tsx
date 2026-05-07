@@ -1,4 +1,4 @@
-import { Modal } from "@ark/ui"
+import { Modal, ModalFooter } from "@ark/ui"
 import { useCreateVenue, useDeleteVenue, useUpdateVenue, useVenues } from "@data/hooks"
 import type { Venue } from "@data/types"
 import { createSignal, For, Show } from "solid-js"
@@ -163,15 +163,7 @@ export function ManageVenuesModal(props: ManageVenuesModalProps) {
           </p>
         </Show>
 
-        <div class="flex justify-end pt-4 border-t border-border">
-          <button
-            type="button"
-            onClick={handleClose}
-            class="px-4 py-2 text-sm font-medium text-foreground hover:bg-surface-muted rounded-lg transition-colors"
-          >
-            Done
-          </button>
-        </div>
+        <ModalFooter onCancel={handleClose} cancelLabel="Done" />
       </div>
     </Modal>
   )

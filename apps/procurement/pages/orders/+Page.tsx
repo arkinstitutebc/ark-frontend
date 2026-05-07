@@ -1,21 +1,9 @@
+import { formatDatePH, formatPeso, PageContainer, PageHeader } from "@ark/ui"
 import { useOrders } from "@data/hooks"
 import type { PoStatus, PurchaseOrder } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { PoDocumentModal } from "@/components/po-document-modal"
 import { Icons, PoStatusBadge, QueryBoundary } from "@/components/ui"
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(amount)
-}
-
-function formatDate(dateStr?: string) {
-  if (!dateStr) return "-"
-  return new Intl.DateTimeFormat("en-PH", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(new Date(dateStr))
-}
 
 function getEmptyStateMessage(filter: PoStatus | "all") {
   switch (filter) {
@@ -66,20 +54,19 @@ export default function OrdersPage() {
   })
 
   return (
-    <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
-      {/* Header */}
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <h1 class="text-2xl font-semibold text-foreground">Purchase Orders</h1>
-          <p class="text-sm text-muted mt-1">Manage supplier orders and delivery tracking</p>
-        </div>
-        <a
-          href="/orders/create"
-          class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
-        >
-          + Create PO
-        </a>
-      </div>
+    <PageContainer>
+      <PageHeader
+        title="Purchase Orders"
+        subtitle="Manage supplier orders and delivery tracking"
+        action={
+          <a
+            href="/orders/create"
+            class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            + Create PO
+          </a>
+        }
+      />
 
       {/* Stats Cards */}
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
@@ -202,15 +189,15 @@ export default function OrdersPage() {
                           <span class="text-sm text-foreground">{po.supplier}</span>
                         </td>
                         <td class="py-4 px-6 text-right">
-                          <span class="text-sm text-foreground">
-                            {formatCurrency(Number(po.totalAmount))}
-                          </span>
+                          <span class="text-sm text-foreground">{formatPeso(po.totalAmount)}</span>
                         </td>
                         <td class="py-4 px-6">
                           <PoStatusBadge status={po.status} />
                         </td>
                         <td class="py-4 px-6">
-                          <span class="text-sm text-muted">{formatDate(po.estimatedDelivery)}</span>
+                          <span class="text-sm text-muted">
+                            {formatDatePH(po.estimatedDelivery)}
+                          </span>
                         </td>
                         <td class="py-4 px-6 text-right">
                           <button
@@ -236,6 +223,6 @@ export default function OrdersPage() {
 
       {/* Document Modal */}
       <PoDocumentModal open={modalOpen()} onClose={() => setModalOpen(false)} po={selectedPo()} />
-    </div>
+    </PageContainer>
   )
 }

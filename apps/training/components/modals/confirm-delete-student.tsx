@@ -1,4 +1,4 @@
-import { Modal } from "@ark/ui"
+import { Modal, ModalFooter } from "@ark/ui"
 import { useDeleteStudent } from "@data/hooks"
 import type { Student } from "@data/types"
 
@@ -26,23 +26,12 @@ export function ConfirmDeleteStudentModal(props: ConfirmDeleteStudentModalProps)
           </strong>{" "}
           and any related attendance and assessment records. This can't be undone.
         </p>
-        <div class="flex justify-end gap-3 pt-4 border-t border-border">
-          <button
-            type="button"
-            onClick={props.onClose}
-            class="px-4 py-2 text-sm font-medium text-foreground hover:bg-surface-muted rounded-lg transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={handleDelete}
-            disabled={mutation.isPending}
-            class="px-4 py-2 text-sm font-medium text-white bg-accent hover:bg-accent/90 rounded-lg transition-colors disabled:opacity-50"
-          >
-            {mutation.isPending ? "Deleting..." : "Delete"}
-          </button>
-        </div>
+        <ModalFooter
+          onCancel={props.onClose}
+          onSubmit={handleDelete}
+          submitting={mutation.isPending}
+          danger
+        />
       </div>
     </Modal>
   )

@@ -1,4 +1,4 @@
-import { Modal, Select } from "@ark/ui"
+import { Modal, ModalFooter, Select } from "@ark/ui"
 import { TRAINING_TYPES } from "@data/constants"
 import { useCreateBatch, useInstructors, useVenues } from "@data/hooks"
 import { createBatchSchema } from "@data/schemas"
@@ -220,22 +220,12 @@ export function AddBatchModal(props: AddBatchModalProps) {
           <p class="text-sm text-red-600 dark:text-red-400">{mutation.error?.message}</p>
         </Show>
 
-        <div class="flex justify-end gap-3 pt-4 border-t border-border">
-          <button
-            type="button"
-            onClick={handleClose}
-            class="px-4 py-2 text-sm font-medium text-foreground hover:bg-surface-muted rounded-lg transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={mutation.isPending}
-            class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50"
-          >
-            {mutation.isPending ? "Creating..." : "Create Batch"}
-          </button>
-        </div>
+        <ModalFooter
+          onCancel={handleClose}
+          submitInForm
+          submitting={mutation.isPending}
+          submitLabel={mutation.isPending ? "Creating..." : "Create Batch"}
+        />
       </form>
       <ManageVenuesModal open={showManageVenues()} onClose={() => setShowManageVenues(false)} />
     </Modal>
