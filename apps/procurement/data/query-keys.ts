@@ -12,4 +12,7 @@ export const queryKeys = {
   batches: {
     all: ["batches"] as const,
   },
+  receipts: {
+    byPoCode: (poCode: string) => ["receipts", poCode] as const,
+  },
 } as const

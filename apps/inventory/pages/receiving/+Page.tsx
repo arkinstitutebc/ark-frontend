@@ -22,6 +22,7 @@ function formatDate(dateStr?: string) {
 interface ReceivedItem {
   poItemId: string
   itemName: string
+  unit?: string
   quantityOrdered: number
   quantityReceived: number
 }
@@ -42,10 +43,16 @@ export default function ReceivingPage() {
   const openPo = (po: PurchaseOrder) => {
     setSelectedPo(po)
     const items: Record<string, ReceivedItem> = {}
-    for (const item of po.items as Array<{ id: string; name: string; quantity: number }>) {
+    for (const item of po.items as Array<{
+      id: string
+      name: string
+      unit?: string
+      quantity: number
+    }>) {
       items[item.id] = {
         poItemId: item.id,
         itemName: item.name,
+        unit: item.unit,
         quantityOrdered: item.quantity,
         quantityReceived: 0,
       }
@@ -73,11 +80,16 @@ export default function ReceivingPage() {
     const po = selectedPo()
     if (!po || !hasReceivedItems()) return
 
-    // The backend receive endpoint expects item IDs from the inventory, not PO item IDs
-    // For now, we send what we have — the backend handles the mapping
+    // Backend upserts inventory_items keyed by (batchId, name) — no need to
+    // pre-create rows. We send the PO line's name + unit so newly-received
+    // items are auto-created on the inventory side.
     const items = Object.values(receivedItems())
       .filter(i => i.quantityReceived > 0)
-      .map(i => ({ itemId: i.poItemId, quantityReceived: i.quantityReceived }))
+      .map(i => ({
+        name: i.itemName,
+        unit: i.unit,
+        quantityReceived: i.quantityReceived,
+      }))
 
     receiveMutation.mutate(
       { poId: po.id, items },

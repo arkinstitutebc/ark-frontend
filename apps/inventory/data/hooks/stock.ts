@@ -51,7 +51,7 @@ export function useAdjustStock() {
 
 interface ReceivePoInput {
   poId: string
-  items: Array<{ itemId: string; quantityReceived: number }>
+  items: Array<{ name: string; unit?: string; quantityReceived: number }>
 }
 
 export function useReceivePo() {

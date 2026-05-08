@@ -3,6 +3,10 @@ import { useMovements } from "@data/hooks"
 import type { StockItem } from "@data/types"
 import { For, Show } from "solid-js"
 
+const PROCUREMENT_PORTAL_URL =
+  (typeof import.meta !== "undefined" && import.meta.env?.VITE_PROCUREMENT_PORTAL_URL) ||
+  "https://procurement.arkinstitutebc.com"
+
 interface ViewItemModalProps {
   open: boolean
   onClose: () => void
@@ -163,7 +167,16 @@ export function ViewItemModal(props: ViewItemModalProps) {
                         <>
                           <div>
                             <p class="text-xs text-muted">PO Reference</p>
-                            <p class="text-sm font-medium text-foreground">{_item().poReference}</p>
+                            <a
+                              href={`${PROCUREMENT_PORTAL_URL}/orders`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              class="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 hover:underline"
+                              title="Open in procurement portal"
+                            >
+                              {_item().poReference}
+                              <Icons.arrowRight class="w-3.5 h-3.5" />
+                            </a>
                           </div>
                           <div>
                             <p class="text-xs text-muted">Source</p>
