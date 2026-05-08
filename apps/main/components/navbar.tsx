@@ -125,13 +125,6 @@ export function Navbar(props: NavbarProps) {
                     <UI.user class="w-4 h-4 text-muted" />
                     <span>Manage profile</span>
                   </a>
-                  <a
-                    href="/learn"
-                    class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-surface-muted"
-                  >
-                    <UI.helpCircle class="w-4 h-4 text-muted" />
-                    <span>How To · Learning Hub</span>
-                  </a>
                   <div class="h-px bg-border my-1" />
                   <a
                     href="/login"

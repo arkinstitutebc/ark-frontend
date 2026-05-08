@@ -11,6 +11,7 @@ export interface CurrentUser {
   role: string
   firstName: string
   lastName: string
+  photoUrl?: string
 }
 
 export interface TopBarProps {
@@ -85,9 +86,20 @@ export function TopBar(props: TopBarProps) {
               aria-expanded={userDropdownOpen()}
               class="flex items-center gap-2 p-1 rounded-lg hover:bg-surface-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
-              <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm flex-shrink-0">
-                <User class="w-4 h-4 text-white" />
-              </div>
+              <Show
+                when={props.user?.photoUrl}
+                fallback={
+                  <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm flex-shrink-0">
+                    <User class="w-4 h-4 text-white" />
+                  </div>
+                }
+              >
+                <img
+                  src={props.user?.photoUrl}
+                  alt={displayName()}
+                  class="w-8 h-8 rounded-full object-cover shadow-sm flex-shrink-0"
+                />
+              </Show>
               <ChevronDown class="w-4 h-4 text-muted flex-shrink-0" />
             </button>
 

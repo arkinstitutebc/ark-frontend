@@ -72,12 +72,12 @@ export default function DashboardPage() {
 
             <PortalCards userRole={userRole()} />
 
-            <Show when={userRole() === "admin"}>
-              <div class="mt-10">
-                <h3 class="text-sm font-semibold text-muted uppercase tracking-wide mb-4">
-                  Administration
-                </h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="mt-10">
+              <h3 class="text-sm font-semibold text-muted uppercase tracking-wide mb-4">
+                Resources
+              </h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <Show when={userRole() === "admin"}>
                   <a
                     href="/admin/users"
                     class="group block bg-surface rounded-2xl shadow-lg p-6 border border-border hover:shadow-xl hover:border-primary/30 transition-all"
@@ -101,9 +101,34 @@ export default function DashboardPage() {
                       <Icons.arrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </a>
-                </div>
+                </Show>
+
+                <a
+                  href="/learn"
+                  class="group block bg-surface rounded-2xl shadow-lg p-6 border border-border hover:shadow-xl hover:border-primary/30 transition-all"
+                >
+                  <div class="flex items-start justify-between mb-5">
+                    <div class="p-4 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
+                      <Icons.helpCircle class="w-8 h-8 text-primary" />
+                    </div>
+                    <span class="px-3 py-1 bg-primary/10 text-primary text-xs font-semibold rounded-full">
+                      Guides
+                    </span>
+                  </div>
+                  <h3 class="text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
+                    Learning Hub
+                  </h3>
+                  <p class="text-sm text-muted mt-1.5">
+                    How-to guides for every portal — Training, Procurement, Inventory, Finance,
+                    Billing, HR.
+                  </p>
+                  <div class="flex items-center gap-2 mt-5 text-primary font-medium text-sm group-hover:gap-3 transition-all">
+                    <span>Open guides</span>
+                    <Icons.arrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </a>
               </div>
-            </Show>
+            </div>
           </div>
         </main>
 
