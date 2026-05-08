@@ -1,3 +1,3 @@
 export { useCurrentUser } from "./auth"
 export { useMovements } from "./movements"
-export { useAdjustStock, useReceivePo, useStock, useStockItem } from "./stock"
+export { useAdjustStock, useCycleCount, useReceivePo, useStock, useStockItem } from "./stock"

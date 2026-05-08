@@ -69,3 +69,42 @@ export function useReceivePo() {
     onError: (err: Error) => toast.error(err.message),
   }))
 }
+
+interface CycleCountInput {
+  note?: string
+  items: Array<{ itemId: string; countedQty: number }>
+}
+
+interface CycleCountResult {
+  itemsAdjusted: number
+  itemsUnchanged: number
+  movements: Array<{
+    itemId: string
+    itemName: string
+    before: number
+    after: number
+    delta: number
+  }>
+}
+
+export function useCycleCount() {
+  const qc = useQueryClient()
+  return createMutation(() => ({
+    mutationFn: (data: CycleCountInput) =>
+      api<CycleCountResult>("/api/inventory/stock/count", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    onSuccess: result => {
+      qc.invalidateQueries({ queryKey: queryKeys.stock.all })
+      qc.invalidateQueries({ queryKey: queryKeys.movements.all })
+      qc.invalidateQueries({ queryKey: ["stock"] })
+      const adjusted = result.itemsAdjusted
+      const unchanged = result.itemsUnchanged
+      toast.success(
+        `Stock take saved — ${adjusted} adjusted${unchanged ? `, ${unchanged} unchanged` : ""}`
+      )
+    },
+    onError: (err: Error) => toast.error(err.message),
+  }))
+}

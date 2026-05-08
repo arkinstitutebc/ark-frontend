@@ -34,6 +34,31 @@ const sections: TutorialSection[] = [
     ),
   },
   {
+    id: "stock-take",
+    title: "Run a stock take (cycle count)",
+    body: (
+      <>
+        <p>
+          Use <b>Stock Take</b> to reconcile the whole shelf in one session — counter walks the
+          items, types each <b>Counted</b> quantity, and submits once. The variance column shows
+          what'll change before you commit.
+        </p>
+        <ol class="list-decimal pl-5 space-y-1.5">
+          <li>
+            Open <b>Stock Take</b> from the sidebar.
+          </li>
+          <li>(Optional) Add a session note — appears on every adjustment row.</li>
+          <li>Type the counted quantity for each item. Leave blank to skip.</li>
+          <li>
+            Hit <b>Submit count</b>. Items that match on-hand are skipped; differences become
+            adjustment movements automatically.
+          </li>
+        </ol>
+        <p>The whole submission runs in one transaction — if anything fails, nothing is saved.</p>
+      </>
+    ),
+  },
+  {
     id: "adjust",
     title: "Adjust a single item",
     body: (
