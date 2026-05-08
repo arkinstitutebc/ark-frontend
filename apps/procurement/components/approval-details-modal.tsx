@@ -34,39 +34,64 @@ function formatDate(dateStr: string) {
   }).format(new Date(dateStr))
 }
 
+/**
+ * Three modes drive what the modal does:
+ *  - `view`   — read-only details (no action buttons)
+ *  - `approve` — approve flow; notes optional
+ *  - `reject`  — reject flow; notes REQUIRED (matches server-side `min(1)`)
+ */
+export type ApprovalAction = "view" | "approve" | "reject"
+
 interface ApprovalDetailsModalProps {
   open: boolean
   onClose: () => void
   pr: PurchaseRequest | null
+  /** What the user is about to do — drives buttons + notes-required UI. */
+  mode: ApprovalAction
   onApprove: (id: string, notes?: string) => void
-  onReject: (id: string, notes?: string) => void
+  onReject: (id: string, notes: string) => void
   processing: boolean
 }
 
 export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
   const [notes, setNotes] = createSignal("")
+  const [showError, setShowError] = createSignal(false)
+
+  const notesRequired = () => props.mode === "reject"
+  const notesValid = () => !notesRequired() || notes().trim().length > 0
+
+  const modalTitle = () => {
+    if (props.mode === "approve") return "Approve Purchase Request"
+    if (props.mode === "reject") return "Reject Purchase Request"
+    return "Purchase Request Details"
+  }
 
   const handleApprove = () => {
-    if (props.pr) {
-      props.onApprove(props.pr.id, notes())
-      setNotes("")
-    }
+    if (!props.pr) return
+    props.onApprove(props.pr.id, notes().trim() || undefined)
+    setNotes("")
+    setShowError(false)
   }
 
   const handleReject = () => {
-    if (props.pr) {
-      props.onReject(props.pr.id, notes())
-      setNotes("")
+    if (!props.pr) return
+    if (!notesValid()) {
+      setShowError(true)
+      return
     }
+    props.onReject(props.pr.id, notes().trim())
+    setNotes("")
+    setShowError(false)
   }
 
   const handleClose = () => {
     setNotes("")
+    setShowError(false)
     props.onClose()
   }
 
   return (
-    <Modal open={props.open} onClose={handleClose} title="Purchase Request Details" size="lg">
+    <Modal open={props.open} onClose={handleClose} title={modalTitle()} size="lg">
       <Show when={props.pr}>
         {pr => (
           <div class="flex flex-col max-h-[70vh]">
@@ -198,20 +223,39 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
                 </div>
               </Show>
 
-              {/* Notes Section - only for pending */}
-              <Show when={pr().status === "pending"}>
+              {/* Notes — only for pending PRs being acted on */}
+              <Show when={pr().status === "pending" && props.mode !== "view"}>
                 <div>
                   <label for="approval-notes" class="text-xs text-muted mb-2 block">
-                    Approval notes (optional)
+                    {notesRequired() ? "Reason for rejection" : "Approval notes (optional)"}
+                    <Show when={notesRequired()}>
+                      <span class="text-red-500 ml-0.5">*</span>
+                    </Show>
                   </label>
                   <textarea
                     id="approval-notes"
                     value={notes()}
-                    onInput={e => setNotes(e.currentTarget.value)}
-                    placeholder="Add notes for this approval..."
-                    rows={2}
-                    class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none"
+                    onInput={e => {
+                      setNotes(e.currentTarget.value)
+                      if (showError()) setShowError(false)
+                    }}
+                    placeholder={
+                      notesRequired()
+                        ? "Tell the requester what to fix so they can resubmit..."
+                        : "Add notes for this approval..."
+                    }
+                    rows={3}
+                    class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 resize-none ${
+                      showError()
+                        ? "border-red-300 focus:ring-red-200 focus:border-red-400"
+                        : "border-border focus:ring-primary/20 focus:border-primary"
+                    }`}
                   />
+                  <Show when={showError()}>
+                    <p class="text-xs text-red-600 mt-1">
+                      A reason is required when rejecting — it goes back to the requester.
+                    </p>
+                  </Show>
                 </div>
               </Show>
             </div>
@@ -226,22 +270,24 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
               >
                 Cancel
               </button>
-              <Show when={pr().status === "pending"}>
-                <button
-                  type="button"
-                  onClick={handleReject}
-                  disabled={props.processing}
-                  class="px-4 py-2 text-sm font-medium text-white bg-accent hover:bg-accent/90 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
-                >
-                  Reject
-                </button>
+              <Show when={pr().status === "pending" && props.mode === "approve"}>
                 <button
                   type="button"
                   onClick={handleApprove}
                   disabled={props.processing}
                   class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
                 >
-                  Approve
+                  {props.processing ? "Approving..." : "Confirm approval"}
+                </button>
+              </Show>
+              <Show when={pr().status === "pending" && props.mode === "reject"}>
+                <button
+                  type="button"
+                  onClick={handleReject}
+                  disabled={props.processing}
+                  class="px-4 py-2 text-sm font-medium text-white bg-accent hover:bg-accent/90 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  {props.processing ? "Rejecting..." : "Confirm rejection"}
                 </button>
               </Show>
             </div>

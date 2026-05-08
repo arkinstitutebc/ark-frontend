@@ -2,7 +2,7 @@ import { formatDatePH, formatPeso, PageContainer, PageHeader } from "@ark/ui"
 import { useApprovePr, useRejectPr, useRequests } from "@data/hooks"
 import type { PrStatus, PurchaseRequest } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
-import { ApprovalDetailsModal } from "@/components/approval-details-modal"
+import { type ApprovalAction, ApprovalDetailsModal } from "@/components/approval-details-modal"
 import { Icons, PrStatusBadge, QueryBoundary } from "@/components/ui"
 
 const StatusBadge = PrStatusBadge
@@ -151,6 +151,7 @@ export default function ApprovalsPage() {
   const [search, setSearch] = createSignal("")
   const [selectedPr, setSelectedPr] = createSignal<PurchaseRequest | null>(null)
   const [modalOpen, setModalOpen] = createSignal(false)
+  const [modalMode, setModalMode] = createSignal<ApprovalAction>("view")
 
   const isProcessing = () => approveMutation.isPending || rejectMutation.isPending
 
@@ -177,35 +178,33 @@ export default function ApprovalsPage() {
     }
   })
 
-  // Both approve + reject open the details modal so the user can write notes
-  // before recording the action — captured as approvalNotes on the request.
-  const handleApprove = (pr: PurchaseRequest) => {
+  // Each list-row button opens the modal in the matching mode so the user
+  // sees only the relevant action (no accidental approve-when-meaning-reject)
+  // and reject notes are enforced before submit.
+  const openModal = (pr: PurchaseRequest, mode: ApprovalAction) => {
     setSelectedPr(pr)
+    setModalMode(mode)
     setModalOpen(true)
   }
 
-  const handleReject = (pr: PurchaseRequest) => {
-    setSelectedPr(pr)
-    setModalOpen(true)
-  }
-
-  const handleViewDetails = (pr: PurchaseRequest) => {
-    setSelectedPr(pr)
-    setModalOpen(true)
-  }
+  const handleApprove = (pr: PurchaseRequest) => openModal(pr, "approve")
+  const handleReject = (pr: PurchaseRequest) => openModal(pr, "reject")
+  const handleViewDetails = (pr: PurchaseRequest) => openModal(pr, "view")
 
   const handleModalApprove = (id: string, notes?: string) => {
     approveMutation.mutate(
-      { id, approvalNotes: notes || "Approved for procurement." },
+      { id, approvalNotes: notes },
       {
         onSuccess: () => setModalOpen(false),
       }
     )
   }
 
-  const handleModalReject = (id: string, notes?: string) => {
+  // Notes are required server-side; the modal blocks submit when empty so
+  // we always have a real reason here.
+  const handleModalReject = (id: string, notes: string) => {
     rejectMutation.mutate(
-      { id, approvalNotes: notes || "Request rejected." },
+      { id, approvalNotes: notes },
       {
         onSuccess: () => setModalOpen(false),
       }
@@ -315,6 +314,7 @@ export default function ApprovalsPage() {
         open={modalOpen()}
         onClose={() => setModalOpen(false)}
         pr={selectedPr()}
+        mode={modalMode()}
         onApprove={handleModalApprove}
         onReject={handleModalReject}
         processing={isProcessing()}
