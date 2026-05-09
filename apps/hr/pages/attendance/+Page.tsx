@@ -1,4 +1,4 @@
-import { formatDatePH } from "@ark/ui"
+import { formatDatePH, THead, Th } from "@ark/ui"
 import { useAttendance, useTrainers } from "@data/hooks"
 import type { AttendanceStatus, HrAttendance, Trainer } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -123,28 +123,14 @@ export default function Page() {
               }
             >
               <table class="w-full">
-                <thead class="bg-surface-muted border-b border-border">
-                  <tr>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Trainer
-                    </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Time In
-                    </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Time Out
-                    </th>
-                    <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                      Hours
-                    </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
+                <THead>
+                  <Th>Trainer</Th>
+                  <Th>Date</Th>
+                  <Th>Time In</Th>
+                  <Th>Time Out</Th>
+                  <Th align="right">Hours</Th>
+                  <Th>Status</Th>
+                </THead>
                 <tbody>
                   <For each={filteredRecords()}>
                     {(record: HrAttendance) => (

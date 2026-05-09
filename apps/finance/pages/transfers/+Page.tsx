@@ -1,4 +1,4 @@
-import { formatPeso } from "@ark/ui"
+import { formatPeso, THead, Th } from "@ark/ui"
 import { useBankBalance, useBanks, useTransfers } from "@data/hooks"
 import type { Bank, Transfer } from "@data/types"
 import { For, Show } from "solid-js"
@@ -84,22 +84,12 @@ export default function TransfersPage() {
             >
               <div class="overflow-x-auto">
                 <table class="w-full">
-                  <thead class="bg-surface-muted border-b border-border">
-                    <tr>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        Transfer Flow
-                      </th>
-                      <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                        Amount
-                      </th>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        Reference
-                      </th>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        Date
-                      </th>
-                    </tr>
-                  </thead>
+                  <THead>
+                    <Th>Transfer Flow</Th>
+                    <Th align="right">Amount</Th>
+                    <Th>Reference</Th>
+                    <Th>Date</Th>
+                  </THead>
                   <tbody>
                     <For each={transfers}>
                       {(t: Transfer) => (

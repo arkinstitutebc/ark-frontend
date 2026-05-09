@@ -1,4 +1,4 @@
-import { BackLink, formatDatePH, formatPeso } from "@ark/ui"
+import { BackLink, formatDatePH, formatPeso, THead, Th } from "@ark/ui"
 import { type PayrollPeriodDetail, usePayrollPeriod, useProcessPayroll } from "@data/hooks"
 import { createMemo, For } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
@@ -89,28 +89,14 @@ export default function Page() {
               </div>
               <div class="overflow-x-auto">
                 <table class="w-full">
-                  <thead class="bg-surface-muted border-b border-border">
-                    <tr>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        Trainer
-                      </th>
-                      <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                        Hours
-                      </th>
-                      <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                        Rate/hr
-                      </th>
-                      <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                        Gross
-                      </th>
-                      <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                        Deductions
-                      </th>
-                      <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                        Net Pay
-                      </th>
-                    </tr>
-                  </thead>
+                  <THead>
+                    <Th>Trainer</Th>
+                    <Th align="right">Hours</Th>
+                    <Th align="right">Rate/hr</Th>
+                    <Th align="right">Gross</Th>
+                    <Th align="right">Deductions</Th>
+                    <Th align="right">Net Pay</Th>
+                  </THead>
                   <tbody>
                     <For each={data.entries || []}>
                       {entry => (

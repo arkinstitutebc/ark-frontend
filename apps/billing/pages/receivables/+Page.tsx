@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso, PageContainer } from "@ark/ui"
+import { formatDatePH, formatPeso, PageContainer, THead, Th } from "@ark/ui"
 import { useReceivables, useRecordPayment, useUpdateAr } from "@data/hooks"
 import type { AccountReceivable, ArStatus } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -182,25 +182,13 @@ export default function ReceivablesPage() {
             >
               <div class="overflow-x-auto">
                 <table class="w-full">
-                  <thead class="bg-surface-muted border-b border-border">
-                    <tr>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        Batch
-                      </th>
-                      <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                        Amount
-                      </th>
-                      <th class="py-4 px-6 text-center text-xs font-semibold text-muted uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                        Paid
-                      </th>
-                      <th class="py-4 px-6 text-center text-xs font-semibold text-muted uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
+                  <THead>
+                    <Th>Batch</Th>
+                    <Th align="right">Amount</Th>
+                    <Th align="center">Status</Th>
+                    <Th align="right">Paid</Th>
+                    <Th align="center">Actions</Th>
+                  </THead>
                   <tbody>
                     <For each={filteredAr()}>
                       {ar => (

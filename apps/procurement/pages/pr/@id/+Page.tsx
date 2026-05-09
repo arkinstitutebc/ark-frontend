@@ -1,4 +1,4 @@
-import { BackLink, formatDatePH, formatPeso, PageContainer } from "@ark/ui"
+import { BackLink, formatDatePH, formatPeso, PageContainer, THead, Th } from "@ark/ui"
 import { useRequest } from "@data/hooks"
 import type { PurchaseRequest } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -101,25 +101,13 @@ export default function PrDetailPage() {
               </div>
               <div class="overflow-x-auto">
                 <table class="w-full">
-                  <thead class="bg-surface-muted border-b border-border">
-                    <tr>
-                      <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                        Item
-                      </th>
-                      <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                        Qty
-                      </th>
-                      <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                        Unit
-                      </th>
-                      <th class="text-right py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                        Unit Price
-                      </th>
-                      <th class="text-right py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                        Total
-                      </th>
-                    </tr>
-                  </thead>
+                  <THead>
+                    <Th>Item</Th>
+                    <Th>Qty</Th>
+                    <Th>Unit</Th>
+                    <Th align="right">Unit Price</Th>
+                    <Th align="right">Total</Th>
+                  </THead>
                   <tbody>
                     <For each={p.items}>
                       {item => (

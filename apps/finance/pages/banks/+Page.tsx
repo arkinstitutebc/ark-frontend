@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso } from "@ark/ui"
+import { formatDatePH, formatPeso, THead, Th } from "@ark/ui"
 import { useBankBalance, useBanks, useTransactions } from "@data/hooks"
 import type { Bank, Transaction } from "@data/types"
 import { createSignal, For } from "solid-js"
@@ -136,25 +136,13 @@ export default function Page() {
             </div>
             <div class="overflow-x-auto">
               <table class="w-full">
-                <thead class="bg-surface-muted border-b border-border">
-                  <tr>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Reference
-                    </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Type
-                    </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Description
-                    </th>
-                    <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                      Amount
-                    </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Date
-                    </th>
-                  </tr>
-                </thead>
+                <THead>
+                  <Th>Reference</Th>
+                  <Th>Type</Th>
+                  <Th>Description</Th>
+                  <Th align="right">Amount</Th>
+                  <Th>Date</Th>
+                </THead>
                 <tbody>
                   <For each={txns}>
                     {(txn: Transaction) => (

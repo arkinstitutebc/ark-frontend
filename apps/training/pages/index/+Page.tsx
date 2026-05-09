@@ -1,3 +1,4 @@
+import { THead, Th } from "@ark/ui"
 import { useBatches } from "@data/hooks"
 import type { Batch } from "@data/types"
 import { createSignal, For, Show } from "solid-js"
@@ -60,25 +61,13 @@ export default function BatchesPage() {
           >
             <div class="bg-surface rounded-lg border border-border overflow-hidden">
               <table class="w-full">
-                <thead class="bg-surface-muted border-b border-border">
-                  <tr>
-                    <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                      Batch
-                    </th>
-                    <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                      Training
-                    </th>
-                    <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                      Schedule
-                    </th>
-                    <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                      Students
-                    </th>
-                    <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                      Status
-                    </th>
-                  </tr>
-                </thead>
+                <THead>
+                  <Th>Batch</Th>
+                  <Th>Training</Th>
+                  <Th>Schedule</Th>
+                  <Th>Students</Th>
+                  <Th>Status</Th>
+                </THead>
                 <tbody>
                   <For each={query.data}>
                     {(batch: Batch) => (

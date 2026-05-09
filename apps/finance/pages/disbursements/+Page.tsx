@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso } from "@ark/ui"
+import { DataTable, formatDatePH, formatPeso, THead, Th, Tr } from "@ark/ui"
 import { useBankBalance, useDisbursements } from "@data/hooks"
 import type { Transaction } from "@data/types"
 import { createMemo, For, Show } from "solid-js"
@@ -66,44 +66,30 @@ export default function DisbursementsPage() {
                 </div>
               }
             >
-              <div class="overflow-x-auto">
-                <table class="w-full">
-                  <thead class="bg-surface-muted border-b border-border">
-                    <tr>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        Description
-                      </th>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        Category
-                      </th>
-                      <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                        Amount
-                      </th>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        Date
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <For each={txns}>
-                      {(txn: Transaction) => (
-                        <tr class="border-t border-border hover:bg-surface-muted transition-colors">
-                          <td class="py-4 px-6 text-sm text-foreground">{txn.description}</td>
-                          <td class="py-4 px-6">
-                            <StatusBadge status={txn.category || "other"} />
-                          </td>
-                          <td class="py-4 px-6 text-right text-sm font-semibold text-red-700 tabular-nums">
-                            {formatPeso(Math.abs(Number(txn.amount)))}
-                          </td>
-                          <td class="py-4 px-6 text-sm text-muted">
-                            {formatDatePH(txn.createdAt)}
-                          </td>
-                        </tr>
-                      )}
-                    </For>
-                  </tbody>
-                </table>
-              </div>
+              <DataTable>
+                <THead>
+                  <Th>Description</Th>
+                  <Th>Category</Th>
+                  <Th align="right">Amount</Th>
+                  <Th>Date</Th>
+                </THead>
+                <tbody>
+                  <For each={txns}>
+                    {(txn: Transaction) => (
+                      <Tr>
+                        <td class="py-4 px-6 text-sm text-foreground">{txn.description}</td>
+                        <td class="py-4 px-6">
+                          <StatusBadge status={txn.category || "other"} />
+                        </td>
+                        <td class="py-4 px-6 text-right text-sm font-semibold text-red-700 tabular-nums">
+                          {formatPeso(Math.abs(Number(txn.amount)))}
+                        </td>
+                        <td class="py-4 px-6 text-sm text-muted">{formatDatePH(txn.createdAt)}</td>
+                      </Tr>
+                    )}
+                  </For>
+                </tbody>
+              </DataTable>
             </Show>
           </div>
         )}

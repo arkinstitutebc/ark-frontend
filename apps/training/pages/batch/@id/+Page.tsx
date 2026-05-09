@@ -1,4 +1,13 @@
-import { BackLink, formatDatePH, formatPeso, Icons, PageContainer, statusToneClass } from "@ark/ui"
+import {
+  BackLink,
+  formatDatePH,
+  formatPeso,
+  Icons,
+  PageContainer,
+  statusToneClass,
+  THead,
+  Th,
+} from "@ark/ui"
 import { useBatch, useBatchStudents, useStudent } from "@data/hooks"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
@@ -145,22 +154,12 @@ export default function BatchDetailPage() {
                 >
                   <div class="bg-surface rounded-lg border border-border overflow-hidden">
                     <table class="w-full">
-                      <thead class="bg-surface-muted border-b border-border">
-                        <tr>
-                          <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                            Student ID
-                          </th>
-                          <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                            Name
-                          </th>
-                          <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                            Status
-                          </th>
-                          <th class="text-right py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                            Actions
-                          </th>
-                        </tr>
-                      </thead>
+                      <THead>
+                        <Th>Student ID</Th>
+                        <Th>Name</Th>
+                        <Th>Status</Th>
+                        <Th align="right">Actions</Th>
+                      </THead>
                       <tbody>
                         <Show
                           when={(studentsQuery.data?.length ?? 0) > 0}

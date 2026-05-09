@@ -1,4 +1,4 @@
-import { BackLink, PageContainer, PageHeader, QueryBoundary, statusTone } from "@ark/ui"
+import { BackLink, PageContainer, PageHeader, QueryBoundary, statusTone, THead, Th } from "@ark/ui"
 import { useCycleCount, useStock } from "@data/hooks"
 import type { StockItem } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -97,25 +97,19 @@ export default function StockTakePage() {
 
               <div class="overflow-x-auto">
                 <table class="w-full">
-                  <thead class="bg-surface-muted border-b border-border">
-                    <tr>
-                      <th class="text-left px-6 py-3 text-xs font-semibold text-muted uppercase tracking-wider">
-                        Item
-                      </th>
-                      <th class="text-left px-6 py-3 text-xs font-semibold text-muted uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th class="text-right px-6 py-3 text-xs font-semibold text-muted uppercase tracking-wider">
-                        On hand
-                      </th>
-                      <th class="text-right px-6 py-3 text-xs font-semibold text-muted uppercase tracking-wider">
-                        Counted
-                      </th>
-                      <th class="text-right px-6 py-3 text-xs font-semibold text-muted uppercase tracking-wider">
-                        Variance
-                      </th>
-                    </tr>
-                  </thead>
+                  <THead>
+                    <Th size="dense">Item</Th>
+                    <Th size="dense">Status</Th>
+                    <Th size="dense" align="right">
+                      On hand
+                    </Th>
+                    <Th size="dense" align="right">
+                      Counted
+                    </Th>
+                    <Th size="dense" align="right">
+                      Variance
+                    </Th>
+                  </THead>
                   <tbody>
                     <Show
                       when={items().length > 0}

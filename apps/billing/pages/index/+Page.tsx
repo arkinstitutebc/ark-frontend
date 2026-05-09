@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso } from "@ark/ui"
+import { formatDatePH, formatPeso, THead, Th } from "@ark/ui"
 import { useReceivables } from "@data/hooks"
 import type { AccountReceivable } from "@data/types"
 import { createMemo, For } from "solid-js"
@@ -103,22 +103,12 @@ export default function Page() {
               </div>
               <div class="overflow-x-auto">
                 <table class="w-full">
-                  <thead class="bg-surface-muted border-b border-border">
-                    <tr>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        Batch Code
-                      </th>
-                      <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                        Amount
-                      </th>
-                      <th class="py-4 px-6 text-center text-xs font-semibold text-muted uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        Created
-                      </th>
-                    </tr>
-                  </thead>
+                  <THead>
+                    <Th>Batch Code</Th>
+                    <Th align="right">Amount</Th>
+                    <Th align="center">Status</Th>
+                    <Th>Created</Th>
+                  </THead>
                   <tbody>
                     <For each={recentAr()}>
                       {ar => (

@@ -1,4 +1,4 @@
-import { BackLink, formatDatePH, formatPeso, PageContainer } from "@ark/ui"
+import { BackLink, formatDatePH, formatPeso, PageContainer, THead, Th } from "@ark/ui"
 import { api } from "@data/api"
 import { useOrder } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
@@ -124,25 +124,13 @@ export default function PoDetailPage() {
                 </div>
                 <div class="overflow-x-auto">
                   <table class="w-full">
-                    <thead class="bg-surface-muted border-b border-border">
-                      <tr>
-                        <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                          Item
-                        </th>
-                        <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                          Qty
-                        </th>
-                        <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                          Unit
-                        </th>
-                        <th class="text-right py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                          Unit Price
-                        </th>
-                        <th class="text-right py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                          Total
-                        </th>
-                      </tr>
-                    </thead>
+                    <THead>
+                      <Th>Item</Th>
+                      <Th>Qty</Th>
+                      <Th>Unit</Th>
+                      <Th align="right">Unit Price</Th>
+                      <Th align="right">Total</Th>
+                    </THead>
                     <tbody>
                       <For each={p.items}>
                         {item => (
@@ -217,22 +205,12 @@ export default function PoDetailPage() {
                   </div>
                   <div class="overflow-x-auto">
                     <table class="w-full">
-                      <thead class="bg-surface-muted border-b border-border">
-                        <tr>
-                          <th class="text-left py-3 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                            Date
-                          </th>
-                          <th class="text-left py-3 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                            Item
-                          </th>
-                          <th class="text-right py-3 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                            Qty
-                          </th>
-                          <th class="text-left py-3 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                            Recorded by
-                          </th>
-                        </tr>
-                      </thead>
+                      <THead>
+                        <Th>Date</Th>
+                        <Th>Item</Th>
+                        <Th align="right">Qty</Th>
+                        <Th>Recorded by</Th>
+                      </THead>
                       <tbody>
                         <For each={receipts()}>
                           {r => (

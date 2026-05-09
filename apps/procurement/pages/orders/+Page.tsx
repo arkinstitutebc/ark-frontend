@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso, PageContainer, PageHeader } from "@ark/ui"
+import { formatDatePH, formatPeso, PageContainer, PageHeader, THead, Th } from "@ark/ui"
 import { useOrders } from "@data/hooks"
 import type { PoStatus, PurchaseOrder } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -141,34 +141,16 @@ export default function OrdersPage() {
             >
               <div class="overflow-x-auto">
                 <table class="w-full">
-                  <thead class="bg-surface-muted border-b border-border">
-                    <tr>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        PO Code
-                      </th>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        PR Ref
-                      </th>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        Batch
-                      </th>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        Supplier
-                      </th>
-                      <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                        Amount
-                      </th>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        Est. Delivery
-                      </th>
-                      <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
+                  <THead>
+                    <Th>PO Code</Th>
+                    <Th>PR Ref</Th>
+                    <Th>Batch</Th>
+                    <Th>Supplier</Th>
+                    <Th align="right">Amount</Th>
+                    <Th>Status</Th>
+                    <Th>Est. Delivery</Th>
+                    <Th align="right">Actions</Th>
+                  </THead>
                   <tbody>
                     <For each={filteredOrders()}>
                       {(po: PurchaseOrder) => (

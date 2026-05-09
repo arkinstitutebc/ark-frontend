@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso, PageContainer, PageHeader } from "@ark/ui"
+import { DataTable, formatDatePH, formatPeso, PageContainer, PageHeader, THead, Th } from "@ark/ui"
 import { useRequests } from "@data/hooks"
 import type { PrStatus, PurchaseRequest } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -115,85 +115,67 @@ export default function Page() {
                 </div>
               }
             >
-              <div class="overflow-x-auto">
-                <table class="w-full">
-                  <thead class="bg-surface-muted border-b border-border">
-                    <tr>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        PR Code
-                      </th>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        Batch
-                      </th>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        Category
-                      </th>
-                      <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                        Amount
-                      </th>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                        Created
-                      </th>
-                      <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <For each={filteredRequests()}>
-                      {(pr: PurchaseRequest) => (
-                        <tr
-                          onClick={() => navigate(`/pr/${pr.id}`)}
-                          class="border-t border-border hover:bg-surface-muted cursor-pointer transition-colors"
-                        >
-                          <td class="py-4 px-6">
-                            <span class="font-mono text-sm font-medium text-foreground">
-                              {pr.prCode}
+              <DataTable>
+                <THead>
+                  <Th>PR Code</Th>
+                  <Th>Batch</Th>
+                  <Th>Category</Th>
+                  <Th align="right">Amount</Th>
+                  <Th>Status</Th>
+                  <Th>Created</Th>
+                  <Th align="right">Actions</Th>
+                </THead>
+                <tbody>
+                  <For each={filteredRequests()}>
+                    {(pr: PurchaseRequest) => (
+                      <tr
+                        onClick={() => navigate(`/pr/${pr.id}`)}
+                        class="border-t border-border hover:bg-surface-muted cursor-pointer transition-colors"
+                      >
+                        <td class="py-4 px-6">
+                          <span class="font-mono text-sm font-medium text-foreground">
+                            {pr.prCode}
+                          </span>
+                        </td>
+                        <td class="py-4 px-6">
+                          <p class="text-sm text-foreground">{pr.batchName}</p>
+                          <p class="text-xs text-muted">{pr.batchCode}</p>
+                        </td>
+                        <td class="py-4 px-6">
+                          <Show
+                            when={pr.category}
+                            fallback={<span class="text-sm text-muted">—</span>}
+                          >
+                            <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-primary/10 text-primary">
+                              {pr.category}
                             </span>
-                          </td>
-                          <td class="py-4 px-6">
-                            <p class="text-sm text-foreground">{pr.batchName}</p>
-                            <p class="text-xs text-muted">{pr.batchCode}</p>
-                          </td>
-                          <td class="py-4 px-6">
-                            <Show
-                              when={pr.category}
-                              fallback={<span class="text-sm text-muted">—</span>}
-                            >
-                              <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-primary/10 text-primary">
-                                {pr.category}
-                              </span>
-                            </Show>
-                          </td>
-                          <td class="py-4 px-6 text-right text-sm text-foreground">
-                            {formatPeso(Number(pr.totalAmount))}
-                          </td>
-                          <td class="py-4 px-6">
-                            <StatusBadge status={pr.status} />
-                          </td>
-                          <td class="py-4 px-6 text-sm text-muted">{formatDatePH(pr.createdAt)}</td>
-                          <td class="py-4 px-6 text-right">
-                            <button
-                              type="button"
-                              onClick={e => {
-                                e.stopPropagation()
-                                setSelectedPr(pr)
-                                setModalOpen(true)
-                              }}
-                              class="text-primary hover:text-primary/80 text-sm font-medium"
-                            >
-                              View
-                            </button>
-                          </td>
-                        </tr>
-                      )}
-                    </For>
-                  </tbody>
-                </table>
-              </div>
+                          </Show>
+                        </td>
+                        <td class="py-4 px-6 text-right text-sm text-foreground">
+                          {formatPeso(Number(pr.totalAmount))}
+                        </td>
+                        <td class="py-4 px-6">
+                          <StatusBadge status={pr.status} />
+                        </td>
+                        <td class="py-4 px-6 text-sm text-muted">{formatDatePH(pr.createdAt)}</td>
+                        <td class="py-4 px-6 text-right">
+                          <button
+                            type="button"
+                            onClick={e => {
+                              e.stopPropagation()
+                              setSelectedPr(pr)
+                              setModalOpen(true)
+                            }}
+                            class="text-primary hover:text-primary/80 text-sm font-medium"
+                          >
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    )}
+                  </For>
+                </tbody>
+              </DataTable>
             </Show>
           </div>
         )}

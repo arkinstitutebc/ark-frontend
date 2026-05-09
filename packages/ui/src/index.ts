@@ -20,8 +20,18 @@
  * into their own `@ark/ui-smart` package then.
  */
 
-// Data — CRUD hook factory
+// Data — CRUD hook factory + table primitives
 export { type CrudConfig, createCrudHooks } from "./data/create-crud-hooks"
+export {
+  DataTable,
+  type DataTableProps,
+  THead,
+  type THeadProps,
+  Th,
+  type ThProps,
+  Tr,
+  type TrProps,
+} from "./data/data-table"
 // Display
 export { Card } from "./display/card"
 export {

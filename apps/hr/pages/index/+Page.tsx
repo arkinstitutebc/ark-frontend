@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso } from "@ark/ui"
+import { formatDatePH, formatPeso, THead, Th } from "@ark/ui"
 import { useTrainers } from "@data/hooks"
 import type { Trainer, TrainerStatus } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -113,25 +113,13 @@ export default function Page() {
               }
             >
               <table class="w-full">
-                <thead class="bg-surface-muted border-b border-border">
-                  <tr>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Name
-                    </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Specialization
-                    </th>
-                    <th class="py-4 px-6 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                      Rate/hr
-                    </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th class="py-4 px-6 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                      Hired
-                    </th>
-                  </tr>
-                </thead>
+                <THead>
+                  <Th>Name</Th>
+                  <Th>Specialization</Th>
+                  <Th align="right">Rate/hr</Th>
+                  <Th>Status</Th>
+                  <Th>Hired</Th>
+                </THead>
                 <tbody>
                   <For each={filteredTrainers()}>
                     {(trainer: Trainer) => (

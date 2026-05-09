@@ -1,3 +1,4 @@
+import { THead, Th } from "@ark/ui"
 import { useMovements } from "@data/hooks"
 import type { StockMovement } from "@data/types"
 import { createMemo, createSignal, For } from "solid-js"
@@ -107,28 +108,14 @@ export default function MovementsPage() {
               </div>
             </div>
             <table class="w-full">
-              <thead class="bg-surface-muted">
-                <tr>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                    Date
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                    Item
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                    Type
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                    Quantity
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                    Reason / Reference
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                    User
-                  </th>
-                </tr>
-              </thead>
+              <THead>
+                <Th size="dense">Date</Th>
+                <Th size="dense">Item</Th>
+                <Th size="dense">Type</Th>
+                <Th size="dense">Quantity</Th>
+                <Th size="dense">Reason / Reference</Th>
+                <Th size="dense">User</Th>
+              </THead>
               <tbody class="divide-y divide-border">
                 <For each={filteredMovements()}>
                   {(m: StockMovement) => (

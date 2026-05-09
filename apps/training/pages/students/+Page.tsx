@@ -1,4 +1,4 @@
-import { PageContainer, PageHeader, Select } from "@ark/ui"
+import { PageContainer, PageHeader, Select, THead, Th } from "@ark/ui"
 import { useBatches, useStudent, useStudents } from "@data/hooks"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { AddStudentModal, ConfirmDeleteStudentModal, EditStudentModal } from "@/components/modals"
@@ -131,28 +131,14 @@ export default function StudentsPage() {
       >
         <div class="bg-surface rounded-lg border border-border overflow-hidden">
           <table class="w-full">
-            <thead class="bg-surface-muted border-b border-border">
-              <tr>
-                <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                  Student ID
-                </th>
-                <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                  Name
-                </th>
-                <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                  Batch
-                </th>
-                <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                  Level
-                </th>
-                <th class="text-left py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                  Status
-                </th>
-                <th class="text-right py-4 px-6 text-xs font-semibold text-muted uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
+            <THead>
+              <Th>Student ID</Th>
+              <Th>Name</Th>
+              <Th>Batch</Th>
+              <Th>Level</Th>
+              <Th>Status</Th>
+              <Th align="right">Actions</Th>
+            </THead>
             <tbody>
               <Show
                 when={filteredStudents().length > 0}

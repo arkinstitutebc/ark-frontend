@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso, Modal } from "@ark/ui"
+import { formatDatePH, formatPeso, Modal, THead, Th } from "@ark/ui"
 import { useAttendance } from "@data/hooks"
 import type { Trainer } from "@data/types"
 import { For, Show } from "solid-js"
@@ -69,25 +69,15 @@ export function TrainerDetailModal(props: TrainerDetailModalProps) {
               >
                 <div class="bg-surface-muted rounded-lg border border-border overflow-hidden">
                   <table class="w-full">
-                    <thead class="bg-surface-muted border-b border-border">
-                      <tr>
-                        <th class="py-2 px-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                          Date
-                        </th>
-                        <th class="py-2 px-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                          Time In
-                        </th>
-                        <th class="py-2 px-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                          Time Out
-                        </th>
-                        <th class="py-2 px-3 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                          Hours
-                        </th>
-                        <th class="py-2 px-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
+                    <THead>
+                      <Th size="compact">Date</Th>
+                      <Th size="compact">Time In</Th>
+                      <Th size="compact">Time Out</Th>
+                      <Th size="compact" align="right">
+                        Hours
+                      </Th>
+                      <Th size="compact">Status</Th>
+                    </THead>
                     <tbody>
                       <For each={recentAttendance()}>
                         {record => (

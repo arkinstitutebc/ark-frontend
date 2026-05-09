@@ -1,3 +1,4 @@
+import { THead, Th } from "@ark/ui"
 import { useAdjustStock, useMovements, useStock } from "@data/hooks"
 import type { StockItem } from "@data/types"
 import { createMemo, createSignal, For } from "solid-js"
@@ -144,25 +145,15 @@ export default function Page() {
               </div>
             </div>
             <table class="w-full">
-              <thead class="bg-surface-muted">
-                <tr>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                    Item
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                    Batch
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                    On Hand
-                  </th>
-                  <th class="px-6 py-3 text-left text-xs font-semibold text-muted uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th class="px-6 py-3 text-right text-xs font-semibold text-muted uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
+              <THead>
+                <Th size="dense">Item</Th>
+                <Th size="dense">Batch</Th>
+                <Th size="dense">On Hand</Th>
+                <Th size="dense">Status</Th>
+                <Th size="dense" align="right">
+                  Actions
+                </Th>
+              </THead>
               <tbody class="divide-y divide-border">
                 <For each={filteredStock()}>
                   {(item: StockItem) => (
