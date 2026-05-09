@@ -1,16 +1,10 @@
+import { formatPeso } from "@ark/ui"
 import { useBankBalance, useTransactions } from "@data/hooks"
 import type { Transaction } from "@data/types"
 import { createMemo, For } from "solid-js"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
-
+// formatDate kept locally — uses a no-year compact format that's not in the shared lib
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-PH", {
     month: "short",
@@ -61,14 +55,14 @@ export default function Page() {
         <div class="bg-surface rounded-lg border border-border p-4">
           <p class="text-sm text-muted mb-1">Revenue Vault</p>
           <p class="text-2xl text-foreground tabular-nums tracking-tight">
-            {revenueBalance.data ? formatCurrency(revenueBalance.data.balance) : "-"}
+            {revenueBalance.data ? formatPeso(revenueBalance.data.balance) : "-"}
           </p>
           <p class="text-xs text-muted mt-1">Land Bank</p>
         </div>
         <div class="bg-surface rounded-lg border border-border p-4">
           <p class="text-sm text-muted mb-1">Operational Hub</p>
           <p class="text-2xl text-foreground tabular-nums tracking-tight">
-            {opsBalance.data ? formatCurrency(opsBalance.data.balance) : "-"}
+            {opsBalance.data ? formatPeso(opsBalance.data.balance) : "-"}
           </p>
           <p class="text-xs text-muted mt-1">Security Bank</p>
         </div>
@@ -77,7 +71,7 @@ export default function Page() {
           <p class="text-2xl text-foreground tabular-nums tracking-tight">
             {(() => {
               const v = totalBalance()
-              return v !== null ? formatCurrency(v) : "-"
+              return v !== null ? formatPeso(v) : "-"
             })()}
           </p>
           <p class="text-xs text-muted mt-1">Combined banks</p>
@@ -107,7 +101,7 @@ export default function Page() {
                 </div>
               </div>
               <p class="text-sm font-semibold text-foreground tabular-nums">
-                {revenueBalance.data ? formatCurrency(revenueBalance.data.balance) : "-"}
+                {revenueBalance.data ? formatPeso(revenueBalance.data.balance) : "-"}
               </p>
             </div>
             <div class="flex items-center justify-between py-2">
@@ -121,7 +115,7 @@ export default function Page() {
                 </div>
               </div>
               <p class="text-sm font-semibold text-foreground tabular-nums">
-                {opsBalance.data ? formatCurrency(opsBalance.data.balance) : "-"}
+                {opsBalance.data ? formatPeso(opsBalance.data.balance) : "-"}
               </p>
             </div>
             <div class="pt-3 border-t border-border flex items-center justify-between">
@@ -129,7 +123,7 @@ export default function Page() {
               <p class="text-sm font-semibold text-foreground tabular-nums">
                 {(() => {
                   const v = totalBalance()
-                  return v !== null ? formatCurrency(v) : "-"
+                  return v !== null ? formatPeso(v) : "-"
                 })()}
               </p>
             </div>
@@ -218,7 +212,7 @@ export default function Page() {
                         <td
                           class={`py-4 px-6 text-right text-sm font-semibold tabular-nums ${getTxnColor(txn.type)}`}
                         >
-                          {formatCurrency(Math.abs(Number(txn.amount)))}
+                          {formatPeso(Math.abs(Number(txn.amount)))}
                         </td>
                         <td class="py-4 px-6 text-sm text-muted">{formatDate(txn.createdAt)}</td>
                       </tr>

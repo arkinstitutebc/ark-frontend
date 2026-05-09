@@ -1,23 +1,8 @@
+import { formatDatePH, formatPeso } from "@ark/ui"
 import { useReceivables } from "@data/hooks"
 import type { AccountReceivable } from "@data/types"
 import { createMemo, For } from "solid-js"
 import { QueryBoundary, StatusBadge } from "@/components/ui"
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("en-PH", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  })
-}
 
 export default function Page() {
   const query = useReceivables()
@@ -50,7 +35,7 @@ export default function Page() {
         <div class="bg-surface rounded-lg border border-border p-4">
           <p class="text-sm text-muted mb-1">Total AR Amount</p>
           <p class="text-2xl text-foreground tabular-nums tracking-tight">
-            {query.data ? formatCurrency(arStats().totalAmount) : "-"}
+            {query.data ? formatPeso(arStats().totalAmount) : "-"}
           </p>
           <p class="text-xs text-muted mt-1">
             {query.data ? `${arStats().total} receivables` : ""}
@@ -59,7 +44,7 @@ export default function Page() {
         <div class="bg-surface rounded-lg border border-border p-4">
           <p class="text-sm text-muted mb-1">Outstanding</p>
           <p class="text-2xl text-foreground tabular-nums tracking-tight">
-            {query.data ? formatCurrency(arStats().outstanding) : "-"}
+            {query.data ? formatPeso(arStats().outstanding) : "-"}
           </p>
           <p class="text-xs text-muted mt-1">Unpaid balance</p>
         </div>
@@ -73,7 +58,7 @@ export default function Page() {
         <div class="bg-surface rounded-lg border border-border p-4">
           <p class="text-sm text-muted mb-1">Payments Received</p>
           <p class="text-2xl text-foreground tabular-nums tracking-tight">
-            {query.data ? formatCurrency(arStats().paymentsReceived) : "-"}
+            {query.data ? formatPeso(arStats().paymentsReceived) : "-"}
           </p>
           <p class="text-xs text-muted mt-1">Collected to date</p>
         </div>
@@ -97,7 +82,7 @@ export default function Page() {
                           </span>
                         </div>
                         <p class="text-sm font-semibold text-foreground tabular-nums">
-                          {formatCurrency(items().reduce((sum, ar) => sum + Number(ar.amount), 0))}
+                          {formatPeso(items().reduce((sum, ar) => sum + Number(ar.amount), 0))}
                         </p>
                       </div>
                     )
@@ -140,12 +125,12 @@ export default function Page() {
                         <tr class="border-t border-border hover:bg-surface-muted transition-colors">
                           <td class="py-4 px-6 text-sm text-foreground">{ar.batchCode}</td>
                           <td class="py-4 px-6 text-right text-sm font-semibold text-foreground tabular-nums">
-                            {formatCurrency(Number(ar.amount))}
+                            {formatPeso(Number(ar.amount))}
                           </td>
                           <td class="py-4 px-6 text-center">
                             <StatusBadge status={ar.status} />
                           </td>
-                          <td class="py-4 px-6 text-sm text-muted">{formatDate(ar.createdAt)}</td>
+                          <td class="py-4 px-6 text-sm text-muted">{formatDatePH(ar.createdAt)}</td>
                         </tr>
                       )}
                     </For>

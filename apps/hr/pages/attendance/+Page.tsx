@@ -1,15 +1,8 @@
+import { formatDatePH } from "@ark/ui"
 import { useAttendance, useTrainers } from "@data/hooks"
 import type { AttendanceStatus, HrAttendance, Trainer } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { AttendanceStatusBadge, Icons, QueryBoundary } from "@/components/ui"
-
-function formatDate(dateStr: string) {
-  return new Intl.DateTimeFormat("en-PH", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(new Date(dateStr))
-}
 
 export default function Page() {
   const [filterTrainer, setFilterTrainer] = createSignal<string>("all")
@@ -166,7 +159,9 @@ export default function Page() {
                             </p>
                           </div>
                         </td>
-                        <td class="py-4 px-6 text-sm text-foreground">{formatDate(record.date)}</td>
+                        <td class="py-4 px-6 text-sm text-foreground">
+                          {formatDatePH(record.date)}
+                        </td>
                         <td class="py-4 px-6 text-sm text-muted font-mono">
                           {record.timeIn || "—"}
                         </td>

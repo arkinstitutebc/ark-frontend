@@ -1,23 +1,8 @@
+import { formatDatePH, formatPeso } from "@ark/ui"
 import { useBankBalance, useBanks, useTransactions } from "@data/hooks"
 import type { Bank, Transaction } from "@data/types"
 import { createSignal, For } from "solid-js"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("en-PH", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  })
-}
 
 function getTxnLabel(type: string) {
   switch (type) {
@@ -98,7 +83,7 @@ export default function Page() {
                       <p class="text-xl font-semibold text-foreground tabular-nums">
                         {(() => {
                           const balance = getBalanceFor(bank.id)
-                          return balance !== null ? formatCurrency(balance) : "-"
+                          return balance !== null ? formatPeso(balance) : "-"
                         })()}
                       </p>
                     </div>
@@ -186,9 +171,9 @@ export default function Page() {
                         <td
                           class={`py-4 px-6 text-right text-sm font-semibold tabular-nums ${getTxnColor(txn.type)}`}
                         >
-                          {formatCurrency(Math.abs(Number(txn.amount)))}
+                          {formatPeso(Math.abs(Number(txn.amount)))}
                         </td>
-                        <td class="py-4 px-6 text-sm text-muted">{formatDate(txn.createdAt)}</td>
+                        <td class="py-4 px-6 text-sm text-muted">{formatDatePH(txn.createdAt)}</td>
                       </tr>
                     )}
                   </For>

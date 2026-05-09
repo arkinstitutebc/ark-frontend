@@ -1,21 +1,8 @@
-import { Modal } from "@ark/ui"
+import { formatDatePH, formatPeso, Modal } from "@ark/ui"
 import { useAttendance } from "@data/hooks"
 import type { Trainer } from "@data/types"
 import { For, Show } from "solid-js"
 import { AttendanceStatusBadge, Icons, TrainerStatusBadge } from "@/components/ui"
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(amount)
-}
-
-function formatDate(dateStr?: string) {
-  if (!dateStr) return "—"
-  return new Intl.DateTimeFormat("en-PH", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(new Date(dateStr))
-}
 
 interface TrainerDetailModalProps {
   open: boolean
@@ -62,13 +49,11 @@ export function TrainerDetailModal(props: TrainerDetailModalProps) {
               </div>
               <div>
                 <p class="text-xs text-muted mb-1">Hourly Rate</p>
-                <p class="text-sm text-foreground">
-                  {formatCurrency(Number(trainer().hourlyRate))}
-                </p>
+                <p class="text-sm text-foreground">{formatPeso(Number(trainer().hourlyRate))}</p>
               </div>
               <div>
                 <p class="text-xs text-muted mb-1">Hire Date</p>
-                <p class="text-sm text-foreground">{formatDate(trainer().hireDate)}</p>
+                <p class="text-sm text-foreground">{formatDatePH(trainer().hireDate)}</p>
               </div>
             </div>
 
@@ -108,7 +93,7 @@ export function TrainerDetailModal(props: TrainerDetailModalProps) {
                         {record => (
                           <tr class="border-t border-border">
                             <td class="py-2 px-3 text-sm text-foreground">
-                              {formatDate(record.date)}
+                              {formatDatePH(record.date)}
                             </td>
                             <td class="py-2 px-3 text-sm text-muted font-mono">
                               {record.timeIn || "—"}

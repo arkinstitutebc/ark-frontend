@@ -1,18 +1,10 @@
-import { BackLink } from "@ark/ui"
+import { BackLink, formatPeso } from "@ark/ui"
 import { useBankBalance, useBanks, useCreateTransfer } from "@data/hooks"
 import { createTransferSchema } from "@data/schemas"
 import type { Bank } from "@data/types"
 import { validateForm } from "@data/validate"
 import { createSignal, Show } from "solid-js"
 import { Icons } from "@/components/ui"
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
 
 const HIGH_VALUE_THRESHOLD = 50000
 
@@ -126,7 +118,7 @@ export default function CreateTransferPage() {
                         </div>
                       </div>
                       <p class="text-sm font-semibold text-foreground mt-2">
-                        {formatCurrency(revenueBalance.data?.balance ?? 0)}
+                        {formatPeso(revenueBalance.data?.balance ?? 0)}
                       </p>
                     </button>
                     <button
@@ -144,7 +136,7 @@ export default function CreateTransferPage() {
                         </div>
                       </div>
                       <p class="text-sm font-semibold text-foreground mt-2">
-                        {formatCurrency(opsBalance.data?.balance ?? 0)}
+                        {formatPeso(opsBalance.data?.balance ?? 0)}
                       </p>
                     </button>
                   </div>
@@ -186,7 +178,7 @@ export default function CreateTransferPage() {
                         onClick={() => setAmount(String(v))}
                         class="px-2 py-1 text-xs bg-surface-muted hover:bg-surface-muted rounded transition-colors"
                       >
-                        {formatCurrency(v)}
+                        {formatPeso(v)}
                       </button>
                     ))}
                   </div>
@@ -266,7 +258,7 @@ export default function CreateTransferPage() {
                 <div class="border-t pt-3 flex justify-between">
                   <span class="font-medium">Amount</span>
                   <span class="text-xl tabular-nums">
-                    {amountValue() > 0 ? formatCurrency(amountValue()) : "—"}
+                    {amountValue() > 0 ? formatPeso(amountValue()) : "—"}
                   </span>
                 </div>
                 <Show when={amountValue() > 0}>
@@ -274,13 +266,13 @@ export default function CreateTransferPage() {
                     <div class="flex justify-between">
                       <span>{getBankName(fromBank())} after</span>
                       <span class="tabular-nums">
-                        {formatCurrency(fromBankBalance() - amountValue())}
+                        {formatPeso(fromBankBalance() - amountValue())}
                       </span>
                     </div>
                     <div class="flex justify-between">
                       <span>{getBankName(toBank())} after</span>
                       <span class="tabular-nums">
-                        {formatCurrency(toBankBalance() + amountValue())}
+                        {formatPeso(toBankBalance() + amountValue())}
                       </span>
                     </div>
                   </div>

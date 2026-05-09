@@ -1,23 +1,8 @@
+import { formatDatePH, formatPeso } from "@ark/ui"
 import { useBankBalance, useDisbursements } from "@data/hooks"
 import type { Transaction } from "@data/types"
 import { createMemo, For, Show } from "solid-js"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("en-PH", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  })
-}
 
 export default function DisbursementsPage() {
   const query = useDisbursements()
@@ -53,14 +38,14 @@ export default function DisbursementsPage() {
           <p class="text-2xl text-foreground tabular-nums">
             {(() => {
               const v = totalExpenses()
-              return v !== null ? formatCurrency(v) : "-"
+              return v !== null ? formatPeso(v) : "-"
             })()}
           </p>
         </div>
         <div class="bg-surface rounded-lg border border-border p-4">
           <p class="text-sm text-muted mb-1">Operational Hub Balance</p>
           <p class="text-2xl text-foreground tabular-nums">
-            {opsBalance.data ? formatCurrency(opsBalance.data.balance) : "-"}
+            {opsBalance.data ? formatPeso(opsBalance.data.balance) : "-"}
           </p>
         </div>
       </div>
@@ -108,9 +93,11 @@ export default function DisbursementsPage() {
                             <StatusBadge status={txn.category || "other"} />
                           </td>
                           <td class="py-4 px-6 text-right text-sm font-semibold text-red-700 tabular-nums">
-                            {formatCurrency(Math.abs(Number(txn.amount)))}
+                            {formatPeso(Math.abs(Number(txn.amount)))}
                           </td>
-                          <td class="py-4 px-6 text-sm text-muted">{formatDate(txn.createdAt)}</td>
+                          <td class="py-4 px-6 text-sm text-muted">
+                            {formatDatePH(txn.createdAt)}
+                          </td>
                         </tr>
                       )}
                     </For>

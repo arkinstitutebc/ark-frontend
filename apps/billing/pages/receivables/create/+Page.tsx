@@ -1,4 +1,4 @@
-import { BackLink } from "@ark/ui"
+import { BackLink, formatPeso } from "@ark/ui"
 import { api } from "@data/api"
 import { useCreateAr } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
@@ -8,14 +8,6 @@ import { validateForm } from "@data/validate"
 import { createQuery } from "@tanstack/solid-query"
 import { createSignal, For, Show } from "solid-js"
 import { Icons } from "@/components/ui"
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
 
 export default function CreateBillingPage() {
   const [errors, setErrors] = createSignal<Record<string, string>>({})
@@ -164,7 +156,7 @@ export default function CreateBillingPage() {
                         onClick={() => setAmount(String(v))}
                         class="px-2 py-1 text-xs bg-surface-muted hover:bg-surface-muted rounded transition-colors"
                       >
-                        {formatCurrency(v)}
+                        {formatPeso(v)}
                       </button>
                     ))}
                   </div>
@@ -198,14 +190,14 @@ export default function CreateBillingPage() {
                 <div class="border-t pt-3 flex justify-between">
                   <span class="font-medium">Amount</span>
                   <span class="text-xl tabular-nums">
-                    {amountValue() > 0 ? formatCurrency(amountValue()) : "—"}
+                    {amountValue() > 0 ? formatPeso(amountValue()) : "—"}
                   </span>
                 </div>
                 <Show when={selectedBatch()}>
                   {batch => (
                     <div class="border-t pt-3 flex justify-between text-xs text-muted">
                       <span>Batch Budget</span>
-                      <span class="tabular-nums">{formatCurrency(Number(batch().budget))}</span>
+                      <span class="tabular-nums">{formatPeso(Number(batch().budget))}</span>
                     </div>
                   )}
                 </Show>

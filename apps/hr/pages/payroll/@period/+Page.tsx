@@ -1,20 +1,8 @@
-import { BackLink } from "@ark/ui"
+import { BackLink, formatDatePH, formatPeso } from "@ark/ui"
 import { type PayrollPeriodDetail, usePayrollPeriod, useProcessPayroll } from "@data/hooks"
 import { createMemo, For } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
 import { Icons, PayrollStatusBadge, QueryBoundary } from "@/components/ui"
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(amount)
-}
-
-function formatDate(dateStr: string) {
-  return new Intl.DateTimeFormat("en-PH", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(new Date(dateStr))
-}
 
 export default function Page() {
   const pageContext = usePageContext()
@@ -43,7 +31,7 @@ export default function Page() {
                   <PayrollStatusBadge status={data.status} />
                 </div>
                 <p class="text-sm text-muted">
-                  {formatDate(data.periodStart)} — {formatDate(data.periodEnd)}
+                  {formatDatePH(data.periodStart)} — {formatDatePH(data.periodEnd)}
                 </p>
               </div>
               <div class="flex items-center gap-2">
@@ -74,13 +62,13 @@ export default function Page() {
               <div class="bg-surface rounded-lg border border-border p-4">
                 <p class="text-sm text-muted mb-1">Total Gross</p>
                 <p class="text-2xl text-foreground tabular-nums">
-                  {formatCurrency(Number(data.totalGross || 0))}
+                  {formatPeso(Number(data.totalGross || 0))}
                 </p>
               </div>
               <div class="bg-surface rounded-lg border border-border p-4">
                 <p class="text-sm text-muted mb-1">Total Net</p>
                 <p class="text-2xl text-foreground tabular-nums">
-                  {formatCurrency(Number(data.totalNet || 0))}
+                  {formatPeso(Number(data.totalNet || 0))}
                 </p>
               </div>
               <div class="bg-surface rounded-lg border border-border p-4">
@@ -134,16 +122,16 @@ export default function Page() {
                             {Number(entry.totalHours || 0).toFixed(1)}
                           </td>
                           <td class="py-4 px-6 text-right text-sm text-muted tabular-nums">
-                            {formatCurrency(Number(entry.hourlyRate || 0))}
+                            {formatPeso(Number(entry.hourlyRate || 0))}
                           </td>
                           <td class="py-4 px-6 text-right text-sm text-foreground tabular-nums">
-                            {formatCurrency(Number(entry.grossPay || 0))}
+                            {formatPeso(Number(entry.grossPay || 0))}
                           </td>
                           <td class="py-4 px-6 text-right text-sm text-red-600 tabular-nums">
-                            {formatCurrency(Number(entry.deductions || 0))}
+                            {formatPeso(Number(entry.deductions || 0))}
                           </td>
                           <td class="py-4 px-6 text-right text-sm font-semibold text-foreground tabular-nums">
-                            {formatCurrency(Number(entry.netPay || 0))}
+                            {formatPeso(Number(entry.netPay || 0))}
                           </td>
                         </tr>
                       )}
@@ -155,13 +143,13 @@ export default function Page() {
                         Total
                       </td>
                       <td class="py-4 px-6 text-right text-sm font-semibold text-foreground tabular-nums">
-                        {formatCurrency(Number(data.totalGross || 0))}
+                        {formatPeso(Number(data.totalGross || 0))}
                       </td>
                       <td class="py-4 px-6 text-right text-sm font-semibold text-red-600 tabular-nums">
-                        {formatCurrency(Number(data.totalGross || 0) - Number(data.totalNet || 0))}
+                        {formatPeso(Number(data.totalGross || 0) - Number(data.totalNet || 0))}
                       </td>
                       <td class="py-4 px-6 text-right text-sm font-semibold text-foreground tabular-nums">
-                        {formatCurrency(Number(data.totalNet || 0))}
+                        {formatPeso(Number(data.totalNet || 0))}
                       </td>
                     </tr>
                   </tfoot>

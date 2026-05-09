@@ -1,4 +1,4 @@
-import { BackLink } from "@ark/ui"
+import { BackLink, formatDatePH, formatPeso } from "@ark/ui"
 import { api } from "@data/api"
 import { useReceivePo } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
@@ -6,19 +6,6 @@ import type { PurchaseOrder } from "@data/types"
 import { createQuery } from "@tanstack/solid-query"
 import { createSignal, For, Show } from "solid-js"
 import { Icons } from "@/components/ui"
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(amount)
-}
-
-function formatDate(dateStr?: string) {
-  if (!dateStr) return "-"
-  return new Intl.DateTimeFormat("en-PH", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(dateStr))
-}
 
 interface ReceivedItem {
   poItemId: string
@@ -160,12 +147,12 @@ export default function ReceivingPage() {
                       <h3 class="text-base font-semibold text-foreground">{po.supplier}</h3>
                       <div class="flex items-center gap-4 text-sm text-muted mt-1">
                         <span>Batch: {po.batchName}</span>
-                        <span>Est: {formatDate(po.estimatedDelivery)}</span>
+                        <span>Est: {formatDatePH(po.estimatedDelivery)}</span>
                       </div>
                     </div>
                     <div class="text-right">
                       <p class="text-lg font-bold text-foreground">
-                        {formatCurrency(Number(po.totalAmount))}
+                        {formatPeso(Number(po.totalAmount))}
                       </p>
                       <p class="text-xs text-muted">{po.items.length} items</p>
                     </div>
@@ -212,7 +199,7 @@ export default function ReceivingPage() {
                     </p>
                   </div>
                   <p class="text-lg font-bold text-foreground">
-                    {formatCurrency(Number(po().totalAmount))}
+                    {formatPeso(Number(po().totalAmount))}
                   </p>
                 </div>
 

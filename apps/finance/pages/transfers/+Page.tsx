@@ -1,16 +1,10 @@
+import { formatPeso } from "@ark/ui"
 import { useBankBalance, useBanks, useTransfers } from "@data/hooks"
 import type { Bank, Transfer } from "@data/types"
 import { For, Show } from "solid-js"
 import { Icons, QueryBoundary } from "@/components/ui"
 
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
-
+// formatDate kept locally — uses date+time format that's not in the shared lib
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-PH", {
     month: "short",
@@ -57,14 +51,14 @@ export default function TransfersPage() {
           <p class="text-sm text-muted mb-1">Total Amount</p>
           <p class="text-2xl text-foreground tabular-nums">
             {transfersQuery.data
-              ? formatCurrency(transfersQuery.data.reduce((s, t) => s + Number(t.amount), 0))
+              ? formatPeso(transfersQuery.data.reduce((s, t) => s + Number(t.amount), 0))
               : "-"}
           </p>
         </div>
         <div class="bg-surface rounded-lg border border-border p-4">
           <p class="text-sm text-muted mb-1">Revenue Vault Balance</p>
           <p class="text-2xl text-foreground tabular-nums">
-            {revenueBalance.data ? formatCurrency(revenueBalance.data.balance) : "-"}
+            {revenueBalance.data ? formatPeso(revenueBalance.data.balance) : "-"}
           </p>
         </div>
       </div>
@@ -118,7 +112,7 @@ export default function TransfersPage() {
                             </div>
                           </td>
                           <td class="py-4 px-6 text-right text-sm font-semibold text-foreground tabular-nums">
-                            {formatCurrency(Number(t.amount))}
+                            {formatPeso(Number(t.amount))}
                           </td>
                           <td class="py-4 px-6 text-sm text-muted">{t.reference || "-"}</td>
                           <td class="py-4 px-6 text-sm text-muted">{formatDate(t.createdAt)}</td>

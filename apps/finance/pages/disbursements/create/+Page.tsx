@@ -1,16 +1,8 @@
-import { BackLink } from "@ark/ui"
+import { BackLink, formatPeso } from "@ark/ui"
 import { useBankBalance, useCreateDisbursement } from "@data/hooks"
 import { createDisbursementSchema } from "@data/schemas"
 import { validateForm } from "@data/validate"
 import { createSignal, Show } from "solid-js"
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
 
 const CATEGORIES = [
   { value: "supplies", label: "Supplies" },
@@ -170,13 +162,13 @@ export default function CreateDisbursementPage() {
                 <div class="flex justify-between">
                   <span class="text-muted">Balance</span>
                   <span class="tabular-nums">
-                    {opsBalance.data ? formatCurrency(opsBalance.data.balance) : "-"}
+                    {opsBalance.data ? formatPeso(opsBalance.data.balance) : "-"}
                   </span>
                 </div>
                 <div class="border-t pt-3 flex justify-between">
                   <span class="font-medium">Amount</span>
                   <span class="text-xl tabular-nums text-red-700">
-                    {amountValue() > 0 ? formatCurrency(amountValue()) : "—"}
+                    {amountValue() > 0 ? formatPeso(amountValue()) : "—"}
                   </span>
                 </div>
               </div>

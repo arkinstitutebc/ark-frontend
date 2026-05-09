@@ -1,23 +1,8 @@
+import { formatDatePH, formatPeso } from "@ark/ui"
 import { usePayroll } from "@data/hooks"
 import type { PayrollPeriod } from "@data/types"
 import { For } from "solid-js"
 import { Icons, PayrollStatusBadge, QueryBoundary } from "@/components/ui"
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-    maximumFractionDigits: 0,
-  }).format(amount)
-}
-
-function formatDate(dateStr: string) {
-  return new Intl.DateTimeFormat("en-PH", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(new Date(dateStr))
-}
 
 export default function Page() {
   const query = usePayroll()
@@ -48,7 +33,7 @@ export default function Page() {
                       </div>
                       <div class="flex items-center gap-4 text-sm text-muted">
                         <span>
-                          {formatDate(period.periodStart)} — {formatDate(period.periodEnd)}
+                          {formatDatePH(period.periodStart)} — {formatDatePH(period.periodEnd)}
                         </span>
                         <span>{period.trainerCount} trainers</span>
                       </div>
@@ -56,10 +41,10 @@ export default function Page() {
                     <div class="text-right">
                       <p class="text-sm text-muted">Net Pay</p>
                       <p class="text-lg font-bold text-foreground">
-                        {formatCurrency(Number(period.totalNet || 0))}
+                        {formatPeso(Number(period.totalNet || 0))}
                       </p>
                       <p class="text-xs text-muted">
-                        Gross: {formatCurrency(Number(period.totalGross || 0))}
+                        Gross: {formatPeso(Number(period.totalGross || 0))}
                       </p>
                     </div>
                   </div>

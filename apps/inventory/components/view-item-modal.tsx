@@ -1,4 +1,4 @@
-import { Icons, Modal } from "@ark/ui"
+import { formatDatePH, Icons, Modal } from "@ark/ui"
 import { useMovements } from "@data/hooks"
 import type { StockItem } from "@data/types"
 import { For, Show } from "solid-js"
@@ -12,21 +12,6 @@ interface ViewItemModalProps {
   onClose: () => void
   item: StockItem | null
   onAdjust: () => void
-}
-
-function formatDate(dateStr: string) {
-  return new Intl.DateTimeFormat("en-PH", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(dateStr))
-}
-
-function _formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", {
-    style: "currency",
-    currency: "PHP",
-  }).format(amount)
 }
 
 export function ViewItemModal(props: ViewItemModalProps) {
@@ -115,7 +100,7 @@ export function ViewItemModal(props: ViewItemModalProps) {
                         Last Updated
                       </p>
                       <p class="text-sm font-medium text-foreground">
-                        {formatDate(_item().lastUpdated)}
+                        {formatDatePH(_item().lastUpdated)}
                       </p>
                     </div>
                   </div>
@@ -142,7 +127,7 @@ export function ViewItemModal(props: ViewItemModalProps) {
                     <div class="bg-surface-muted rounded-lg px-4 py-3">
                       <p class="text-xs text-muted mb-1">Last Updated</p>
                       <p class="text-sm font-medium text-foreground">
-                        {formatDate(_item().lastUpdated)}
+                        {formatDatePH(_item().lastUpdated)}
                       </p>
                     </div>
                   </div>
@@ -223,7 +208,7 @@ export function ViewItemModal(props: ViewItemModalProps) {
                             {movement => (
                               <tr class="border-b border-border last:border-b-0">
                                 <td class="px-4 py-2.5 text-sm text-muted whitespace-nowrap">
-                                  {formatDate(movement.createdAt)}
+                                  {formatDatePH(movement.createdAt)}
                                 </td>
                                 <td class="px-4 py-2.5 text-sm">
                                   <span

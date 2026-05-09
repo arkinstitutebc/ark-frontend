@@ -1,4 +1,4 @@
-import { Modal } from "@ark/ui"
+import { formatDatePH, formatPeso, Modal } from "@ark/ui"
 import type { PrStatus, PurchaseRequest } from "@data/types"
 import { createSignal, Show } from "solid-js"
 
@@ -20,18 +20,6 @@ function StatusBadge(props: { status: PrStatus }) {
       {label}
     </span>
   )
-}
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(amount)
-}
-
-function formatDate(dateStr: string) {
-  return new Intl.DateTimeFormat("en-PH", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(new Date(dateStr))
 }
 
 /**
@@ -106,7 +94,7 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
                   <StatusBadge status={pr().status} />
                 </div>
                 <span class="text-lg font-semibold text-foreground">
-                  {formatCurrency(Number(pr().totalAmount))}
+                  {formatPeso(Number(pr().totalAmount))}
                 </span>
               </div>
 
@@ -126,7 +114,7 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
                 </div>
                 <div class="bg-surface-muted rounded-lg px-4 py-3">
                   <p class="text-xs text-muted mb-1">Created Date</p>
-                  <p class="text-sm font-medium text-foreground">{formatDate(pr().createdAt)}</p>
+                  <p class="text-sm font-medium text-foreground">{formatDatePH(pr().createdAt)}</p>
                 </div>
                 <div class="bg-primary/5 rounded-lg px-4 py-3 col-span-2 border border-primary/10">
                   <p class="text-xs text-primary/70 mb-1">Created By</p>
@@ -169,10 +157,10 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
                             {item.quantity} {item.unit}
                           </td>
                           <td class="px-4 py-3 text-sm text-foreground text-right">
-                            {formatCurrency(item.unitPrice)}
+                            {formatPeso(item.unitPrice)}
                           </td>
                           <td class="px-4 py-3 text-sm text-foreground text-right">
-                            {formatCurrency(item.total)}
+                            {formatPeso(item.total)}
                           </td>
                         </tr>
                       ))}
@@ -186,7 +174,7 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
                           Grand Total
                         </td>
                         <td class="px-4 py-3 text-sm font-semibold text-foreground text-right">
-                          {formatCurrency(Number(pr().totalAmount))}
+                          {formatPeso(Number(pr().totalAmount))}
                         </td>
                       </tr>
                     </tfoot>
@@ -209,7 +197,7 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
                       <div>
                         <p class="text-xs text-muted mb-1">Approved Date</p>
                         <p class="text-sm font-medium text-foreground">
-                          {formatDate(pr().approvedAt ?? "")}
+                          {formatDatePH(pr().approvedAt ?? "")}
                         </p>
                       </div>
                     </Show>

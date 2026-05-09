@@ -1,20 +1,9 @@
+import { formatDatePH, formatPeso } from "@ark/ui"
 import { useTrainers } from "@data/hooks"
 import type { Trainer, TrainerStatus } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { TrainerDetailModal } from "@/components/trainer-detail-modal"
 import { Icons, QueryBoundary, TrainerStatusBadge } from "@/components/ui"
-
-function formatCurrency(amount: number) {
-  return new Intl.NumberFormat("en-PH", { style: "currency", currency: "PHP" }).format(amount)
-}
-
-function formatDate(dateStr: string) {
-  return new Intl.DateTimeFormat("en-PH", {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  }).format(new Date(dateStr))
-}
 
 export default function Page() {
   const query = useTrainers()
@@ -163,13 +152,13 @@ export default function Page() {
                         </td>
                         <td class="py-4 px-6 text-sm text-foreground">{trainer.specialization}</td>
                         <td class="py-4 px-6 text-right text-sm text-foreground">
-                          {formatCurrency(Number(trainer.hourlyRate))}
+                          {formatPeso(Number(trainer.hourlyRate))}
                         </td>
                         <td class="py-4 px-6">
                           <TrainerStatusBadge status={trainer.status} />
                         </td>
                         <td class="py-4 px-6 text-sm text-muted">
-                          {trainer.hireDate ? formatDate(trainer.hireDate) : "-"}
+                          {trainer.hireDate ? formatDatePH(trainer.hireDate) : "-"}
                         </td>
                       </tr>
                     )}
