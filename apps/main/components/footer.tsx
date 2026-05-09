@@ -1,3 +1,4 @@
+import { ARK_VERSION } from "@ark/ui"
 import { createSignal, onCleanup, onMount } from "solid-js"
 import { UI } from "./ui"
 
@@ -47,6 +48,7 @@ export function Footer() {
               class="object-contain opacity-60"
             />
             <p class="text-sm text-muted">© 2025 Ark Institute. All rights reserved.</p>
+            <span class="text-xs text-muted/70 tracking-wider uppercase">v{ARK_VERSION}</span>
           </div>
           <div class="flex items-center gap-4">
             <div class="flex items-center gap-2 bg-surface/80 px-4 py-2 rounded-full border border-border shadow-sm">

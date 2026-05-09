@@ -1,6 +1,7 @@
 import { ArrowLeft, ChevronLeft, type Folder, LogOut } from "lucide-solid"
 import { type Component, createMemo, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
+import { ARK_VERSION } from "../version"
 import { useSidebar } from "./sidebar-context"
 
 export interface NavItem {
@@ -134,6 +135,11 @@ export function Sidebar(props: SidebarProps) {
             </Show>
           </a>
         )}
+
+        {/* Version chip — quietly anchored at the bottom of the sidebar */}
+        <Show when={!collapsed()}>
+          <p class="px-3 pt-2 text-[10px] text-muted/70 tracking-wider uppercase">v{ARK_VERSION}</p>
+        </Show>
       </div>
     </div>
   )
