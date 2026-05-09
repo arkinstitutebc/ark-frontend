@@ -35,6 +35,12 @@ export {
 // Display
 export { Card } from "./display/card"
 export {
+  InfoCard,
+  type InfoCardProps,
+  StatCard,
+  type StatCardProps,
+} from "./display/cards"
+export {
   NotificationBell,
   type NotificationBellProps,
   type NotificationItem,

@@ -1,4 +1,4 @@
-import { BackLink, formatDatePH, formatPeso, THead, Th } from "@ark/ui"
+import { BackLink, formatDatePH, formatPeso, StatCard, THead, Th } from "@ark/ui"
 import { type PayrollPeriodDetail, usePayrollPeriod, useProcessPayroll } from "@data/hooks"
 import { createMemo, For } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
@@ -59,22 +59,13 @@ export default function Page() {
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-              <div class="bg-surface rounded-lg border border-border p-4">
-                <p class="text-sm text-muted mb-1">Total Gross</p>
-                <p class="text-2xl text-foreground tabular-nums">
-                  {formatPeso(Number(data.totalGross || 0))}
-                </p>
-              </div>
-              <div class="bg-surface rounded-lg border border-border p-4">
-                <p class="text-sm text-muted mb-1">Total Net</p>
-                <p class="text-2xl text-foreground tabular-nums">
-                  {formatPeso(Number(data.totalNet || 0))}
-                </p>
-              </div>
-              <div class="bg-surface rounded-lg border border-border p-4">
-                <p class="text-sm text-muted mb-1">Trainers</p>
-                <p class="text-2xl text-foreground">{data.trainerCount || 0}</p>
-              </div>
+              <StatCard
+                label="Total Gross"
+                numeric
+                value={formatPeso(Number(data.totalGross || 0))}
+              />
+              <StatCard label="Total Net" numeric value={formatPeso(Number(data.totalNet || 0))} />
+              <StatCard label="Trainers" value={data.trainerCount || 0} />
             </div>
 
             {processMutation.isError && (

@@ -1,4 +1,4 @@
-import { formatPeso, THead, Th } from "@ark/ui"
+import { formatPeso, StatCard, THead, Th } from "@ark/ui"
 import { useBankBalance, useTransactions } from "@data/hooks"
 import type { Transaction } from "@data/types"
 import { createMemo, For } from "solid-js"
@@ -52,37 +52,33 @@ export default function Page() {
 
       {/* Stats Cards */}
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Revenue Vault</p>
-          <p class="text-2xl text-foreground tabular-nums tracking-tight">
-            {revenueBalance.data ? formatPeso(revenueBalance.data.balance) : "-"}
-          </p>
-          <p class="text-xs text-muted mt-1">Land Bank</p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Operational Hub</p>
-          <p class="text-2xl text-foreground tabular-nums tracking-tight">
-            {opsBalance.data ? formatPeso(opsBalance.data.balance) : "-"}
-          </p>
-          <p class="text-xs text-muted mt-1">Security Bank</p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Total Balance</p>
-          <p class="text-2xl text-foreground tabular-nums tracking-tight">
-            {(() => {
-              const v = totalBalance()
-              return v !== null ? formatPeso(v) : "-"
-            })()}
-          </p>
-          <p class="text-xs text-muted mt-1">Combined banks</p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Transactions</p>
-          <p class="text-2xl text-foreground tabular-nums tracking-tight">
-            {transactionsQuery.data?.length ?? "-"}
-          </p>
-          <p class="text-xs text-muted mt-1">Recent activity</p>
-        </div>
+        <StatCard
+          label="Revenue Vault"
+          numeric
+          value={revenueBalance.data ? formatPeso(revenueBalance.data.balance) : "-"}
+          hint="Land Bank"
+        />
+        <StatCard
+          label="Operational Hub"
+          numeric
+          value={opsBalance.data ? formatPeso(opsBalance.data.balance) : "-"}
+          hint="Security Bank"
+        />
+        <StatCard
+          label="Total Balance"
+          numeric
+          value={(() => {
+            const v = totalBalance()
+            return v !== null ? formatPeso(v) : "-"
+          })()}
+          hint="Combined banks"
+        />
+        <StatCard
+          label="Transactions"
+          numeric
+          value={transactionsQuery.data?.length ?? "-"}
+          hint="Recent activity"
+        />
       </div>
 
       {/* Bank Balances Detail */}

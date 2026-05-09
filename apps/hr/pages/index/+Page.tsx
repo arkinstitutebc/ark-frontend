@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso, THead, Th } from "@ark/ui"
+import { formatDatePH, formatPeso, StatCard, THead, Th } from "@ark/ui"
 import { useTrainers } from "@data/hooks"
 import type { Trainer, TrainerStatus } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -49,22 +49,10 @@ export default function Page() {
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Total</p>
-          <p class="text-2xl text-foreground">{query.isSuccess ? stats().total : "-"}</p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Active</p>
-          <p class="text-2xl text-foreground">{query.isSuccess ? stats().active : "-"}</p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">On Leave</p>
-          <p class="text-2xl text-foreground">{query.isSuccess ? stats().onLeave : "-"}</p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Inactive</p>
-          <p class="text-2xl text-foreground">{query.isSuccess ? stats().inactive : "-"}</p>
-        </div>
+        <StatCard label="Total" value={query.isSuccess ? stats().total : "-"} />
+        <StatCard label="Active" value={query.isSuccess ? stats().active : "-"} />
+        <StatCard label="On Leave" value={query.isSuccess ? stats().onLeave : "-"} />
+        <StatCard label="Inactive" value={query.isSuccess ? stats().inactive : "-"} />
       </div>
 
       <div class="flex flex-col sm:flex-row gap-3 mb-6">

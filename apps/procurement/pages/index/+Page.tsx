@@ -1,4 +1,13 @@
-import { DataTable, formatDatePH, formatPeso, PageContainer, PageHeader, THead, Th } from "@ark/ui"
+import {
+  DataTable,
+  formatDatePH,
+  formatPeso,
+  PageContainer,
+  PageHeader,
+  StatCard,
+  THead,
+  Th,
+} from "@ark/ui"
 import { useRequests } from "@data/hooks"
 import type { PrStatus, PurchaseRequest } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -52,22 +61,10 @@ export default function Page() {
       />
 
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Total</p>
-          <p class="text-2xl text-foreground">{query.isSuccess ? stats().total : "-"}</p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Pending</p>
-          <p class="text-2xl text-foreground">{query.isSuccess ? stats().pending : "-"}</p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Approved</p>
-          <p class="text-2xl text-foreground">{query.isSuccess ? stats().approved : "-"}</p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Ordered</p>
-          <p class="text-2xl text-foreground">{query.isSuccess ? stats().ordered : "-"}</p>
-        </div>
+        <StatCard label="Total" value={query.isSuccess ? stats().total : "-"} />
+        <StatCard label="Pending" value={query.isSuccess ? stats().pending : "-"} />
+        <StatCard label="Approved" value={query.isSuccess ? stats().approved : "-"} />
+        <StatCard label="Ordered" value={query.isSuccess ? stats().ordered : "-"} />
       </div>
 
       <div class="flex flex-col sm:flex-row gap-3 mb-6">

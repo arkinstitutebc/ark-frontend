@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso, THead, Th } from "@ark/ui"
+import { formatDatePH, formatPeso, StatCard, THead, Th } from "@ark/ui"
 import { useReceivables } from "@data/hooks"
 import type { AccountReceivable } from "@data/types"
 import { createMemo, For } from "solid-js"
@@ -32,36 +32,30 @@ export default function Page() {
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Total AR Amount</p>
-          <p class="text-2xl text-foreground tabular-nums tracking-tight">
-            {query.data ? formatPeso(arStats().totalAmount) : "-"}
-          </p>
-          <p class="text-xs text-muted mt-1">
-            {query.data ? `${arStats().total} receivables` : ""}
-          </p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Outstanding</p>
-          <p class="text-2xl text-foreground tabular-nums tracking-tight">
-            {query.data ? formatPeso(arStats().outstanding) : "-"}
-          </p>
-          <p class="text-xs text-muted mt-1">Unpaid balance</p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Batches Billed</p>
-          <p class="text-2xl text-foreground tabular-nums tracking-tight">
-            {query.data ? arStats().batchesBilled : "-"}
-          </p>
-          <p class="text-xs text-muted mt-1">{query.data ? `of ${arStats().total} total` : ""}</p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Payments Received</p>
-          <p class="text-2xl text-foreground tabular-nums tracking-tight">
-            {query.data ? formatPeso(arStats().paymentsReceived) : "-"}
-          </p>
-          <p class="text-xs text-muted mt-1">Collected to date</p>
-        </div>
+        <StatCard
+          label="Total AR Amount"
+          numeric
+          value={query.data ? formatPeso(arStats().totalAmount) : "-"}
+          hint={query.data ? `${arStats().total} receivables` : ""}
+        />
+        <StatCard
+          label="Outstanding"
+          numeric
+          value={query.data ? formatPeso(arStats().outstanding) : "-"}
+          hint="Unpaid balance"
+        />
+        <StatCard
+          label="Batches Billed"
+          numeric
+          value={query.data ? arStats().batchesBilled : "-"}
+          hint={query.data ? `of ${arStats().total} total` : ""}
+        />
+        <StatCard
+          label="Payments Received"
+          numeric
+          value={query.data ? formatPeso(arStats().paymentsReceived) : "-"}
+          hint="Collected to date"
+        />
       </div>
 
       <QueryBoundary query={query}>

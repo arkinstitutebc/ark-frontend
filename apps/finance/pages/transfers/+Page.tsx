@@ -1,4 +1,4 @@
-import { formatPeso, THead, Th } from "@ark/ui"
+import { formatPeso, StatCard, THead, Th } from "@ark/ui"
 import { useBankBalance, useBanks, useTransfers } from "@data/hooks"
 import type { Bank, Transfer } from "@data/types"
 import { For, Show } from "solid-js"
@@ -43,24 +43,21 @@ export default function TransfersPage() {
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Total Transfers</p>
-          <p class="text-2xl text-foreground tabular-nums">{transfersQuery.data?.length ?? "-"}</p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Total Amount</p>
-          <p class="text-2xl text-foreground tabular-nums">
-            {transfersQuery.data
+        <StatCard label="Total Transfers" numeric value={transfersQuery.data?.length ?? "-"} />
+        <StatCard
+          label="Total Amount"
+          numeric
+          value={
+            transfersQuery.data
               ? formatPeso(transfersQuery.data.reduce((s, t) => s + Number(t.amount), 0))
-              : "-"}
-          </p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Revenue Vault Balance</p>
-          <p class="text-2xl text-foreground tabular-nums">
-            {revenueBalance.data ? formatPeso(revenueBalance.data.balance) : "-"}
-          </p>
-        </div>
+              : "-"
+          }
+        />
+        <StatCard
+          label="Revenue Vault Balance"
+          numeric
+          value={revenueBalance.data ? formatPeso(revenueBalance.data.balance) : "-"}
+        />
       </div>
 
       <QueryBoundary query={transfersQuery}>

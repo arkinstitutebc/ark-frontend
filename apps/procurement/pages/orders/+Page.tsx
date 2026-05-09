@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso, PageContainer, PageHeader, THead, Th } from "@ark/ui"
+import { formatDatePH, formatPeso, PageContainer, PageHeader, StatCard, THead, Th } from "@ark/ui"
 import { useOrders } from "@data/hooks"
 import type { PoStatus, PurchaseOrder } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -71,22 +71,10 @@ export default function OrdersPage() {
 
       {/* Stats Cards */}
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Total</p>
-          <p class="text-2xl text-foreground">{query.isSuccess ? stats().total : "-"}</p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Draft</p>
-          <p class="text-2xl text-foreground">{query.isSuccess ? stats().draft : "-"}</p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Sent</p>
-          <p class="text-2xl text-foreground">{query.isSuccess ? stats().sent : "-"}</p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Received</p>
-          <p class="text-2xl text-foreground">{query.isSuccess ? stats().received : "-"}</p>
-        </div>
+        <StatCard label="Total" value={query.isSuccess ? stats().total : "-"} />
+        <StatCard label="Draft" value={query.isSuccess ? stats().draft : "-"} />
+        <StatCard label="Sent" value={query.isSuccess ? stats().sent : "-"} />
+        <StatCard label="Received" value={query.isSuccess ? stats().received : "-"} />
       </div>
 
       {/* Filters */}

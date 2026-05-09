@@ -1,4 +1,4 @@
-import { THead, Th } from "@ark/ui"
+import { StatCard, THead, Th } from "@ark/ui"
 import { useAdjustStock, useMovements, useStock } from "@data/hooks"
 import type { StockItem } from "@data/types"
 import { createMemo, createSignal, For } from "solid-js"
@@ -72,58 +72,30 @@ export default function Page() {
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-muted">Total Items</p>
-              <p class="text-2xl text-foreground mt-1">
-                {stockQuery.isSuccess ? stats().total : "-"}
-              </p>
-            </div>
-            <div class="w-12 h-12 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-              <Icons.package class="w-6 h-6" />
-            </div>
-          </div>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-muted">Low Stock</p>
-              <p class="text-2xl text-foreground mt-1">
-                {stockQuery.isSuccess ? stats().lowStock : "-"}
-              </p>
-            </div>
-            <div class="w-12 h-12 rounded-lg bg-yellow-50 text-yellow-600 flex items-center justify-center">
-              <Icons.fileText class="w-6 h-6" />
-            </div>
-          </div>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-muted">Out of Stock</p>
-              <p class="text-2xl text-foreground mt-1">
-                {stockQuery.isSuccess ? stats().outOfStock : "-"}
-              </p>
-            </div>
-            <div class="w-12 h-12 rounded-lg bg-red-50 text-red-600 flex items-center justify-center">
-              <Icons.xCircle class="w-6 h-6" />
-            </div>
-          </div>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <p class="text-sm text-muted">Total Movements</p>
-              <p class="text-2xl text-foreground mt-1">
-                {movementsQuery.isSuccess ? stats().totalMovements : "-"}
-              </p>
-            </div>
-            <div class="w-12 h-12 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
-              <Icons.box class="w-6 h-6" />
-            </div>
-          </div>
-        </div>
+        <StatCard
+          label="Total Items"
+          value={stockQuery.isSuccess ? stats().total : "-"}
+          icon={<Icons.package class="w-6 h-6" />}
+          iconClass="bg-blue-50 text-blue-600"
+        />
+        <StatCard
+          label="Low Stock"
+          value={stockQuery.isSuccess ? stats().lowStock : "-"}
+          icon={<Icons.fileText class="w-6 h-6" />}
+          iconClass="bg-yellow-50 text-yellow-600"
+        />
+        <StatCard
+          label="Out of Stock"
+          value={stockQuery.isSuccess ? stats().outOfStock : "-"}
+          icon={<Icons.xCircle class="w-6 h-6" />}
+          iconClass="bg-red-50 text-red-600"
+        />
+        <StatCard
+          label="Total Movements"
+          value={movementsQuery.isSuccess ? stats().totalMovements : "-"}
+          icon={<Icons.box class="w-6 h-6" />}
+          iconClass="bg-purple-50 text-purple-600"
+        />
       </div>
 
       <QueryBoundary query={stockQuery}>

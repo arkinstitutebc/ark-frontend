@@ -3,6 +3,7 @@ import {
   formatDatePH,
   formatPeso,
   Icons,
+  InfoCard,
   PageContainer,
   statusToneClass,
   THead,
@@ -78,24 +79,26 @@ export default function BatchDetailPage() {
               </div>
 
               <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div class="bg-surface rounded-lg border border-border p-4">
-                  <p class="text-xs text-muted mb-1">Schedule</p>
-                  <p class="text-sm font-medium text-foreground">
-                    {formatDatePH(b().startDate)} – {formatDatePH(b().endDate)}
-                  </p>
-                </div>
-                <div class="bg-surface rounded-lg border border-border p-4">
-                  <p class="text-xs text-muted mb-1">Students</p>
-                  <p class="text-sm font-medium text-foreground">{b().studentsEnrolled}</p>
-                </div>
-                <div class="bg-surface rounded-lg border border-border p-4">
-                  <p class="text-xs text-muted mb-1">Budget</p>
-                  <p class="text-sm font-medium text-foreground">{formatPeso(b().budget)}</p>
-                </div>
-                <div class="bg-surface rounded-lg border border-border p-4">
-                  <p class="text-xs text-muted mb-1">Level</p>
-                  <p class="text-sm font-medium text-foreground">{b().trainingLevel}</p>
-                </div>
+                <InfoCard
+                  label="Schedule"
+                  valueClass="text-foreground font-medium"
+                  value={`${formatDatePH(b().startDate)} – ${formatDatePH(b().endDate)}`}
+                />
+                <InfoCard
+                  label="Students"
+                  valueClass="text-foreground font-medium"
+                  value={b().studentsEnrolled}
+                />
+                <InfoCard
+                  label="Budget"
+                  valueClass="text-foreground font-medium"
+                  value={formatPeso(b().budget)}
+                />
+                <InfoCard
+                  label="Level"
+                  valueClass="text-foreground font-medium"
+                  value={b().trainingLevel}
+                />
               </div>
 
               <div class="bg-surface rounded-lg border border-border mb-8">

@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso, PageContainer, THead, Th } from "@ark/ui"
+import { formatDatePH, formatPeso, PageContainer, StatCard, THead, Th } from "@ark/ui"
 import { useReceivables, useRecordPayment, useUpdateAr } from "@data/hooks"
 import type { AccountReceivable, ArStatus } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -98,28 +98,24 @@ export default function ReceivablesPage() {
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Total</p>
-          <p class="text-2xl text-foreground tabular-nums">{query.data ? stats().total : "-"}</p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Total Amount</p>
-          <p class="text-2xl text-foreground tabular-nums">
-            {query.data ? formatPeso(stats().totalAmount) : "-"}
-          </p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Collected</p>
-          <p class="text-2xl text-green-700 tabular-nums">
-            {query.data ? formatPeso(stats().collected) : "-"}
-          </p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Outstanding</p>
-          <p class="text-2xl text-primary tabular-nums">
-            {query.data ? formatPeso(stats().outstanding) : "-"}
-          </p>
-        </div>
+        <StatCard label="Total" numeric value={query.data ? stats().total : "-"} />
+        <StatCard
+          label="Total Amount"
+          numeric
+          value={query.data ? formatPeso(stats().totalAmount) : "-"}
+        />
+        <StatCard
+          label="Collected"
+          numeric
+          valueClass="text-green-700"
+          value={query.data ? formatPeso(stats().collected) : "-"}
+        />
+        <StatCard
+          label="Outstanding"
+          numeric
+          valueClass="text-primary"
+          value={query.data ? formatPeso(stats().outstanding) : "-"}
+        />
       </div>
 
       <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">

@@ -1,4 +1,4 @@
-import { BackLink, formatDatePH, formatPeso, PageContainer, THead, Th } from "@ark/ui"
+import { BackLink, formatDatePH, formatPeso, InfoCard, PageContainer, THead, Th } from "@ark/ui"
 import { api } from "@data/api"
 import { useOrder } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
@@ -80,22 +80,10 @@ export default function PoDetailPage() {
 
               {/* Info Cards */}
               <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <div class="bg-surface rounded-lg border border-border p-4">
-                  <p class="text-xs text-muted mb-1">PR Reference</p>
-                  <p class="text-sm font-mono text-foreground">{p.prId}</p>
-                </div>
-                <div class="bg-surface rounded-lg border border-border p-4">
-                  <p class="text-xs text-muted mb-1">Supplier</p>
-                  <p class="text-sm text-foreground">{p.supplier}</p>
-                </div>
-                <div class="bg-surface rounded-lg border border-border p-4">
-                  <p class="text-xs text-muted mb-1">Total Amount</p>
-                  <p class="text-sm text-foreground">{formatPeso(Number(p.totalAmount))}</p>
-                </div>
-                <div class="bg-surface rounded-lg border border-border p-4">
-                  <p class="text-xs text-muted mb-1">Created</p>
-                  <p class="text-sm text-foreground">{formatDatePH(p.createdAt)}</p>
-                </div>
+                <InfoCard label="PR Reference" mono value={p.prId} />
+                <InfoCard label="Supplier" value={p.supplier} />
+                <InfoCard label="Total Amount" value={formatPeso(Number(p.totalAmount))} />
+                <InfoCard label="Created" value={formatDatePH(p.createdAt)} />
               </div>
 
               {/* Details Section */}

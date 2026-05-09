@@ -1,4 +1,4 @@
-import { BackLink, formatDatePH, formatPeso, PageContainer, THead, Th } from "@ark/ui"
+import { BackLink, formatDatePH, formatPeso, InfoCard, PageContainer, THead, Th } from "@ark/ui"
 import { useRequest } from "@data/hooks"
 import type { PurchaseRequest } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -57,26 +57,16 @@ export default function PrDetailPage() {
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-              <div class="bg-surface rounded-lg border border-border p-4">
-                <p class="text-xs text-muted mb-1">Category</p>
+              <InfoCard label="Category">
                 <Show when={p.category} fallback={<p class="text-sm text-muted">—</p>}>
                   <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-primary/10 text-primary">
                     {p.category}
                   </span>
                 </Show>
-              </div>
-              <div class="bg-surface rounded-lg border border-border p-4">
-                <p class="text-xs text-muted mb-1">Total Amount</p>
-                <p class="text-sm text-foreground">{formatPeso(Number(p.totalAmount))}</p>
-              </div>
-              <div class="bg-surface rounded-lg border border-border p-4">
-                <p class="text-xs text-muted mb-1">Created</p>
-                <p class="text-sm text-foreground">{formatDatePH(p.createdAt)}</p>
-              </div>
-              <div class="bg-surface rounded-lg border border-border p-4">
-                <p class="text-xs text-muted mb-1">Created By</p>
-                <p class="text-sm text-foreground">{p.createdBy}</p>
-              </div>
+              </InfoCard>
+              <InfoCard label="Total Amount" value={formatPeso(Number(p.totalAmount))} />
+              <InfoCard label="Created" value={formatDatePH(p.createdAt)} />
+              <InfoCard label="Created By" value={p.createdBy} />
             </div>
 
             <div class="bg-surface rounded-lg border border-border mb-8">

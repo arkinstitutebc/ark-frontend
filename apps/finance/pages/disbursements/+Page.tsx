@@ -1,4 +1,4 @@
-import { DataTable, formatDatePH, formatPeso, THead, Th, Tr } from "@ark/ui"
+import { DataTable, formatDatePH, formatPeso, StatCard, THead, Th, Tr } from "@ark/ui"
 import { useBankBalance, useDisbursements } from "@data/hooks"
 import type { Transaction } from "@data/types"
 import { createMemo, For, Show } from "solid-js"
@@ -29,25 +29,20 @@ export default function DisbursementsPage() {
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Total Disbursements</p>
-          <p class="text-2xl text-foreground tabular-nums">{query.data?.length ?? "-"}</p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Total Expenses</p>
-          <p class="text-2xl text-foreground tabular-nums">
-            {(() => {
-              const v = totalExpenses()
-              return v !== null ? formatPeso(v) : "-"
-            })()}
-          </p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Operational Hub Balance</p>
-          <p class="text-2xl text-foreground tabular-nums">
-            {opsBalance.data ? formatPeso(opsBalance.data.balance) : "-"}
-          </p>
-        </div>
+        <StatCard label="Total Disbursements" numeric value={query.data?.length ?? "-"} />
+        <StatCard
+          label="Total Expenses"
+          numeric
+          value={(() => {
+            const v = totalExpenses()
+            return v !== null ? formatPeso(v) : "-"
+          })()}
+        />
+        <StatCard
+          label="Operational Hub Balance"
+          numeric
+          value={opsBalance.data ? formatPeso(opsBalance.data.balance) : "-"}
+        />
       </div>
 
       <QueryBoundary query={query}>

@@ -1,4 +1,4 @@
-import { formatDatePH, THead, Th } from "@ark/ui"
+import { formatDatePH, StatCard, THead, Th } from "@ark/ui"
 import { useAttendance, useTrainers } from "@data/hooks"
 import type { AttendanceStatus, HrAttendance, Trainer } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -49,22 +49,22 @@ export default function Page() {
       </div>
 
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Total Records</p>
-          <p class="text-2xl text-foreground">{attendanceQuery.isSuccess ? stats().total : "-"}</p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Present</p>
-          <p class="text-2xl text-green-700">{attendanceQuery.isSuccess ? stats().present : "-"}</p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Late</p>
-          <p class="text-2xl text-yellow-700">{attendanceQuery.isSuccess ? stats().late : "-"}</p>
-        </div>
-        <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Absent</p>
-          <p class="text-2xl text-red-700">{attendanceQuery.isSuccess ? stats().absent : "-"}</p>
-        </div>
+        <StatCard label="Total Records" value={attendanceQuery.isSuccess ? stats().total : "-"} />
+        <StatCard
+          label="Present"
+          valueClass="text-green-700"
+          value={attendanceQuery.isSuccess ? stats().present : "-"}
+        />
+        <StatCard
+          label="Late"
+          valueClass="text-yellow-700"
+          value={attendanceQuery.isSuccess ? stats().late : "-"}
+        />
+        <StatCard
+          label="Absent"
+          valueClass="text-red-700"
+          value={attendanceQuery.isSuccess ? stats().absent : "-"}
+        />
       </div>
 
       <div class="flex flex-col sm:flex-row gap-3 mb-6">
