@@ -7,7 +7,17 @@ import {
   useInviteUser,
   validateForm,
 } from "@ark/api-client"
-import { Button, Icons, Input, Modal, PageLoading, Select, TableSkeleton, toast } from "@ark/ui"
+import {
+  BackLink,
+  Button,
+  Icons,
+  Input,
+  Modal,
+  PageLoading,
+  Select,
+  TableSkeleton,
+  toast,
+} from "@ark/ui"
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { z } from "zod"
 import { Footer, Navbar } from "@/components"
@@ -111,12 +121,9 @@ export default function AdminUsersPage() {
           <div class="max-w-6xl mx-auto mt-4">
             <div class="mb-6 flex items-center justify-between gap-4">
               <div>
-                <a
-                  href="/"
-                  class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary mb-2"
-                >
-                  <Icons.arrowLeft class="w-4 h-4" /> Dashboard
-                </a>
+                <div class="mb-2">
+                  <BackLink href="/">Dashboard</BackLink>
+                </div>
                 <h1 class="text-2xl font-bold text-foreground">User Management</h1>
                 <p class="text-sm text-muted mt-0.5">
                   Invite, edit, and deactivate users in the Ark Institute portal.

@@ -1,3 +1,4 @@
+import { BackLink } from "@ark/ui"
 import { useBankBalance, useBanks, useCreateTransfer } from "@data/hooks"
 import { createTransferSchema } from "@data/schemas"
 import type { Bank } from "@data/types"
@@ -90,10 +91,8 @@ export default function CreateTransferPage() {
 
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
-      <div class="flex items-center gap-4 mb-8">
-        <a href="/transfers" class="p-2 hover:bg-surface-muted rounded-lg transition-colors">
-          <Icons.arrowLeft class="w-5 h-5 text-muted" />
-        </a>
+      <div class="flex items-center gap-3 mb-8">
+        <BackLink variant="icon" label="Back to transfers" href="/transfers" />
         <div>
           <h1 class="text-2xl font-semibold text-foreground">New Fund Transfer</h1>
           <p class="text-sm text-muted mt-1">

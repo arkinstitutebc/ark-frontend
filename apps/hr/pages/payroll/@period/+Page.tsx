@@ -1,3 +1,4 @@
+import { BackLink } from "@ark/ui"
 import { type PayrollPeriodDetail, usePayrollPeriod, useProcessPayroll } from "@data/hooks"
 import { createMemo, For } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
@@ -28,12 +29,9 @@ export default function Page() {
 
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
-      <a
-        href="/payroll"
-        class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary mb-6"
-      >
-        <Icons.arrowLeft class="w-4 h-4" /> Back to Payroll
-      </a>
+      <div class="mb-6">
+        <BackLink href="/payroll">Back to Payroll</BackLink>
+      </div>
 
       <QueryBoundary query={query}>
         {(data: PayrollPeriodDetail) => (

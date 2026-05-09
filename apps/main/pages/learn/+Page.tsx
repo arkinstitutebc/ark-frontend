@@ -1,5 +1,5 @@
 import { useCurrentUser } from "@ark/api-client"
-import { Icons, PageLoading, PortalIcons } from "@ark/ui"
+import { BackLink, Icons, PageLoading, PortalIcons } from "@ark/ui"
 import { For, Show } from "solid-js"
 import { Footer, Navbar } from "@/components"
 
@@ -88,12 +88,9 @@ export default function LearnHubPage() {
 
         <main class="flex-1 px-6 sm:px-8 lg:px-12 py-8 sm:py-10">
           <div class="max-w-6xl mx-auto mt-6">
-            <a
-              href="/"
-              class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary mb-4"
-            >
-              <Icons.arrowLeft class="w-4 h-4" /> Dashboard
-            </a>
+            <div class="mb-4">
+              <BackLink href="/">Dashboard</BackLink>
+            </div>
 
             <div class="mb-8">
               <h1 class="text-2xl sm:text-3xl font-semibold text-foreground flex items-center gap-3">

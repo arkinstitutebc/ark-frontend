@@ -1,4 +1,4 @@
-import { formatPeso, Icons, PageContainer, Select } from "@ark/ui"
+import { BackLink, formatPeso, PageContainer, Select } from "@ark/ui"
 import { useCreatePo, useRequests } from "@data/hooks"
 import { createPoSchema } from "@data/schemas"
 import type { PurchaseRequest } from "@data/types"
@@ -102,14 +102,8 @@ export default function CreatePoPage() {
   return (
     <PageContainer>
       {/* Header */}
-      <div class="flex items-center gap-4 mb-8">
-        <button
-          type="button"
-          onClick={() => navigate("/orders")}
-          class="p-2 hover:bg-surface-muted rounded-lg transition-colors"
-        >
-          <Icons.arrowLeft class="w-5 h-5 text-muted" />
-        </button>
+      <div class="flex items-center gap-3 mb-8">
+        <BackLink variant="icon" label="Back to orders" onClick={() => navigate("/orders")} />
         <div>
           <h1 class="text-2xl font-semibold text-foreground">Create Purchase Order</h1>
           <p class="text-sm text-muted mt-1">Generate a PO from an approved purchase request</p>

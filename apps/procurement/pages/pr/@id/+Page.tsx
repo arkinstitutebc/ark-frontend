@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso, PageContainer } from "@ark/ui"
+import { BackLink, formatDatePH, formatPeso, PageContainer } from "@ark/ui"
 import { useRequest } from "@data/hooks"
 import type { PurchaseRequest } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -14,12 +14,9 @@ export default function PrDetailPage() {
 
   return (
     <PageContainer>
-      <a
-        href="/"
-        class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary mb-6"
-      >
-        <Icons.arrowLeft class="w-4 h-4" /> Back to Requests
-      </a>
+      <div class="mb-6">
+        <BackLink href="/">Back to Requests</BackLink>
+      </div>
 
       <QueryBoundary query={query}>
         {(p: PurchaseRequest) => (

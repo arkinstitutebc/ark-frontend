@@ -1,3 +1,4 @@
+import { BackLink } from "@ark/ui"
 import { api } from "@data/api"
 import { useCreateAr } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
@@ -73,10 +74,8 @@ export default function CreateBillingPage() {
 
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
-      <div class="flex items-center gap-4 mb-8">
-        <a href="/receivables" class="p-2 hover:bg-surface-muted rounded-lg transition-colors">
-          <Icons.arrowLeft class="w-5 h-5 text-muted" />
-        </a>
+      <div class="flex items-center gap-3 mb-8">
+        <BackLink variant="icon" label="Back to receivables" href="/receivables" />
         <div>
           <h1 class="text-2xl font-semibold text-foreground">Create Billing Statement</h1>
           <p class="text-sm text-muted mt-1">Create an accounts receivable record for a batch</p>

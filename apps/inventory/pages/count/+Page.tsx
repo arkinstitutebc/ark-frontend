@@ -1,4 +1,4 @@
-import { Icons, PageContainer, PageHeader, QueryBoundary, statusTone } from "@ark/ui"
+import { BackLink, PageContainer, PageHeader, QueryBoundary, statusTone } from "@ark/ui"
 import { useCycleCount, useStock } from "@data/hooks"
 import type { StockItem } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -65,12 +65,9 @@ export default function StockTakePage() {
 
   return (
     <PageContainer>
-      <a
-        href="/"
-        class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary mb-4"
-      >
-        <Icons.arrowLeft class="w-4 h-4" /> Back to Stock
-      </a>
+      <div class="mb-4">
+        <BackLink href="/">Back to Stock</BackLink>
+      </div>
 
       <PageHeader
         title="Stock Take"

@@ -6,7 +6,7 @@ import {
   useUpdateMe,
   useUploadAvatar,
 } from "@ark/api-client"
-import { AvatarCropper, Button, Icons, Input, RolePill, toast } from "@ark/ui"
+import { AvatarCropper, BackLink, Button, Icons, Input, RolePill, toast } from "@ark/ui"
 import { createEffect, createMemo, createSignal, onCleanup, onMount, Show } from "solid-js"
 
 interface PasswordRule {
@@ -210,12 +210,7 @@ export default function ProfilePage() {
       <div class="max-w-2xl mx-auto px-4 py-12">
         <Show when={!showRequiredBanner()}>
           <div class="mb-6">
-            <a
-              href={returnUrl() ?? "/"}
-              class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary"
-            >
-              <Icons.arrowLeft class="w-4 h-4" /> {returnUrl() ? "Back" : "Dashboard"}
-            </a>
+            <BackLink href={returnUrl() ?? "/"}>{returnUrl() ? "Back" : "Dashboard"}</BackLink>
           </div>
         </Show>
 

@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso, Icons, PageContainer, statusToneClass } from "@ark/ui"
+import { BackLink, formatDatePH, formatPeso, Icons, PageContainer, statusToneClass } from "@ark/ui"
 import { useBatch, useBatchStudents, useStudent } from "@data/hooks"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
@@ -17,13 +17,9 @@ export default function BatchDetailPage() {
 
   return (
     <PageContainer>
-      <a
-        href="/"
-        class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary mb-6"
-      >
-        <Icons.arrowLeft class="w-4 h-4" />
-        Back to Batches
-      </a>
+      <div class="mb-6">
+        <BackLink href="/">Back to Batches</BackLink>
+      </div>
 
       <Show
         when={!batchQuery.isLoading}

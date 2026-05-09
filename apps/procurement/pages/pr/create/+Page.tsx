@@ -1,4 +1,4 @@
-import { formatPeso, Icons, PageContainer, Select } from "@ark/ui"
+import { BackLink, formatPeso, Icons, PageContainer, Select } from "@ark/ui"
 import { api } from "@data/api"
 import { useCategories, useCreatePr } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
@@ -144,14 +144,8 @@ export default function CreatePrPage() {
   return (
     <PageContainer>
       {/* Header */}
-      <div class="flex items-center gap-4 mb-8">
-        <button
-          type="button"
-          onClick={() => navigate("/")}
-          class="p-2 hover:bg-surface-muted rounded-lg transition-colors"
-        >
-          <Icons.arrowLeft class="w-5 h-5 text-muted" />
-        </button>
+      <div class="flex items-center gap-3 mb-8">
+        <BackLink variant="icon" label="Back to Requests" onClick={() => navigate("/")} />
         <div>
           <h1 class="text-2xl font-semibold text-foreground">Create Purchase Request</h1>
           <p class="text-sm text-muted mt-1">Submit a new procurement request for approval</p>

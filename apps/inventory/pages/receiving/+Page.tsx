@@ -1,3 +1,4 @@
+import { BackLink } from "@ark/ui"
 import { api } from "@data/api"
 import { useReceivePo } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
@@ -197,13 +198,7 @@ export default function ReceivingPage() {
           return (
             <div>
               <nav class="flex items-center gap-2 text-sm mb-6">
-                <button
-                  type="button"
-                  onClick={closePo}
-                  class="text-muted hover:text-foreground flex items-center gap-1"
-                >
-                  <Icons.arrowLeft class="w-4 h-4" /> All Orders
-                </button>
+                <BackLink onClick={closePo}>All Orders</BackLink>
                 <span class="text-muted">/</span>
                 <span class="text-foreground font-medium">{po().poCode}</span>
               </nav>

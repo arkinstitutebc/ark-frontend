@@ -1,4 +1,4 @@
-import { formatPeso, Icons, PageContainer, Select, toast } from "@ark/ui"
+import { BackLink, formatPeso, Icons, PageContainer, Select, toast } from "@ark/ui"
 import { api } from "@data/api"
 import { useCategories, useRequest, useUpdatePr } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
@@ -160,14 +160,12 @@ export default function EditPrPage() {
       <QueryBoundary query={prQuery}>
         {() => (
           <>
-            <div class="flex items-center gap-4 mb-8">
-              <button
-                type="button"
+            <div class="flex items-center gap-3 mb-8">
+              <BackLink
+                variant="icon"
+                label="Back to request"
                 onClick={() => navigate(`/pr/${id()}`)}
-                class="p-2 hover:bg-surface-muted rounded-lg transition-colors"
-              >
-                <Icons.arrowLeft class="w-5 h-5 text-muted" />
-              </button>
+              />
               <div>
                 <h1 class="text-2xl font-semibold text-foreground">Edit Purchase Request</h1>
                 <p class="text-sm text-muted mt-1">

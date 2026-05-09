@@ -8,7 +8,7 @@ import {
   useResetUserPassword,
   useUpdateUser,
 } from "@ark/api-client"
-import { Button, Icons, Input, Modal, PageLoading, Select, toast } from "@ark/ui"
+import { BackLink, Button, Icons, Input, Modal, PageLoading, Select, toast } from "@ark/ui"
 import { createEffect, createMemo, createSignal, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
 import { Footer, Navbar } from "@/components"
@@ -116,12 +116,9 @@ export default function AdminUserDetailPage() {
 
         <main class="flex-1 px-6 sm:px-8 lg:px-12 py-8 sm:py-10">
           <div class="max-w-3xl mx-auto mt-4">
-            <a
-              href="/admin/users"
-              class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary mb-4"
-            >
-              <Icons.arrowLeft class="w-4 h-4" /> Back to users
-            </a>
+            <div class="mb-4">
+              <BackLink href="/admin/users">Back to users</BackLink>
+            </div>
 
             <Show
               when={!target.isPending}

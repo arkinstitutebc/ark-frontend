@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso, PageContainer } from "@ark/ui"
+import { BackLink, formatDatePH, formatPeso, PageContainer } from "@ark/ui"
 import { api } from "@data/api"
 import { useOrder } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
@@ -31,12 +31,9 @@ export default function PoDetailPage() {
   return (
     <PageContainer>
       {/* Back Link */}
-      <a
-        href="/orders"
-        class="inline-flex items-center gap-1.5 text-sm text-muted hover:text-primary mb-6"
-      >
-        <Icons.arrowLeft class="w-4 h-4" /> Back to Orders
-      </a>
+      <div class="mb-6">
+        <BackLink href="/orders">Back to Orders</BackLink>
+      </div>
 
       <QueryBoundary query={query}>
         {(p: PurchaseOrder) => {

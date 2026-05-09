@@ -52,6 +52,7 @@ export { Select, type SelectOption, type SelectProps } from "./forms/select"
 export { Icons, PortalIcons } from "./icons"
 // Layout
 export { AuthGate, type AuthGateProps } from "./layout/auth-gate"
+export { BackLink, type BackLinkProps } from "./layout/back-link"
 export { PageContainer } from "./layout/page-container"
 export { PageHeader } from "./layout/page-header"
 export { PortalTopBar, type PortalTopBarProps } from "./layout/portal-topbar"

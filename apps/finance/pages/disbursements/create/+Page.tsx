@@ -1,8 +1,8 @@
+import { BackLink } from "@ark/ui"
 import { useBankBalance, useCreateDisbursement } from "@data/hooks"
 import { createDisbursementSchema } from "@data/schemas"
 import { validateForm } from "@data/validate"
 import { createSignal, Show } from "solid-js"
-import { Icons } from "@/components/ui"
 
 function formatCurrency(amount: number) {
   return new Intl.NumberFormat("en-PH", {
@@ -75,10 +75,8 @@ export default function CreateDisbursementPage() {
 
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
-      <div class="flex items-center gap-4 mb-8">
-        <a href="/disbursements" class="p-2 hover:bg-surface-muted rounded-lg transition-colors">
-          <Icons.arrowLeft class="w-5 h-5 text-muted" />
-        </a>
+      <div class="flex items-center gap-3 mb-8">
+        <BackLink variant="icon" label="Back to disbursements" href="/disbursements" />
         <div>
           <h1 class="text-2xl font-semibold text-foreground">New Disbursement</h1>
           <p class="text-sm text-muted mt-1">Record a cash disbursement from Operational Hub</p>
