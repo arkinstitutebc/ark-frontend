@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso, THead, Th } from "@ark/ui"
+import { formatDatePH, formatPeso, PageHeader, THead, Th } from "@ark/ui"
 import { useBankBalance, useBanks, useTransactions } from "@data/hooks"
 import type { Bank, Transaction } from "@data/types"
 import { createSignal, For } from "solid-js"
@@ -45,10 +45,7 @@ export default function Page() {
 
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
-      <div class="mb-6">
-        <h1 class="text-2xl font-semibold text-foreground">Bank Accounts</h1>
-        <p class="text-sm text-muted mt-1">View balances and transaction history</p>
-      </div>
+      <PageHeader title="Bank Accounts" subtitle="View balances and transaction history" />
 
       {/* Bank Cards */}
       <QueryBoundary query={banksQuery}>

@@ -1,4 +1,4 @@
-import { THead, Th } from "@ark/ui"
+import { PageHeader, THead, Th } from "@ark/ui"
 import { useBatches } from "@data/hooks"
 import type { Batch } from "@data/types"
 import { createSignal, For, Show } from "solid-js"
@@ -19,19 +19,19 @@ export default function BatchesPage() {
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8">
       <div class="max-w-6xl mx-auto">
-        <div class="flex items-center justify-between mb-8">
-          <div>
-            <h1 class="text-2xl font-semibold text-foreground">Batches</h1>
-            <p class="text-sm text-muted mt-1">{query.data?.length ?? 0} training batches</p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setShowAddModal(true)}
-            class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
-          >
-            + New Batch
-          </button>
-        </div>
+        <PageHeader
+          title="Batches"
+          subtitle={`${query.data?.length ?? 0} training batches`}
+          action={
+            <button
+              type="button"
+              onClick={() => setShowAddModal(true)}
+              class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
+            >
+              + New Batch
+            </button>
+          }
+        />
 
         <AddBatchModal open={showAddModal()} onClose={() => setShowAddModal(false)} />
 

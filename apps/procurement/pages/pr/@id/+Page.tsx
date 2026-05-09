@@ -1,4 +1,13 @@
-import { BackLink, formatDatePH, formatPeso, InfoCard, PageContainer, THead, Th } from "@ark/ui"
+import {
+  BackLink,
+  formatDatePH,
+  formatPeso,
+  InfoCard,
+  PageContainer,
+  PageHeader,
+  THead,
+  Th,
+} from "@ark/ui"
 import { useRequest } from "@data/hooks"
 import type { PurchaseRequest } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -21,40 +30,38 @@ export default function PrDetailPage() {
       <QueryBoundary query={query}>
         {(p: PurchaseRequest) => (
           <>
-            <div class="flex items-start justify-between mb-8">
-              <div>
-                <div class="flex items-center gap-3 mb-2">
-                  <h1 class="text-2xl font-semibold text-foreground">{p.prCode}</h1>
-                  <StatusBadge status={p.status} />
-                </div>
-                <p class="text-sm text-muted">{p.batchName}</p>
-              </div>
-              <div class="flex items-center gap-2">
-                <Show when={p.status === "pending"}>
-                  <a
-                    href={`/pr/${p.id}/edit`}
+            <PageHeader
+              title={p.prCode}
+              badge={<StatusBadge status={p.status} />}
+              subtitle={p.batchName}
+              action={
+                <div class="flex items-center gap-2">
+                  <Show when={p.status === "pending"}>
+                    <a
+                      href={`/pr/${p.id}/edit`}
+                      class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors"
+                    >
+                      <Icons.edit class="w-4 h-4" /> Edit
+                    </a>
+                  </Show>
+                  <Show when={p.status === "approved"}>
+                    <a
+                      href={`/orders/create?prId=${p.id}`}
+                      class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
+                    >
+                      Create PO
+                    </a>
+                  </Show>
+                  <button
+                    type="button"
+                    onClick={() => setDocumentModalOpen(true)}
                     class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors"
                   >
-                    <Icons.edit class="w-4 h-4" /> Edit
-                  </a>
-                </Show>
-                <Show when={p.status === "approved"}>
-                  <a
-                    href={`/orders/create?prId=${p.id}`}
-                    class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
-                  >
-                    Create PO
-                  </a>
-                </Show>
-                <button
-                  type="button"
-                  onClick={() => setDocumentModalOpen(true)}
-                  class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors"
-                >
-                  <Icons.fileText class="w-4 h-4" /> View PDF
-                </button>
-              </div>
-            </div>
+                    <Icons.fileText class="w-4 h-4" /> View PDF
+                  </button>
+                </div>
+              }
+            />
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               <InfoCard label="Category">

@@ -1,4 +1,4 @@
-import { DataTable, formatDatePH, formatPeso, StatCard, THead, Th, Tr } from "@ark/ui"
+import { DataTable, formatDatePH, formatPeso, PageHeader, StatCard, THead, Th, Tr } from "@ark/ui"
 import { useBankBalance, useDisbursements } from "@data/hooks"
 import type { Transaction } from "@data/types"
 import { createMemo, For, Show } from "solid-js"
@@ -15,18 +15,18 @@ export default function DisbursementsPage() {
 
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <h1 class="text-2xl font-semibold text-foreground">Disbursements</h1>
-          <p class="text-sm text-muted mt-1">Cash disbursements and operational expenses</p>
-        </div>
-        <a
-          href="/disbursements/create"
-          class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
-        >
-          + New Disbursement
-        </a>
-      </div>
+      <PageHeader
+        title="Disbursements"
+        subtitle="Cash disbursements and operational expenses"
+        action={
+          <a
+            href="/disbursements/create"
+            class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            + New Disbursement
+          </a>
+        }
+      />
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
         <StatCard label="Total Disbursements" numeric value={query.data?.length ?? "-"} />

@@ -1,4 +1,4 @@
-import { THead, Th } from "@ark/ui"
+import { PageHeader, THead, Th } from "@ark/ui"
 import { useMovements } from "@data/hooks"
 import type { StockMovement } from "@data/types"
 import { createMemo, createSignal, For } from "solid-js"
@@ -49,10 +49,7 @@ export default function MovementsPage() {
 
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
-      <div class="mb-8">
-        <h1 class="text-2xl font-semibold text-foreground">Stock Movements</h1>
-        <p class="text-sm text-muted mt-1">Audit log of all stock changes</p>
-      </div>
+      <PageHeader title="Stock Movements" subtitle="Audit log of all stock changes" />
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <div class="bg-surface rounded-lg border border-border p-4">

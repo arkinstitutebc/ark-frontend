@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso } from "@ark/ui"
+import { formatDatePH, formatPeso, PageHeader } from "@ark/ui"
 import { usePayroll } from "@data/hooks"
 import type { PayrollPeriod } from "@data/types"
 import { For } from "solid-js"
@@ -9,12 +9,7 @@ export default function Page() {
 
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <h1 class="text-2xl font-semibold text-foreground">Payroll</h1>
-          <p class="text-sm text-muted mt-1">Semi-monthly payroll periods (15th & 30th)</p>
-        </div>
-      </div>
+      <PageHeader title="Payroll" subtitle="Semi-monthly payroll periods (15th & 30th)" />
 
       <QueryBoundary query={query}>
         {(periods: PayrollPeriod[]) => (

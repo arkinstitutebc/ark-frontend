@@ -1,4 +1,4 @@
-import { StatCard, THead, Th } from "@ark/ui"
+import { PageHeader, StatCard, THead, Th } from "@ark/ui"
 import { useAdjustStock, useMovements, useStock } from "@data/hooks"
 import type { StockItem } from "@data/types"
 import { createMemo, createSignal, For } from "solid-js"
@@ -58,18 +58,18 @@ export default function Page() {
 
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <h1 class="text-2xl font-semibold text-foreground">Stock Overview</h1>
-          <p class="text-sm text-muted mt-1">Track inventory levels across all batches</p>
-        </div>
-        <a
-          href="/receiving"
-          class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
-        >
-          <Icons.plus class="w-4 h-4" /> New Receipt
-        </a>
-      </div>
+      <PageHeader
+        title="Stock Overview"
+        subtitle="Track inventory levels across all batches"
+        action={
+          <a
+            href="/receiving"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+          >
+            <Icons.plus class="w-4 h-4" /> New Receipt
+          </a>
+        }
+      />
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard

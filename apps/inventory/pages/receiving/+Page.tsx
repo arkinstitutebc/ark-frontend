@@ -1,4 +1,4 @@
-import { BackLink, formatDatePH, formatPeso } from "@ark/ui"
+import { BackLink, formatDatePH, formatPeso, PageHeader } from "@ark/ui"
 import { api } from "@data/api"
 import { useReceivePo } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
@@ -95,10 +95,7 @@ export default function ReceivingPage() {
 
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
-      <div class="mb-8">
-        <h1 class="text-2xl font-semibold text-foreground">New Receipt</h1>
-        <p class="text-sm text-muted mt-1">Receive goods from purchase orders</p>
-      </div>
+      <PageHeader title="New Receipt" subtitle="Receive goods from purchase orders" />
 
       <Show when={showSuccess()}>
         <div class="mb-6 bg-green-50 border border-green-200 rounded-lg p-4 flex items-center gap-3">

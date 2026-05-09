@@ -1,4 +1,4 @@
-import { BackLink, formatDatePH, formatPeso, StatCard, THead, Th } from "@ark/ui"
+import { BackLink, formatDatePH, formatPeso, PageHeader, StatCard, THead, Th } from "@ark/ui"
 import { type PayrollPeriodDetail, usePayrollPeriod, useProcessPayroll } from "@data/hooks"
 import { createMemo, For } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
@@ -24,39 +24,35 @@ export default function Page() {
       <QueryBoundary query={query}>
         {(data: PayrollPeriodDetail) => (
           <>
-            <div class="flex items-start justify-between mb-8">
-              <div>
-                <div class="flex items-center gap-3 mb-2">
-                  <h1 class="text-2xl font-semibold text-foreground">{data.label}</h1>
-                  <StatusBadge status={data.status} />
+            <PageHeader
+              title={data.label}
+              badge={<StatusBadge status={data.status} />}
+              subtitle={`${formatDatePH(data.periodStart)} — ${formatDatePH(data.periodEnd)}`}
+              action={
+                <div class="flex items-center gap-2">
+                  {data.status === "draft" && (
+                    <button
+                      type="button"
+                      onClick={handleProcess}
+                      disabled={processMutation.isPending}
+                      class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+                    >
+                      {processMutation.isPending ? "Processing..." : "Process Payroll"}
+                    </button>
+                  )}
+                  {data.status !== "draft" && (
+                    <a
+                      href={`${import.meta.env.VITE_API_URL || "http://localhost:4000"}/api/hr/payroll/${periodId()}/pdf`}
+                      target="_blank"
+                      rel="noopener"
+                      class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors"
+                    >
+                      <Icons.download class="w-4 h-4" /> Download PDF
+                    </a>
+                  )}
                 </div>
-                <p class="text-sm text-muted">
-                  {formatDatePH(data.periodStart)} — {formatDatePH(data.periodEnd)}
-                </p>
-              </div>
-              <div class="flex items-center gap-2">
-                {data.status === "draft" && (
-                  <button
-                    type="button"
-                    onClick={handleProcess}
-                    disabled={processMutation.isPending}
-                    class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-                  >
-                    {processMutation.isPending ? "Processing..." : "Process Payroll"}
-                  </button>
-                )}
-                {data.status !== "draft" && (
-                  <a
-                    href={`${import.meta.env.VITE_API_URL || "http://localhost:4000"}/api/hr/payroll/${periodId()}/pdf`}
-                    target="_blank"
-                    rel="noopener"
-                    class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors"
-                  >
-                    <Icons.download class="w-4 h-4" /> Download PDF
-                  </a>
-                )}
-              </div>
-            </div>
+              }
+            />
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
               <StatCard

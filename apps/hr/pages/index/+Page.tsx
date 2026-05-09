@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso, StatCard, THead, Th } from "@ark/ui"
+import { formatDatePH, formatPeso, PageHeader, StatCard, THead, Th } from "@ark/ui"
 import { useTrainers } from "@data/hooks"
 import type { Trainer, TrainerStatus } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -41,12 +41,7 @@ export default function Page() {
 
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
-      <div class="flex items-center justify-between mb-8">
-        <div>
-          <h1 class="text-2xl font-semibold text-foreground">Trainers</h1>
-          <p class="text-sm text-muted mt-1">Manage trainer profiles and assignments</p>
-        </div>
-      </div>
+      <PageHeader title="Trainers" subtitle="Manage trainer profiles and assignments" />
 
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
         <StatCard label="Total" value={query.isSuccess ? stats().total : "-"} />

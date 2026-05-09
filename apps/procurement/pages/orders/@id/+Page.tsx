@@ -1,4 +1,13 @@
-import { BackLink, formatDatePH, formatPeso, InfoCard, PageContainer, THead, Th } from "@ark/ui"
+import {
+  BackLink,
+  formatDatePH,
+  formatPeso,
+  InfoCard,
+  PageContainer,
+  PageHeader,
+  THead,
+  Th,
+} from "@ark/ui"
 import { api } from "@data/api"
 import { useOrder } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
@@ -50,33 +59,31 @@ export default function PoDetailPage() {
           return (
             <>
               {/* Header */}
-              <div class="flex items-start justify-between mb-8">
-                <div>
-                  <div class="flex items-center gap-3 mb-2">
-                    <h1 class="text-2xl font-semibold text-foreground">{p.poCode}</h1>
-                    <StatusBadge status={p.status} />
-                  </div>
-                  <p class="text-sm text-muted">{p.batchName}</p>
-                </div>
-                <div class="flex items-center gap-2">
-                  <Show when={p.status !== "received" && p.status !== "cancelled"}>
+              <PageHeader
+                title={p.poCode}
+                badge={<StatusBadge status={p.status} />}
+                subtitle={p.batchName}
+                action={
+                  <div class="flex items-center gap-2">
+                    <Show when={p.status !== "received" && p.status !== "cancelled"}>
+                      <button
+                        type="button"
+                        onClick={() => setEditModalOpen(true)}
+                        class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors"
+                      >
+                        <Icons.edit class="w-4 h-4" /> Edit
+                      </button>
+                    </Show>
                     <button
                       type="button"
-                      onClick={() => setEditModalOpen(true)}
+                      onClick={() => setDocumentModalOpen(true)}
                       class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors"
                     >
-                      <Icons.edit class="w-4 h-4" /> Edit
+                      <Icons.fileText class="w-4 h-4" /> View PDF
                     </button>
-                  </Show>
-                  <button
-                    type="button"
-                    onClick={() => setDocumentModalOpen(true)}
-                    class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors"
-                  >
-                    <Icons.fileText class="w-4 h-4" /> View PDF
-                  </button>
-                </div>
-              </div>
+                  </div>
+                }
+              />
 
               {/* Info Cards */}
               <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
