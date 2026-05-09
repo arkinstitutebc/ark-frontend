@@ -2,7 +2,7 @@ import { formatDatePH, formatPeso } from "@ark/ui"
 import { usePayroll } from "@data/hooks"
 import type { PayrollPeriod } from "@data/types"
 import { For } from "solid-js"
-import { Icons, PayrollStatusBadge, QueryBoundary } from "@/components/ui"
+import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
 export default function Page() {
   const query = usePayroll()
@@ -29,7 +29,7 @@ export default function Page() {
                     <div>
                       <div class="flex items-center gap-3 mb-2">
                         <h3 class="text-base font-semibold text-foreground">{period.label}</h3>
-                        <PayrollStatusBadge status={period.status} />
+                        <StatusBadge status={period.status} />
                       </div>
                       <div class="flex items-center gap-4 text-sm text-muted">
                         <span>

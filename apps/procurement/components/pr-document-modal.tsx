@@ -1,8 +1,7 @@
 import { API_URL } from "@ark/api-client"
-import { formatDatePH, formatPeso, Modal } from "@ark/ui"
+import { formatDatePH, formatPeso, Modal, StatusBadge } from "@ark/ui"
 import type { PurchaseRequest } from "@data/types"
 import { Show } from "solid-js"
-import { PrStatusBadge } from "./ui/status-badges"
 
 interface PrDocumentModalProps {
   open: boolean
@@ -24,7 +23,7 @@ export function PrDocumentModal(props: PrDocumentModalProps) {
                   <span class="font-mono text-sm font-medium text-foreground">
                     {pr().prCode || pr().id}
                   </span>
-                  <PrStatusBadge status={pr().status} />
+                  <StatusBadge status={pr().status} />
                 </div>
                 <span class="text-lg font-semibold text-foreground">
                   {formatPeso(Number(pr().totalAmount))}

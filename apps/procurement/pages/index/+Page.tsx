@@ -4,7 +4,7 @@ import type { PrStatus, PurchaseRequest } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
 import { PrDocumentModal } from "@/components/pr-document-modal"
-import { Icons, PrStatusBadge, QueryBoundary } from "@/components/ui"
+import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
 export default function Page() {
   const query = useRequests()
@@ -172,7 +172,7 @@ export default function Page() {
                             {formatPeso(Number(pr.totalAmount))}
                           </td>
                           <td class="py-4 px-6">
-                            <PrStatusBadge status={pr.status} />
+                            <StatusBadge status={pr.status} />
                           </td>
                           <td class="py-4 px-6 text-sm text-muted">{formatDatePH(pr.createdAt)}</td>
                           <td class="py-4 px-6 text-right">

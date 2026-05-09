@@ -2,7 +2,7 @@ import { useAdjustStock, useMovements, useStock } from "@data/hooks"
 import type { StockItem } from "@data/types"
 import { createMemo, createSignal, For } from "solid-js"
 import { AdjustStockModal } from "@/components/adjust-stock-modal"
-import { Icons, QueryBoundary, StockStatusBadge } from "@/components/ui"
+import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 import { ViewItemModal } from "@/components/view-item-modal"
 
 export default function Page() {
@@ -181,7 +181,7 @@ export default function Page() {
                         </span>
                       </td>
                       <td class="px-6 py-4">
-                        <StockStatusBadge status={item.status} />
+                        <StatusBadge status={item.status} />
                       </td>
                       <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-2">

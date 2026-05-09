@@ -4,7 +4,7 @@ import type { PoStatus, PurchaseOrder } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
 import { PoDocumentModal } from "@/components/po-document-modal"
-import { Icons, PoStatusBadge, QueryBoundary } from "@/components/ui"
+import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
 function getEmptyStateMessage(filter: PoStatus | "all") {
   switch (filter) {
@@ -196,7 +196,7 @@ export default function OrdersPage() {
                             </span>
                           </td>
                           <td class="py-4 px-6">
-                            <PoStatusBadge status={po.status} />
+                            <StatusBadge status={po.status} />
                           </td>
                           <td class="py-4 px-6">
                             <span class="text-sm text-muted">

@@ -2,7 +2,7 @@ import { BackLink, formatDatePH, formatPeso } from "@ark/ui"
 import { type PayrollPeriodDetail, usePayrollPeriod, useProcessPayroll } from "@data/hooks"
 import { createMemo, For } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
-import { Icons, PayrollStatusBadge, QueryBoundary } from "@/components/ui"
+import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
 export default function Page() {
   const pageContext = usePageContext()
@@ -28,7 +28,7 @@ export default function Page() {
               <div>
                 <div class="flex items-center gap-3 mb-2">
                   <h1 class="text-2xl font-semibold text-foreground">{data.label}</h1>
-                  <PayrollStatusBadge status={data.status} />
+                  <StatusBadge status={data.status} />
                 </div>
                 <p class="text-sm text-muted">
                   {formatDatePH(data.periodStart)} — {formatDatePH(data.periodEnd)}

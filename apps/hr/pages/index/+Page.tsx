@@ -3,7 +3,7 @@ import { useTrainers } from "@data/hooks"
 import type { Trainer, TrainerStatus } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { TrainerDetailModal } from "@/components/trainer-detail-modal"
-import { Icons, QueryBoundary, TrainerStatusBadge } from "@/components/ui"
+import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
 export default function Page() {
   const query = useTrainers()
@@ -155,7 +155,7 @@ export default function Page() {
                           {formatPeso(Number(trainer.hourlyRate))}
                         </td>
                         <td class="py-4 px-6">
-                          <TrainerStatusBadge status={trainer.status} />
+                          <StatusBadge status={trainer.status} />
                         </td>
                         <td class="py-4 px-6 text-sm text-muted">
                           {trainer.hireDate ? formatDatePH(trainer.hireDate) : "-"}

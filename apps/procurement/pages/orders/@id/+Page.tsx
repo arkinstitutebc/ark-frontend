@@ -8,7 +8,7 @@ import { createMemo, createSignal, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
 import { EditPoModal } from "@/components/edit-po-modal"
 import { PoDocumentModal } from "@/components/po-document-modal"
-import { Icons, PoStatusBadge, QueryBoundary } from "@/components/ui"
+import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
 interface ReceiptMovement {
   id: string
@@ -54,7 +54,7 @@ export default function PoDetailPage() {
                 <div>
                   <div class="flex items-center gap-3 mb-2">
                     <h1 class="text-2xl font-semibold text-foreground">{p.poCode}</h1>
-                    <PoStatusBadge status={p.status} />
+                    <StatusBadge status={p.status} />
                   </div>
                   <p class="text-sm text-muted">{p.batchName}</p>
                 </div>
@@ -185,7 +185,7 @@ export default function PoDetailPage() {
                 <div class="divide-y divide-border">
                   <div class="flex py-4 px-6">
                     <span class="w-40 text-sm text-muted">Status</span>
-                    <PoStatusBadge status={p.status} />
+                    <StatusBadge status={p.status} />
                   </div>
                   <div class="flex py-4 px-6">
                     <span class="w-40 text-sm text-muted">Est. Delivery</span>

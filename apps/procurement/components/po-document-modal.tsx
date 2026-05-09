@@ -1,8 +1,7 @@
 import { API_URL } from "@ark/api-client"
-import { formatDatePH, formatPeso, Modal } from "@ark/ui"
+import { formatDatePH, formatPeso, Modal, StatusBadge } from "@ark/ui"
 import type { PurchaseOrder } from "@data/types"
 import { Show } from "solid-js"
-import { PoStatusBadge } from "./ui/status-badges"
 
 interface PoDocumentModalProps {
   open: boolean
@@ -24,7 +23,7 @@ export function PoDocumentModal(props: PoDocumentModalProps) {
                   <span class="font-mono text-sm font-medium text-foreground">
                     {po().poCode || po().id}
                   </span>
-                  <PoStatusBadge status={po().status} />
+                  <StatusBadge status={po().status} />
                 </div>
                 <span class="text-lg font-semibold text-foreground">
                   {formatPeso(Number(po().totalAmount))}

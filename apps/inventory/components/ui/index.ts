@@ -10,6 +10,3 @@ export {
   QueryBoundary,
   StatusBadge,
 } from "@ark/ui"
-
-// Local domain status badges (PR/PO/inventory-state).
-export * from "./status-badges"

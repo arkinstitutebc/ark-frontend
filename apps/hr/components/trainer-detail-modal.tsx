@@ -2,7 +2,7 @@ import { formatDatePH, formatPeso, Modal } from "@ark/ui"
 import { useAttendance } from "@data/hooks"
 import type { Trainer } from "@data/types"
 import { For, Show } from "solid-js"
-import { AttendanceStatusBadge, Icons, TrainerStatusBadge } from "@/components/ui"
+import { Icons, StatusBadge } from "@/components/ui"
 
 interface TrainerDetailModalProps {
   open: boolean
@@ -32,7 +32,7 @@ export function TrainerDetailModal(props: TrainerDetailModalProps) {
               <div class="flex-1">
                 <div class="flex items-center gap-3">
                   <h3 class="text-lg font-semibold text-foreground">{trainer().name}</h3>
-                  <TrainerStatusBadge status={trainer().status} />
+                  <StatusBadge status={trainer().status} />
                 </div>
                 <p class="text-sm text-muted mt-1">{trainer().specialization}</p>
               </div>
@@ -105,7 +105,7 @@ export function TrainerDetailModal(props: TrainerDetailModalProps) {
                               {record.hoursWorked}
                             </td>
                             <td class="py-2 px-3">
-                              <AttendanceStatusBadge status={record.status} />
+                              <StatusBadge status={record.status} />
                             </td>
                           </tr>
                         )}

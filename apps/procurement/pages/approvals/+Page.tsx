@@ -3,9 +3,7 @@ import { useApprovePr, useRejectPr, useRequests } from "@data/hooks"
 import type { PrStatus, PurchaseRequest } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { type ApprovalAction, ApprovalDetailsModal } from "@/components/approval-details-modal"
-import { Icons, PrStatusBadge, QueryBoundary } from "@/components/ui"
-
-const StatusBadge = PrStatusBadge
+import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
 function getEmptyStateMessage(filter: PrStatus | "all") {
   switch (filter) {

@@ -1,7 +1,7 @@
 /**
  * Single source of truth for status pill colors. The `StatusBadge` display
- * component in `display/status-badge.tsx` uses this map; pages that render
- * inline status pills can also import `statusTone()` directly.
+ * component in `display/status-badge.tsx` reads from this map; pages that
+ * render inline status pills can also import `statusTone()` directly.
  *
  * Add new status names to the lookup as features grow. Anything unknown
  * falls back to the neutral "muted" tone.
@@ -10,19 +10,33 @@
 export type StatusTone = {
   bg: string
   text: string
+  /** Solid color used for the leading dot in `<StatusBadge>`. */
+  dot: string
 }
 
-const POSITIVE = {
-  bg: "bg-green-100 dark:bg-green-900/30",
+// Bg uses the lighter `-50` palette to match the per-portal badges that
+// preceded this. Dark-mode classes keep contrast in dark themes.
+const POSITIVE: StatusTone = {
+  bg: "bg-green-50 dark:bg-green-900/30",
   text: "text-green-700 dark:text-green-300",
+  dot: "bg-green-400",
 }
-const PROGRESS = { bg: "bg-blue-100 dark:bg-blue-900/30", text: "text-blue-700 dark:text-blue-300" }
-const PENDING = {
-  bg: "bg-yellow-100 dark:bg-yellow-900/30",
+const PROGRESS: StatusTone = {
+  bg: "bg-blue-50 dark:bg-blue-900/30",
+  text: "text-blue-700 dark:text-blue-300",
+  dot: "bg-blue-400",
+}
+const PENDING: StatusTone = {
+  bg: "bg-yellow-50 dark:bg-yellow-900/30",
   text: "text-yellow-700 dark:text-yellow-300",
+  dot: "bg-yellow-400",
 }
-const NEGATIVE = { bg: "bg-red-100 dark:bg-red-900/30", text: "text-red-700 dark:text-red-300" }
-const NEUTRAL = { bg: "bg-surface-muted", text: "text-muted" }
+const NEGATIVE: StatusTone = {
+  bg: "bg-red-50 dark:bg-red-900/30",
+  text: "text-red-700 dark:text-red-300",
+  dot: "bg-red-400",
+}
+const NEUTRAL: StatusTone = { bg: "bg-surface-muted", text: "text-muted", dot: "bg-muted" }
 
 const TONE_BY_STATUS: Record<string, StatusTone> = {
   // training / batches
@@ -30,12 +44,14 @@ const TONE_BY_STATUS: Record<string, StatusTone> = {
   "In Progress": PROGRESS,
   "On Hold": PENDING,
   Completed: POSITIVE,
+  "Batch Completed": POSITIVE,
 
   // students
   Enrolled: PROGRESS,
   "In Training": PROGRESS,
   Certified: POSITIVE,
   Dropped: NEGATIVE,
+  "Student Completed": NEUTRAL,
 
   // procurement / billing / generic
   pending: PENDING,
@@ -57,15 +73,25 @@ const TONE_BY_STATUS: Record<string, StatusTone> = {
   "low-stock": PENDING,
   "out-of-stock": NEGATIVE,
 
-  // hr
+  // hr — trainers
   active: POSITIVE,
   inactive: NEUTRAL,
   "on-leave": PENDING,
 
-  // finance / payroll
-  processed: POSITIVE,
+  // hr — attendance
+  present: POSITIVE,
+  late: PENDING,
+  absent: NEGATIVE,
+
+  // finance / payroll / transactions
+  processed: PROGRESS,
   failed: NEGATIVE,
   completed: POSITIVE,
+  income: POSITIVE,
+  expense: NEGATIVE,
+  transfer: PROGRESS,
+  "transfer in": PROGRESS,
+  "transfer out": PROGRESS,
 }
 
 export function statusTone(status: string | null | undefined): StatusTone {
