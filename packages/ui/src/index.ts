@@ -90,6 +90,14 @@ export {
   useTheme,
 } from "./theme/theme"
 export { ThemeToggle } from "./theme/theme-toggle"
+// Tutorial content (per-portal manuals — used by both sub-portal /tutorials
+// pages and the main portal's /learn/<portal> manual)
+export { billingTutorial } from "./tutorials/billing"
+export { financeTutorial } from "./tutorials/finance"
+export { hrTutorial } from "./tutorials/hr"
+export { inventoryTutorial } from "./tutorials/inventory"
+export { procurementTutorial } from "./tutorials/procurement"
+export { trainingTutorial } from "./tutorials/training"
 export { cn } from "./utils"
 export { formatDatePH, formatMonthYear, formatPeso } from "./utils/format"
 export { type StatusTone, statusTone, statusToneClass } from "./utils/status-tone"

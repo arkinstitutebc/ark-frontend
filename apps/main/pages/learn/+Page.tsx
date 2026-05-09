@@ -7,15 +7,8 @@ interface LearningCard {
   title: string
   blurb: string
   icon: keyof typeof PortalIcons
-  /** Base portal URL — we link to {url}/tutorials. */
-  baseUrlEnvKey:
-    | "VITE_TRAINING_PORTAL_URL"
-    | "VITE_PROCUREMENT_PORTAL_URL"
-    | "VITE_INVENTORY_PORTAL_URL"
-    | "VITE_FINANCE_PORTAL_URL"
-    | "VITE_HR_PORTAL_URL"
-    | "VITE_BILLING_PORTAL_URL"
-  fallback: string
+  /** In-portal route — every manual lives under main so users stay in one tab. */
+  href: string
 }
 
 const cards: LearningCard[] = [
@@ -23,50 +16,39 @@ const cards: LearningCard[] = [
     title: "Training",
     blurb: "Batches, students, venues, TESDA records.",
     icon: "batches",
-    baseUrlEnvKey: "VITE_TRAINING_PORTAL_URL",
-    fallback: "https://training.arkinstitutebc.com",
+    href: "/learn/training",
   },
   {
     title: "Procurement",
     blurb: "Purchase Requests, Purchase Orders, approvals.",
     icon: "procurement",
-    baseUrlEnvKey: "VITE_PROCUREMENT_PORTAL_URL",
-    fallback: "https://procurement.arkinstitutebc.com",
+    href: "/learn/procurement",
   },
   {
     title: "Inventory",
     blurb: "Stock, receiving deliveries, movement log.",
     icon: "inventory",
-    baseUrlEnvKey: "VITE_INVENTORY_PORTAL_URL",
-    fallback: "https://inventory.arkinstitutebc.com",
+    href: "/learn/inventory",
   },
   {
     title: "Finance",
     blurb: "Banks, transfers, disbursements, P&L report.",
     icon: "finance",
-    baseUrlEnvKey: "VITE_FINANCE_PORTAL_URL",
-    fallback: "https://finance.arkinstitutebc.com",
+    href: "/learn/finance",
   },
   {
     title: "Billing",
     blurb: "TESDA student receivables and statements.",
     icon: "billing",
-    baseUrlEnvKey: "VITE_BILLING_PORTAL_URL",
-    fallback: "https://billing.arkinstitutebc.com",
+    href: "/learn/billing",
   },
   {
     title: "HR & Payroll",
     blurb: "Trainers, attendance, payroll periods.",
     icon: "hr",
-    baseUrlEnvKey: "VITE_HR_PORTAL_URL",
-    fallback: "https://hr.arkinstitutebc.com",
+    href: "/learn/hr",
   },
 ]
-
-function tutorialUrl(card: LearningCard) {
-  const base = (import.meta.env[card.baseUrlEnvKey] as string | undefined) ?? card.fallback
-  return `${base.replace(/\/$/, "")}/tutorials`
-}
 
 export default function LearnHubPage() {
   const userQuery = useCurrentUser()
@@ -97,8 +79,8 @@ export default function LearnHubPage() {
                 <Icons.helpCircle class="w-7 h-7 text-primary" /> Learning Hub
               </h1>
               <p class="text-sm text-muted mt-2 max-w-2xl">
-                Step-by-step guides for every portal — open the one you want to learn, then come
-                back here when you need another.
+                The full how-to manual for every Ark Institute portal — read here without leaving
+                the main hub.
               </p>
             </div>
 
@@ -108,7 +90,7 @@ export default function LearnHubPage() {
                   const Icon = PortalIcons[card.icon]
                   return (
                     <a
-                      href={tutorialUrl(card)}
+                      href={card.href}
                       class="group block bg-surface rounded-2xl shadow-sm p-6 border border-border hover:shadow-md hover:border-primary/30 transition-all"
                     >
                       <div class="flex items-start justify-between mb-5">
@@ -124,7 +106,7 @@ export default function LearnHubPage() {
                       <p class="text-sm text-muted mt-1.5">{card.blurb}</p>
 
                       <div class="flex items-center gap-2 mt-5 text-primary font-medium text-sm group-hover:gap-3 transition-all">
-                        <span>Open guide</span>
+                        <span>Read manual</span>
                         <Icons.arrowRight class="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                       </div>
                     </a>
