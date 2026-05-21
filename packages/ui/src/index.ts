@@ -100,5 +100,11 @@ export { procurementTutorial } from "./tutorials/procurement"
 export { trainingTutorial } from "./tutorials/training"
 export { cn } from "./utils"
 export { formatDatePH, formatMonthYear, formatPeso } from "./utils/format"
-export { type StatusTone, statusTone, statusToneClass } from "./utils/status-tone"
+export {
+  categoryTone,
+  categoryToneClass,
+  type StatusTone,
+  statusTone,
+  statusToneClass,
+} from "./utils/status-tone"
 export { ARK_VERSION } from "./version"

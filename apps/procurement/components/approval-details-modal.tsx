@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso, Modal } from "@ark/ui"
+import { categoryToneClass, formatDatePH, formatPeso, Modal } from "@ark/ui"
 import type { PrStatus, PurchaseRequest } from "@data/types"
 import { createSignal, Show } from "solid-js"
 
@@ -123,7 +123,16 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
                 </div>
                 <div class="bg-surface-muted rounded-lg px-4 py-3">
                   <p class="text-xs text-muted mb-1">Category</p>
-                  <p class="text-sm font-medium text-foreground">{pr().category}</p>
+                  <Show
+                    when={pr().category}
+                    fallback={<p class="text-sm font-medium text-foreground">—</p>}
+                  >
+                    <span
+                      class={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${categoryToneClass(pr().category)}`}
+                    >
+                      {pr().category}
+                    </span>
+                  </Show>
                 </div>
                 <div class="bg-surface-muted rounded-lg px-4 py-3">
                   <p class="text-xs text-muted mb-1">Created Date</p>

@@ -1,5 +1,6 @@
 import {
   BackLink,
+  categoryToneClass,
   formatDatePH,
   formatPeso,
   InfoCard,
@@ -66,7 +67,9 @@ export default function PrDetailPage() {
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               <InfoCard label="Category">
                 <Show when={p.category} fallback={<p class="text-sm text-muted">—</p>}>
-                  <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-primary/10 text-primary">
+                  <span
+                    class={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${categoryToneClass(p.category)}`}
+                  >
                     {p.category}
                   </span>
                 </Show>

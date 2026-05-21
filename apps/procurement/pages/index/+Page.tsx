@@ -1,4 +1,5 @@
 import {
+  categoryToneClass,
   DataTable,
   formatDatePH,
   formatPeso,
@@ -143,7 +144,9 @@ export default function Page() {
                             when={pr.category}
                             fallback={<span class="text-sm text-muted">—</span>}
                           >
-                            <span class="inline-flex px-2 py-0.5 text-xs font-medium rounded-full bg-primary/10 text-primary">
+                            <span
+                              class={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${categoryToneClass(pr.category)}`}
+                            >
                               {pr.category}
                             </span>
                           </Show>

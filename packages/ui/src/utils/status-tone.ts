@@ -105,3 +105,32 @@ export function statusToneClass(status: string | null | undefined): string {
   const t = statusTone(status)
   return `${t.bg} ${t.text}`
 }
+
+// User-managed labels (procurement categories, inventory tags, etc) don't have
+// fixed semantic meaning, so they get a deterministic hash-to-palette mapping
+// — same label always gets the same color, but new labels added at runtime
+// pick up a color automatically with no schema change.
+type CategoryTone = { bg: string; text: string }
+
+const CATEGORY_PALETTE: CategoryTone[] = [
+  { bg: "bg-violet-50 dark:bg-violet-900/30", text: "text-violet-700 dark:text-violet-300" },
+  { bg: "bg-indigo-50 dark:bg-indigo-900/30", text: "text-indigo-700 dark:text-indigo-300" },
+  { bg: "bg-sky-50 dark:bg-sky-900/30", text: "text-sky-700 dark:text-sky-300" },
+  { bg: "bg-teal-50 dark:bg-teal-900/30", text: "text-teal-700 dark:text-teal-300" },
+  { bg: "bg-amber-50 dark:bg-amber-900/30", text: "text-amber-700 dark:text-amber-300" },
+  { bg: "bg-rose-50 dark:bg-rose-900/30", text: "text-rose-700 dark:text-rose-300" },
+  { bg: "bg-lime-50 dark:bg-lime-900/30", text: "text-lime-700 dark:text-lime-300" },
+  { bg: "bg-fuchsia-50 dark:bg-fuchsia-900/30", text: "text-fuchsia-700 dark:text-fuchsia-300" },
+]
+
+export function categoryTone(label: string | null | undefined): CategoryTone {
+  if (!label) return { bg: "bg-surface-muted", text: "text-muted" }
+  let hash = 0
+  for (let i = 0; i < label.length; i++) hash = (hash * 31 + label.charCodeAt(i)) | 0
+  return CATEGORY_PALETTE[Math.abs(hash) % CATEGORY_PALETTE.length]
+}
+
+export function categoryToneClass(label: string | null | undefined): string {
+  const t = categoryTone(label)
+  return `${t.bg} ${t.text}`
+}

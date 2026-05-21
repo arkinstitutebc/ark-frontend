@@ -1,4 +1,4 @@
-import { BackLink, formatPeso, PageContainer, Select, THead, Th } from "@ark/ui"
+import { BackLink, categoryToneClass, formatPeso, PageContainer, Select, THead, Th } from "@ark/ui"
 import { useCreatePo, useRequests } from "@data/hooks"
 import { createPoSchema } from "@data/schemas"
 import type { PurchaseRequest } from "@data/types"
@@ -257,9 +257,15 @@ export default function CreatePoPage() {
                       <span class="text-muted">Batch</span>
                       <span class="text-foreground">{pr().batchName}</span>
                     </div>
-                    <div class="flex justify-between text-sm">
+                    <div class="flex justify-between text-sm items-center">
                       <span class="text-muted">Category</span>
-                      <span class="text-foreground">{pr().category}</span>
+                      <Show when={pr().category} fallback={<span class="text-foreground">—</span>}>
+                        <span
+                          class={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${categoryToneClass(pr().category)}`}
+                        >
+                          {pr().category}
+                        </span>
+                      </Show>
                     </div>
                     <div class="border-t border-border pt-3">
                       <div class="flex justify-between">

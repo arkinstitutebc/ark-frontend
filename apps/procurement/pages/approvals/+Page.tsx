@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso, PageContainer, PageHeader } from "@ark/ui"
+import { categoryToneClass, formatDatePH, formatPeso, PageContainer, PageHeader } from "@ark/ui"
 import { useApprovePr, useCoordinatorReviewPr, useRejectPr, useRequests } from "@data/hooks"
 import type { PrStatus, PurchaseRequest } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -67,9 +67,18 @@ function ApprovalCard(props: {
       </div>
 
       {/* Batch info */}
-      <p class="text-sm text-muted mb-1">
-        {props.pr.batchName} <span class="text-muted">|</span> {props.pr.batchCode}{" "}
-        <span class="text-muted">|</span> {props.pr.category}
+      <p class="text-sm text-muted mb-1 flex items-center gap-2 flex-wrap">
+        <span>{props.pr.batchName}</span>
+        <span class="text-muted">|</span>
+        <span>{props.pr.batchCode}</span>
+        <Show when={props.pr.category}>
+          <span class="text-muted">|</span>
+          <span
+            class={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${categoryToneClass(props.pr.category)}`}
+          >
+            {props.pr.category}
+          </span>
+        </Show>
       </p>
 
       {/* Purpose */}
