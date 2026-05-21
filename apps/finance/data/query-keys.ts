@@ -21,4 +21,8 @@ export const queryKeys = {
   batches: {
     all: ["batches"] as const,
   },
+  reimbursements: {
+    all: ["reimbursements"] as const,
+    detail: (id: string) => ["reimbursements", id] as const,
+  },
 } as const
