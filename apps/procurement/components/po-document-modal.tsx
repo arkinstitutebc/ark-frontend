@@ -34,7 +34,9 @@ export function PoDocumentModal(props: PoDocumentModalProps) {
               <div class="grid grid-cols-2 gap-3">
                 <div class="bg-surface-muted rounded-lg px-4 py-3">
                   <p class="text-xs text-muted mb-1">PR Reference</p>
-                  <p class="text-sm font-mono font-medium text-foreground">{po().prId}</p>
+                  <p class="text-sm font-mono font-medium text-foreground">
+                    {po().prCode ?? po().prId}
+                  </p>
                 </div>
                 <div class="bg-surface-muted rounded-lg px-4 py-3">
                   <p class="text-xs text-muted mb-1">Supplier</p>

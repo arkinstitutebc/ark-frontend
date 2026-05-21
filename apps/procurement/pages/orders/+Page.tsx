@@ -152,7 +152,9 @@ export default function OrdersPage() {
                             </span>
                           </td>
                           <td class="py-4 px-6">
-                            <span class="text-sm text-muted">{po.prId}</span>
+                            <span class="font-mono text-sm text-muted">
+                              {po.prCode ?? po.prId.slice(0, 8)}
+                            </span>
                           </td>
                           <td class="py-4 px-6">
                             <p class="text-sm text-foreground">{po.batchName}</p>

@@ -87,7 +87,7 @@ export default function PoDetailPage() {
 
               {/* Info Cards */}
               <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <InfoCard label="PR Reference" mono value={p.prId} />
+                <InfoCard label="PR Reference" mono value={p.prCode ?? p.prId} />
                 <InfoCard label="Supplier" value={p.supplier} />
                 <InfoCard label="Total Amount" value={formatPeso(Number(p.totalAmount))} />
                 <InfoCard label="Created" value={formatDatePH(p.createdAt)} />

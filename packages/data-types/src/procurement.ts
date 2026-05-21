@@ -65,6 +65,7 @@ export interface PurchaseOrder {
   id: string
   poCode: string
   prId: string
+  prCode?: string | null // derived via JOIN on list/get endpoints
   batchId: string
   batchName: string
   supplier: string
