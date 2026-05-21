@@ -1,5 +1,5 @@
 import { formatDatePH, formatPeso, PageContainer, PageHeader } from "@ark/ui"
-import { useApprovePr, useRejectPr, useRequests } from "@data/hooks"
+import { useApprovePr, useCoordinatorReviewPr, useRejectPr, useRequests } from "@data/hooks"
 import type { PrStatus, PurchaseRequest } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { type ApprovalAction, ApprovalDetailsModal } from "@/components/approval-details-modal"
@@ -10,8 +10,14 @@ function getEmptyStateMessage(filter: PrStatus | "all") {
     case "pending":
       return {
         icon: Icons.checkCircle,
-        title: "No pending approvals",
-        message: "All purchase requests have been reviewed.",
+        title: "No requests awaiting coordinator review",
+        message: "Newly submitted purchase requests will show here.",
+      }
+    case "under_review":
+      return {
+        icon: Icons.checkCircle,
+        title: "No requests awaiting management approval",
+        message: "Coordinator-reviewed requests will show here.",
       }
     case "approved":
       return {
@@ -36,6 +42,7 @@ function getEmptyStateMessage(filter: PrStatus | "all") {
 
 function ApprovalCard(props: {
   pr: PurchaseRequest
+  onCoordinatorReview: (pr: PurchaseRequest) => void
   onApprove: (pr: PurchaseRequest) => void
   onReject: (pr: PurchaseRequest) => void
   onViewDetails: (pr: PurchaseRequest) => void
@@ -105,7 +112,7 @@ function ApprovalCard(props: {
         </div>
 
         <Show
-          when={props.pr.status === "pending"}
+          when={props.pr.status === "pending" || props.pr.status === "under_review"}
           fallback={
             <button
               type="button"
@@ -125,14 +132,26 @@ function ApprovalCard(props: {
             >
               Reject
             </button>
-            <button
-              type="button"
-              disabled={props.processing}
-              onClick={() => props.onApprove(props.pr)}
-              class="px-3 py-1.5 text-xs font-medium text-white bg-primary hover:bg-primary/90 hover:scale-105 active:scale-95 rounded transition-all disabled:opacity-50 cursor-pointer"
-            >
-              Approve
-            </button>
+            <Show when={props.pr.status === "pending"}>
+              <button
+                type="button"
+                disabled={props.processing}
+                onClick={() => props.onCoordinatorReview(props.pr)}
+                class="px-3 py-1.5 text-xs font-medium text-white bg-primary hover:bg-primary/90 hover:scale-105 active:scale-95 rounded transition-all disabled:opacity-50 cursor-pointer"
+              >
+                Coordinator Review
+              </button>
+            </Show>
+            <Show when={props.pr.status === "under_review"}>
+              <button
+                type="button"
+                disabled={props.processing}
+                onClick={() => props.onApprove(props.pr)}
+                class="px-3 py-1.5 text-xs font-medium text-white bg-primary hover:bg-primary/90 hover:scale-105 active:scale-95 rounded transition-all disabled:opacity-50 cursor-pointer"
+              >
+                Approve
+              </button>
+            </Show>
           </div>
         </Show>
       </div>
@@ -144,14 +163,17 @@ export default function ApprovalsPage() {
   const query = useRequests()
   const approveMutation = useApprovePr()
   const rejectMutation = useRejectPr()
+  const coordinatorReviewMutation = useCoordinatorReviewPr()
 
+  // Default to the coordinator queue — first stage in the 3-signature flow.
   const [filter, setFilter] = createSignal<PrStatus | "all">("pending")
   const [search, setSearch] = createSignal("")
   const [selectedPr, setSelectedPr] = createSignal<PurchaseRequest | null>(null)
   const [modalOpen, setModalOpen] = createSignal(false)
   const [modalMode, setModalMode] = createSignal<ApprovalAction>("view")
 
-  const isProcessing = () => approveMutation.isPending || rejectMutation.isPending
+  const isProcessing = () =>
+    approveMutation.isPending || rejectMutation.isPending || coordinatorReviewMutation.isPending
 
   const filteredRequests = createMemo(() => {
     const data = query.data || []
@@ -171,6 +193,7 @@ export default function ApprovalsPage() {
     return {
       total: data.length,
       pending: data.filter(r => r.status === "pending").length,
+      underReview: data.filter(r => r.status === "under_review").length,
       approved: data.filter(r => r.status === "approved").length,
       rejected: data.filter(r => r.status === "rejected").length,
     }
@@ -185,6 +208,7 @@ export default function ApprovalsPage() {
     setModalOpen(true)
   }
 
+  const handleCoordinatorReview = (pr: PurchaseRequest) => openModal(pr, "coordinator-review")
   const handleApprove = (pr: PurchaseRequest) => openModal(pr, "approve")
   const handleReject = (pr: PurchaseRequest) => openModal(pr, "reject")
   const handleViewDetails = (pr: PurchaseRequest) => openModal(pr, "view")
@@ -192,6 +216,15 @@ export default function ApprovalsPage() {
   const handleModalApprove = (id: string, notes?: string) => {
     approveMutation.mutate(
       { id, approvalNotes: notes },
+      {
+        onSuccess: () => setModalOpen(false),
+      }
+    )
+  }
+
+  const handleModalCoordinatorReview = (id: string, notes?: string) => {
+    coordinatorReviewMutation.mutate(
+      { id, notes },
       {
         onSuccess: () => setModalOpen(false),
       }
@@ -214,21 +247,32 @@ export default function ApprovalsPage() {
       <PageHeader title="Approvals" subtitle="Review and approve purchase requests" />
 
       {/* Error banner */}
-      <Show when={approveMutation.isError || rejectMutation.isError}>
+      <Show
+        when={
+          approveMutation.isError || rejectMutation.isError || coordinatorReviewMutation.isError
+        }
+      >
         <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-          {approveMutation.error?.message || rejectMutation.error?.message}
+          {approveMutation.error?.message ||
+            rejectMutation.error?.message ||
+            coordinatorReviewMutation.error?.message}
         </div>
       </Show>
 
-      {/* Stats */}
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+      {/* Stats — first row mirrors the two-stage queue so reviewers can see
+          their workload at a glance. */}
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-8">
         <div class="bg-surface rounded-lg border border-border p-4">
           <p class="text-sm text-muted mb-1">Total</p>
           <p class="text-2xl text-foreground">{query.isSuccess ? stats().total : "-"}</p>
         </div>
         <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Pending</p>
+          <p class="text-sm text-muted mb-1">Coordinator queue</p>
           <p class="text-2xl text-foreground">{query.isSuccess ? stats().pending : "-"}</p>
+        </div>
+        <div class="bg-surface rounded-lg border border-border p-4">
+          <p class="text-sm text-muted mb-1">Management queue</p>
+          <p class="text-2xl text-foreground">{query.isSuccess ? stats().underReview : "-"}</p>
         </div>
         <div class="bg-surface rounded-lg border border-border p-4">
           <p class="text-sm text-muted mb-1">Approved</p>
@@ -256,7 +300,8 @@ export default function ApprovalsPage() {
           <For
             each={[
               { value: "all" as const, label: "All" },
-              { value: "pending" as const, label: "Pending" },
+              { value: "pending" as const, label: "Coordinator queue" },
+              { value: "under_review" as const, label: "Management queue" },
               { value: "approved" as const, label: "Approved" },
               { value: "rejected" as const, label: "Rejected" },
             ]}
@@ -295,6 +340,7 @@ export default function ApprovalsPage() {
                 {pr => (
                   <ApprovalCard
                     pr={pr}
+                    onCoordinatorReview={handleCoordinatorReview}
                     onApprove={handleApprove}
                     onReject={handleReject}
                     onViewDetails={handleViewDetails}
@@ -315,6 +361,7 @@ export default function ApprovalsPage() {
         mode={modalMode()}
         onApprove={handleModalApprove}
         onReject={handleModalReject}
+        onCoordinatorReview={handleModalCoordinatorReview}
         processing={isProcessing()}
       />
     </PageContainer>

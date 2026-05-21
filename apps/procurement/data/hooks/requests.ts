@@ -2,15 +2,28 @@ import { createCrudHooks, toast } from "@ark/ui"
 import { createMutation, useQueryClient } from "@tanstack/solid-query"
 import { api } from "../api"
 import { queryKeys } from "../query-keys"
-import type { PrAttachment, PrItem, PurchaseRequest } from "../types"
+import type {
+  AccountingTreatment,
+  CostType,
+  ExpenseCategory,
+  PrAttachment,
+  PrItem,
+  ProfitCenter,
+  PurchaseRequest,
+} from "../types"
 
+// `prCode` no longer accepted from the client — backend generates `PR-YYYY-NNNNN`.
 interface CreatePrInput {
-  prCode: string
   batchId: string
   batchName?: string
   batchCode?: string
   category: string
   purpose: string
+  dateNeeded: string
+  expenseCategory: ExpenseCategory
+  profitCenter: ProfitCenter
+  accountingTreatment: AccountingTreatment
+  costType: CostType
   items: PrItem[]
   attachments?: PrAttachment[]
   totalAmount: string
@@ -23,6 +36,11 @@ interface UpdatePrInput {
   batchCode?: string
   category?: string
   purpose?: string
+  dateNeeded?: string
+  expenseCategory?: ExpenseCategory
+  profitCenter?: ProfitCenter
+  accountingTreatment?: AccountingTreatment
+  costType?: CostType
   items?: PrItem[]
   attachments?: PrAttachment[]
   totalAmount?: string
@@ -49,6 +67,25 @@ export const useRequests = crud.useList
 export const useRequest = crud.useOne
 export const useCreatePr = crud.useCreate
 export const useUpdatePr = crud.useUpdate
+
+// Bespoke: coordinator review (intermediate stage before management approval)
+export function useCoordinatorReviewPr() {
+  const qc = useQueryClient()
+  return createMutation(() => ({
+    mutationFn: ({ id, ...data }: { id: string; notes?: string }) =>
+      api<PurchaseRequest>(`/api/procurement/requests/${id}/coordinator-review`, {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: queryKeys.requests.all })
+      qc.invalidateQueries({ queryKey: queryKeys.requests.detail(variables.id) })
+      qc.invalidateQueries({ queryKey: ["requests"] })
+      toast.success("Coordinator review submitted")
+    },
+    onError: (err: Error) => toast.error(err.message),
+  }))
+}
 
 // Bespoke: approve / reject action endpoints
 export function useApprovePr() {

@@ -55,6 +55,7 @@ const TONE_BY_STATUS: Record<string, StatusTone> = {
 
   // procurement / billing / generic
   pending: PENDING,
+  under_review: PROGRESS,
   approved: POSITIVE,
   rejected: NEGATIVE,
   ordered: PROGRESS,

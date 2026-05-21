@@ -18,9 +18,13 @@ export type { Instructor } from "./instructor"
 export type { StockItem, StockMovement, StockReceipt, StockStatus } from "./inventory"
 export type { PayrollEntry, PayrollPeriod, PayrollStatus } from "./payroll"
 export type {
+  AccountingTreatment,
+  CostType,
+  ExpenseCategory,
   PoStatus,
   PrAttachment,
   PrItem,
+  ProfitCenter,
   PrStatus,
   PurchaseOrder,
   PurchaseRequest,

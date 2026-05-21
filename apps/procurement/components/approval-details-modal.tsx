@@ -4,6 +4,7 @@ import { createSignal, Show } from "solid-js"
 
 const statusColors: Record<PrStatus, { bg: string; text: string; dot: string }> = {
   pending: { bg: "bg-yellow-50", text: "text-yellow-700", dot: "bg-yellow-400" },
+  under_review: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-400" },
   approved: { bg: "bg-green-50", text: "text-green-700", dot: "bg-green-400" },
   rejected: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-400" },
   ordered: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-400" },
@@ -11,7 +12,8 @@ const statusColors: Record<PrStatus, { bg: string; text: string; dot: string }> 
 
 function StatusBadge(props: { status: PrStatus }) {
   const colors = statusColors[props.status]
-  const label = props.status.charAt(0).toUpperCase() + props.status.slice(1)
+  const raw = props.status.replace(/_/g, " ")
+  const label = raw.charAt(0).toUpperCase() + raw.slice(1)
   return (
     <span
       class={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${colors.bg} ${colors.text}`}
@@ -23,12 +25,16 @@ function StatusBadge(props: { status: PrStatus }) {
 }
 
 /**
- * Three modes drive what the modal does:
- *  - `view`   — read-only details (no action buttons)
- *  - `approve` — approve flow; notes optional
- *  - `reject`  — reject flow; notes REQUIRED (matches server-side `min(1)`)
+ * Four modes drive what the modal does:
+ *  - `view`               — read-only details (no action buttons)
+ *  - `coordinator-review` — first-stage review by a coordinator; notes optional.
+ *                            Flips status pending → under_review.
+ *  - `approve`            — second-stage management approval; notes optional.
+ *                            Requires status under_review; backend rejects same-actor.
+ *  - `reject`             — reject flow; notes REQUIRED (matches server-side `min(1)`).
+ *                            Allowed from either pending or under_review.
  */
-export type ApprovalAction = "view" | "approve" | "reject"
+export type ApprovalAction = "view" | "coordinator-review" | "approve" | "reject"
 
 interface ApprovalDetailsModalProps {
   open: boolean
@@ -38,6 +44,7 @@ interface ApprovalDetailsModalProps {
   mode: ApprovalAction
   onApprove: (id: string, notes?: string) => void
   onReject: (id: string, notes: string) => void
+  onCoordinatorReview: (id: string, notes?: string) => void
   processing: boolean
 }
 
@@ -45,18 +52,40 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
   const [notes, setNotes] = createSignal("")
   const [showError, setShowError] = createSignal(false)
 
+  // Rejection notes are required server-side (z.string().min(1)) — keep the
+  // UI requirement in lockstep so users get a friendly error instead of 400.
   const notesRequired = () => props.mode === "reject"
   const notesValid = () => !notesRequired() || notes().trim().length > 0
 
   const modalTitle = () => {
     if (props.mode === "approve") return "Approve Purchase Request"
     if (props.mode === "reject") return "Reject Purchase Request"
+    if (props.mode === "coordinator-review") return "Coordinator Review"
     return "Purchase Request Details"
   }
+
+  // Status at which an action button is allowed. `pending` rows are eligible
+  // for coordinator-review or reject; `under_review` rows are eligible for
+  // approve or reject.
+  const canCoordinatorReview = (pr: PurchaseRequest) =>
+    pr.status === "pending" && props.mode === "coordinator-review"
+  const canApprove = (pr: PurchaseRequest) =>
+    pr.status === "under_review" && props.mode === "approve"
+  const canReject = (pr: PurchaseRequest) =>
+    (pr.status === "pending" || pr.status === "under_review") && props.mode === "reject"
+  const actionable = (pr: PurchaseRequest) =>
+    canCoordinatorReview(pr) || canApprove(pr) || canReject(pr)
 
   const handleApprove = () => {
     if (!props.pr) return
     props.onApprove(props.pr.id, notes().trim() || undefined)
+    setNotes("")
+    setShowError(false)
+  }
+
+  const handleCoordinatorReview = () => {
+    if (!props.pr) return
+    props.onCoordinatorReview(props.pr.id, notes().trim() || undefined)
     setNotes("")
     setShowError(false)
   }
@@ -122,6 +151,58 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
                 </div>
               </div>
 
+              {/* Accounting classification — surfaced here so the reviewer can
+                  sanity-check the finance routing before signing off. */}
+              <Show
+                when={
+                  pr().expenseCategory ||
+                  pr().profitCenter ||
+                  pr().accountingTreatment ||
+                  pr().costType ||
+                  pr().dateNeeded
+                }
+              >
+                <div>
+                  <p class="text-xs text-muted mb-2">Accounting Classification</p>
+                  <div class="grid grid-cols-2 gap-3">
+                    <Show when={pr().dateNeeded}>
+                      <div class="bg-surface-muted rounded-lg px-4 py-3">
+                        <p class="text-xs text-muted mb-1">Date Needed</p>
+                        <p class="text-sm font-medium text-foreground">
+                          {formatDatePH(pr().dateNeeded ?? "")}
+                        </p>
+                      </div>
+                    </Show>
+                    <Show when={pr().expenseCategory}>
+                      <div class="bg-surface-muted rounded-lg px-4 py-3">
+                        <p class="text-xs text-muted mb-1">Expense Category</p>
+                        <p class="text-sm font-medium text-foreground">{pr().expenseCategory}</p>
+                      </div>
+                    </Show>
+                    <Show when={pr().profitCenter}>
+                      <div class="bg-surface-muted rounded-lg px-4 py-3">
+                        <p class="text-xs text-muted mb-1">Profit Center</p>
+                        <p class="text-sm font-medium text-foreground">{pr().profitCenter}</p>
+                      </div>
+                    </Show>
+                    <Show when={pr().accountingTreatment}>
+                      <div class="bg-surface-muted rounded-lg px-4 py-3">
+                        <p class="text-xs text-muted mb-1">Accounting Treatment</p>
+                        <p class="text-sm font-medium text-foreground">
+                          {pr().accountingTreatment}
+                        </p>
+                      </div>
+                    </Show>
+                    <Show when={pr().costType}>
+                      <div class="bg-surface-muted rounded-lg px-4 py-3">
+                        <p class="text-xs text-muted mb-1">Cost Type</p>
+                        <p class="text-sm font-medium text-foreground">{pr().costType}</p>
+                      </div>
+                    </Show>
+                  </div>
+                </div>
+              </Show>
+
               {/* Purpose Section */}
               <div>
                 <p class="text-xs text-muted mb-2">Purpose</p>
@@ -182,40 +263,88 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
                 </div>
               </div>
 
-              {/* Approval Info */}
-              <Show when={pr().status !== "pending"}>
-                <div class="bg-surface-muted rounded-lg p-4">
-                  <p class="text-xs text-muted mb-2">Approval Details</p>
-                  <div class="grid grid-cols-2 gap-4">
-                    <Show when={pr().approvedBy}>
-                      <div>
-                        <p class="text-xs text-muted mb-1">Approved By</p>
-                        <p class="text-sm font-medium text-foreground">{pr().approvedBy}</p>
+              {/* Approval Info — coordinator review stage + management approval. */}
+              <Show
+                when={
+                  pr().status !== "pending" ||
+                  pr().coordinatorReviewedBy ||
+                  pr().coordinatorReviewedAt
+                }
+              >
+                <div class="bg-surface-muted rounded-lg p-4 space-y-4">
+                  <Show when={pr().coordinatorReviewedBy || pr().coordinatorReviewedAt}>
+                    <div>
+                      <p class="text-xs text-muted mb-2 font-medium uppercase tracking-wide">
+                        Coordinator Review
+                      </p>
+                      <div class="grid grid-cols-2 gap-4">
+                        <Show when={pr().coordinatorReviewedBy}>
+                          <div>
+                            <p class="text-xs text-muted mb-1">Reviewed By</p>
+                            <p class="text-sm font-medium text-foreground">
+                              {pr().coordinatorReviewedBy}
+                            </p>
+                          </div>
+                        </Show>
+                        <Show when={pr().coordinatorReviewedAt}>
+                          <div>
+                            <p class="text-xs text-muted mb-1">Review Date</p>
+                            <p class="text-sm font-medium text-foreground">
+                              {formatDatePH(pr().coordinatorReviewedAt ?? "")}
+                            </p>
+                          </div>
+                        </Show>
+                        <Show when={pr().coordinatorNotes}>
+                          <div class="col-span-2">
+                            <p class="text-xs text-muted mb-1">Notes</p>
+                            <p class="text-sm text-foreground">{pr().coordinatorNotes}</p>
+                          </div>
+                        </Show>
                       </div>
-                    </Show>
-                    <Show when={pr().approvedAt}>
-                      <div>
-                        <p class="text-xs text-muted mb-1">Approved Date</p>
-                        <p class="text-sm font-medium text-foreground">
-                          {formatDatePH(pr().approvedAt ?? "")}
-                        </p>
+                    </div>
+                  </Show>
+
+                  <Show when={pr().approvedBy || pr().approvedAt}>
+                    <div>
+                      <p class="text-xs text-muted mb-2 font-medium uppercase tracking-wide">
+                        Management Approval
+                      </p>
+                      <div class="grid grid-cols-2 gap-4">
+                        <Show when={pr().approvedBy}>
+                          <div>
+                            <p class="text-xs text-muted mb-1">Approved By</p>
+                            <p class="text-sm font-medium text-foreground">{pr().approvedBy}</p>
+                          </div>
+                        </Show>
+                        <Show when={pr().approvedAt}>
+                          <div>
+                            <p class="text-xs text-muted mb-1">Approved Date</p>
+                            <p class="text-sm font-medium text-foreground">
+                              {formatDatePH(pr().approvedAt ?? "")}
+                            </p>
+                          </div>
+                        </Show>
+                        <Show when={pr().approvalNotes}>
+                          <div class="col-span-2">
+                            <p class="text-xs text-muted mb-1">Notes</p>
+                            <p class="text-sm text-foreground">{pr().approvalNotes}</p>
+                          </div>
+                        </Show>
                       </div>
-                    </Show>
-                    <Show when={pr().approvalNotes}>
-                      <div class="col-span-2">
-                        <p class="text-xs text-muted mb-1">Notes</p>
-                        <p class="text-sm text-foreground">{pr().approvalNotes}</p>
-                      </div>
-                    </Show>
-                  </div>
+                    </div>
+                  </Show>
                 </div>
               </Show>
 
-              {/* Notes — only for pending PRs being acted on */}
-              <Show when={pr().status === "pending" && props.mode !== "view"}>
+              {/* Notes — for PRs being acted on in this stage */}
+              <Show when={actionable(pr())}>
                 <div>
                   <label for="approval-notes" class="text-xs text-muted mb-2 block">
-                    {notesRequired() ? "Reason for rejection" : "Approval notes (optional)"}
+                    {notesRequired()
+                      ? "Reason for rejection"
+                      : props.mode === "coordinator-review"
+                        ? "Coordinator notes (optional)"
+                        : "Approval notes (optional)"}
                     <Show when={notesRequired()}>
                       <span class="text-red-500 ml-0.5">*</span>
                     </Show>
@@ -230,7 +359,9 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
                     placeholder={
                       notesRequired()
                         ? "Tell the requester what to fix so they can resubmit..."
-                        : "Add notes for this approval..."
+                        : props.mode === "coordinator-review"
+                          ? "Comments for management before final approval..."
+                          : "Add notes for this approval..."
                     }
                     rows={3}
                     class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 resize-none ${
@@ -258,7 +389,17 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
               >
                 Cancel
               </button>
-              <Show when={pr().status === "pending" && props.mode === "approve"}>
+              <Show when={canCoordinatorReview(pr())}>
+                <button
+                  type="button"
+                  onClick={handleCoordinatorReview}
+                  disabled={props.processing}
+                  class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
+                >
+                  {props.processing ? "Submitting..." : "Submit coordinator review"}
+                </button>
+              </Show>
+              <Show when={canApprove(pr())}>
                 <button
                   type="button"
                   onClick={handleApprove}
@@ -268,7 +409,7 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
                   {props.processing ? "Approving..." : "Confirm approval"}
                 </button>
               </Show>
-              <Show when={pr().status === "pending" && props.mode === "reject"}>
+              <Show when={canReject(pr())}>
                 <button
                   type="button"
                   onClick={handleReject}

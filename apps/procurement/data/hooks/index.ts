@@ -8,6 +8,7 @@ export {
 export { useCreatePo, useOrder, useOrders, useUpdatePo } from "./orders"
 export {
   useApprovePr,
+  useCoordinatorReviewPr,
   useCreatePr,
   useRejectPr,
   useRequest,

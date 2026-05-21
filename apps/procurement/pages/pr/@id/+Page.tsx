@@ -72,9 +72,21 @@ export default function PrDetailPage() {
                 </Show>
               </InfoCard>
               <InfoCard label="Total Amount" value={formatPeso(Number(p.totalAmount))} />
-              <InfoCard label="Created" value={formatDatePH(p.createdAt)} />
+              <InfoCard
+                label="Date Needed"
+                value={p.dateNeeded ? formatDatePH(p.dateNeeded) : "—"}
+              />
               <InfoCard label="Created By" value={p.createdBy} />
             </div>
+
+            <Show when={p.expenseCategory || p.profitCenter || p.accountingTreatment || p.costType}>
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                <InfoCard label="Expense Category" value={p.expenseCategory ?? "—"} />
+                <InfoCard label="Profit Center" value={p.profitCenter ?? "—"} />
+                <InfoCard label="Accounting Treatment" value={p.accountingTreatment ?? "—"} />
+                <InfoCard label="Cost Type" value={p.costType ?? "—"} />
+              </div>
+            </Show>
 
             <div class="bg-surface rounded-lg border border-border mb-8">
               <div class="px-6 py-4 border-b border-border">
@@ -182,6 +194,42 @@ export default function PrDetailPage() {
                     <span class="w-40 text-sm text-muted">Status</span>
                     <StatusBadge status={p.status} />
                   </div>
+
+                  <Show when={p.coordinatorReviewedBy || p.coordinatorReviewedAt}>
+                    <div class="py-3 px-6 bg-surface-muted/40">
+                      <p class="text-xs uppercase tracking-wider text-muted font-medium">
+                        Coordinator review
+                      </p>
+                    </div>
+                    <Show when={p.coordinatorReviewedBy}>
+                      <div class="flex py-4 px-6">
+                        <span class="w-40 text-sm text-muted">Reviewed By</span>
+                        <span class="text-sm text-foreground">{p.coordinatorReviewedBy}</span>
+                      </div>
+                    </Show>
+                    <Show when={p.coordinatorReviewedAt}>
+                      {reviewedAt => (
+                        <div class="flex py-4 px-6">
+                          <span class="w-40 text-sm text-muted">Date</span>
+                          <span class="text-sm text-foreground">{formatDatePH(reviewedAt())}</span>
+                        </div>
+                      )}
+                    </Show>
+                    <Show when={p.coordinatorNotes}>
+                      <div class="flex py-4 px-6">
+                        <span class="w-40 text-sm text-muted">Notes</span>
+                        <span class="text-sm text-foreground flex-1">{p.coordinatorNotes}</span>
+                      </div>
+                    </Show>
+                  </Show>
+
+                  <Show when={p.approvedBy || p.approvedAt}>
+                    <div class="py-3 px-6 bg-surface-muted/40">
+                      <p class="text-xs uppercase tracking-wider text-muted font-medium">
+                        Management approval
+                      </p>
+                    </div>
+                  </Show>
                   <Show when={p.approvedBy}>
                     <div class="flex py-4 px-6">
                       <span class="w-40 text-sm text-muted">Approved By</span>

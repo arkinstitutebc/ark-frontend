@@ -1,4 +1,11 @@
-export type PrStatus = "pending" | "approved" | "rejected" | "ordered"
+export type PrStatus = "pending" | "under_review" | "approved" | "rejected" | "ordered"
+
+// Accounting classification — kept in sync with the Zod enums in
+// ark-services/src/types/procurement.ts.
+export type ExpenseCategory = "cost-of-services" | "admin-expense" | "fixed-asset"
+export type ProfitCenter = "JDVP" | "TWSP-FBS" | "TWSP-HSK" | "Admin"
+export type AccountingTreatment = "variable" | "traceable-fixed" | "common-overhead" | "capital"
+export type CostType = "FBS-variable" | "HSK-variable" | "common"
 
 export interface PrItem {
   id: string
@@ -30,12 +37,23 @@ export interface PurchaseRequest {
   batchCode: string
   category: string
   purpose: string
+  /** Date by which the requested items must be on hand (YYYY-MM-DD). */
+  dateNeeded?: string
+  /** Accounting classification — used by finance for the segmented P&L. */
+  expenseCategory?: ExpenseCategory
+  profitCenter?: ProfitCenter
+  accountingTreatment?: AccountingTreatment
+  costType?: CostType
   items: PrItem[]
   attachments?: PrAttachment[] | null
   totalAmount: number
   status: PrStatus
   createdBy: string
   createdAt: string
+  /** Intermediate stage in the 3-signature flow (Requestor → Coordinator → Management). */
+  coordinatorReviewedAt?: string
+  coordinatorReviewedBy?: string
+  coordinatorNotes?: string
   approvedAt?: string
   approvedBy?: string
   approvalNotes?: string
