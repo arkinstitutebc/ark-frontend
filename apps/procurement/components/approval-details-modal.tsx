@@ -24,23 +24,12 @@ function StatusBadge(props: { status: PrStatus }) {
   )
 }
 
-/**
- * Four modes drive what the modal does:
- *  - `view`               — read-only details (no action buttons)
- *  - `coordinator-review` — first-stage review by a coordinator; notes optional.
- *                            Flips status pending → under_review.
- *  - `approve`            — second-stage management approval; notes optional.
- *                            Requires status under_review; backend rejects same-actor.
- *  - `reject`             — reject flow; notes REQUIRED (matches server-side `min(1)`).
- *                            Allowed from either pending or under_review.
- */
 export type ApprovalAction = "view" | "coordinator-review" | "approve" | "reject"
 
 interface ApprovalDetailsModalProps {
   open: boolean
   onClose: () => void
   pr: PurchaseRequest | null
-  /** What the user is about to do — drives buttons + notes-required UI. */
   mode: ApprovalAction
   onApprove: (id: string, notes?: string) => void
   onReject: (id: string, notes: string) => void
@@ -52,8 +41,6 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
   const [notes, setNotes] = createSignal("")
   const [showError, setShowError] = createSignal(false)
 
-  // Rejection notes are required server-side (z.string().min(1)) — keep the
-  // UI requirement in lockstep so users get a friendly error instead of 400.
   const notesRequired = () => props.mode === "reject"
   const notesValid = () => !notesRequired() || notes().trim().length > 0
 
@@ -64,9 +51,6 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
     return "Purchase Request Details"
   }
 
-  // Status at which an action button is allowed. `pending` rows are eligible
-  // for coordinator-review or reject; `under_review` rows are eligible for
-  // approve or reject.
   const canCoordinatorReview = (pr: PurchaseRequest) =>
     pr.status === "pending" && props.mode === "coordinator-review"
   const canApprove = (pr: PurchaseRequest) =>
@@ -151,8 +135,6 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
                 </div>
               </div>
 
-              {/* Accounting classification — surfaced here so the reviewer can
-                  sanity-check the finance routing before signing off. */}
               <Show
                 when={
                   pr().expenseCategory ||
@@ -263,7 +245,6 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
                 </div>
               </div>
 
-              {/* Approval Info — coordinator review stage + management approval. */}
               <Show
                 when={
                   pr().status !== "pending" ||
@@ -336,7 +317,6 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
                 </div>
               </Show>
 
-              {/* Notes — for PRs being acted on in this stage */}
               <Show when={actionable(pr())}>
                 <div>
                   <label for="approval-notes" class="text-xs text-muted mb-2 block">

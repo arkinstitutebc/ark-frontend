@@ -36,8 +36,6 @@ interface PrItemInput {
 
 const units = ["pcs", "units", "sets", "pairs", "boxes", "kg", "liters", "hours", "days", "months"]
 
-// Display labels for accounting classification dropdowns — mirrored from the
-// create page (kept in sync with backend Zod enums).
 const expenseCategoryLabels: Record<ExpenseCategory, string> = {
   "cost-of-services": "Cost of Services",
   "admin-expense": "Admin Expense",
@@ -87,8 +85,6 @@ export default function EditPrPage() {
   const [attachments, setAttachments] = createSignal<PrAttachment[]>([])
   const [hydrated, setHydrated] = createSignal(false)
 
-  // Hydrate form once the PR loads. If the PR is not pending, redirect back to
-  // the detail page — the backend would reject the update anyway.
   createEffect(() => {
     const pr = prQuery.data
     if (!pr || hydrated()) return
@@ -100,8 +96,6 @@ export default function EditPrPage() {
     setSelectedBatchId(pr.batchId)
     setCategory(pr.category ?? "")
     setPurpose(pr.purpose ?? "")
-    // dateNeeded comes back as ISO string from Postgres `date` column —
-    // <input type="date"> wants the YYYY-MM-DD slice only.
     setDateNeeded(pr.dateNeeded ? pr.dateNeeded.slice(0, 10) : "")
     setExpenseCategory((pr.expenseCategory ?? "") as ExpenseCategory | "")
     setProfitCenter((pr.profitCenter ?? "") as ProfitCenter | "")

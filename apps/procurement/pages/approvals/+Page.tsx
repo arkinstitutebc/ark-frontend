@@ -165,7 +165,6 @@ export default function ApprovalsPage() {
   const rejectMutation = useRejectPr()
   const coordinatorReviewMutation = useCoordinatorReviewPr()
 
-  // Default to the coordinator queue — first stage in the 3-signature flow.
   const [filter, setFilter] = createSignal<PrStatus | "all">("pending")
   const [search, setSearch] = createSignal("")
   const [selectedPr, setSelectedPr] = createSignal<PurchaseRequest | null>(null)
@@ -199,9 +198,6 @@ export default function ApprovalsPage() {
     }
   })
 
-  // Each list-row button opens the modal in the matching mode so the user
-  // sees only the relevant action (no accidental approve-when-meaning-reject)
-  // and reject notes are enforced before submit.
   const openModal = (pr: PurchaseRequest, mode: ApprovalAction) => {
     setSelectedPr(pr)
     setModalMode(mode)
@@ -231,8 +227,6 @@ export default function ApprovalsPage() {
     )
   }
 
-  // Notes are required server-side; the modal blocks submit when empty so
-  // we always have a real reason here.
   const handleModalReject = (id: string, notes: string) => {
     rejectMutation.mutate(
       { id, approvalNotes: notes },
@@ -259,8 +253,6 @@ export default function ApprovalsPage() {
         </div>
       </Show>
 
-      {/* Stats — first row mirrors the two-stage queue so reviewers can see
-          their workload at a glance. */}
       <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-8">
         <div class="bg-surface rounded-lg border border-border p-4">
           <p class="text-sm text-muted mb-1">Total</p>

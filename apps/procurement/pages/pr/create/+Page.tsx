@@ -34,8 +34,6 @@ interface PrItemInput {
 
 const units = ["pcs", "units", "sets", "pairs", "boxes", "kg", "liters", "hours", "days", "months"]
 
-// Display labels for accounting classification dropdowns — values mirror the
-// backend Zod enums in ark-services/src/types/procurement.ts.
 const expenseCategoryLabels: Record<ExpenseCategory, string> = {
   "cost-of-services": "Cost of Services",
   "admin-expense": "Admin Expense",
@@ -157,8 +155,6 @@ export default function CreatePrPage() {
       total: item.quantity * item.unitPrice,
     }))
 
-    // prCode is now backend-generated (`PR-YYYY-NNNNN` sequence), so we no
-    // longer send a client-side timestamp.
     createPrMutation.mutate(
       {
         batchId: selectedBatchId(),
@@ -316,15 +312,9 @@ export default function CreatePrPage() {
               </div>
             </div>
 
-            {/* Accounting Classification — drives the segmented P&L on the
-                finance side. Required on new PRs so finance never has to
-                back-fill these from memory. */}
             <div class="bg-surface rounded-lg border border-border p-6">
               <h2 class="text-lg font-semibold text-foreground mb-1">Accounting Classification</h2>
-              <p class="text-xs text-muted mb-4">
-                Used by finance for the segmented P&amp;L. Pick the closest match — finance can
-                re-classify during reconciliation if needed.
-              </p>
+              <p class="text-xs text-muted mb-4">Used by finance for the segmented P&amp;L.</p>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
