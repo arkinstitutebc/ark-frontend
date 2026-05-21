@@ -11,6 +11,8 @@ export interface AdminUser {
   lastName: string
   isActive: boolean
   mustChangePassword: boolean
+  position?: string | null
+  department?: string | null
   createdAt: string
   updatedAt: string
 }
@@ -20,12 +22,16 @@ export interface InviteUserInput {
   firstName: string
   lastName: string
   role: AdminRole
+  position?: string
+  department?: string
 }
 
 export interface UpdateUserInput {
   firstName?: string
   lastName?: string
   role?: AdminRole
+  position?: string | null
+  department?: string | null
 }
 
 export interface UserWithTempPassword {

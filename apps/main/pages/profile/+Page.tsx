@@ -73,9 +73,11 @@ export default function ProfilePage() {
   const uploadAvatar = useUploadAvatar()
   const changePassword = useChangePassword()
 
-  // ── Name card state ──────────────────────────────────────────────
+  // ── Identity card state ──────────────────────────────────────────
   const [firstName, setFirstName] = createSignal("")
   const [lastName, setLastName] = createSignal("")
+  const [position, setPosition] = createSignal("")
+  const [department, setDepartment] = createSignal("")
   let initializedFromServer = false
   createEffect(() => {
     if (initializedFromServer) return
@@ -83,13 +85,20 @@ export default function ProfilePage() {
     if (u) {
       setFirstName(u.firstName)
       setLastName(u.lastName)
+      setPosition(u.position ?? "")
+      setDepartment(u.department ?? "")
       initializedFromServer = true
     }
   })
   const nameDirty = createMemo(() => {
     const u = userQuery.data
     if (!u) return false
-    return firstName() !== u.firstName || lastName() !== u.lastName
+    return (
+      firstName() !== u.firstName ||
+      lastName() !== u.lastName ||
+      position() !== (u.position ?? "") ||
+      department() !== (u.department ?? "")
+    )
   })
   const canSaveName = createMemo(
     () =>
@@ -105,11 +114,13 @@ export default function ProfilePage() {
       const updated = await updateMe.mutateAsync({
         firstName: firstName().trim(),
         lastName: lastName().trim(),
+        position: position().trim() || null,
+        department: department().trim() || null,
       })
-      // Reflect the server's canonical (possibly trimmed) values immediately
-      // so the inputs match what was persisted, without waiting for refetch.
       setFirstName(updated.firstName)
       setLastName(updated.lastName)
+      setPosition(updated.position ?? "")
+      setDepartment(updated.department ?? "")
       toast.success("Profile updated")
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not update profile")
@@ -289,6 +300,18 @@ export default function ProfilePage() {
                   label="Last name"
                   value={lastName()}
                   onInput={e => setLastName(e.currentTarget.value)}
+                />
+                <Input
+                  label="Position / Role"
+                  value={position()}
+                  onInput={e => setPosition(e.currentTarget.value)}
+                  placeholder="e.g. Operations Coordinator"
+                />
+                <Input
+                  label="Department"
+                  value={department()}
+                  onInput={e => setDepartment(e.currentTarget.value)}
+                  placeholder="e.g. Training"
                 />
               </div>
               <div class="flex justify-end">

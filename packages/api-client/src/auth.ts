@@ -9,11 +9,15 @@ export interface CurrentUser {
   lastName: string
   mustChangePassword?: boolean
   photoUrl?: string
+  position?: string | null
+  department?: string | null
 }
 
 export interface UpdateMeInput {
   firstName?: string
   lastName?: string
+  position?: string | null
+  department?: string | null
 }
 
 const MAIN_PORTAL_URL =

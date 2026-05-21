@@ -27,6 +27,8 @@ export default function AdminUserDetailPage() {
   const [firstName, setFirstName] = createSignal("")
   const [lastName, setLastName] = createSignal("")
   const [role, setRole] = createSignal<AdminRole>("trainer")
+  const [position, setPosition] = createSignal("")
+  const [department, setDepartment] = createSignal("")
   const [hydrated, setHydrated] = createSignal(false)
   const [tempCredentials, setTempCredentials] = createSignal<UserWithTempPassword | null>(null)
 
@@ -48,6 +50,8 @@ export default function AdminUserDetailPage() {
       setFirstName(u.firstName)
       setLastName(u.lastName)
       setRole(u.role)
+      setPosition(u.position ?? "")
+      setDepartment(u.department ?? "")
       setHydrated(true)
     }
   })
@@ -59,10 +63,18 @@ export default function AdminUserDetailPage() {
     e.preventDefault()
     const u = target.data
     if (!u) return
-    const payload: { firstName?: string; lastName?: string; role?: AdminRole } = {}
+    const payload: {
+      firstName?: string
+      lastName?: string
+      role?: AdminRole
+      position?: string | null
+      department?: string | null
+    } = {}
     if (firstName() !== u.firstName) payload.firstName = firstName()
     if (lastName() !== u.lastName) payload.lastName = lastName()
     if (!isSelf() && role() !== u.role) payload.role = role()
+    if (position() !== (u.position ?? "")) payload.position = position().trim() || null
+    if (department() !== (u.department ?? "")) payload.department = department().trim() || null
     if (Object.keys(payload).length === 0) {
       toast.info("No changes to save.")
       return
@@ -175,6 +187,18 @@ export default function AdminUserDetailPage() {
                               label="Last name"
                               value={lastName()}
                               onInput={e => setLastName(e.currentTarget.value)}
+                            />
+                            <Input
+                              label="Position / Role"
+                              value={position()}
+                              onInput={e => setPosition(e.currentTarget.value)}
+                              placeholder="e.g. Operations Coordinator"
+                            />
+                            <Input
+                              label="Department"
+                              value={department()}
+                              onInput={e => setDepartment(e.currentTarget.value)}
+                              placeholder="e.g. Training"
                             />
                           </div>
                           <div>

@@ -27,6 +27,16 @@ const inviteSchema = z.object({
   firstName: z.string().min(1, "First name required").max(100),
   lastName: z.string().min(1, "Last name required").max(100),
   role: z.enum(["admin", "director", "trainer"]),
+  position: z
+    .string()
+    .max(100)
+    .transform(v => v.trim())
+    .optional(),
+  department: z
+    .string()
+    .max(100)
+    .transform(v => v.trim())
+    .optional(),
 })
 
 type InviteFormState = {
@@ -34,6 +44,8 @@ type InviteFormState = {
   firstName: string
   lastName: string
   role: AdminRole
+  position: string
+  department: string
 }
 
 const emptyInvite: InviteFormState = {
@@ -41,6 +53,8 @@ const emptyInvite: InviteFormState = {
   firstName: "",
   lastName: "",
   role: "trainer",
+  position: "",
+  department: "",
 }
 
 export default function AdminUsersPage() {
@@ -252,6 +266,20 @@ export default function AdminUsersPage() {
               ]}
               value={form().role}
               onChange={role => setForm({ ...form(), role })}
+            />
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Input
+              label="Position / Role"
+              value={form().position}
+              onInput={e => setForm({ ...form(), position: e.currentTarget.value })}
+              placeholder="e.g. Operations Coordinator"
+            />
+            <Input
+              label="Department"
+              value={form().department}
+              onInput={e => setForm({ ...form(), department: e.currentTarget.value })}
+              placeholder="e.g. Training"
             />
           </div>
 
