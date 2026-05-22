@@ -1,6 +1,7 @@
 export { useCurrentUser } from "./auth"
 export { useBankBalance, useBanks } from "./banks"
 export { useCreateDisbursement, useDisbursements } from "./disbursements"
+export { type IncomeStatementRange, useIncomeStatement } from "./income-statement"
 export { type PnlReport, type PnlRow, usePnl } from "./pnl"
 export {
   type CreateRrInput,

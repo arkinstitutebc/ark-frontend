@@ -24,6 +24,12 @@ const navItems: NavItem[] = [
     icon: ListChecks,
   },
   { id: "pnl", label: "P&L Report", href: "/pnl", icon: FileText },
+  {
+    id: "income-statement",
+    label: "Income Statement",
+    href: "/income-statement",
+    icon: FileText,
+  },
   { id: "tutorials", label: "How To", href: "/tutorials", icon: HelpCircle },
 ]
 

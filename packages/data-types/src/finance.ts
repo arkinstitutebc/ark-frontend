@@ -63,3 +63,24 @@ export interface Transfer {
   outTxnId?: string
   inTxnId?: string
 }
+
+export type IncomeStatementSegment = "JDVP" | "TWSP-FBS" | "TWSP-HSK"
+
+export type IncomeStatementRowKind = "header" | "detail" | "subtotal" | "computed"
+
+export interface IncomeStatementRow {
+  key: string
+  label: string
+  kind: IncomeStatementRowKind
+  bySegment: Record<IncomeStatementSegment, number>
+  total: number
+  indent?: number
+}
+
+export interface IncomeStatement {
+  periodFrom: string
+  periodTo: string
+  segments: IncomeStatementSegment[]
+  rows: IncomeStatementRow[]
+  netOperatingIncome: number
+}

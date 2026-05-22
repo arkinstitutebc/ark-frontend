@@ -18,6 +18,10 @@ export const queryKeys = {
   pnl: {
     byMonth: (month: string) => ["pnl", month] as const,
   },
+  incomeStatement: {
+    range: (r: { from?: string; to?: string }) =>
+      ["income-statement", r.from ?? "", r.to ?? ""] as const,
+  },
   batches: {
     all: ["batches"] as const,
   },
