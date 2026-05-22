@@ -1,6 +1,7 @@
 import { type NavItem, Sidebar as SharedSidebar } from "@ark/ui"
 import {
   ArrowLeftRight,
+  BookOpen,
   FileText,
   HandCoins,
   HelpCircle,
@@ -30,6 +31,7 @@ const navItems: NavItem[] = [
     href: "/income-statement",
     icon: FileText,
   },
+  { id: "gl-accounts", label: "GL Accounts", href: "/gl-accounts", icon: BookOpen },
   { id: "tutorials", label: "How To", href: "/tutorials", icon: HelpCircle },
 ]
 

@@ -17,6 +17,7 @@ export type {
   TxnCategory,
   TxnType,
 } from "./finance"
+export type { GlAccount, GlAccountSection } from "./gl-account"
 export type { AttendanceStatus, HrAttendance } from "./hr-attendance"
 export type { Instructor } from "./instructor"
 export type { StockItem, StockMovement, StockReceipt, StockStatus } from "./inventory"
