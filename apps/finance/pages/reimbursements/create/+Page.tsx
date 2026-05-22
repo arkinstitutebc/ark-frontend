@@ -4,6 +4,7 @@ import type {
   ExpenseCategory,
   ProfitCenter,
   RrItem,
+  RrSupportingDocs,
 } from "@ark/data-types"
 import { BackLink, formatPeso, Icons, PageContainer, Select } from "@ark/ui"
 import { useCreateRr, useCurrentUser } from "@data/hooks"
@@ -67,6 +68,17 @@ export default function CreateRrPage() {
     { id: "1", date: "", description: "", receiptNo: "", amount: 0, hasReceipt: false },
   ])
   const [amountInWords, setAmountInWords] = createSignal("")
+  const [supportingDocs, setSupportingDocs] = createSignal<RrSupportingDocs>({
+    receipts: false,
+    deliveryReceipt: false,
+    quotation: false,
+    prRef: false,
+    activity: false,
+    other: "",
+    noReceiptsExplanation: "",
+  })
+  const toggleDoc = (key: keyof RrSupportingDocs) =>
+    setSupportingDocs(prev => ({ ...prev, [key]: !prev[key] }))
 
   createEffect(() => {
     const u = me.data
@@ -134,6 +146,16 @@ export default function CreateRrPage() {
     }
     setErrors({})
 
+    const docs = supportingDocs()
+    const hasAnyDoc =
+      docs.receipts ||
+      docs.deliveryReceipt ||
+      docs.quotation ||
+      docs.prRef ||
+      docs.activity ||
+      (docs.other ?? "").trim() ||
+      (docs.noReceiptsExplanation ?? "").trim()
+
     createMutation.mutate(
       {
         ...data,
@@ -142,6 +164,13 @@ export default function CreateRrPage() {
         accountingTreatment: data.accountingTreatment as AccountingTreatment,
         costType: data.costType as CostType,
         totalAmount: String(total()),
+        supportingDocs: hasAnyDoc
+          ? {
+              ...docs,
+              other: docs.other?.trim() || undefined,
+              noReceiptsExplanation: docs.noReceiptsExplanation?.trim() || undefined,
+            }
+          : undefined,
       },
       { onSuccess: () => navigate("/reimbursements") }
     )
@@ -419,6 +448,69 @@ export default function CreateRrPage() {
                 />
               </div>
             </div>
+
+            <div class="bg-surface rounded-lg border border-border p-6">
+              <h2 class="text-lg font-semibold text-foreground mb-1">Supporting Documents</h2>
+              <p class="text-xs text-muted mb-4">
+                Tick what's attached. Receipts required for amounts ≥ ₱300.
+              </p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <DocCheckbox
+                  label="Official Receipts / Invoice"
+                  checked={!!supportingDocs().receipts}
+                  onToggle={() => toggleDoc("receipts")}
+                />
+                <DocCheckbox
+                  label="Approved Purchase Request (ref. PR No.)"
+                  checked={!!supportingDocs().prRef}
+                  onToggle={() => toggleDoc("prRef")}
+                />
+                <DocCheckbox
+                  label="Signed Delivery Receipt"
+                  checked={!!supportingDocs().deliveryReceipt}
+                  onToggle={() => toggleDoc("deliveryReceipt")}
+                />
+                <DocCheckbox
+                  label="Activity Report / Training Attendance Sheet"
+                  checked={!!supportingDocs().activity}
+                  onToggle={() => toggleDoc("activity")}
+                />
+                <DocCheckbox
+                  label="Quotation / Canvass Sheet"
+                  checked={!!supportingDocs().quotation}
+                  onToggle={() => toggleDoc("quotation")}
+                />
+              </div>
+              <div class="mt-4 space-y-3">
+                <label class="block">
+                  <span class="block text-xs text-muted mb-1">Other (specify)</span>
+                  <input
+                    type="text"
+                    value={supportingDocs().other ?? ""}
+                    onInput={e => setSupportingDocs(p => ({ ...p, other: e.currentTarget.value }))}
+                    placeholder="e.g. Travel itinerary, signed waiver…"
+                    class={inputCls()}
+                  />
+                </label>
+                <label class="block">
+                  <span class="block text-xs text-muted mb-1">
+                    No receipts available — explanation
+                  </span>
+                  <textarea
+                    rows={2}
+                    value={supportingDocs().noReceiptsExplanation ?? ""}
+                    onInput={e =>
+                      setSupportingDocs(p => ({
+                        ...p,
+                        noReceiptsExplanation: e.currentTarget.value,
+                      }))
+                    }
+                    placeholder="If receipts couldn't be obtained, describe why (per Ark policy)."
+                    class={`${inputCls()} resize-none`}
+                  />
+                </label>
+              </div>
+            </div>
           </div>
 
           <div class="lg:col-span-1">
@@ -486,4 +578,18 @@ function Field(props: {
 
 function inputCls(error?: string) {
   return `w-full px-3 py-2 border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${error ? "border-red-300" : "border-border"}`
+}
+
+function DocCheckbox(props: { label: string; checked: boolean; onToggle: () => void }) {
+  return (
+    <label class="flex items-start gap-2 text-sm text-foreground cursor-pointer">
+      <input
+        type="checkbox"
+        checked={props.checked}
+        onChange={props.onToggle}
+        class="mt-0.5 accent-primary"
+      />
+      <span>{props.label}</span>
+    </label>
+  )
 }

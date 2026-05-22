@@ -206,6 +206,39 @@ export default function RrDetailPage() {
                 </Show>
               </div>
 
+              <Show when={rr.supportingDocs} keyed>
+                {docs => (
+                  <div class="bg-surface rounded-lg border border-border mb-8">
+                    <div class="px-6 py-4 border-b border-border">
+                      <h2 class="text-lg font-semibold text-foreground">Supporting Documents</h2>
+                    </div>
+                    <div class="px-6 py-4 grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm">
+                      <DocLine checked={!!docs.receipts} label="Official Receipts / Invoice" />
+                      <DocLine
+                        checked={!!docs.prRef}
+                        label={
+                          rr.referencedPrCode
+                            ? `Approved PR (${rr.referencedPrCode})`
+                            : "Approved Purchase Request"
+                        }
+                      />
+                      <DocLine checked={!!docs.deliveryReceipt} label="Signed Delivery Receipt" />
+                      <DocLine checked={!!docs.activity} label="Activity Report / Attendance" />
+                      <DocLine checked={!!docs.quotation} label="Quotation / Canvass Sheet" />
+                      <Show when={docs.other}>
+                        <DocLine checked={true} label={`Other: ${docs.other}`} />
+                      </Show>
+                    </div>
+                    <Show when={docs.noReceiptsExplanation}>
+                      <div class="px-6 py-3 border-t border-border text-xs text-muted">
+                        No receipts —{" "}
+                        <span class="text-foreground">{docs.noReceiptsExplanation}</span>
+                      </div>
+                    </Show>
+                  </div>
+                )}
+              </Show>
+
               <Show
                 when={
                   rr.financeVerifiedBy ||
@@ -389,5 +422,16 @@ function AuditRow(props: {
         <span class="text-sm text-muted sm:ml-auto sm:max-w-md">"{props.notes}"</span>
       </Show>
     </div>
+  )
+}
+
+function DocLine(props: { checked: boolean; label: string }) {
+  return (
+    <span
+      class={`inline-flex items-start gap-2 ${props.checked ? "text-foreground" : "text-muted"}`}
+    >
+      <span class="mt-0.5">{props.checked ? "☑" : "☐"}</span>
+      <span>{props.label}</span>
+    </span>
   )
 }
