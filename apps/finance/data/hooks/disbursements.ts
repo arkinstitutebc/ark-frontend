@@ -11,6 +11,10 @@ interface CreateDisbursementInput {
   description: string
   batchId?: string
   referenceId?: string
+  expenseCategory?: string
+  profitCenter?: string
+  accountingTreatment?: string
+  costType?: string
 }
 
 const crud = createCrudHooks<

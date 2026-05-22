@@ -1,5 +1,15 @@
 import { z } from "zod"
 
+export const expenseCategoryOptions = ["cost-of-services", "admin-expense", "fixed-asset"] as const
+export const profitCenterOptions = ["JDVP", "TWSP-FBS", "TWSP-HSK", "Admin"] as const
+export const accountingTreatmentOptions = [
+  "variable",
+  "traceable-fixed",
+  "common-overhead",
+  "capital",
+] as const
+export const costTypeOptions = ["FBS-variable", "HSK-variable", "common"] as const
+
 export const createTransferSchema = z.object({
   fromBankId: z.string().min(1, "Source bank is required"),
   toBankId: z.string().min(1, "Destination bank is required"),
@@ -13,17 +23,11 @@ export const createDisbursementSchema = z.object({
   amount: z.number().positive("Amount must be greater than zero"),
   description: z.string().min(1, "Description is required"),
   referenceId: z.string().optional(),
+  expenseCategory: z.enum(expenseCategoryOptions).optional(),
+  profitCenter: z.enum(profitCenterOptions).optional(),
+  accountingTreatment: z.enum(accountingTreatmentOptions).optional(),
+  costType: z.enum(costTypeOptions).optional(),
 })
-
-export const expenseCategoryOptions = ["cost-of-services", "admin-expense", "fixed-asset"] as const
-export const profitCenterOptions = ["JDVP", "TWSP-FBS", "TWSP-HSK", "Admin"] as const
-export const accountingTreatmentOptions = [
-  "variable",
-  "traceable-fixed",
-  "common-overhead",
-  "capital",
-] as const
-export const costTypeOptions = ["FBS-variable", "HSK-variable", "common"] as const
 
 const rrItemSchema = z.object({
   date: z.string().optional(),

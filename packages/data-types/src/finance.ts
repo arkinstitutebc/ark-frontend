@@ -18,6 +18,19 @@ export type TxnCategory =
   | "transportation"
   | "training_materials"
   | "other"
+  // GL line items from the Accounting Treatment matrix.
+  | "internet"
+  | "meals"
+  | "honorarium"
+  | "maintenance"
+  | "insurance"
+  | "legal_fees"
+  | "office_equipment"
+  | "training_tools"
+  | "construction"
+  | "ppe"
+  | "misc_direct"
+  | "misc_indirect"
 
 export interface Transaction {
   id: string
