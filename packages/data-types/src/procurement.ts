@@ -10,10 +10,12 @@ export type CostType = "FBS-variable" | "HSK-variable" | "common"
 export interface PrItem {
   id: string
   name: string
+  specification?: string
   quantity: number
   unit: string
   unitPrice: number
   total: number
+  remarks?: string
 }
 
 export interface PrAttachment {

@@ -27,9 +27,11 @@ import { ManageCategoriesModal } from "@/components/manage-categories-modal"
 interface PrItemInput {
   id: string
   name: string
+  specification?: string
   quantity: number
   unit: string
   unitPrice: number
+  remarks?: string
 }
 
 const units = ["pcs", "units", "sets", "pairs", "boxes", "kg", "liters", "hours", "days", "months"]
@@ -112,9 +114,11 @@ export default function CreatePrPage() {
       .filter(item => item.name.trim() && item.quantity > 0 && item.unitPrice > 0)
       .map(item => ({
         name: item.name,
+        specification: item.specification?.trim() || undefined,
         quantity: item.quantity,
         unit: item.unit,
         unitPrice: item.unitPrice,
+        remarks: item.remarks?.trim() || undefined,
       }))
 
     const data = {
@@ -149,10 +153,12 @@ export default function CreatePrPage() {
     const prItems = validItems.map((item, index) => ({
       id: String(index + 1),
       name: item.name,
+      specification: item.specification,
       quantity: item.quantity,
       unit: item.unit,
       unitPrice: item.unitPrice,
       total: item.quantity * item.unitPrice,
+      remarks: item.remarks,
     }))
 
     createPrMutation.mutate(
@@ -438,6 +444,18 @@ export default function CreatePrPage() {
                         />
                       </div>
 
+                      <div>
+                        <input
+                          type="text"
+                          value={item().specification ?? ""}
+                          onInput={e =>
+                            updateItem(item().id, "specification", e.currentTarget.value)
+                          }
+                          placeholder="Specification / Details (optional)"
+                          class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                        />
+                      </div>
+
                       <div class="grid grid-cols-3 gap-3">
                         <label class="block">
                           <span class="block text-xs text-muted mb-1">Quantity</span>
@@ -482,6 +500,16 @@ export default function CreatePrPage() {
                             class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                           />
                         </label>
+                      </div>
+
+                      <div>
+                        <input
+                          type="text"
+                          value={item().remarks ?? ""}
+                          onInput={e => updateItem(item().id, "remarks", e.currentTarget.value)}
+                          placeholder="Remarks (optional)"
+                          class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                        />
                       </div>
 
                       <Show when={item().name && item().quantity > 0 && item().unitPrice > 0}>
