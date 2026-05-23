@@ -2,6 +2,7 @@ import type {
   AccountingTreatment,
   CostType,
   ExpenseCategory,
+  PrAttachment,
   ProfitCenter,
   RrItem,
   RrSupportingDocs,
@@ -18,6 +19,7 @@ import {
 import { validateForm } from "@data/validate"
 import { createEffect, createMemo, createSignal, Index, type JSX, Show } from "solid-js"
 import { navigate } from "vike/client/router"
+import { AttachmentUploader } from "@/components/attachment-uploader"
 
 interface ItemRow extends RrItem {
   id: string
@@ -68,6 +70,7 @@ export default function CreateRrPage() {
     { id: "1", date: "", description: "", receiptNo: "", amount: 0, hasReceipt: false },
   ])
   const [amountInWords, setAmountInWords] = createSignal("")
+  const [attachments, setAttachments] = createSignal<PrAttachment[]>([])
   const [supportingDocs, setSupportingDocs] = createSignal<RrSupportingDocs>({
     receipts: false,
     deliveryReceipt: false,
@@ -164,6 +167,7 @@ export default function CreateRrPage() {
         accountingTreatment: data.accountingTreatment as AccountingTreatment,
         costType: data.costType as CostType,
         totalAmount: String(total()),
+        attachments: attachments().length > 0 ? attachments() : undefined,
         supportingDocs: hasAnyDoc
           ? {
               ...docs,
@@ -510,6 +514,14 @@ export default function CreateRrPage() {
                   />
                 </label>
               </div>
+            </div>
+
+            <div class="bg-surface rounded-lg border border-border p-6">
+              <h2 class="text-lg font-semibold text-foreground mb-1">Attachments</h2>
+              <p class="text-xs text-muted mb-3">
+                Optional — upload receipt photos, supplier quotes, or invoices.
+              </p>
+              <AttachmentUploader attachments={attachments()} onChange={setAttachments} />
             </div>
           </div>
 

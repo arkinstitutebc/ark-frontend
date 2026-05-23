@@ -95,14 +95,24 @@ export default function RrDetailPage() {
                 badge={<StatusBadge status={rr.status} />}
                 subtitle={rr.claimantName ?? rr.createdBy ?? ""}
                 action={
-                  <a
-                    href={`${API_URL}/api/reimbursements/${rr.id}/pdf`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted"
-                  >
-                    <Icons.fileText class="w-4 h-4" /> View PDF
-                  </a>
+                  <div class="flex items-center gap-2">
+                    <Show when={rr.status === "pending"}>
+                      <a
+                        href={`/reimbursements/${rr.id}/edit`}
+                        class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted"
+                      >
+                        <Icons.edit class="w-4 h-4" /> Edit
+                      </a>
+                    </Show>
+                    <a
+                      href={`${API_URL}/api/reimbursements/${rr.id}/pdf`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted"
+                    >
+                      <Icons.fileText class="w-4 h-4" /> View PDF
+                    </a>
+                  </div>
                 }
               />
 
