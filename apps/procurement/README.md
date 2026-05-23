@@ -4,7 +4,7 @@
 
 ## Pages
 
-`/` PR list, `/pr/[id]`, `/pr/create`, `/orders`, `/orders/[id]`, `/orders/create`, `/approvals`
+`/` PR list (with category badges), `/pr/:id`, `/pr/create` (4-axis classification + AttachmentUploader), `/pr/:id/edit` (pending-only), `/orders`, `/orders/:id`, `/orders/create`, `/approvals` (Coordinator queue + Management queue, separation-of-duties guard), `/tutorials`
 
 ## Dev
 
