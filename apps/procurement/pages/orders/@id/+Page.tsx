@@ -201,10 +201,12 @@ export default function PoDetailPage() {
                   <div class="overflow-x-auto">
                     <table class="w-full">
                       <THead>
-                        <Th>Date</Th>
-                        <Th>Item</Th>
-                        <Th align="right">Qty</Th>
-                        <Th>Recorded by</Th>
+                        <Th size="dense">Date</Th>
+                        <Th size="dense">Item</Th>
+                        <Th size="dense" align="right">
+                          Qty
+                        </Th>
+                        <Th size="dense">Recorded by</Th>
                       </THead>
                       <tbody>
                         <For each={receipts()}>

@@ -91,12 +91,14 @@ export default function ReimbursementsPage() {
           <div class="overflow-x-auto">
             <table class="w-full">
               <THead>
-                <Th>RR Code</Th>
-                <Th>Claimant</Th>
-                <Th>Activity</Th>
-                <Th>Filed</Th>
-                <Th align="right">Amount</Th>
-                <Th>Status</Th>
+                <Th size="dense">RR Code</Th>
+                <Th size="dense">Claimant</Th>
+                <Th size="dense">Activity</Th>
+                <Th size="dense">Filed</Th>
+                <Th size="dense" align="right">
+                  Amount
+                </Th>
+                <Th size="dense">Status</Th>
               </THead>
               <tbody>
                 <For each={rows()}>

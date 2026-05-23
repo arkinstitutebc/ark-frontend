@@ -166,12 +166,14 @@ export default function RrDetailPage() {
                 <div class="overflow-x-auto">
                   <table class="w-full">
                     <THead>
-                      <Th>#</Th>
-                      <Th>Date</Th>
-                      <Th>Description</Th>
-                      <Th>Receipt #</Th>
-                      <Th align="right">Amount</Th>
-                      <Th>OR?</Th>
+                      <Th size="dense">#</Th>
+                      <Th size="dense">Date</Th>
+                      <Th size="dense">Description</Th>
+                      <Th size="dense">Receipt #</Th>
+                      <Th size="dense" align="right">
+                        Amount
+                      </Th>
+                      <Th size="dense">OR?</Th>
                     </THead>
                     <tbody>
                       <For each={items}>

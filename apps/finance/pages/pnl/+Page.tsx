@@ -1,4 +1,4 @@
-import { formatPeso, PageContainer } from "@ark/ui"
+import { formatPeso, PageContainer, PageHeader } from "@ark/ui"
 import { type PnlReport, usePnl } from "@data/hooks"
 import { createSignal, For, Show } from "solid-js"
 import { Icons, QueryBoundary } from "@/components/ui"
@@ -92,52 +92,54 @@ export default function PnlPage() {
 
   return (
     <PageContainer>
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-        <div>
-          <h1 class="text-2xl font-semibold text-foreground">Profit & Loss Statement</h1>
-          <p class="text-sm text-muted mt-1">Segmented income statement by project</p>
-        </div>
-        <div class="flex items-center gap-3">
+      <PageHeader
+        title="Profit & Loss Statement"
+        subtitle="Batch-segmented monthly P&L"
+        action={
+          <a
+            href={`${import.meta.env.VITE_API_URL || "http://localhost:4000"}/api/finance/pnl/pdf?month=${selectedMonth()}`}
+            target="_blank"
+            rel="noopener"
+            class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted"
+          >
+            <Icons.fileText class="w-4 h-4" /> View PDF
+          </a>
+        }
+      />
+
+      <div class="flex flex-wrap gap-3 mb-6 items-end">
+        <label class="block">
+          <span class="block text-xs text-muted mb-1">Month</span>
           <input
             type="month"
             value={selectedMonth()}
             onInput={e => setSelectedMonth(e.currentTarget.value)}
-            class="px-3 py-2 text-sm border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+            class="px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           />
+        </label>
+        <div class="flex gap-2">
           <button
             type="button"
             onClick={exportCsv}
             disabled={!pnlQuery.data}
-            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors disabled:opacity-50"
+            class="px-3 py-2 rounded-lg text-sm font-medium bg-surface text-foreground border border-border hover:bg-surface-muted disabled:opacity-50 inline-flex items-center gap-1.5"
           >
-            <Icons.download class="w-4 h-4" /> CSV
+            <Icons.download class="w-3.5 h-3.5" /> CSV
           </button>
           <button
             type="button"
             onClick={exportXlsx}
             disabled={!pnlQuery.data}
-            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:opacity-90 transition-colors disabled:opacity-50"
+            class="px-3 py-2 rounded-lg text-sm font-medium bg-surface text-foreground border border-border hover:bg-surface-muted disabled:opacity-50 inline-flex items-center gap-1.5"
           >
-            <Icons.download class="w-4 h-4" /> XLSX
+            <Icons.download class="w-3.5 h-3.5" /> XLSX
           </button>
-          <a
-            href={`${import.meta.env.VITE_API_URL || "http://localhost:4000"}/api/finance/pnl/pdf?month=${selectedMonth()}`}
-            target="_blank"
-            rel="noopener"
-            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors"
-          >
-            <Icons.download class="w-4 h-4" /> PDF
-          </a>
         </div>
       </div>
 
       <QueryBoundary query={pnlQuery}>
         {(data: PnlReport) => (
           <div class="bg-surface rounded-lg border border-border overflow-hidden">
-            <div class="px-5 py-4 border-b border-border">
-              <p class="text-sm font-semibold text-foreground">Ark Tech Institute Inc.</p>
-              <p class="text-xs text-muted mt-0.5">Period: {data.month}</p>
-            </div>
             <div class="overflow-x-auto">
               <table class="w-full">
                 <thead class="bg-surface-muted border-b border-border">
