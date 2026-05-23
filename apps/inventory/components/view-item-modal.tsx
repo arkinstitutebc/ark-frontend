@@ -1,4 +1,4 @@
-import { formatDatePH, Icons, Modal } from "@ark/ui"
+import { categoryToneClass, formatDatePH, Icons, Modal } from "@ark/ui"
 import { useMovements } from "@data/hooks"
 import type { StockItem } from "@data/types"
 import { For, Show } from "solid-js"
@@ -66,7 +66,11 @@ export function ViewItemModal(props: ViewItemModalProps) {
                       </span>
                     </div>
                     <h3 class="text-xl text-foreground">{_item().name}</h3>
-                    <p class="text-sm text-muted mt-1">{_item().category}</p>
+                    <span
+                      class={`inline-flex mt-1 px-2 py-0.5 text-xs font-medium rounded-full ${categoryToneClass(_item().category)}`}
+                    >
+                      {_item().category}
+                    </span>
                   </div>
                   <button
                     type="button"
@@ -112,7 +116,11 @@ export function ViewItemModal(props: ViewItemModalProps) {
                   <div class="grid grid-cols-2 gap-3">
                     <div class="bg-surface-muted rounded-lg px-4 py-3">
                       <p class="text-xs text-muted mb-1">Category</p>
-                      <p class="text-sm font-medium text-foreground">{_item().category}</p>
+                      <span
+                        class={`inline-flex px-2 py-0.5 text-xs font-medium rounded-full ${categoryToneClass(_item().category)}`}
+                      >
+                        {_item().category}
+                      </span>
                     </div>
                     <div class="bg-surface-muted rounded-lg px-4 py-3">
                       <p class="text-xs text-muted mb-1">Unit of Measure</p>

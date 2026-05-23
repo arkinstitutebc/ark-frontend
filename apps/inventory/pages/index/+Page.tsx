@@ -1,4 +1,4 @@
-import { PageHeader, StatCard, THead, Th } from "@ark/ui"
+import { categoryToneClass, PageHeader, StatCard, THead, Th } from "@ark/ui"
 import { useAdjustStock, useMovements, useStock } from "@data/hooks"
 import type { StockItem } from "@data/types"
 import { createMemo, createSignal, For } from "solid-js"
@@ -132,7 +132,11 @@ export default function Page() {
                     <tr class="hover:bg-surface-muted transition-colors">
                       <td class="px-6 py-4">
                         <p class="text-sm font-medium text-foreground">{item.name}</p>
-                        <p class="text-xs text-muted mt-0.5">{item.category}</p>
+                        <span
+                          class={`inline-flex mt-1 px-2 py-0.5 text-xs font-medium rounded-full ${categoryToneClass(item.category)}`}
+                        >
+                          {item.category}
+                        </span>
                       </td>
                       <td class="px-6 py-4">
                         <span class="text-sm text-foreground">{item.batchCode}</span>
