@@ -37,17 +37,27 @@ export default defineConfig({
     },
   ],
   /**
-   * Build apps/main first, then serve via `vike preview`. Tests run against
-   * the production build — same code path users hit on prod, including the
-   * Tailwind class-generation pipeline. Catches missing-class bugs that
-   * `vike dev` (JIT) would silently mask.
+   * Build + serve each portal we want to exercise. Tests use full URLs against
+   * the per-portal port (main=3000, finance=3004 — extend as needed for
+   * procurement/inventory/etc when those flows get specs).
+   *
+   * Tests run against the production build (vike preview), not dev, so the
+   * Tailwind class-generation + SSR hydration path matches prod.
    */
-  webServer: {
-    command: "cd apps/main && bun run build && bun run preview --port 3000",
-    url: "http://localhost:3000",
-    reuseExistingServer: !process.env.CI,
-    timeout: 180_000,
-  },
+  webServer: [
+    {
+      command: "cd apps/main && bun run build && bun run preview --port 3000",
+      url: "http://localhost:3000",
+      reuseExistingServer: !process.env.CI,
+      timeout: 180_000,
+    },
+    {
+      command: "cd apps/finance && bun run build && bun run preview --port 3004",
+      url: "http://localhost:3004",
+      reuseExistingServer: !process.env.CI,
+      timeout: 180_000,
+    },
+  ],
   expect: {
     toHaveScreenshot: {
       maxDiffPixelRatio: 0.02,
