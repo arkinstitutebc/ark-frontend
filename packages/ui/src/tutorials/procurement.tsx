@@ -67,19 +67,39 @@ export const procurementTutorial: {
     },
     {
       id: "approvals",
-      title: "Approve or reject (admin / director)",
+      title: "3-signature approval workflow",
       body: (
         <>
           <p>
-            Approvals show up in the <b>Approvals</b> tab and on your notification bell. Open a
-            request, review the items + total, then either approve (with optional notes) or reject
-            (notes required so the requester knows what to fix).
+            Every PR needs three signatures: <b>Requestor → Coordinator → Management</b>. The
+            <b> Approvals</b> page has two queues so each role only sees what's theirs.
           </p>
-          <p>
-            Approving a PR fires a notification to the requester. Rejecting it sets the status to{" "}
-            <b>rejected</b> — they can copy the items into a fresh PR with the fixes.
-          </p>
+          <ol class="list-decimal pl-5 space-y-1.5">
+            <li>
+              <b>Coordinator queue</b>: PRs in <b>pending</b> status. The coordinator reviews items
+              + classification, then sends up or sends back. Same-actor guard means the requestor
+              can't review their own PR.
+            </li>
+            <li>
+              <b>Management queue</b>: PRs after coordinator review. Management approves (notes
+              optional) or rejects (notes required). A different actor than the coordinator must
+              sign here too.
+            </li>
+            <li>The fully-approved PR is now ready to become a PO.</li>
+          </ol>
         </>
+      ),
+    },
+    {
+      id: "classifications",
+      title: "4-axis accounting classification",
+      body: (
+        <p>
+          Every PR carries four accounting axes — <b>Expense Category</b>, <b>Profit Center</b>,{" "}
+          <b>Accounting Treatment</b>, <b>Cost Type</b>. These flow downstream into the segmented
+          income statement and the asset register. Set them once when creating the PR; the rest of
+          the chain reads them automatically.
+        </p>
       ),
     },
     {

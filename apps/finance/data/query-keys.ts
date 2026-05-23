@@ -29,4 +29,8 @@ export const queryKeys = {
     all: ["reimbursements"] as const,
     detail: (id: string) => ["reimbursements", id] as const,
   },
+  assets: {
+    all: ["assets"] as const,
+    detail: (id: string) => ["assets", id] as const,
+  },
 } as const

@@ -7,6 +7,7 @@ import {
   HelpCircle,
   Landmark,
   ListChecks,
+  Package,
   Receipt,
   TrendingUp,
   Wallet,
@@ -32,6 +33,7 @@ const navItems: NavItem[] = [
     icon: FileText,
   },
   { id: "gl-accounts", label: "GL Accounts", href: "/gl-accounts", icon: BookOpen },
+  { id: "assets", label: "Assets", href: "/assets", icon: Package },
   { id: "tutorials", label: "How To", href: "/tutorials", icon: HelpCircle },
 ]
 

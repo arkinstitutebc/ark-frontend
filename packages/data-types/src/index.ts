@@ -1,4 +1,5 @@
 export type { Assessment } from "./assessment"
+export type { Asset, AssetStatus } from "./asset"
 export type { Attendance } from "./attendance"
 export type { Batch, BatchStatus, TrainingCategory, TrainingLevel } from "./batch"
 export type { DashboardStats } from "./dashboard"

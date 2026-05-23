@@ -2,6 +2,20 @@
 
 All notable changes to the ark-frontend monorepo (7 portals + 4 shared packages).
 
+## [1.2.0] — 2026-05-23
+
+### Added — Feature #5: Asset Register
+- Finance portal: `/assets` list (with Active count + Total cost + Book value stat cards), `/assets/create` form with live depreciation preview, `/assets/:id` detail with full month-by-month depreciation schedule + Dispose modal.
+- `useAssets` / `useAsset` / `useCreateAsset` / `useUpdateAsset` / `useDisposeAsset` hooks via `createCrudHooks`.
+- `Asset` + `AssetStatus` types in `@ark/data-types`.
+- Sidebar entry between GL Accounts and How To.
+
+### Changed
+- **Income Statement design polish**: toned down bright `text-primary` on computed rows (CONTRIBUTION MARGIN / SEGMENT MARGIN / NET OPERATING INCOME) to neutral `text-foreground` + `bg-surface-muted` so the table reads cleaner. Standardized all column padding to `px-6` so segment columns no longer feel tighter than Line Item / Total.
+- **Table header/body alignment**: 3 RR pages + PO detail receipts table — `<Th>` now `size="dense"` so header padding matches `py-3` body cells (1px misalign fixed).
+- **PnL ↔ Income Statement parity**: PnL header switched from hand-rolled h1/buttons → `<PageHeader>` primitive with filter row below + chip-style export buttons. Inner card sub-header dropped.
+- **Tutorials refresh**: finance tutorial rewritten to cover RR, Income Statement, GL Accounts, Assets. Procurement tutorial updated for 3-signature workflow + 4-axis classification.
+
 ## [1.1.0] — 2026-05-23
 
 First minor release since v1.0.0. Adds Reimbursement Module (Feature #4), Segmented Income Statement, GL Accounts admin, Procurement 3-signature approvals UI, and a major @ark/ui primitive consolidation that cut ~100 lines of duplicate UI across the 7 portals.
