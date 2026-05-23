@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso, PageContainer, PageHeader, StatCard, THead, Th } from "@ark/ui"
+import { formatDatePH, PageContainer, PageHeader, StatCard, THead, Th } from "@ark/ui"
 import { useOrders } from "@data/hooks"
 import type { PoStatus, PurchaseOrder } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -134,7 +134,6 @@ export default function OrdersPage() {
                     <Th>PR Ref</Th>
                     <Th>Batch</Th>
                     <Th>Supplier</Th>
-                    <Th align="right">Amount</Th>
                     <Th>Status</Th>
                     <Th>Est. Delivery</Th>
                     <Th align="right">Actions</Th>
@@ -161,11 +160,6 @@ export default function OrdersPage() {
                           </td>
                           <td class="py-4 px-6">
                             <span class="text-sm text-foreground">{po.supplier}</span>
-                          </td>
-                          <td class="py-4 px-6 text-right">
-                            <span class="text-sm text-foreground">
-                              {formatPeso(po.totalAmount)}
-                            </span>
                           </td>
                           <td class="py-4 px-6">
                             <StatusBadge status={po.status} />
