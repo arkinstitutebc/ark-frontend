@@ -1,0 +1,37 @@
+name: Lighthouse
+
+# Runs Lighthouse CI against the 4 highest-traffic prod portals after each
+# successful main deploy. Results are visible in the workflow summary.
+#
+# Non-blocking: a regression doesn't fail the workflow (no `assert` config).
+# We catch trends in the run history, not enforce thresholds on every commit.
+
+on:
+  workflow_run:
+    workflows: ["Deploy"]
+    types: [completed]
+    branches: [main]
+
+jobs:
+  audit:
+    if: github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+
+      - name: Wait for portals to settle
+        run: sleep 15
+
+      - name: Lighthouse — 4 highest-traffic portals
+        uses: treosh/lighthouse-ci-action@v12
+        with:
+          urls: |
+            https://portal.arkinstitutebc.com/login
+            https://finance.arkinstitutebc.com/income-statement
+            https://finance.arkinstitutebc.com/gl-accounts
+            https://procurement.arkinstitutebc.com/
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+          runs: 1

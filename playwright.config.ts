@@ -57,6 +57,12 @@ export default defineConfig({
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
     },
+    {
+      command: "cd apps/procurement && bun run build && bun run preview --port 3002",
+      url: "http://localhost:3002",
+      reuseExistingServer: !process.env.CI,
+      timeout: 180_000,
+    },
   ],
   expect: {
     toHaveScreenshot: {

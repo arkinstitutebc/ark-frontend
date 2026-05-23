@@ -1,0 +1,69 @@
+name: Bundle Size
+
+on:
+  pull_request:
+    paths:
+      - "apps/**"
+      - "packages/**"
+      - "bun.lock"
+      - ".github/workflows/bundle-size.yml"
+
+permissions:
+  pull-requests: write
+
+jobs:
+  measure:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.13
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/.bun/install/cache
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: bun-${{ runner.os }}-${{ hashFiles('bun.lock') }}
+          restore-keys: |
+            bun-${{ runner.os }}-
+      - run: bun install --frozen-lockfile
+
+      - name: Build all portals
+        run: bun run --filter '*' build
+
+      - name: Measure dist sizes
+        id: measure
+        run: |
+          {
+            echo "## Bundle sizes"
+            echo ""
+            echo "| Portal | Client | Server |"
+            echo "|---|---:|---:|"
+            for app in apps/*/; do
+              name=$(basename "$app")
+              # Vike emits to dist/client and dist/server
+              client_size="-"
+              server_size="-"
+              if [ -d "$app/dist/client" ]; then
+                client_size=$(du -sh "$app/dist/client" 2>/dev/null | cut -f1)
+              fi
+              if [ -d "$app/dist/server" ]; then
+                server_size=$(du -sh "$app/dist/server" 2>/dev/null | cut -f1)
+              fi
+              echo "| \`$name\` | $client_size | $server_size |"
+            done
+            echo ""
+            echo "_Measured via \`du -sh\` after \`bun run build\`. No hard cap yet — this is for visibility on PRs that touch \`apps/\` or \`packages/\`._"
+          } > bundle-report.md
+          echo "report-path=bundle-report.md" >> "$GITHUB_OUTPUT"
+
+      - name: Post comment
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: bundle-size
+          path: bundle-report.md
