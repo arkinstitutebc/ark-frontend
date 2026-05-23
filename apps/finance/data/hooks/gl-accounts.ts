@@ -1,5 +1,5 @@
-import { createCrudHooks } from "@ark/ui"
 import type { GlAccount, GlAccountSection } from "@ark/data-types"
+import { createCrudHooks } from "@ark/ui"
 
 export interface CreateGlAccountInput {
   code: string

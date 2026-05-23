@@ -263,9 +263,7 @@ export default function Page() {
                 id="gl-sort"
                 type="number"
                 value={form().sortOrder ?? 0}
-                onInput={e =>
-                  setForm({ ...form(), sortOrder: Number(e.currentTarget.value) || 0 })
-                }
+                onInput={e => setForm({ ...form(), sortOrder: Number(e.currentTarget.value) || 0 })}
                 class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
               />
             </div>
