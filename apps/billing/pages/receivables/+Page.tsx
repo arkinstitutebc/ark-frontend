@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso, PageContainer, StatCard, THead, Th } from "@ark/ui"
+import { formatDatePH, formatPeso, PageContainer, PageHeader, StatCard, THead, Th } from "@ark/ui"
 import { useReceivables, useRecordPayment, useUpdateAr } from "@data/hooks"
 import type { AccountReceivable, ArStatus } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -84,18 +84,18 @@ export default function ReceivablesPage() {
 
   return (
     <PageContainer>
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-        <div>
-          <h1 class="text-2xl font-semibold text-foreground">Accounts Receivable</h1>
-          <p class="text-sm text-muted mt-1">Manage TESDA billing statements and payments</p>
-        </div>
-        <a
-          href="/receivables/create"
-          class="inline-flex items-center gap-2 px-4 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors shadow-sm"
-        >
-          <Icons.plus class="w-4 h-4" /> Create Billing
-        </a>
-      </div>
+      <PageHeader
+        title="Accounts Receivable"
+        subtitle="Manage TESDA billing statements and payments"
+        action={
+          <a
+            href="/receivables/create"
+            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors"
+          >
+            <Icons.plus class="w-4 h-4" /> Create Billing
+          </a>
+        }
+      />
 
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         <StatCard label="Total" numeric value={query.data ? stats().total : "-"} />
@@ -113,7 +113,7 @@ export default function ReceivablesPage() {
         <StatCard
           label="Outstanding"
           numeric
-          valueClass="text-primary"
+          valueClass="text-red-700"
           value={query.data ? formatPeso(stats().outstanding) : "-"}
         />
       </div>

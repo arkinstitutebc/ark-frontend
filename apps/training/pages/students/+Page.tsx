@@ -164,7 +164,7 @@ export default function StudentsPage() {
                         {student.firstName} {student.lastName}
                       </td>
                       <td class="py-4 px-6 text-sm text-muted">{getBatchCode(student.batchId)}</td>
-                      <td class="py-4 px-6 text-sm text-primary font-medium">
+                      <td class="py-4 px-6 text-sm font-medium text-foreground">
                         {getTrainingLevel(student.batchId)}
                       </td>
                       <td class="py-4 px-6">
