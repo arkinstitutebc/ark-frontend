@@ -4,7 +4,7 @@
 
 ## Pages
 
-`/` batches, `/batch/@id`, `/students`
+`/` batches list, `/batch/:id` batch detail (roster + attendance + assessments), `/students` (auto STU-YYYY-NNNNN codes), `/tutorials`
 
 ## Dev
 

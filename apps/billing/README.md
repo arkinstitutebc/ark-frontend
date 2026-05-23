@@ -4,7 +4,7 @@
 
 ## Pages
 
-`/` dashboard, `/receivables`, `/receivables/create`
+`/` dashboard, `/receivables` (AR list), `/receivables/create`, `/tutorials`
 
 ## Dev
 

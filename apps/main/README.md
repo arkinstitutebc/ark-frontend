@@ -4,7 +4,7 @@
 
 ## Pages
 
-`/` dashboard, `/login`
+`/` SSO hub + portal cards, `/login`, `/profile` (avatar + position/department), `/admin/users` (admin only — invite, edit, deactivate, reset password), `/admin/users/:id`, `/learn` Learning Hub, `/learn/{training,procurement,inventory,finance,billing,hr}` per-portal manuals
 
 ## Dev
 
