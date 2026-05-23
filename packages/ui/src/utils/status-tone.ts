@@ -106,6 +106,29 @@ export function statusToneClass(status: string | null | undefined): string {
   return `${t.bg} ${t.text}`
 }
 
+/**
+ * Dark-aware tone class for inline pills, alert boxes, error toasts, and any
+ * ad-hoc badge that isn't tied to a `<StatusBadge>` status name. Use this
+ * instead of hardcoding `bg-red-50 text-red-700` (breaks dark mode).
+ *
+ * ```tsx
+ * <span class={`px-2 py-0.5 rounded ${tonePillClass("negative")}`}>Inactive</span>
+ * <div class={`p-4 rounded-lg border ${tonePillClass("negative")} border-red-200 dark:border-red-800`}>Error: ...</div>
+ * ```
+ */
+export type ToneKind = "positive" | "pending" | "negative" | "progress" | "neutral"
+const TONE_BY_KIND: Record<ToneKind, StatusTone> = {
+  positive: POSITIVE,
+  pending: PENDING,
+  negative: NEGATIVE,
+  progress: PROGRESS,
+  neutral: NEUTRAL,
+}
+export function tonePillClass(kind: ToneKind): string {
+  const t = TONE_BY_KIND[kind]
+  return `${t.bg} ${t.text}`
+}
+
 // User-managed labels (procurement categories, inventory tags, etc) don't have
 // fixed semantic meaning, so they get a deterministic hash-to-palette mapping
 // — same label always gets the same color, but new labels added at runtime

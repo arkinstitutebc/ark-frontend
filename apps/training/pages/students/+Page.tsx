@@ -100,7 +100,7 @@ export default function StudentsPage() {
             class="pl-9 pr-3 py-2.5 w-full border border-border rounded-lg text-sm bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           />
         </div>
-        <div class="w-64">
+        <div class="w-full sm:w-64">
           <Select
             options={batchFilterOptions()}
             value={filterBatch()}

@@ -1,28 +1,6 @@
-import { categoryToneClass, formatDatePH, formatPeso, Modal } from "@ark/ui"
-import type { PrStatus, PurchaseRequest } from "@data/types"
+import { categoryToneClass, formatDatePH, formatPeso, Modal, StatusBadge } from "@ark/ui"
+import type { PurchaseRequest } from "@data/types"
 import { createSignal, Show } from "solid-js"
-
-const statusColors: Record<PrStatus, { bg: string; text: string; dot: string }> = {
-  pending: { bg: "bg-yellow-50", text: "text-yellow-700", dot: "bg-yellow-400" },
-  under_review: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-400" },
-  approved: { bg: "bg-green-50", text: "text-green-700", dot: "bg-green-400" },
-  rejected: { bg: "bg-red-50", text: "text-red-700", dot: "bg-red-400" },
-  ordered: { bg: "bg-blue-50", text: "text-blue-700", dot: "bg-blue-400" },
-}
-
-function StatusBadge(props: { status: PrStatus }) {
-  const colors = statusColors[props.status]
-  const raw = props.status.replace(/_/g, " ")
-  const label = raw.charAt(0).toUpperCase() + raw.slice(1)
-  return (
-    <span
-      class={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${colors.bg} ${colors.text}`}
-    >
-      <span class={`w-1.5 h-1.5 rounded-full ${colors.dot}`} />
-      {label}
-    </span>
-  )
-}
 
 export type ApprovalAction = "view" | "coordinator-review" | "approve" | "reject"
 

@@ -455,7 +455,7 @@ export default function CreatePrPage() {
                         />
                       </div>
 
-                      <div class="grid grid-cols-3 gap-3">
+                      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         <label class="block">
                           <span class="block text-xs text-muted mb-1">Quantity</span>
                           <input

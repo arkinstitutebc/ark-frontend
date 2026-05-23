@@ -1,5 +1,5 @@
 import type { GlAccount, GlAccountSection } from "@ark/data-types"
-import { Modal, ModalFooter, PageHeader, Select } from "@ark/ui"
+import { Modal, ModalFooter, PageHeader, Select, tonePillClass } from "@ark/ui"
 import {
   type CreateGlAccountInput,
   useCreateGlAccount,
@@ -144,62 +144,68 @@ export default function Page() {
                   <header class="px-4 py-3 border-b border-border bg-surface-muted/50">
                     <h2 class="text-sm font-semibold text-foreground">{group.label}</h2>
                   </header>
-                  <table class="w-full text-sm">
-                    <thead class="text-xs uppercase text-muted">
-                      <tr>
-                        <th class="text-left px-4 py-2 font-medium">Code</th>
-                        <th class="text-left px-4 py-2 font-medium">Label</th>
-                        <th class="text-left px-4 py-2 font-medium">Default Treatment</th>
-                        <th class="text-left px-4 py-2 font-medium">Status</th>
-                        <th class="text-right px-4 py-2 font-medium">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody class="divide-y divide-border">
-                      <For each={group.rows}>
-                        {acct => (
-                          <tr classList={{ "opacity-50": !acct.active }}>
-                            <td class="px-4 py-2 font-mono text-xs text-muted">{acct.code}</td>
-                            <td class="px-4 py-2 text-foreground">{acct.label}</td>
-                            <td class="px-4 py-2 text-muted">
-                              {acct.defaultAccountingTreatment ?? "—"}
-                            </td>
-                            <td class="px-4 py-2">
-                              <Show
-                                when={acct.active}
-                                fallback={
-                                  <span class="text-xs px-2 py-0.5 rounded bg-red-50 text-red-700">
-                                    Inactive
+                  <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                      <thead class="text-xs uppercase text-muted">
+                        <tr>
+                          <th class="text-left px-4 py-2 font-medium">Code</th>
+                          <th class="text-left px-4 py-2 font-medium">Label</th>
+                          <th class="text-left px-4 py-2 font-medium">Default Treatment</th>
+                          <th class="text-left px-4 py-2 font-medium">Status</th>
+                          <th class="text-right px-4 py-2 font-medium">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-border">
+                        <For each={group.rows}>
+                          {acct => (
+                            <tr classList={{ "opacity-50": !acct.active }}>
+                              <td class="px-4 py-2 font-mono text-xs text-muted">{acct.code}</td>
+                              <td class="px-4 py-2 text-foreground">{acct.label}</td>
+                              <td class="px-4 py-2 text-muted">
+                                {acct.defaultAccountingTreatment ?? "—"}
+                              </td>
+                              <td class="px-4 py-2">
+                                <Show
+                                  when={acct.active}
+                                  fallback={
+                                    <span
+                                      class={`text-xs px-2 py-0.5 rounded ${tonePillClass("negative")}`}
+                                    >
+                                      Inactive
+                                    </span>
+                                  }
+                                >
+                                  <span
+                                    class={`text-xs px-2 py-0.5 rounded ${tonePillClass("positive")}`}
+                                  >
+                                    Active
                                   </span>
-                                }
-                              >
-                                <span class="text-xs px-2 py-0.5 rounded bg-green-50 text-green-700">
-                                  Active
-                                </span>
-                              </Show>
-                            </td>
-                            <td class="px-4 py-2 text-right">
-                              <button
-                                type="button"
-                                onClick={() => openEdit(acct)}
-                                class="text-xs font-medium text-muted hover:text-primary px-2"
-                              >
-                                Edit
-                              </button>
-                              <Show when={acct.active}>
+                                </Show>
+                              </td>
+                              <td class="px-4 py-2 text-right">
                                 <button
                                   type="button"
-                                  onClick={() => handleDeactivate(acct)}
-                                  class="text-xs font-medium text-muted hover:text-red-500 px-2"
+                                  onClick={() => openEdit(acct)}
+                                  class="text-xs font-medium text-muted hover:text-primary px-2"
                                 >
-                                  Deactivate
+                                  Edit
                                 </button>
-                              </Show>
-                            </td>
-                          </tr>
-                        )}
-                      </For>
-                    </tbody>
-                  </table>
+                                <Show when={acct.active}>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDeactivate(acct)}
+                                    class="text-xs font-medium text-muted hover:text-red-500 px-2"
+                                  >
+                                    Deactivate
+                                  </button>
+                                </Show>
+                              </td>
+                            </tr>
+                          )}
+                        </For>
+                      </tbody>
+                    </table>
+                  </div>
                 </section>
               </Show>
             )}

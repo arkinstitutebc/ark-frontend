@@ -1,4 +1,4 @@
-import { PageHeader, THead, Th } from "@ark/ui"
+import { PageHeader, THead, Th, type ToneKind, tonePillClass } from "@ark/ui"
 import { useMovements } from "@data/hooks"
 import type { StockMovement } from "@data/types"
 import { createMemo, createSignal, For } from "solid-js"
@@ -14,10 +14,10 @@ function formatDate(dateStr: string) {
   }).format(new Date(dateStr))
 }
 
-const TYPE_COLORS: Record<string, string> = {
-  in: "bg-green-50 text-green-700 border-green-200",
-  out: "bg-red-50 text-red-700 border-red-200",
-  adjustment: "bg-yellow-50 text-yellow-700 border-yellow-200",
+const TYPE_TONE: Record<string, ToneKind> = {
+  in: "positive",
+  out: "negative",
+  adjustment: "pending",
 }
 
 const TYPE_LABELS: Record<string, string> = { in: "IN", out: "OUT", adjustment: "ADJ" }
@@ -124,7 +124,7 @@ export default function MovementsPage() {
                       </td>
                       <td class="px-6 py-4">
                         <span
-                          class={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold border ${TYPE_COLORS[m.type] || ""}`}
+                          class={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${tonePillClass(TYPE_TONE[m.type] ?? "neutral")}`}
                         >
                           {TYPE_LABELS[m.type] || m.type}
                         </span>
