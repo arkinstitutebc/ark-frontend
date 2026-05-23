@@ -1,4 +1,12 @@
-import { BackLink, formatPeso, Icons, PageContainer, Select, toast } from "@ark/ui"
+import {
+  AttachmentUploader,
+  BackLink,
+  formatPeso,
+  Icons,
+  PageContainer,
+  Select,
+  toast,
+} from "@ark/ui"
 import { api } from "@data/api"
 import { useCategories, useRequest, useUpdatePr } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
@@ -22,7 +30,6 @@ import { createQuery } from "@tanstack/solid-query"
 import { createEffect, createMemo, createSignal, Index, Show } from "solid-js"
 import { navigate } from "vike/client/router"
 import { usePageContext } from "vike-solid/usePageContext"
-import { AttachmentUploader } from "@/components/attachment-uploader"
 import { ManageCategoriesModal } from "@/components/manage-categories-modal"
 import { QueryBoundary } from "@/components/ui"
 
@@ -624,7 +631,11 @@ export default function EditPrPage() {
                 <p class="text-xs text-muted mb-3">
                   Optional — attach receipts, supplier quotes, or invoices to support this request.
                 </p>
-                <AttachmentUploader attachments={attachments()} onChange={setAttachments} />
+                <AttachmentUploader
+                  attachments={attachments()}
+                  onChange={setAttachments}
+                  signatureEndpoint="/api/procurement/upload-signature/attachment"
+                />
               </div>
             </form>
             <ManageCategoriesModal

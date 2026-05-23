@@ -7,7 +7,15 @@ import type {
   RrItem,
   RrSupportingDocs,
 } from "@ark/data-types"
-import { BackLink, formatPeso, Icons, PageContainer, Select, toast } from "@ark/ui"
+import {
+  AttachmentUploader,
+  BackLink,
+  formatPeso,
+  Icons,
+  PageContainer,
+  Select,
+  toast,
+} from "@ark/ui"
 import { useReimbursement, useUpdateRr } from "@data/hooks"
 import {
   accountingTreatmentOptions,
@@ -20,7 +28,6 @@ import { validateForm } from "@data/validate"
 import { createEffect, createMemo, createSignal, Index, type JSX, Show } from "solid-js"
 import { navigate } from "vike/client/router"
 import { usePageContext } from "vike-solid/usePageContext"
-import { AttachmentUploader } from "@/components/attachment-uploader"
 
 interface ItemRow extends RrItem {
   id: string
@@ -566,7 +573,11 @@ export default function EditRrPage() {
                 <p class="text-xs text-muted mb-3">
                   Optional — upload receipt photos, supplier quotes, or invoices.
                 </p>
-                <AttachmentUploader attachments={attachments()} onChange={setAttachments} />
+                <AttachmentUploader
+                  attachments={attachments()}
+                  onChange={setAttachments}
+                  signatureEndpoint="/api/reimbursements/upload-signature/attachment"
+                />
               </div>
             </div>
 

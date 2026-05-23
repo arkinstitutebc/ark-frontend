@@ -1,4 +1,4 @@
-import { BackLink, formatPeso, Icons, PageContainer, Select } from "@ark/ui"
+import { AttachmentUploader, BackLink, formatPeso, Icons, PageContainer, Select } from "@ark/ui"
 import { api } from "@data/api"
 import { useCategories, useCreatePr } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
@@ -21,7 +21,6 @@ import { validateForm } from "@data/validate"
 import { createQuery } from "@tanstack/solid-query"
 import { createMemo, createSignal, Index, Show } from "solid-js"
 import { navigate } from "vike/client/router"
-import { AttachmentUploader } from "@/components/attachment-uploader"
 import { ManageCategoriesModal } from "@/components/manage-categories-modal"
 
 interface PrItemInput {
@@ -596,7 +595,11 @@ export default function CreatePrPage() {
           <p class="text-xs text-muted mb-3">
             Optional — attach receipts, supplier quotes, or invoices to support this request.
           </p>
-          <AttachmentUploader attachments={attachments()} onChange={setAttachments} />
+          <AttachmentUploader
+            attachments={attachments()}
+            onChange={setAttachments}
+            signatureEndpoint="/api/procurement/upload-signature/attachment"
+          />
         </div>
       </form>
       <ManageCategoriesModal

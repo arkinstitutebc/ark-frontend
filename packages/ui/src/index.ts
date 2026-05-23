@@ -60,6 +60,11 @@ export { QueryBoundary } from "./feedback/query-boundary"
 export { TableSkeleton } from "./feedback/table-skeleton"
 export { TopProgressBar } from "./feedback/top-progress-bar"
 // Forms
+export {
+  type AttachmentRef,
+  AttachmentUploader,
+  type AttachmentUploaderProps,
+} from "./forms/attachment-uploader"
 export { Button } from "./forms/button"
 export { formErrorClass, formInputClass, formLabelClass } from "./forms/form-styles"
 export { Input, Textarea } from "./forms/input"

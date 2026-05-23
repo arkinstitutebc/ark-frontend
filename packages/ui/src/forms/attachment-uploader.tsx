@@ -1,11 +1,14 @@
-import { Icons, toast } from "@ark/ui"
-import { api } from "@data/api"
-import type { PrAttachment } from "@data/types"
+import { api } from "@ark/api-client"
 import { createSignal, For, Show } from "solid-js"
+import { toast } from "../feedback/app-toaster"
+import { Icons } from "../icons"
 
-interface AttachmentUploaderProps {
-  attachments: PrAttachment[]
-  onChange: (next: PrAttachment[]) => void
+export interface AttachmentRef {
+  name: string
+  url: string
+  type?: string
+  size?: number
+  uploadedAt?: string
 }
 
 interface SignatureResponse {
@@ -17,25 +20,22 @@ interface SignatureResponse {
   resourceType: "image" | "raw" | "auto"
 }
 
-/**
- * Browser direct-upload to Cloudinary. The API issues a short-lived signature
- * (`POST /api/procurement/upload-signature/attachment`); the file goes
- * straight from browser → Cloudinary, never through our server.
- *
- * Receipts/quotes/invoices: jpg, jpeg, png, webp, pdf — up to 10MB each.
- */
+export interface AttachmentUploaderProps {
+  attachments: AttachmentRef[]
+  onChange: (next: AttachmentRef[]) => void
+  signatureEndpoint: string
+}
+
 export function AttachmentUploader(props: AttachmentUploaderProps) {
   const [uploading, setUploading] = createSignal(false)
 
   const handleFiles = async (files: FileList | null) => {
     if (!files || files.length === 0) return
     setUploading(true)
-    const added: PrAttachment[] = []
+    const added: AttachmentRef[] = []
     for (const file of Array.from(files)) {
       try {
-        const sig = await api<SignatureResponse>("/api/procurement/upload-signature/attachment", {
-          method: "POST",
-        })
+        const sig = await api<SignatureResponse>(props.signatureEndpoint, { method: "POST" })
         const isPdf = file.type === "application/pdf"
         const url = `https://api.cloudinary.com/v1_1/${sig.cloudName}/${isPdf ? "raw" : "image"}/upload`
         const form = new FormData()
