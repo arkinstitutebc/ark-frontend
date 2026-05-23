@@ -139,7 +139,7 @@ export default function IncomeStatementPage() {
                     </th>
                     <For each={data.segments}>
                       {seg => (
-                        <th class="text-right px-4 py-3 text-xs font-semibold text-muted uppercase">
+                        <th class="text-right px-6 py-3 text-xs font-semibold text-muted uppercase">
                           {SEGMENT_LABEL[seg]}
                         </th>
                       )}
@@ -157,27 +157,27 @@ export default function IncomeStatementPage() {
                       const isComputed = row.kind === "computed"
                       const indent = row.indent ?? 0
                       const labelClass = isComputed
-                        ? "px-6 py-3 font-bold text-primary uppercase tracking-wide"
+                        ? "px-6 py-3 font-semibold text-foreground uppercase tracking-wide text-xs"
                         : isHeader
                           ? "px-6 py-2 font-semibold text-muted uppercase text-xs bg-surface-muted/50"
                           : isSubtotal
                             ? "px-6 py-2 font-semibold text-foreground"
                             : "px-6 py-1.5 text-foreground"
                       const valueClass = isComputed
-                        ? "px-4 py-3 text-right font-bold text-primary"
+                        ? "px-6 py-3 text-right font-semibold text-foreground tabular-nums"
                         : isSubtotal
-                          ? "px-4 py-2 text-right font-semibold text-foreground"
-                          : "px-4 py-1.5 text-right text-foreground"
+                          ? "px-6 py-2 text-right font-semibold text-foreground tabular-nums"
+                          : "px-6 py-1.5 text-right text-foreground tabular-nums"
                       const rowClass = isComputed
-                        ? "border-t-2 border-primary/40 bg-primary/5"
+                        ? "border-t border-border bg-surface-muted"
                         : isSubtotal
                           ? "border-t border-border"
                           : ""
                       const totalClass = isComputed
-                        ? "px-6 py-3 text-right font-bold text-primary"
+                        ? "px-6 py-3 text-right font-semibold text-foreground tabular-nums"
                         : isSubtotal
-                          ? "px-6 py-2 text-right font-semibold text-foreground"
-                          : "px-6 py-1.5 text-right text-foreground"
+                          ? "px-6 py-2 text-right font-semibold text-foreground tabular-nums"
+                          : "px-6 py-1.5 text-right text-foreground tabular-nums"
                       const labelStyle =
                         indent > 0 ? `padding-left: ${24 + indent * 16}px` : undefined
 
