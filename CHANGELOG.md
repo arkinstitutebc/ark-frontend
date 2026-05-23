@@ -2,6 +2,17 @@
 
 All notable changes to the ark-frontend monorepo (7 portals + 4 shared packages).
 
+## [1.2.1] — 2026-05-23
+
+### Added
+- **5.3 Auto-create asset from fixed-asset disbursement** — when a disbursement is logged with `expenseCategory='fixed-asset'`, the user is redirected to `/assets/create` with name / cost / category / date / profit center pre-filled and `linkedDisbursementId` set. Banner on the asset form shows the prefill source. User still picks useful life + residual value.
+
+### Changed
+- **Income Statement Traceable Fixed granularity** — frontend renders the new per-category breakdown the endpoint now sends (no code change needed; this is the visible effect of backend 5.2).
+- **Receivables list** — switched hand-rolled h1 to shared `<PageHeader>` (matches every other list page). "Outstanding" stat color → red (was blue, semantically wrong; should signal money still owed).
+- **Students table** — toned down `text-primary` on training-level cell to `text-foreground font-medium` (matches the IS / table-cell consistency pass).
+- **5 per-app READMEs** — main / training / inventory / hr / billing — pages lists now reflect actual routes (RR, Assets, GL Accounts, Stock Take, /learn manuals, etc.).
+
 ## [1.2.0] — 2026-05-23
 
 ### Added — Feature #5: Asset Register
