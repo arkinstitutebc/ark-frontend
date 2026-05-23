@@ -1,14 +1,7 @@
 import type { PrAttachment } from "@ark/data-types"
-import {
-  AttachmentUploader,
-  BackLink,
-  formatPeso,
-  PageContainer,
-  PageHeader,
-  Select,
-} from "@ark/ui"
+import { AttachmentUploader, BackLink, formatPeso, PageContainer, Select } from "@ark/ui"
 import { useCreateAsset, useGlAccounts } from "@data/hooks"
-import { createMemo, createSignal, type JSX, Show } from "solid-js"
+import { createMemo, createSignal, type JSX, onMount, Show } from "solid-js"
 import { navigate } from "vike/client/router"
 
 const PROFIT_CENTERS = [
@@ -44,6 +37,26 @@ export default function CreateAssetPage() {
   const [linkedPrCode, setLinkedPrCode] = createSignal("")
   const [notes, setNotes] = createSignal("")
   const [attachments, setAttachments] = createSignal<PrAttachment[]>([])
+  const [fromDisbursement, setFromDisbursement] = createSignal<string | null>(null)
+
+  // Pre-fill from a fixed-asset disbursement (?fromDisbursement=&name=&cost=&category=&date=&profitCenter=).
+  onMount(() => {
+    if (typeof window === "undefined") return
+    const params = new URLSearchParams(window.location.search)
+    const disbursement = params.get("fromDisbursement")
+    if (!disbursement) return
+    setFromDisbursement(disbursement)
+    const nameParam = params.get("name")
+    if (nameParam) setName(nameParam)
+    const costParam = params.get("cost")
+    if (costParam) setAcquisitionCost(costParam)
+    const categoryParam = params.get("category")
+    if (categoryParam) setCategory(categoryParam)
+    const dateParam = params.get("date")
+    if (dateParam) setAcquisitionDate(dateParam)
+    const pcParam = params.get("profitCenter")
+    if (pcParam) setProfitCenter(pcParam)
+  })
 
   const categoryOptions = createMemo(() => {
     const list = glAccountsQuery.data ?? []
@@ -85,6 +98,7 @@ export default function CreateAssetPage() {
         location: location().trim() || undefined,
         serialNo: serialNo().trim() || undefined,
         linkedPrCode: linkedPrCode().trim() || undefined,
+        linkedDisbursementId: fromDisbursement() ?? undefined,
         notes: notes().trim() || undefined,
         attachments: attachments().length > 0 ? attachments() : undefined,
       },
@@ -104,6 +118,15 @@ export default function CreateAssetPage() {
           </p>
         </div>
       </div>
+
+      <Show when={fromDisbursement()}>
+        <div class="mb-6 p-4 bg-primary/5 border border-primary/20 rounded-lg text-sm text-foreground">
+          <span class="font-medium">Prefilled from a fixed-asset disbursement.</span>{" "}
+          <span class="text-muted">
+            Fill in useful life + residual value to complete registration.
+          </span>
+        </div>
+      </Show>
 
       <Show when={create.isError}>
         <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">

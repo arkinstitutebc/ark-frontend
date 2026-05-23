@@ -111,7 +111,21 @@ export default function CreateDisbursementPage() {
         ...data,
       },
       {
-        onSuccess: () => {
+        onSuccess: created => {
+          // Fixed-asset disbursements get a follow-up: pre-fill the asset
+          // register so finance doesn't have to retype name / cost / category.
+          if (data.expenseCategory === "fixed-asset") {
+            const params = new URLSearchParams({
+              fromDisbursement: created.id,
+              name: data.description,
+              cost: String(data.amount),
+              category: data.category,
+              date: created.createdAt.slice(0, 10),
+              ...(data.profitCenter ? { profitCenter: data.profitCenter } : {}),
+            })
+            window.location.href = `/assets/create?${params.toString()}`
+            return
+          }
           window.location.href = "/disbursements"
         },
       }
