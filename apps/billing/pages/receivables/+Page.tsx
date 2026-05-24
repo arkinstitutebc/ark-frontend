@@ -17,6 +17,21 @@ export default function ReceivablesPage() {
   const query = useReceivables()
   const updateMutation = useUpdateAr()
   const paymentMutation = useRecordPayment()
+  const selectedOutstanding = () => {
+    const ar = selectedAr()
+    if (!ar) return 0
+    return Number(ar.amount) - Number(ar.paidAmount || 0)
+  }
+  const paymentValue = () => {
+    const value = Number.parseFloat(paymentAmount())
+    return Number.isNaN(value) ? 0 : value
+  }
+  const paymentError = () => {
+    if (!paymentAmount()) return ""
+    if (paymentValue() <= 0) return "Payment must be greater than zero."
+    if (paymentValue() > selectedOutstanding()) return "Payment exceeds the outstanding balance."
+    return ""
+  }
 
   const filteredAr = createMemo(() => {
     let items = [...(query.data || [])]
@@ -49,8 +64,8 @@ export default function ReceivablesPage() {
 
   const handleRecordPayment = () => {
     const ar = selectedAr()
-    const amount = Number.parseFloat(paymentAmount())
-    if (!ar || Number.isNaN(amount) || amount <= 0) return
+    const amount = paymentValue()
+    if (!ar || amount <= 0 || amount > selectedOutstanding()) return
     paymentMutation.mutate(
       { arId: ar.id, amount, notes: paymentNotes() || undefined },
       {
@@ -276,9 +291,7 @@ export default function ReceivablesPage() {
                   </div>
                   <div>
                     <p class="text-muted">Remaining</p>
-                    <p class="font-semibold text-primary">
-                      {formatPeso(Number(ar().amount) - Number(ar().paidAmount || 0))}
-                    </p>
+                    <p class="font-semibold text-primary">{formatPeso(selectedOutstanding())}</p>
                   </div>
                 </div>
               </div>
@@ -295,6 +308,9 @@ export default function ReceivablesPage() {
                   onInput={e => setPaymentAmount(e.currentTarget.value)}
                   class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
+                <Show when={paymentError()}>
+                  <p class="text-xs text-red-600 mt-1">{paymentError()}</p>
+                </Show>
               </div>
               <div>
                 <label for="payment-notes" class="block text-sm font-medium text-foreground mb-1">
@@ -318,11 +334,7 @@ export default function ReceivablesPage() {
                 <button
                   type="button"
                   onClick={handleRecordPayment}
-                  disabled={
-                    !paymentAmount() ||
-                    Number.parseFloat(paymentAmount()) <= 0 ||
-                    paymentMutation.isPending
-                  }
+                  disabled={!paymentAmount() || !!paymentError() || paymentMutation.isPending}
                   class="flex-1 px-4 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {paymentMutation.isPending ? "Processing..." : "Record Payment"}

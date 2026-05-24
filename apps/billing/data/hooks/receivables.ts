@@ -22,6 +22,16 @@ interface ReceivablesListQuery {
   status?: string
 }
 
+interface RecordPaymentResult {
+  receivable: AccountReceivable
+  transaction: {
+    id: string
+    amount: string
+    referenceId: string | null
+    referenceType: string | null
+  }
+}
+
 const crud = createCrudHooks<
   AccountReceivable,
   AccountReceivable,
@@ -45,7 +55,7 @@ export function useRecordPayment() {
   const qc = useQueryClient()
   return createMutation(() => ({
     mutationFn: ({ arId, ...data }: { arId: string; amount: number; notes?: string }) =>
-      api<{ receivable: AccountReceivable }>(`/api/billing/receivables/${arId}/payment`, {
+      api<RecordPaymentResult>(`/api/billing/receivables/${arId}/payment`, {
         method: "POST",
         body: JSON.stringify(data),
       }),

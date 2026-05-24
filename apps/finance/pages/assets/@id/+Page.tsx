@@ -24,17 +24,23 @@ export default function AssetDetailPage() {
 
   const [disposeOpen, setDisposeOpen] = createSignal(false)
   const [disposalDate, setDisposalDate] = createSignal(new Date().toISOString().slice(0, 10))
-  const [disposalProceeds, setDisposalProceeds] = createSignal("0")
+  const [disposalProceeds, setDisposalProceeds] = createSignal("")
   const [disposeNotes, setDisposeNotes] = createSignal("")
+  const disposalProceedsValue = () => {
+    const value = disposalProceeds().trim()
+    if (!value) return undefined
+    const parsed = Number.parseFloat(value)
+    return Number.isNaN(parsed) ? undefined : parsed.toFixed(2)
+  }
 
   const submitDispose = () => {
     const id_ = query.data?.id
-    if (!id_) return
+    if (!id_ || !disposalDate()) return
     dispose.mutate(
       {
         id: id_,
         disposalDate: disposalDate(),
-        disposalProceeds: (Number.parseFloat(disposalProceeds()) || 0).toFixed(2),
+        disposalProceeds: disposalProceedsValue(),
         notes: disposeNotes().trim() || undefined,
       },
       { onSuccess: () => setDisposeOpen(false) }
@@ -238,6 +244,9 @@ export default function AssetDetailPage() {
                         onInput={e => setDisposalDate(e.currentTarget.value)}
                         class="w-full px-3 py-2 border border-border rounded-lg text-sm"
                       />
+                      <Show when={!disposalDate()}>
+                        <p class="text-xs text-red-600 mt-1">Disposal date is required.</p>
+                      </Show>
                     </label>
                     <label class="block">
                       <span class="block text-sm font-medium text-foreground mb-1">
@@ -250,6 +259,7 @@ export default function AssetDetailPage() {
                         value={disposalProceeds()}
                         onInput={e => setDisposalProceeds(e.currentTarget.value)}
                         class="w-full px-3 py-2 border border-border rounded-lg text-sm"
+                        placeholder="Leave blank if none"
                       />
                     </label>
                     <label class="block">
@@ -274,7 +284,7 @@ export default function AssetDetailPage() {
                       <button
                         type="button"
                         onClick={submitDispose}
-                        disabled={dispose.isPending}
+                        disabled={dispose.isPending || !disposalDate()}
                         class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg disabled:opacity-50"
                       >
                         {dispose.isPending ? "Disposing…" : "Dispose"}
