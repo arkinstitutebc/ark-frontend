@@ -1,9 +1,15 @@
 import { expect, test } from "@playwright/test"
+import { loginAsAdmin, requireBackend } from "./auth-helper"
 import { waitForReady } from "./helpers"
 
 const PROCUREMENT_URL = "http://localhost:3002"
 
 test.describe("Procurement — Purchase Requests + 3-sig workflow", () => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    await requireBackend(testInfo)
+    await loginAsAdmin(page)
+  })
+
   test("PR list renders chrome + filters", async ({ page }) => {
     await page.goto(`${PROCUREMENT_URL}/`)
     await waitForReady(page)
@@ -23,9 +29,9 @@ test.describe("Procurement — Purchase Requests + 3-sig workflow", () => {
 
     // 4-axis accounting classification — feature #3 dropdowns
     await expect(page.getByText("Expense Category").first()).toBeVisible()
-    await expect(page.getByText("Profit Center", { exact: true }).first()).toBeVisible()
+    await expect(page.getByRole("combobox", { name: "Profit Center" })).toBeVisible()
     await expect(page.getByText("Accounting Treatment").first()).toBeVisible()
-    await expect(page.getByText("Cost Type", { exact: true }).first()).toBeVisible()
+    await expect(page.getByRole("combobox", { name: "Cost Type" })).toBeVisible()
 
     // Items + Specification/Remarks fields per row (shipped in bucket 1 polish)
     await expect(page.getByPlaceholder(/Item name|description/i).first()).toBeVisible()

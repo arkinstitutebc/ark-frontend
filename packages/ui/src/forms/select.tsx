@@ -111,6 +111,7 @@ export function Select<T>(props: SelectProps<T>): JSX.Element {
       }
     } else if (e.key === "Escape" && open()) {
       e.preventDefault()
+      e.stopPropagation()
       close()
     }
   }

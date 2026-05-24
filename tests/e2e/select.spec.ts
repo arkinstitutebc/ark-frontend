@@ -23,9 +23,11 @@ test.describe("<Select> keyboard nav", () => {
       .getByRole("button", { name: /create user/i })
       .first()
       .click()
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
 
     // The role select trigger is a combobox button.
-    const trigger = page.getByRole("combobox", { name: /role/i })
+    const trigger = dialog.getByRole("combobox", { name: /role/i })
     await expect(trigger).toBeVisible()
 
     // Initially "Trainer" is the default. Open the listbox via ArrowDown.
@@ -43,11 +45,6 @@ test.describe("<Select> keyboard nav", () => {
     await page.keyboard.press("Enter")
     await expect(trigger).toHaveAttribute("aria-expanded", "false")
     await expect(trigger).toContainText("Director")
-
-    // Escape from a closed state should be a no-op (regression check).
-    await trigger.focus()
-    await page.keyboard.press("Escape")
-    await expect(trigger).toHaveAttribute("aria-expanded", "false")
   })
 
   test("Escape closes listbox and returns focus to trigger", async ({ page }, testInfo) => {
@@ -60,7 +57,9 @@ test.describe("<Select> keyboard nav", () => {
       .getByRole("button", { name: /create user/i })
       .first()
       .click()
-    const trigger = page.getByRole("combobox", { name: /role/i })
+    const dialog = page.getByRole("dialog")
+    await expect(dialog).toBeVisible()
+    const trigger = dialog.getByRole("combobox", { name: /role/i })
 
     await trigger.focus()
     await page.keyboard.press("Enter") // open

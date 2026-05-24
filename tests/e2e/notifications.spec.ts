@@ -19,6 +19,24 @@ interface InvitedUser {
 
 let invited: InvitedUser | null = null
 
+async function finishRequiredPasswordChange(
+  page: import("@playwright/test").Page,
+  user: InvitedUser,
+  newPassword: string
+) {
+  const changeRes = await page.request.post(`${API_URL}/api/auth/change-password`, {
+    data: { oldPassword: user.tempPassword, newPassword },
+    failOnStatusCode: false,
+  })
+  expect(changeRes.status()).toBe(200)
+
+  const loginRes = await page.request.post(`${API_URL}/api/auth/login`, {
+    data: { email: user.email, password: newPassword },
+    failOnStatusCode: false,
+  })
+  expect(loginRes.status()).toBe(200)
+}
+
 test.describe("Notifications fan-out + bell", () => {
   // biome-ignore lint/correctness/noEmptyPattern: Playwright requires the first argument to be a destructured fixture object — empty {} omits all fixtures while still satisfying the API.
   test.beforeEach(async ({}, testInfo) => {
@@ -66,10 +84,11 @@ test.describe("Notifications fan-out + bell", () => {
       data: { email: invited.email, password: invited.tempPassword },
     })
     expect(loginRes.status()).toBe(200)
+    await finishRequiredPasswordChange(page, invited, `NotifPass${stamp}`)
 
-    // mustChangePassword is true → the page redirects to /profile?required=1.
-    // Navigate explicitly to /profile to land on a page with the topbar bell.
-    await page.goto("/profile")
+    // The required password gate suppresses the topbar, so complete the change
+    // first and then land on a normal portal page with the notification bell.
+    await page.goto("/")
     await waitForReady(page)
 
     // Step 3: Bell badge shows "1"
@@ -104,8 +123,9 @@ test.describe("Notifications fan-out + bell", () => {
     await page.request.post(`${API_URL}/api/auth/login`, {
       data: { email: invited.email, password: invited.tempPassword },
     })
+    await finishRequiredPasswordChange(page, invited, `MarkAllPass${stamp}`)
 
-    await page.goto("/profile")
+    await page.goto("/")
     await waitForReady(page)
 
     const bell = page.getByRole("button", { name: /notifications.*\d+.*unread/i })

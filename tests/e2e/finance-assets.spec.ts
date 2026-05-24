@@ -1,9 +1,15 @@
 import { expect, test } from "@playwright/test"
+import { loginAsAdmin, requireBackend } from "./auth-helper"
 import { waitForReady } from "./helpers"
 
 const FINANCE_URL = "http://localhost:3004"
 
 test.describe("Finance — Asset Register", () => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    await requireBackend(testInfo)
+    await loginAsAdmin(page)
+  })
+
   test("list page renders chrome + stat cards + empty state", async ({ page }) => {
     await page.goto(`${FINANCE_URL}/assets`)
     await waitForReady(page)
@@ -14,7 +20,7 @@ test.describe("Finance — Asset Register", () => {
     // Stat cards: Active assets / Total cost / Book value
     await expect(page.getByText("Active assets")).toBeVisible()
     await expect(page.getByText(/Total cost/i)).toBeVisible()
-    await expect(page.getByText(/Book value/i)).toBeVisible()
+    await expect(page.getByText("Book value (today)")).toBeVisible()
 
     // Filter chips
     await expect(page.getByRole("button", { name: "All", exact: true })).toBeVisible()
@@ -30,9 +36,9 @@ test.describe("Finance — Asset Register", () => {
 
     // Required fields visible
     await expect(page.getByText("Name")).toBeVisible()
-    await expect(page.getByText("Category", { exact: true }).first()).toBeVisible()
+    await expect(page.getByRole("combobox", { name: "Category" })).toBeVisible()
     await expect(page.getByText(/Acquisition Cost/i)).toBeVisible()
-    await expect(page.getByText(/Useful Life/i)).toBeVisible()
+    await expect(page.getByText("Useful Life (months)*")).toBeVisible()
 
     // Useful-life quick-set presets
     await expect(page.getByRole("button", { name: /^3 years$/i })).toBeVisible()
@@ -40,7 +46,7 @@ test.describe("Finance — Asset Register", () => {
 
     // Depreciation preview panel
     await expect(page.getByText(/Depreciation Preview/i)).toBeVisible()
-    await expect(page.getByText(/Monthly depreciation/i)).toBeVisible()
+    await expect(page.getByText("Monthly depreciation", { exact: true })).toBeVisible()
   })
 
   test("prefill from disbursement banner shows when fromDisbursement query param is present", async ({

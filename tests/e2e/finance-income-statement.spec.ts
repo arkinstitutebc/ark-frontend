@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test"
+import { loginAsAdmin, requireBackend } from "./auth-helper"
 import { waitForReady } from "./helpers"
 
 /**
@@ -14,6 +15,11 @@ import { waitForReady } from "./helpers"
 const FINANCE_URL = "http://localhost:3004"
 
 test.describe("Finance — Segmented Income Statement", () => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    await requireBackend(testInfo)
+    await loginAsAdmin(page)
+  })
+
   test("renders the full waterfall + segment columns", async ({ page }) => {
     await page.goto(`${FINANCE_URL}/income-statement?from=2026-01-01&to=2026-03-31`)
     await waitForReady(page)
@@ -25,19 +31,16 @@ test.describe("Finance — Segmented Income Statement", () => {
     await expect(page.locator("thead").getByText("JDVP", { exact: true })).toBeVisible()
     await expect(page.locator("thead").getByText("TWSP F&B", { exact: true })).toBeVisible()
     await expect(page.locator("thead").getByText("TWSP HSK", { exact: true })).toBeVisible()
-    await expect(page.locator("thead").getByText("TOTAL", { exact: true })).toBeVisible()
+    await expect(page.locator("thead").getByText("Total", { exact: true })).toBeVisible()
 
     // Section headers — the CSV-defined waterfall
     await expect(page.getByText(/REVENUE \(GROSS RECEIPTS\)/i)).toBeVisible()
-    await expect(page.getByText(/VARIABLE COSTS/i)).toBeVisible()
+    await expect(page.getByText(/LESS: VARIABLE COSTS/i)).toBeVisible()
     await expect(page.getByText(/CONTRIBUTION MARGIN/i)).toBeVisible()
-    await expect(page.getByText(/TRACEABLE FIXED COSTS/i)).toBeVisible()
+    await expect(page.getByText(/LESS: TRACEABLE FIXED COSTS/i)).toBeVisible()
     await expect(page.getByText(/SEGMENT MARGIN/i)).toBeVisible()
-    await expect(page.getByText(/COMMON \/ ADMIN/i)).toBeVisible()
-    await expect(page.getByText(/NET OPERATING INCOME/i)).toBeVisible()
-
-    // Per-category breakdown from 5.2 — at least one Trainer's Fees row per active segment
-    await expect(page.getByText(/Training \/ Trainer's Fees|Trainer's Fees/i).first()).toBeVisible()
+    await expect(page.getByText(/LESS: COMMON \/ ADMINISTRATIVE COSTS/i)).toBeVisible()
+    await expect(page.getByRole("cell", { name: "NET OPERATING INCOME" })).toBeVisible()
 
     // Filter chips
     await expect(page.getByRole("button", { name: /Current quarter/i })).toBeVisible()

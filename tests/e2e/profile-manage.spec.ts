@@ -67,6 +67,7 @@ test.describe("Manage Profile — avatar upload", () => {
     // Hidden file input on the photo card.
     const fileInput = page.locator('input[type="file"][accept*="image"]')
     await fileInput.setInputFiles("tests/fixtures/avatar-1px.png")
+    await page.getByRole("button", { name: /use this photo/i }).click()
 
     // Either: toast.success "Photo uploaded" (Cloudinary configured)
     // OR:     toast.error containing 503 / "Failed to upload" (Cloudinary not configured)

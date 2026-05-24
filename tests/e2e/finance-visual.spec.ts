@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test"
+import { loginAsAdmin, requireBackend } from "./auth-helper"
 import { waitForReady } from "./helpers"
 
 /**
@@ -12,6 +13,11 @@ import { waitForReady } from "./helpers"
 
 const FINANCE_URL = "http://localhost:3004"
 
+test.skip(
+  !process.env.RUN_VISUAL_E2E,
+  "RUN_VISUAL_E2E=1 required because finance visual baselines are intentionally updated separately"
+)
+
 const PAGES = [
   { path: "/income-statement?from=2026-01-01&to=2026-03-31", name: "income-statement" },
   { path: "/gl-accounts", name: "gl-accounts" },
@@ -20,7 +26,9 @@ const PAGES = [
 ] as const
 
 for (const page of PAGES) {
-  test(`visual snapshot — ${page.name}`, async ({ page: pw }) => {
+  test(`visual snapshot — ${page.name}`, async ({ page: pw }, testInfo) => {
+    await requireBackend(testInfo)
+    await loginAsAdmin(pw)
     await pw.goto(`${FINANCE_URL}${page.path}`)
     await waitForReady(pw)
     // Settle async data (income statement does 3 queries; assets does 1).

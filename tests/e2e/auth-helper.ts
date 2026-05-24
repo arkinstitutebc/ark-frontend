@@ -8,8 +8,8 @@ export interface SeededAdmin {
 }
 
 export const SEEDED_ADMIN: SeededAdmin = {
-  email: "matt@arkinstitutebc.com",
-  password: "changeme",
+  email: process.env.E2E_ADMIN_EMAIL || "matt@arkinstitutebc.com",
+  password: process.env.E2E_ADMIN_PASSWORD || "changeme",
 }
 
 /**
