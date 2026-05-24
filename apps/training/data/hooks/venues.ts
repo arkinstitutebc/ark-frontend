@@ -1,4 +1,5 @@
 import { createCrudHooks } from "@ark/ui"
+import { queryKeys } from "../query-keys"
 import type { Venue } from "../types"
 
 interface CreateVenueInput {
@@ -19,6 +20,11 @@ const crud = createCrudHooks<Venue, Venue, CreateVenueInput, UpdateVenueInput, v
   messages: {
     create: "Venue added",
     delete: "Venue removed",
+  },
+  queryKeys: {
+    all: queryKeys.venues.all,
+    list: () => queryKeys.venues.all,
+    detail: id => queryKeys.venues.detail(id),
   },
 })
 

@@ -1,5 +1,6 @@
 import { createCrudHooks } from "@ark/ui"
 import type { ProcurementCategory } from "@data/types"
+import { queryKeys } from "../query-keys"
 
 interface CreateCategoryInput {
   name: string
@@ -25,6 +26,11 @@ const crud = createCrudHooks<
   messages: {
     create: "Category added",
     delete: "Category removed",
+  },
+  queryKeys: {
+    all: queryKeys.categories.all,
+    list: () => queryKeys.categories.all,
+    detail: id => queryKeys.categories.detail(id),
   },
 })
 

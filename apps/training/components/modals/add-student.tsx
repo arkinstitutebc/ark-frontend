@@ -1,6 +1,7 @@
 import { formErrorClass, formInputClass, Modal, ModalFooter, Select, toast } from "@ark/ui"
 import { api } from "@data/api"
 import { useBatches, useCreateStudent } from "@data/hooks"
+import { queryKeys } from "@data/query-keys"
 import { createStudentSchema } from "@data/schemas"
 import type { Student } from "@data/types"
 import { validateForm } from "@data/validate"
@@ -65,8 +66,8 @@ export function AddStudentModal(props: AddStudentModalProps) {
     setErrors({})
     createMutation.mutate(result.data, {
       onSuccess: () => {
-        qc.invalidateQueries({ queryKey: ["batches"] })
-        qc.invalidateQueries({ queryKey: ["batches", result.data.batchId, "students"] })
+        qc.invalidateQueries({ queryKey: queryKeys.batches.all })
+        qc.invalidateQueries({ queryKey: queryKeys.batches.students(result.data.batchId) })
         resetSingle()
         props.onClose()
       },
@@ -142,8 +143,9 @@ export function AddStudentModal(props: AddStudentModalProps) {
     }
     setSubmitting(false)
     if (added > 0) {
-      qc.invalidateQueries({ queryKey: ["students"] })
-      qc.invalidateQueries({ queryKey: ["batches"] })
+      qc.invalidateQueries({ queryKey: queryKeys.students.all })
+      qc.invalidateQueries({ queryKey: queryKeys.batches.all })
+      qc.invalidateQueries({ queryKey: queryKeys.batches.students(bulkBatchId()) })
     }
     if (failed > 0) toast.error(`Added ${added}, ${failed} failed`)
     else toast.success(`Added ${added} student${added === 1 ? "" : "s"}`)

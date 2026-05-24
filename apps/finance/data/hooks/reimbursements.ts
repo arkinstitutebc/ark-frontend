@@ -49,6 +49,11 @@ const crud = createCrudHooks<Reimbursement, Reimbursement, CreateRrInput, Update
     domain: "reimbursements",
     label: "Reimbursement",
     messages: { create: "Reimbursement submitted", update: "Reimbursement updated" },
+    queryKeys: {
+      all: queryKeys.reimbursements.all,
+      list: q => queryKeys.reimbursements.byStatus(q?.status),
+      detail: id => queryKeys.reimbursements.detail(id),
+    },
   }
 )
 
@@ -66,7 +71,6 @@ function bespoke<TBody>(path: (id: string) => string, successMsg: string) {
       onSuccess: (_d, variables) => {
         qc.invalidateQueries({ queryKey: queryKeys.reimbursements.all })
         qc.invalidateQueries({ queryKey: queryKeys.reimbursements.detail(variables.id) })
-        qc.invalidateQueries({ queryKey: ["reimbursements"] })
         toast.success(successMsg)
       },
       onError: (err: Error) => toast.error(err.message),

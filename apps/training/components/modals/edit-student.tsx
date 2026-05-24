@@ -8,9 +8,11 @@ import {
   Select,
 } from "@ark/ui"
 import { useBatches, useUpdateStudent } from "@data/hooks"
+import { queryKeys } from "@data/query-keys"
 import { updateStudentSchema } from "@data/schemas"
 import type { Student } from "@data/types"
 import { validateForm } from "@data/validate"
+import { useQueryClient } from "@tanstack/solid-query"
 import { createMemo, createSignal, Show } from "solid-js"
 
 interface EditStudentModalProps {
@@ -43,6 +45,7 @@ const EMPLOYMENT_STATUSES = ["Employed", "Unemployed", "Underemployed", "Self-Em
 export function EditStudentModal(props: EditStudentModalProps) {
   const batchesQuery = useBatches()
   const mutation = useUpdateStudent()
+  const qc = useQueryClient()
   const [errors, setErrors] = createSignal<Record<string, string>>({})
 
   // Basic info
@@ -141,7 +144,14 @@ export function EditStudentModal(props: EditStudentModalProps) {
         batchId: batchId(),
         status: status(),
       },
-      { onSuccess: () => props.onClose() }
+      {
+        onSuccess: () => {
+          qc.invalidateQueries({ queryKey: queryKeys.batches.all })
+          qc.invalidateQueries({ queryKey: queryKeys.batches.students(props.student.batchId) })
+          qc.invalidateQueries({ queryKey: queryKeys.batches.students(batchId()) })
+          props.onClose()
+        },
+      }
     )
   }
 

@@ -61,6 +61,11 @@ const crud = createCrudHooks<
   domain: "requests",
   label: "Request",
   messages: { create: "Request submitted", update: "Request updated" },
+  queryKeys: {
+    all: queryKeys.requests.all,
+    list: q => queryKeys.requests.byStatus(q?.status),
+    detail: id => queryKeys.requests.detail(id),
+  },
 })
 
 export const useRequests = crud.useList
@@ -80,7 +85,6 @@ export function useCoordinatorReviewPr() {
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: queryKeys.requests.all })
       qc.invalidateQueries({ queryKey: queryKeys.requests.detail(variables.id) })
-      qc.invalidateQueries({ queryKey: ["requests"] })
       toast.success("Coordinator review submitted")
     },
     onError: (err: Error) => toast.error(err.message),
@@ -99,7 +103,6 @@ export function useApprovePr() {
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: queryKeys.requests.all })
       qc.invalidateQueries({ queryKey: queryKeys.requests.detail(variables.id) })
-      qc.invalidateQueries({ queryKey: ["requests"] })
       toast.success("Request approved")
     },
     onError: (err: Error) => toast.error(err.message),
@@ -117,7 +120,6 @@ export function useRejectPr() {
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: queryKeys.requests.all })
       qc.invalidateQueries({ queryKey: queryKeys.requests.detail(variables.id) })
-      qc.invalidateQueries({ queryKey: ["requests"] })
       toast.success("Request rejected")
     },
     onError: (err: Error) => toast.error(err.message),

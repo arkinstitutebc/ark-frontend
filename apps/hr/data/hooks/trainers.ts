@@ -1,4 +1,5 @@
 import { createCrudHooks } from "@ark/ui"
+import { queryKeys } from "../query-keys"
 import type { Trainer } from "../types"
 
 interface TrainerListQuery {
@@ -34,6 +35,11 @@ const crud = createCrudHooks<
   domain: "trainers",
   label: "Trainer",
   messages: { create: "Trainer added" },
+  queryKeys: {
+    all: queryKeys.trainers.all,
+    list: q => queryKeys.trainers.byStatus(q?.status),
+    detail: id => queryKeys.trainers.detail(id),
+  },
 })
 
 export const useTrainers = crud.useList

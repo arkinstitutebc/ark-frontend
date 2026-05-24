@@ -36,6 +36,11 @@ const crud = createCrudHooks<Asset, Asset, CreateAssetInput, UpdateAssetInput, L
   domain: "assets",
   label: "Asset",
   messages: { create: "Asset registered", update: "Asset updated" },
+  queryKeys: {
+    all: queryKeys.assets.all,
+    list: q => queryKeys.assets.filtered(q),
+    detail: id => queryKeys.assets.detail(id),
+  },
 })
 
 export const useAssets = crud.useList

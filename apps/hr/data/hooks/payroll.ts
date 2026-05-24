@@ -17,6 +17,11 @@ const crud = createCrudHooks<PayrollPeriod, PayrollPeriodDetail, never, never, v
   basePath: "/api/hr/payroll",
   domain: "payroll",
   label: "Payroll period",
+  queryKeys: {
+    all: queryKeys.payroll.all,
+    list: () => queryKeys.payroll.all,
+    detail: id => queryKeys.payroll.detail(id),
+  },
 })
 
 export const usePayroll = crud.useList
@@ -31,7 +36,6 @@ export function useProcessPayroll() {
     onSuccess: (_data, periodId) => {
       qc.invalidateQueries({ queryKey: queryKeys.payroll.all })
       qc.invalidateQueries({ queryKey: queryKeys.payroll.detail(periodId) })
-      qc.invalidateQueries({ queryKey: ["payroll"] })
       toast.success("Payroll processed")
     },
     onError: (err: Error) => toast.error(err.message),

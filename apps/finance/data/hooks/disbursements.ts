@@ -28,6 +28,11 @@ const crud = createCrudHooks<
   domain: "disbursements",
   label: "Disbursement",
   messages: { create: false },
+  queryKeys: {
+    all: queryKeys.disbursements.all,
+    list: () => queryKeys.disbursements.all,
+    detail: id => queryKeys.disbursements.detail(id),
+  },
 })
 
 export const useDisbursements = crud.useList
@@ -44,7 +49,6 @@ export function useCreateDisbursement() {
       qc.invalidateQueries({ queryKey: queryKeys.disbursements.all })
       qc.invalidateQueries({ queryKey: queryKeys.banks.all })
       qc.invalidateQueries({ queryKey: queryKeys.transactions.all })
-      qc.invalidateQueries({ queryKey: ["disbursements"] })
       toast.success("Disbursement recorded")
     },
     onError: (err: Error) => toast.error(err.message),

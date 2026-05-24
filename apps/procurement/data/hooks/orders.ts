@@ -39,6 +39,11 @@ const crud = createCrudHooks<
   label: "Order",
   // useCreatePo overrides the default toast + cross-invalidates requests, so silence the factory's
   messages: { create: false },
+  queryKeys: {
+    all: queryKeys.orders.all,
+    list: q => queryKeys.orders.byStatus(q?.status),
+    detail: id => queryKeys.orders.detail(id),
+  },
 })
 
 export const useOrders = crud.useList
@@ -54,7 +59,6 @@ export function useCreatePo() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.orders.all })
       qc.invalidateQueries({ queryKey: queryKeys.requests.all })
-      qc.invalidateQueries({ queryKey: ["orders"] })
       toast.success("Order created")
     },
     onError: (err: Error) => toast.error(err.message),

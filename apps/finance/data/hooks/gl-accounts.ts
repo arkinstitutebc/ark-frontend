@@ -1,5 +1,6 @@
 import type { GlAccount, GlAccountSection } from "@ark/data-types"
 import { createCrudHooks } from "@ark/ui"
+import { queryKeys } from "../query-keys"
 
 export interface CreateGlAccountInput {
   code: string
@@ -40,6 +41,11 @@ const crud = createCrudHooks<
   messages: {
     create: "GL account added",
     delete: "GL account deactivated",
+  },
+  queryKeys: {
+    all: queryKeys.glAccounts.all,
+    list: q => queryKeys.glAccounts.filtered(q),
+    detail: id => queryKeys.glAccounts.detail(id),
   },
 })
 

@@ -1,4 +1,5 @@
 import { createCrudHooks } from "@ark/ui"
+import { queryKeys } from "../query-keys"
 import type { Student } from "../types"
 
 interface StudentListQuery {
@@ -17,6 +18,11 @@ const crud = createCrudHooks<
   label: "Student",
   messages: {
     create: "Student enrolled",
+  },
+  queryKeys: {
+    all: queryKeys.students.all,
+    list: q => queryKeys.students.filtered(q),
+    detail: id => queryKeys.students.detail(id),
   },
 })
 

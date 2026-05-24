@@ -15,4 +15,8 @@ export const queryKeys = {
   receipts: {
     byPoCode: (poCode: string) => ["receipts", poCode] as const,
   },
+  categories: {
+    all: ["procurement-categories"] as const,
+    detail: (id: string) => ["procurement-categories", id] as const,
+  },
 } as const

@@ -43,6 +43,11 @@ const crud = createCrudHooks<
   domain: "receivables",
   label: "Receivable",
   messages: { create: "Billing created", update: "Receivable updated" },
+  queryKeys: {
+    all: queryKeys.receivables.all,
+    list: q => queryKeys.receivables.byStatus(q?.status),
+    detail: id => queryKeys.receivables.detail(id),
+  },
 })
 
 export const useReceivables = crud.useList
@@ -61,7 +66,6 @@ export function useRecordPayment() {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.receivables.all })
-      qc.invalidateQueries({ queryKey: ["receivables"] })
       toast.success("Payment recorded")
     },
     onError: (err: Error) => toast.error(err.message),

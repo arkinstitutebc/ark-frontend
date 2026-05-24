@@ -18,6 +18,11 @@ const crud = createCrudHooks<
   basePath: "/api/inventory/stock",
   domain: "stock",
   label: "Stock item",
+  queryKeys: {
+    all: queryKeys.stock.all,
+    list: q => queryKeys.stock.byBatch(q?.batchId),
+    detail: id => queryKeys.stock.detail(id),
+  },
 })
 
 export const useStock = crud.useList
@@ -42,7 +47,6 @@ export function useAdjustStock() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.stock.all })
       qc.invalidateQueries({ queryKey: queryKeys.movements.all })
-      qc.invalidateQueries({ queryKey: ["stock"] })
       toast.success("Stock adjusted")
     },
     onError: (err: Error) => toast.error(err.message),
@@ -63,7 +67,6 @@ export function useReceivePo() {
       qc.invalidateQueries({ queryKey: queryKeys.stock.all })
       qc.invalidateQueries({ queryKey: queryKeys.movements.all })
       qc.invalidateQueries({ queryKey: queryKeys.orders.all })
-      qc.invalidateQueries({ queryKey: ["stock"] })
       toast.success("Receipt completed")
     },
     onError: (err: Error) => toast.error(err.message),
@@ -98,7 +101,6 @@ export function useCycleCount() {
     onSuccess: result => {
       qc.invalidateQueries({ queryKey: queryKeys.stock.all })
       qc.invalidateQueries({ queryKey: queryKeys.movements.all })
-      qc.invalidateQueries({ queryKey: ["stock"] })
       const adjusted = result.itemsAdjusted
       const unchanged = result.itemsUnchanged
       toast.success(

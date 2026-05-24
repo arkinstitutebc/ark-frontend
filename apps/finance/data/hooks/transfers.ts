@@ -25,6 +25,11 @@ const crud = createCrudHooks<Transfer, Transfer, CreateTransferInput, Partial<Tr
   label: "Transfer",
   // bespoke create cross-invalidates banks + transactions
   messages: { create: false },
+  queryKeys: {
+    all: queryKeys.transfers.all,
+    list: () => queryKeys.transfers.all,
+    detail: id => queryKeys.transfers.detail(id),
+  },
 })
 
 export const useTransfers = crud.useList
@@ -41,7 +46,6 @@ export function useCreateTransfer() {
       qc.invalidateQueries({ queryKey: queryKeys.transfers.all })
       qc.invalidateQueries({ queryKey: queryKeys.banks.all })
       qc.invalidateQueries({ queryKey: queryKeys.transactions.all })
-      qc.invalidateQueries({ queryKey: ["transfers"] })
       toast.success("Transfer created")
     },
     onError: (err: Error) => toast.error(err.message),
