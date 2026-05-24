@@ -34,6 +34,7 @@ jobs:
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
       - run: bunx biome check .
+      - run: bun run test:unit
       - run: bun run --filter '*' typecheck
 
   deploy:

@@ -7,6 +7,7 @@ import {
   useQueryClient,
 } from "@tanstack/solid-query"
 import { toast } from "../feedback/app-toaster"
+import { buildCrudListUrl } from "./crud-url"
 
 /**
  * Factory for the standard 5 CRUD hooks (list / one / create / update / delete).
@@ -70,18 +71,6 @@ interface CrudHooks<TList, TOne, TCreate, TUpdate, TListQuery> {
   useDelete: () => CreateMutationResult<void, Error, string>
 }
 
-function defaultBuildListUrl<Q>(basePath: string, q: Q | undefined): string {
-  if (!q || typeof q !== "object") return basePath
-  const params = new URLSearchParams()
-  for (const [key, value] of Object.entries(q as Record<string, unknown>)) {
-    if (value !== undefined && value !== null && value !== "") {
-      params.set(key, String(value))
-    }
-  }
-  const qs = params.toString()
-  return qs ? `${basePath}?${qs}` : basePath
-}
-
 export function createCrudHooks<
   TList,
   TOne = TList,
@@ -94,7 +83,7 @@ export function createCrudHooks<
   const { basePath, domain, label } = config
   const labelText = label ?? domain.charAt(0).toUpperCase() + domain.slice(1)
   const buildList =
-    config.buildListUrl ?? ((q: TListQuery | undefined) => defaultBuildListUrl(basePath, q))
+    config.buildListUrl ?? ((q: TListQuery | undefined) => buildCrudListUrl(basePath, q))
   const keys = config.queryKeys ?? {
     all: [domain] as const,
     list: (q: TListQuery | undefined) => [domain, "list", q] as const,

@@ -35,6 +35,7 @@ bun install                    # one-time, links workspaces
 bun run dev:main               # local main portal on :3000
 bun run dev:training           # :3001 (procurement :3002, inventory :3003, finance :3004, billing :3005, hr :3006)
 bun run lint                   # biome
+bun run test:unit              # Bun unit tests for shared API/form helpers
 bun run typecheck              # tsc per workspace
 bun run build                  # Vike production build for every app/package with a build script
 bun run test:e2e               # Playwright dark-mode visual regression (LOCAL ONLY, NOT in CI)
@@ -56,7 +57,7 @@ uses each app's tracked `.env.production` for public URLs and systemd `PORT`.
 
 ## Pipeline
 
-- Pull requests run install, Biome, and workspace typecheck through
+- Pull requests run install, Biome, unit tests, and workspace typecheck through
   `.github/workflows/deploy.yml`.
 - Pull requests that touch `apps/**` or `packages/**` also run
   `.github/workflows/bundle-size.yml`, building every portal and commenting bundle
