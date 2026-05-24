@@ -48,6 +48,8 @@ function ApprovalCard(props: {
   onViewDetails: (pr: PurchaseRequest) => void
   processing: boolean
 }) {
+  const pdfUrl = () =>
+    `${import.meta.env.VITE_API_URL || "http://localhost:4000"}/api/procurement/requests/${props.pr.id}/pdf`
   const itemsSummary = () => {
     const items = props.pr.items
     const count = items.length
@@ -97,14 +99,15 @@ function ApprovalCard(props: {
           >
             <Icons.fileText class="w-3.5 h-3.5" /> Show more details
           </button>
-          <button
-            type="button"
-            onClick={() => props.onViewDetails(props.pr)}
+          <a
+            href={pdfUrl()}
+            target="_blank"
+            rel="noopener"
             class="flex items-center gap-1 text-xs text-muted hover:text-foreground cursor-pointer"
             title="View PDF"
           >
             <Icons.fileText class="w-3.5 h-3.5" /> View PDF
-          </button>
+          </a>
         </div>
       </div>
 

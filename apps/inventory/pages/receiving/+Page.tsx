@@ -2,9 +2,9 @@ import { BackLink, formatDatePH, formatPeso, PageHeader } from "@ark/ui"
 import { api } from "@data/api"
 import { useReceivePo } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
-import type { PurchaseOrder } from "@data/types"
+import type { PurchaseOrder, StockMovement } from "@data/types"
 import { createQuery } from "@tanstack/solid-query"
-import { createSignal, For, Show } from "solid-js"
+import { createMemo, createSignal, For, Show } from "solid-js"
 import { Icons } from "@/components/ui"
 
 interface ReceivedItem {
@@ -16,10 +16,9 @@ interface ReceivedItem {
 }
 
 export default function ReceivingPage() {
-  // Fetch POs with status "sent" or "partial" from procurement API
   const ordersQuery = createQuery(() => ({
     queryKey: queryKeys.orders.all,
-    queryFn: () => api<PurchaseOrder[]>("/api/procurement/orders?status=sent"),
+    queryFn: () => api<PurchaseOrder[]>("/api/procurement/orders"),
   }))
 
   const receiveMutation = useReceivePo()
@@ -27,6 +26,38 @@ export default function ReceivingPage() {
   const [selectedPo, setSelectedPo] = createSignal<PurchaseOrder | null>(null)
   const [receivedItems, setReceivedItems] = createSignal<Record<string, ReceivedItem>>({})
   const [showSuccess, setShowSuccess] = createSignal(false)
+
+  const receivableOrders = createMemo(() =>
+    ((ordersQuery.data as PurchaseOrder[] | undefined) ?? []).filter(
+      po => po.status === "sent" || po.status === "partial"
+    )
+  )
+
+  const movementsQuery = createQuery(() => {
+    const po = selectedPo()
+    return {
+      queryKey: [...queryKeys.movements.all, { reference: po?.poCode }],
+      enabled: !!po,
+      queryFn: () =>
+        po
+          ? api<StockMovement[]>(
+              `/api/inventory/movements?reference=${encodeURIComponent(po.poCode)}`
+            )
+          : Promise.resolve([]),
+    }
+  })
+
+  const previouslyReceivedByName = createMemo(() => {
+    const totals = new Map<string, number>()
+    for (const movement of movementsQuery.data ?? []) {
+      if (movement.type !== "in" || !movement.itemName) continue
+      totals.set(
+        movement.itemName,
+        (totals.get(movement.itemName) ?? 0) + Number(movement.quantity)
+      )
+    }
+    return totals
+  })
 
   const openPo = (po: PurchaseOrder) => {
     setSelectedPo(po)
@@ -53,10 +84,21 @@ export default function ReceivingPage() {
     setReceivedItems({})
   }
 
+  const previouslyReceived = (itemName: string) => previouslyReceivedByName().get(itemName) ?? 0
+  const remainingBeforeReceipt = (item: { name: string; quantity: number }) =>
+    Math.max(0, item.quantity - previouslyReceived(item.name))
+  const remainingAfterReceipt = (item: { id: string; name: string; quantity: number }) =>
+    Math.max(0, remainingBeforeReceipt(item) - (receivedItems()[item.id]?.quantityReceived ?? 0))
+
   const updateReceivedQty = (id: string, qty: number) => {
+    const po = selectedPo()
+    const item = (
+      po?.items as Array<{ id: string; name: string; quantity: number }> | undefined
+    )?.find(line => line.id === id)
+    const maxQty = item ? remainingBeforeReceipt(item) : qty
     setReceivedItems(prev => ({
       ...prev,
-      [id]: { ...prev[id], quantityReceived: Math.max(0, qty) },
+      [id]: { ...prev[id], quantityReceived: Math.min(maxQty, Math.max(0, qty)) },
     }))
   }
 
@@ -124,7 +166,7 @@ export default function ReceivingPage() {
         </Show>
         <Show when={ordersQuery.isSuccess}>
           <div class="space-y-4">
-            <For each={ordersQuery.data as PurchaseOrder[]}>
+            <For each={receivableOrders()}>
               {po => (
                 <button
                   type="button"
@@ -158,7 +200,7 @@ export default function ReceivingPage() {
               )}
             </For>
 
-            {((ordersQuery.data as PurchaseOrder[]) || []).length === 0 && (
+            {receivableOrders().length === 0 && (
               <div class="text-center py-12 bg-surface rounded-lg border border-border">
                 <Icons.fileText class="w-12 h-12 text-muted mx-auto mb-3" />
                 <h3 class="text-base font-semibold text-foreground mb-1">No orders to receive</h3>
@@ -200,6 +242,10 @@ export default function ReceivingPage() {
                   </p>
                 </div>
 
+                <Show when={movementsQuery.isLoading}>
+                  <div class="mb-4 h-10 bg-surface-muted rounded-lg animate-pulse" />
+                </Show>
+
                 <div class="border border-border rounded-lg overflow-hidden">
                   <table class="w-full">
                     <thead class="bg-surface-muted">
@@ -211,7 +257,10 @@ export default function ReceivingPage() {
                           Ordered
                         </th>
                         <th class="text-center px-4 py-3 text-xs font-semibold text-muted uppercase">
-                          Received
+                          Previously received
+                        </th>
+                        <th class="text-center px-4 py-3 text-xs font-semibold text-muted uppercase">
+                          This receipt
                         </th>
                         <th class="text-center px-4 py-3 text-xs font-semibold text-muted uppercase">
                           Remaining
@@ -222,7 +271,9 @@ export default function ReceivingPage() {
                       <For each={poItems()}>
                         {item => {
                           const received = () => receivedItems()[item.id]?.quantityReceived ?? 0
-                          const remaining = () => item.quantity - received()
+                          const prior = () => previouslyReceived(item.name)
+                          const remainingBefore = () => remainingBeforeReceipt(item)
+                          const remaining = () => remainingAfterReceipt(item)
                           return (
                             <tr class="border-t border-border">
                               <td class="px-4 py-3 text-sm font-medium text-foreground">
@@ -231,12 +282,16 @@ export default function ReceivingPage() {
                               <td class="px-4 py-3 text-center text-sm text-muted">
                                 {item.quantity} {item.unit}
                               </td>
+                              <td class="px-4 py-3 text-center text-sm text-muted tabular-nums">
+                                {prior()} {item.unit}
+                              </td>
                               <td class="px-4 py-3">
                                 <div class="flex items-center justify-center gap-2">
                                   <button
                                     type="button"
-                                    onClick={() => updateReceivedQty(item.id, item.quantity)}
-                                    class="px-2.5 py-1 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded transition-colors"
+                                    disabled={movementsQuery.isLoading || remainingBefore() === 0}
+                                    onClick={() => updateReceivedQty(item.id, remainingBefore())}
+                                    class="px-2.5 py-1 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
                                     All
                                   </button>
@@ -244,17 +299,18 @@ export default function ReceivingPage() {
                                     type="number"
                                     value={received()}
                                     min={0}
-                                    max={item.quantity}
+                                    max={remainingBefore()}
+                                    disabled={movementsQuery.isLoading || remainingBefore() === 0}
                                     onInput={e =>
                                       updateReceivedQty(
                                         item.id,
                                         Math.min(
-                                          item.quantity,
+                                          remainingBefore(),
                                           parseInt(e.currentTarget.value, 10) || 0
                                         )
                                       )
                                     }
-                                    class="w-20 px-2 py-1.5 border border-border rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                                    class="w-20 px-2 py-1.5 border border-border rounded-lg text-sm text-center focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:bg-surface-muted disabled:text-muted"
                                   />
                                   <button
                                     type="button"
@@ -296,8 +352,10 @@ export default function ReceivingPage() {
                   <button
                     type="button"
                     onClick={handleCompleteReceipt}
-                    disabled={!hasReceivedItems() || receiveMutation.isPending}
-                    class={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${hasReceivedItems() && !receiveMutation.isPending ? "bg-primary hover:bg-primary/90" : "bg-muted cursor-not-allowed"}`}
+                    disabled={
+                      !hasReceivedItems() || receiveMutation.isPending || movementsQuery.isLoading
+                    }
+                    class={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${hasReceivedItems() && !receiveMutation.isPending && !movementsQuery.isLoading ? "bg-primary hover:bg-primary/90" : "bg-muted cursor-not-allowed"}`}
                   >
                     {receiveMutation.isPending
                       ? "Processing..."
