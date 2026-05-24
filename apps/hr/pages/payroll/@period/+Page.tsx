@@ -1,6 +1,15 @@
-import { BackLink, formatDatePH, formatPeso, PageHeader, StatCard, THead, Th } from "@ark/ui"
+import {
+  BackLink,
+  ConfirmDialog,
+  formatDatePH,
+  formatPeso,
+  PageHeader,
+  StatCard,
+  THead,
+  Th,
+} from "@ark/ui"
 import { type PayrollPeriodDetail, usePayrollPeriod, useProcessPayroll } from "@data/hooks"
-import { createMemo, For } from "solid-js"
+import { createMemo, createSignal, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
@@ -9,10 +18,11 @@ export default function Page() {
   const periodId = createMemo(() => pageContext.routeParams.period as string)
   const query = usePayrollPeriod(periodId)
   const processMutation = useProcessPayroll()
+  const [confirmOpen, setConfirmOpen] = createSignal(false)
 
   const handleProcess = () => {
     if (!periodId()) return
-    processMutation.mutate(periodId())
+    processMutation.mutate(periodId(), { onSuccess: () => setConfirmOpen(false) })
   }
 
   return (
@@ -33,11 +43,11 @@ export default function Page() {
                   {data.status === "draft" && (
                     <button
                       type="button"
-                      onClick={handleProcess}
+                      onClick={() => setConfirmOpen(true)}
                       disabled={processMutation.isPending}
                       class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
                     >
-                      {processMutation.isPending ? "Processing..." : "Process Payroll"}
+                      Process Payroll
                     </button>
                   )}
                   {data.status !== "draft" && (
@@ -54,7 +64,7 @@ export default function Page() {
               }
             />
 
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
               <StatCard
                 label="Total Gross"
                 numeric
@@ -62,6 +72,12 @@ export default function Page() {
               />
               <StatCard label="Total Net" numeric value={formatPeso(Number(data.totalNet || 0))} />
               <StatCard label="Trainers" value={data.trainerCount || 0} />
+              {data.status !== "draft" && (
+                <StatCard
+                  label="Processed"
+                  value={data.processedAt ? formatDatePH(data.processedAt) : "—"}
+                />
+              )}
             </div>
 
             {processMutation.isError && (
@@ -85,30 +101,46 @@ export default function Page() {
                     <Th align="right">Net Pay</Th>
                   </THead>
                   <tbody>
-                    <For each={data.entries || []}>
-                      {entry => (
-                        <tr class="border-t border-border hover:bg-surface-muted transition-colors">
-                          <td class="py-4 px-6 text-sm text-foreground">
-                            {entry.trainerName || "—"}
-                          </td>
-                          <td class="py-4 px-6 text-right text-sm text-muted tabular-nums">
-                            {Number(entry.totalHours || 0).toFixed(1)}
-                          </td>
-                          <td class="py-4 px-6 text-right text-sm text-muted tabular-nums">
-                            {formatPeso(Number(entry.hourlyRate || 0))}
-                          </td>
-                          <td class="py-4 px-6 text-right text-sm text-foreground tabular-nums">
-                            {formatPeso(Number(entry.grossPay || 0))}
-                          </td>
-                          <td class="py-4 px-6 text-right text-sm text-red-600 tabular-nums">
-                            {formatPeso(Number(entry.deductions || 0))}
-                          </td>
-                          <td class="py-4 px-6 text-right text-sm font-semibold text-foreground tabular-nums">
-                            {formatPeso(Number(entry.netPay || 0))}
+                    <Show
+                      when={(data.entries || []).length > 0}
+                      fallback={
+                        <tr>
+                          <td colSpan={6} class="py-10 px-6 text-center">
+                            <p class="text-sm font-medium text-foreground">
+                              No payroll entries yet
+                            </p>
+                            <p class="text-sm text-muted mt-1">
+                              Process payroll after trainer attendance for this period is complete.
+                            </p>
                           </td>
                         </tr>
-                      )}
-                    </For>
+                      }
+                    >
+                      <For each={data.entries || []}>
+                        {entry => (
+                          <tr class="border-t border-border hover:bg-surface-muted transition-colors">
+                            <td class="py-4 px-6 text-sm text-foreground">
+                              {entry.trainerName || "—"}
+                            </td>
+                            <td class="py-4 px-6 text-right text-sm text-muted tabular-nums">
+                              {Number(entry.totalHours || 0).toFixed(1)}
+                            </td>
+                            <td class="py-4 px-6 text-right text-sm text-muted tabular-nums">
+                              {formatPeso(Number(entry.hourlyRate || 0))}
+                            </td>
+                            <td class="py-4 px-6 text-right text-sm text-foreground tabular-nums">
+                              {formatPeso(Number(entry.grossPay || 0))}
+                            </td>
+                            <td class="py-4 px-6 text-right text-sm text-red-600 tabular-nums">
+                              {formatPeso(Number(entry.deductions || 0))}
+                            </td>
+                            <td class="py-4 px-6 text-right text-sm font-semibold text-foreground tabular-nums">
+                              {formatPeso(Number(entry.netPay || 0))}
+                            </td>
+                          </tr>
+                        )}
+                      </For>
+                    </Show>
                   </tbody>
                   <tfoot class="bg-surface-muted border-t border-border">
                     <tr>
@@ -129,6 +161,27 @@ export default function Page() {
                 </table>
               </div>
             </div>
+
+            <ConfirmDialog
+              open={confirmOpen()}
+              onClose={() => setConfirmOpen(false)}
+              title="Process Payroll"
+              description={
+                <div class="space-y-2">
+                  <p>
+                    This will create payroll entries for active trainers with attendance from{" "}
+                    <span class="font-medium">{formatDatePH(data.periodStart)}</span> to{" "}
+                    <span class="font-medium">{formatDatePH(data.periodEnd)}</span>.
+                  </p>
+                  <p class="text-muted">
+                    If no payable attendance is found, the period will stay in draft.
+                  </p>
+                </div>
+              }
+              confirmLabel="Process Payroll"
+              pending={processMutation.isPending}
+              onConfirm={handleProcess}
+            />
           </>
         )}
       </QueryBoundary>

@@ -8,6 +8,11 @@ interface PayrollPeriodDetail extends PayrollPeriod {
   entries: Array<PayrollEntry & { trainerName: string }>
 }
 
+interface ProcessPayrollResult {
+  period: PayrollPeriod
+  entries: Array<PayrollEntry & { trainerName: string }>
+}
+
 const crud = createCrudHooks<PayrollPeriod, PayrollPeriodDetail, never, never, void>({
   basePath: "/api/hr/payroll",
   domain: "payroll",
@@ -22,7 +27,7 @@ export function useProcessPayroll() {
   const qc = useQueryClient()
   return createMutation(() => ({
     mutationFn: (periodId: string) =>
-      api<{ period: PayrollPeriod }>(`/api/hr/payroll/${periodId}/process`, { method: "POST" }),
+      api<ProcessPayrollResult>(`/api/hr/payroll/${periodId}/process`, { method: "POST" }),
     onSuccess: (_data, periodId) => {
       qc.invalidateQueries({ queryKey: queryKeys.payroll.all })
       qc.invalidateQueries({ queryKey: queryKeys.payroll.detail(periodId) })
