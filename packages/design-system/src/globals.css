@@ -61,15 +61,6 @@
   --color-accent: #ef4444; /* light: #c80100 (1° 100% 39%) → dark: 0° 84% 60% */
 }
 
-/* Brighter glow shadows for dark mode to match the lighter brand tints. */
-:root[data-theme="dark"] .shadow-glow-primary {
-  box-shadow: 0 4px 14px rgba(83, 120, 214, 0.35);
-}
-
-:root[data-theme="dark"] .shadow-glow-accent {
-  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
-}
-
 body {
   font-family: "Montserrat Variable", "Montserrat", ui-sans-serif, system-ui, sans-serif;
   background-color: var(--color-background);
@@ -82,6 +73,15 @@ body {
 
 .shadow-glow-accent {
   box-shadow: 0 4px 14px rgba(200, 1, 0, 0.35);
+}
+
+/* Brighter glow shadows for dark mode to match the lighter brand tints. */
+:root[data-theme="dark"] .shadow-glow-primary {
+  box-shadow: 0 4px 14px rgba(83, 120, 214, 0.35);
+}
+
+:root[data-theme="dark"] .shadow-glow-accent {
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35);
 }
 
 @keyframes fade-in {
