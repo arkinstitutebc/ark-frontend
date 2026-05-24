@@ -80,6 +80,8 @@ export default function CreateAssetPage() {
     if (!category()) next.category = "Pick an asset category"
     if (!acquisitionDate()) next.acquisitionDate = "Required"
     if (cost() <= 0) next.acquisitionCost = "Must be > 0"
+    if (residual() < 0) next.residualValue = "Cannot be negative"
+    if (residual() > cost()) next.residualValue = "Cannot exceed acquisition cost"
     if (usefulLifeMonths() <= 0) next.usefulLifeMonths = "Must be > 0"
     setErrors(next)
     if (Object.keys(next).length > 0) return
@@ -200,7 +202,7 @@ export default function CreateAssetPage() {
                     class={cls(errors().acquisitionCost)}
                   />
                 </Field>
-                <Field label="Residual Value (PHP)">
+                <Field label="Residual Value (PHP)" error={errors().residualValue}>
                   <input
                     type="number"
                     min="0"

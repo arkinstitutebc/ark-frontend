@@ -26,6 +26,7 @@ export default function AssetDetailPage() {
   const [disposalDate, setDisposalDate] = createSignal(new Date().toISOString().slice(0, 10))
   const [disposalProceeds, setDisposalProceeds] = createSignal("")
   const [disposeNotes, setDisposeNotes] = createSignal("")
+  const [disposeError, setDisposeError] = createSignal("")
   const disposalProceedsValue = () => {
     const value = disposalProceeds().trim()
     if (!value) return undefined
@@ -34,8 +35,14 @@ export default function AssetDetailPage() {
   }
 
   const submitDispose = () => {
-    const id_ = query.data?.id
-    if (!id_ || !disposalDate()) return
+    const asset = query.data
+    const id_ = asset?.id
+    if (!id_ || !asset || !disposalDate()) return
+    if (disposalDate() < asset.acquisitionDate) {
+      setDisposeError("Disposal date cannot be before acquisition date.")
+      return
+    }
+    setDisposeError("")
     dispose.mutate(
       {
         id: id_,
@@ -234,6 +241,11 @@ export default function AssetDetailPage() {
                     <p class="text-sm text-muted">
                       Marks the asset as disposed. Depreciation stops on the disposal date.
                     </p>
+                    <Show when={disposeError()}>
+                      <div class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                        {disposeError()}
+                      </div>
+                    </Show>
                     <label class="block">
                       <span class="block text-sm font-medium text-foreground mb-1">
                         Disposal date
@@ -241,7 +253,10 @@ export default function AssetDetailPage() {
                       <input
                         type="date"
                         value={disposalDate()}
-                        onInput={e => setDisposalDate(e.currentTarget.value)}
+                        onInput={e => {
+                          setDisposalDate(e.currentTarget.value)
+                          setDisposeError("")
+                        }}
                         class="w-full px-3 py-2 border border-border rounded-lg text-sm"
                       />
                       <Show when={!disposalDate()}>
