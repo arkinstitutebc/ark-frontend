@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test"
 import { loginAsAdmin, requireBackend } from "./auth-helper"
 import { waitForReady } from "./helpers"
+import { PORTAL_URLS } from "./test-config"
 
 /**
  * Verifies the Segmented Income Statement renders the CSV-shaped layout
@@ -12,7 +13,7 @@ import { waitForReady } from "./helpers"
  *   - `bun src/db/seed-demo.ts` already run so the IS isn't empty
  */
 
-const FINANCE_URL = "http://localhost:3004"
+const FINANCE_URL = PORTAL_URLS.finance
 
 test.describe("Finance — Segmented Income Statement", () => {
   test.beforeEach(async ({ page }, testInfo) => {

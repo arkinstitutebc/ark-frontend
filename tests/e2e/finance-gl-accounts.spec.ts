@@ -1,9 +1,9 @@
 import { expect, test } from "@playwright/test"
 import { loginAsAdmin, requireBackend } from "./auth-helper"
 import { waitForReady } from "./helpers"
+import { API_URL, PORTAL_URLS } from "./test-config"
 
-const API_URL = process.env.VITE_API_URL || "http://localhost:4000"
-const FINANCE_URL = "http://localhost:3004"
+const FINANCE_URL = PORTAL_URLS.finance
 
 async function createGlFixture(page: import("@playwright/test").Page, seed: string) {
   const rows = [

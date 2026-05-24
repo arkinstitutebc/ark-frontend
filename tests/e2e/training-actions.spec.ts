@@ -1,8 +1,9 @@
 import { expect, type Locator, type Page, test } from "@playwright/test"
 import { loginAsAdmin, requireBackend } from "./auth-helper"
 import { waitForReady } from "./helpers"
+import { PORTAL_URLS } from "./test-config"
 
-const TRAINING_URL = "http://localhost:3001"
+const TRAINING_URL = PORTAL_URLS.training
 
 async function selectOption(page: Page, scope: Locator, label: string, option: string) {
   await scope.getByRole("combobox", { name: label }).click()

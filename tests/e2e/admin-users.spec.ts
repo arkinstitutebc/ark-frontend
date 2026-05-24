@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test"
 import { loginAsAdmin, requireBackend } from "./auth-helper"
 import { waitForReady } from "./helpers"
+import { API_URL } from "./test-config"
 
 test.describe("Admin users — validation", () => {
   test.beforeEach(async ({ page }, testInfo) => {
@@ -23,9 +24,7 @@ test.describe("Admin users — validation", () => {
   })
 
   test("user detail blocks blank profile names before API mutation", async ({ page }) => {
-    const me = await page.request.get(
-      `${process.env.VITE_API_URL || "http://localhost:4000"}/api/auth/me`
-    )
+    const me = await page.request.get(`${API_URL}/api/auth/me`)
     expect(me.status()).toBe(200)
     const currentUser = await me.json()
 

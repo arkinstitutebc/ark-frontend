@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test"
 import { loginAsAdmin, requireBackend } from "./auth-helper"
 import { waitForReady } from "./helpers"
+import { API_URL } from "./test-config"
 
 /**
  * Manage Profile (M4) — name edit + avatar upload.
@@ -22,8 +23,7 @@ test.describe("Manage Profile — name edit", () => {
     if (testInfo.status !== "passed") return
     // Best-effort revert so a re-run starts from a clean state.
     try {
-      const api = process.env.VITE_API_URL || "http://localhost:4000"
-      await page.request.patch(`${api}/api/auth/me`, {
+      await page.request.patch(`${API_URL}/api/auth/me`, {
         data: { firstName: ORIGINAL_FIRST_NAME },
       })
     } catch {

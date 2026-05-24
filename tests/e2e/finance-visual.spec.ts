@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test"
 import { loginAsAdmin, requireBackend } from "./auth-helper"
 import { waitForReady } from "./helpers"
+import { PORTAL_URLS } from "./test-config"
 
 /**
  * Visual regression for the new finance pages (Phase 3b).
@@ -11,7 +12,7 @@ import { waitForReady } from "./helpers"
  * After intentional UI changes:  bun run test:e2e:update
  */
 
-const FINANCE_URL = "http://localhost:3004"
+const FINANCE_URL = PORTAL_URLS.finance
 
 test.skip(
   !process.env.RUN_VISUAL_E2E,

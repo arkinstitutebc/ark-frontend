@@ -1,8 +1,9 @@
 import { expect, test } from "@playwright/test"
 import { loginAsAdmin, requireBackend } from "./auth-helper"
 import { waitForReady } from "./helpers"
+import { PORTAL_URLS } from "./test-config"
 
-const PROCUREMENT_URL = "http://localhost:3002"
+const PROCUREMENT_URL = PORTAL_URLS.procurement
 
 test.describe("Procurement — Purchase Requests + 3-sig workflow", () => {
   test.beforeEach(async ({ page }, testInfo) => {

@@ -1,9 +1,9 @@
 import { expect, test } from "@playwright/test"
 import { loginAsAdmin, requireBackend } from "./auth-helper"
 import { waitForReady } from "./helpers"
+import { API_URL, PORTAL_URLS } from "./test-config"
 
-const FINANCE_URL = "http://localhost:3004"
-const API_URL = process.env.VITE_API_URL || "http://localhost:4000"
+const FINANCE_URL = PORTAL_URLS.finance
 
 test.describe("Finance — Asset Register", () => {
   test.beforeEach(async ({ page }, testInfo) => {

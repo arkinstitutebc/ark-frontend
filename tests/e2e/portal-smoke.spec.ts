@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test"
 import { loginAsAdmin, requireBackend } from "./auth-helper"
 import { waitForReady } from "./helpers"
+import { PORTAL_URLS } from "./test-config"
 
 type PortalSmokeCase = {
   portal: string
@@ -11,7 +12,7 @@ type PortalSmokeCase = {
 const portals: PortalSmokeCase[] = [
   {
     portal: "Main",
-    url: "http://localhost:3000",
+    url: PORTAL_URLS.main,
     routes: [
       "/",
       "/profile",
@@ -26,22 +27,22 @@ const portals: PortalSmokeCase[] = [
   },
   {
     portal: "Training",
-    url: "http://localhost:3001",
+    url: PORTAL_URLS.training,
     routes: ["/", "/students", "/tutorials"],
   },
   {
     portal: "Procurement",
-    url: "http://localhost:3002",
+    url: PORTAL_URLS.procurement,
     routes: ["/", "/approvals", "/orders", "/pr/create", "/orders/create", "/tutorials"],
   },
   {
     portal: "Inventory",
-    url: "http://localhost:3003",
+    url: PORTAL_URLS.inventory,
     routes: ["/", "/receiving", "/movements", "/count", "/tutorials"],
   },
   {
     portal: "Finance",
-    url: "http://localhost:3004",
+    url: PORTAL_URLS.finance,
     routes: [
       "/",
       "/banks",
@@ -62,12 +63,12 @@ const portals: PortalSmokeCase[] = [
   },
   {
     portal: "Billing",
-    url: "http://localhost:3005",
+    url: PORTAL_URLS.billing,
     routes: ["/", "/receivables", "/receivables/create", "/tutorials"],
   },
   {
     portal: "HR",
-    url: "http://localhost:3006",
+    url: PORTAL_URLS.hr,
     routes: ["/", "/attendance", "/payroll", "/tutorials"],
   },
 ]

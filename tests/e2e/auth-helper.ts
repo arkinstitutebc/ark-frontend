@@ -1,6 +1,5 @@
 import type { Page, TestInfo } from "@playwright/test"
-
-const API_URL = process.env.VITE_API_URL || "http://localhost:4000"
+import { API_URL } from "./test-config"
 
 export interface SeededAdmin {
   email: string

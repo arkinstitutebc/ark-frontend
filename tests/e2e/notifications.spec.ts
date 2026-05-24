@@ -1,6 +1,7 @@
 import { expect, test } from "@playwright/test"
 import { loginAsAdmin, requireBackend } from "./auth-helper"
 import { waitForReady } from "./helpers"
+import { API_URL } from "./test-config"
 
 /**
  * Notifications (M6) — fan-out from inviteUser, badge count, mark-all-read.
@@ -8,8 +9,6 @@ import { waitForReady } from "./helpers"
  * ⚠ MUTATES USER DATA. Creates a throwaway user per run and deactivates it
  * in afterEach. Run only against a local backend with a test DB.
  */
-
-const API_URL = process.env.VITE_API_URL || "http://localhost:4000"
 
 interface InvitedUser {
   id: string
