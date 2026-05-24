@@ -193,6 +193,7 @@ export default function Page() {
         open={adjustModalOpen()}
         onClose={() => setAdjustModalOpen(false)}
         item={selectedItem()}
+        pending={adjustMutation.isPending}
         onSubmit={handleAdjustSubmit}
       />
     </div>

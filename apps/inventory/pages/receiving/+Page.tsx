@@ -89,8 +89,10 @@ export default function ReceivingPage() {
     Math.max(0, item.quantity - previouslyReceived(item.name))
   const remainingAfterReceipt = (item: { id: string; name: string; quantity: number }) =>
     Math.max(0, remainingBeforeReceipt(item) - (receivedItems()[item.id]?.quantityReceived ?? 0))
+  const receiptHistoryUnavailable = () => !!selectedPo() && movementsQuery.isError
 
   const updateReceivedQty = (id: string, qty: number) => {
+    if (receiptHistoryUnavailable()) return
     const po = selectedPo()
     const item = (
       po?.items as Array<{ id: string; name: string; quantity: number }> | undefined
@@ -245,6 +247,15 @@ export default function ReceivingPage() {
                 <Show when={movementsQuery.isLoading}>
                   <div class="mb-4 h-10 bg-surface-muted rounded-lg animate-pulse" />
                 </Show>
+                <Show when={receiptHistoryUnavailable()}>
+                  <div class="mb-4 bg-red-50 border border-red-200 rounded-lg p-4">
+                    <p class="text-sm font-medium text-red-800">Could not load receipt history.</p>
+                    <p class="text-sm text-red-700 mt-1">
+                      Refresh and try again before receiving this PO, so prior receipts are counted
+                      correctly.
+                    </p>
+                  </div>
+                </Show>
 
                 <div class="border border-border rounded-lg overflow-hidden">
                   <table class="w-full">
@@ -289,7 +300,11 @@ export default function ReceivingPage() {
                                 <div class="flex items-center justify-center gap-2">
                                   <button
                                     type="button"
-                                    disabled={movementsQuery.isLoading || remainingBefore() === 0}
+                                    disabled={
+                                      movementsQuery.isLoading ||
+                                      receiptHistoryUnavailable() ||
+                                      remainingBefore() === 0
+                                    }
                                     onClick={() => updateReceivedQty(item.id, remainingBefore())}
                                     class="px-2.5 py-1 text-xs font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
@@ -300,7 +315,11 @@ export default function ReceivingPage() {
                                     value={received()}
                                     min={0}
                                     max={remainingBefore()}
-                                    disabled={movementsQuery.isLoading || remainingBefore() === 0}
+                                    disabled={
+                                      movementsQuery.isLoading ||
+                                      receiptHistoryUnavailable() ||
+                                      remainingBefore() === 0
+                                    }
                                     onInput={e =>
                                       updateReceivedQty(
                                         item.id,
@@ -315,7 +334,8 @@ export default function ReceivingPage() {
                                   <button
                                     type="button"
                                     onClick={() => updateReceivedQty(item.id, 0)}
-                                    class="px-2 py-1 text-xs text-muted hover:text-foreground hover:bg-surface-muted rounded transition-colors"
+                                    disabled={receiptHistoryUnavailable()}
+                                    class="px-2 py-1 text-xs text-muted hover:text-foreground hover:bg-surface-muted rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                                   >
                                     Clear
                                   </button>
@@ -353,9 +373,19 @@ export default function ReceivingPage() {
                     type="button"
                     onClick={handleCompleteReceipt}
                     disabled={
-                      !hasReceivedItems() || receiveMutation.isPending || movementsQuery.isLoading
+                      !hasReceivedItems() ||
+                      receiveMutation.isPending ||
+                      movementsQuery.isLoading ||
+                      receiptHistoryUnavailable()
                     }
-                    class={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${hasReceivedItems() && !receiveMutation.isPending && !movementsQuery.isLoading ? "bg-primary hover:bg-primary/90" : "bg-muted cursor-not-allowed"}`}
+                    class={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${
+                      hasReceivedItems() &&
+                      !receiveMutation.isPending &&
+                      !movementsQuery.isLoading &&
+                      !receiptHistoryUnavailable()
+                        ? "bg-primary hover:bg-primary/90"
+                        : "bg-muted cursor-not-allowed"
+                    }`}
                   >
                     {receiveMutation.isPending
                       ? "Processing..."

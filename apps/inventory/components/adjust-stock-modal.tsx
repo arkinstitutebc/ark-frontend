@@ -8,6 +8,7 @@ interface AdjustStockModalProps {
   open: boolean
   onClose: () => void
   item: StockItem | null
+  pending?: boolean
   onSubmit: (adjustment: { quantity: number; reason: string; notes: string }) => void
 }
 
@@ -33,9 +34,10 @@ export function AdjustStockModal(props: AdjustStockModalProps) {
 
   const newQuantity = () => currentQuantity() + quantity()
   const isValid = () => quantity() !== 0 && reason() !== "" && newQuantity() >= 0
+  const canSubmit = () => isValid() && !props.pending
 
   const handleSubmit = () => {
-    if (!isValid()) return
+    if (!canSubmit()) return
 
     const data = {
       quantity: quantity(),
@@ -269,12 +271,12 @@ export function AdjustStockModal(props: AdjustStockModalProps) {
             <button
               type="button"
               onClick={handleSubmit}
-              disabled={!isValid()}
+              disabled={!canSubmit()}
               class={`px-4 py-2 text-sm font-medium text-white rounded-lg transition-colors ${
-                isValid() ? "bg-primary hover:bg-primary/90" : "bg-muted cursor-not-allowed"
+                canSubmit() ? "bg-primary hover:bg-primary/90" : "bg-muted cursor-not-allowed"
               }`}
             >
-              Update Stock
+              {props.pending ? "Updating..." : "Update Stock"}
             </button>
           </div>
         </div>

@@ -1,4 +1,5 @@
 import { PageHeader, THead, Th, type ToneKind, tonePillClass } from "@ark/ui"
+import { formatMovementQuantity, movementQuantityClass } from "@data/format"
 import { useMovements } from "@data/hooks"
 import type { StockMovement } from "@data/types"
 import { createMemo, createSignal, For } from "solid-js"
@@ -130,11 +131,8 @@ export default function MovementsPage() {
                         </span>
                       </td>
                       <td class="px-6 py-4">
-                        <span
-                          class={`text-sm font-medium ${m.type === "in" ? "text-green-600" : m.type === "out" ? "text-red-600" : "text-yellow-600"}`}
-                        >
-                          {m.type === "out" ? "-" : "+"}
-                          {m.quantity}
+                        <span class={`text-sm font-medium ${movementQuantityClass(m)}`}>
+                          {formatMovementQuantity(m)}
                         </span>
                       </td>
                       <td class="px-6 py-4">

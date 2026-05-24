@@ -1,4 +1,5 @@
 import { categoryToneClass, formatDatePH, Icons, Modal } from "@ark/ui"
+import { formatMovementQuantity } from "@data/format"
 import { useMovements } from "@data/hooks"
 import type { StockItem } from "@data/types"
 import { For, Show } from "solid-js"
@@ -235,8 +236,7 @@ export function ViewItemModal(props: ViewItemModalProps) {
                                   </span>
                                 </td>
                                 <td class="px-4 py-2.5 text-sm text-right font-medium text-foreground">
-                                  {movement.type === "out" ? "-" : "+"}
-                                  {movement.quantity}
+                                  {formatMovementQuantity(movement)}
                                 </td>
                                 <td class="px-4 py-2.5 text-sm text-muted">
                                   {movement.reason || movement.reference || "-"}
