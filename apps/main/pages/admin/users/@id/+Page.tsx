@@ -8,7 +8,17 @@ import {
   useResetUserPassword,
   useUpdateUser,
 } from "@ark/api-client"
-import { BackLink, Button, Icons, Input, Modal, PageLoading, Select, toast } from "@ark/ui"
+import {
+  BackLink,
+  Button,
+  ConfirmDialog,
+  Icons,
+  Input,
+  Modal,
+  PageLoading,
+  Select,
+  toast,
+} from "@ark/ui"
 import { createEffect, createMemo, createSignal, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
 import { Footer, Navbar } from "@/components"
@@ -31,6 +41,7 @@ export default function AdminUserDetailPage() {
   const [department, setDepartment] = createSignal("")
   const [hydrated, setHydrated] = createSignal(false)
   const [tempCredentials, setTempCredentials] = createSignal<UserWithTempPassword | null>(null)
+  const [confirmAction, setConfirmAction] = createSignal<"deactivate" | "reset" | null>(null)
 
   // Auth gate: must be admin.
   createEffect(() => {
@@ -88,9 +99,9 @@ export default function AdminUserDetailPage() {
   }
 
   async function handleDeactivate() {
-    if (!confirm("Deactivate this user? They will not be able to log in.")) return
     try {
       await deactivate.mutateAsync(id())
+      setConfirmAction(null)
       toast.success("User deactivated.")
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not deactivate user")
@@ -107,9 +118,9 @@ export default function AdminUserDetailPage() {
   }
 
   async function handleReset() {
-    if (!confirm("Issue a new temporary password? The user will be forced to change it.")) return
     try {
       const result = await reset.mutateAsync(id())
+      setConfirmAction(null)
       setTempCredentials(result)
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not reset password")
@@ -247,7 +258,7 @@ export default function AdminUserDetailPage() {
                         <div class="px-6 py-5 space-y-3">
                           <button
                             type="button"
-                            onClick={handleReset}
+                            onClick={() => setConfirmAction("reset")}
                             disabled={reset.isPending}
                             class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-border hover:border-primary hover:bg-primary/5 text-left transition-colors disabled:opacity-50"
                           >
@@ -266,7 +277,7 @@ export default function AdminUserDetailPage() {
                           {u.isActive ? (
                             <button
                               type="button"
-                              onClick={handleDeactivate}
+                              onClick={() => setConfirmAction("deactivate")}
                               disabled={isSelf() || deactivate.isPending}
                               class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-border hover:border-red-500 hover:bg-red-50 text-left transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
@@ -314,6 +325,36 @@ export default function AdminUserDetailPage() {
       </Show>
 
       <TempPasswordModal credentials={tempCredentials()} onClose={() => setTempCredentials(null)} />
+      <ConfirmDialog
+        open={confirmAction() === "deactivate"}
+        onClose={() => setConfirmAction(null)}
+        title="Deactivate User"
+        description={
+          <span>
+            Deactivate <span class="font-medium">{target.data?.email}</span>? They will not be able
+            to log in, but their data will stay in the system.
+          </span>
+        }
+        confirmLabel="Deactivate user"
+        danger
+        pending={deactivate.isPending}
+        onConfirm={handleDeactivate}
+      />
+      <ConfirmDialog
+        open={confirmAction() === "reset"}
+        onClose={() => setConfirmAction(null)}
+        title="Reset Password"
+        description={
+          <span>
+            This will issue a new temporary password for{" "}
+            <span class="font-medium">{target.data?.email}</span> and force the user to change it on
+            next login.
+          </span>
+        }
+        confirmLabel="Reset password"
+        pending={reset.isPending}
+        onConfirm={handleReset}
+      />
     </div>
   )
 }
