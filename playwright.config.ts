@@ -46,19 +46,19 @@ export default defineConfig({
    */
   webServer: [
     {
-      command: "cd apps/main && bun run build && bun run preview --port 3000",
+      command: "cd apps/main && bun run build && PORT=3000 bun run preview --port 3000",
       url: "http://localhost:3000",
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
     },
     {
-      command: "cd apps/finance && bun run build && bun run preview --port 3004",
+      command: "cd apps/finance && bun run build && PORT=3004 bun run preview --port 3004",
       url: "http://localhost:3004",
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
     },
     {
-      command: "cd apps/procurement && bun run build && bun run preview --port 3002",
+      command: "cd apps/procurement && bun run build && PORT=3002 bun run preview --port 3002",
       url: "http://localhost:3002",
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
