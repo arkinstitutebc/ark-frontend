@@ -38,7 +38,7 @@ bun run lint                   # biome
 bun run test:unit              # Bun unit tests for shared API/form helpers
 bun run typecheck              # tsc per workspace
 bun run build                  # Vike production build for every app/package with a build script
-bun run test:e2e               # Playwright dark-mode visual regression (LOCAL ONLY, NOT in CI)
+bun run test:e2e               # Playwright portal smoke + focused E2E (LOCAL ONLY, NOT in CI)
 bun run test:e2e:update        # update snapshots after intentional UI changes
 ```
 

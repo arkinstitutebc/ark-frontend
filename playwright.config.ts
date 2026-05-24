@@ -37,9 +37,8 @@ export default defineConfig({
     },
   ],
   /**
-   * Build + serve each portal we want to exercise. Tests use full URLs against
-   * the per-portal port (main=3000, finance=3004 — extend as needed for
-   * procurement/inventory/etc when those flows get specs).
+   * Build + serve each portal. Tests use full URLs against the per-portal
+   * local ports so cross-portal auth, shells, and route hydration are covered.
    *
    * Tests run against the production build (vike preview), not dev, so the
    * Tailwind class-generation + SSR hydration path matches prod.
@@ -52,6 +51,12 @@ export default defineConfig({
       timeout: 180_000,
     },
     {
+      command: "cd apps/training && bun run build && PORT=3001 bun run preview --port 3001",
+      url: "http://localhost:3001",
+      reuseExistingServer: !process.env.CI,
+      timeout: 180_000,
+    },
+    {
       command: "cd apps/finance && bun run build && PORT=3004 bun run preview --port 3004",
       url: "http://localhost:3004",
       reuseExistingServer: !process.env.CI,
@@ -60,6 +65,24 @@ export default defineConfig({
     {
       command: "cd apps/procurement && bun run build && PORT=3002 bun run preview --port 3002",
       url: "http://localhost:3002",
+      reuseExistingServer: !process.env.CI,
+      timeout: 180_000,
+    },
+    {
+      command: "cd apps/inventory && bun run build && PORT=3003 bun run preview --port 3003",
+      url: "http://localhost:3003",
+      reuseExistingServer: !process.env.CI,
+      timeout: 180_000,
+    },
+    {
+      command: "cd apps/billing && bun run build && PORT=3005 bun run preview --port 3005",
+      url: "http://localhost:3005",
+      reuseExistingServer: !process.env.CI,
+      timeout: 180_000,
+    },
+    {
+      command: "cd apps/hr && bun run build && PORT=3006 bun run preview --port 3006",
+      url: "http://localhost:3006",
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
     },
