@@ -295,6 +295,10 @@ export default function CreatePrPage() {
                   <Show when={errors().dateNeeded}>
                     <p class="text-xs text-red-600 mt-1">{errors().dateNeeded}</p>
                   </Show>
+                  <p class="text-xs text-muted mt-1">
+                    Ark standard: submit at least 3 working days before the required date when
+                    possible.
+                  </p>
                 </div>
 
                 <div>
@@ -319,7 +323,9 @@ export default function CreatePrPage() {
 
             <div class="bg-surface rounded-lg border border-border p-6">
               <h2 class="text-lg font-semibold text-foreground mb-1">Accounting Classification</h2>
-              <p class="text-xs text-muted mb-4">Used by finance for the segmented P&amp;L.</p>
+              <p class="text-xs text-muted mb-4">
+                Used by finance for the segmented income statement and asset tracking.
+              </p>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>

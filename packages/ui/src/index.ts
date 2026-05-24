@@ -106,6 +106,11 @@ export { inventoryTutorial } from "./tutorials/inventory"
 export { procurementTutorial } from "./tutorials/procurement"
 export { trainingTutorial } from "./tutorials/training"
 export { cn } from "./utils"
+export {
+  formatAccountingTreatment,
+  formatCostType,
+  formatExpenseCategory,
+} from "./utils/classification-labels"
 export { formatDatePH, formatMonthYear, formatPeso } from "./utils/format"
 export {
   categoryTone,

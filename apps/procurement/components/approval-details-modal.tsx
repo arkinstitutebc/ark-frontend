@@ -1,4 +1,13 @@
-import { categoryToneClass, formatDatePH, formatPeso, Modal, StatusBadge } from "@ark/ui"
+import {
+  categoryToneClass,
+  formatAccountingTreatment,
+  formatCostType,
+  formatDatePH,
+  formatExpenseCategory,
+  formatPeso,
+  Modal,
+  StatusBadge,
+} from "@ark/ui"
 import type { PurchaseRequest } from "@data/types"
 import { createSignal, Show } from "solid-js"
 
@@ -145,7 +154,9 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
                     <Show when={pr().expenseCategory}>
                       <div class="bg-surface-muted rounded-lg px-4 py-3">
                         <p class="text-xs text-muted mb-1">Expense Category</p>
-                        <p class="text-sm font-medium text-foreground">{pr().expenseCategory}</p>
+                        <p class="text-sm font-medium text-foreground">
+                          {formatExpenseCategory(pr().expenseCategory)}
+                        </p>
                       </div>
                     </Show>
                     <Show when={pr().profitCenter}>
@@ -158,14 +169,16 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
                       <div class="bg-surface-muted rounded-lg px-4 py-3">
                         <p class="text-xs text-muted mb-1">Accounting Treatment</p>
                         <p class="text-sm font-medium text-foreground">
-                          {pr().accountingTreatment}
+                          {formatAccountingTreatment(pr().accountingTreatment)}
                         </p>
                       </div>
                     </Show>
                     <Show when={pr().costType}>
                       <div class="bg-surface-muted rounded-lg px-4 py-3">
                         <p class="text-xs text-muted mb-1">Cost Type</p>
-                        <p class="text-sm font-medium text-foreground">{pr().costType}</p>
+                        <p class="text-sm font-medium text-foreground">
+                          {formatCostType(pr().costType)}
+                        </p>
                       </div>
                     </Show>
                   </div>

@@ -294,7 +294,9 @@ export default function CreateRrPage() {
 
             <div class="bg-surface rounded-lg border border-border p-6">
               <h2 class="text-lg font-semibold text-foreground mb-1">Accounting Classification</h2>
-              <p class="text-xs text-muted mb-4">Used by finance for the segmented P&amp;L.</p>
+              <p class="text-xs text-muted mb-4">
+                Used by finance for the segmented income statement and accounting record.
+              </p>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Field label="Expense Category" required error={errors().expenseCategory}>
                   <Select
@@ -455,7 +457,8 @@ export default function CreateRrPage() {
             <div class="bg-surface rounded-lg border border-border p-6">
               <h2 class="text-lg font-semibold text-foreground mb-1">Supporting Documents</h2>
               <p class="text-xs text-muted mb-4">
-                Tick what's attached. Receipts required for amounts ≥ ₱300.
+                Tick what's attached. Claims should be filed within 5 working days; official
+                receipts are expected for amounts PHP 300 and above.
               </p>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <DocCheckbox

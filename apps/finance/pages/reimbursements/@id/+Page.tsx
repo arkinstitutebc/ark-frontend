@@ -2,7 +2,10 @@ import { API_URL } from "@ark/api-client"
 import type { Reimbursement, RrItem } from "@ark/data-types"
 import {
   BackLink,
+  formatAccountingTreatment,
+  formatCostType,
   formatDatePH,
+  formatExpenseCategory,
   formatPeso,
   Icons,
   InfoCard,
@@ -149,10 +152,16 @@ export default function RrDetailPage() {
                     <h2 class="text-lg font-semibold text-foreground">Accounting Classification</h2>
                   </div>
                   <div class="grid grid-cols-2 md:grid-cols-4 gap-0 divide-x divide-border">
-                    <Cell label="Expense Category" value={rr.expenseCategory ?? "—"} />
+                    <Cell
+                      label="Expense Category"
+                      value={formatExpenseCategory(rr.expenseCategory)}
+                    />
                     <Cell label="Profit Center" value={rr.profitCenter ?? "—"} />
-                    <Cell label="Accounting Treatment" value={rr.accountingTreatment ?? "—"} />
-                    <Cell label="Cost Type" value={rr.costType ?? "—"} />
+                    <Cell
+                      label="Accounting Treatment"
+                      value={formatAccountingTreatment(rr.accountingTreatment)}
+                    />
+                    <Cell label="Cost Type" value={formatCostType(rr.costType)} />
                   </div>
                 </div>
               </Show>
