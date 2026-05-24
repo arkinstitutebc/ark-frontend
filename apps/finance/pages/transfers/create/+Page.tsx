@@ -67,11 +67,8 @@ export default function CreateTransferPage() {
 
     mutation.mutate(
       {
-        fromBankId: fromBank(),
-        toBankId: toBank(),
-        amount: amountValue(),
-        reference: reference() || undefined,
-        description: description() || undefined,
+        ...result.data,
+        reference: result.data.reference?.trim() || undefined,
       },
       {
         onSuccess: () => {

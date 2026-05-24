@@ -108,20 +108,21 @@ export default function CreateDisbursementPage() {
     mutation.mutate(
       {
         bankId: "operational-hub",
-        ...data,
+        ...result.data,
+        referenceId: result.data.referenceId?.trim() || undefined,
       },
       {
         onSuccess: created => {
           // Fixed-asset disbursements get a follow-up: pre-fill the asset
           // register so finance doesn't have to retype name / cost / category.
-          if (data.expenseCategory === "fixed-asset") {
+          if (result.data.expenseCategory === "fixed-asset") {
             const params = new URLSearchParams({
               fromDisbursement: created.id,
-              name: data.description,
-              cost: String(data.amount),
-              category: data.category,
+              name: result.data.description,
+              cost: String(result.data.amount),
+              category: result.data.category,
               date: created.createdAt.slice(0, 10),
-              ...(data.profitCenter ? { profitCenter: data.profitCenter } : {}),
+              ...(result.data.profitCenter ? { profitCenter: result.data.profitCenter } : {}),
             })
             window.location.href = `/assets/create?${params.toString()}`
             return

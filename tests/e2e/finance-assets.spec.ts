@@ -3,6 +3,7 @@ import { loginAsAdmin, requireBackend } from "./auth-helper"
 import { waitForReady } from "./helpers"
 
 const FINANCE_URL = "http://localhost:3004"
+const API_URL = process.env.VITE_API_URL || "http://localhost:4000"
 
 test.describe("Finance — Asset Register", () => {
   test.beforeEach(async ({ page }, testInfo) => {
@@ -60,5 +61,44 @@ test.describe("Finance — Asset Register", () => {
     await expect(page.getByText(/Prefilled from a fixed-asset disbursement/i)).toBeVisible()
     // Name field prefilled
     await expect(page.locator('input[type="text"]').first()).toHaveValue("Test Laptop")
+  })
+
+  test("create form blocks residual value above acquisition cost", async ({ page }) => {
+    await page.goto(`${FINANCE_URL}/assets/create`)
+    await waitForReady(page)
+
+    await page.locator('input[type="text"]').first().fill("QA Residual Guard")
+    const numberInputs = page.locator('input[type="number"]')
+    await numberInputs.nth(0).fill("100")
+    await numberInputs.nth(1).fill("150")
+    await page.getByRole("button", { name: /register asset/i }).click()
+
+    await expect(page.getByText(/cannot exceed acquisition cost/i)).toBeVisible()
+  })
+
+  test("dispose modal blocks disposal before acquisition date", async ({ page }) => {
+    const created = await page.request.post(`${API_URL}/api/finance/assets`, {
+      data: {
+        name: `QA Dispose Guard ${Date.now()}`,
+        category: "office_equipment",
+        acquisitionDate: "2026-03-15",
+        acquisitionCost: "1200.00",
+        residualValue: "100.00",
+        usefulLifeMonths: 12,
+        profitCenter: "Admin",
+      },
+    })
+    expect(created.status()).toBe(201)
+    const asset = await created.json()
+
+    await page.goto(`${FINANCE_URL}/assets/${asset.id}`)
+    await waitForReady(page)
+
+    await page.getByRole("button", { name: /dispose/i }).click()
+    const dialog = page.getByText("Dispose Asset").locator("..")
+    await dialog.locator('input[type="date"]').fill("2026-03-01")
+    await dialog.getByRole("button", { name: /^dispose$/i }).click()
+
+    await expect(page.getByText(/disposal date cannot be before acquisition date/i)).toBeVisible()
   })
 })

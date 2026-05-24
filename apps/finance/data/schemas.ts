@@ -9,20 +9,42 @@ export const accountingTreatmentOptions = [
   "capital",
 ] as const
 export const costTypeOptions = ["FBS-variable", "HSK-variable", "common"] as const
+export const txnCategoryOptions = [
+  "payroll",
+  "supplies",
+  "trainer_fees",
+  "utilities",
+  "rent",
+  "transportation",
+  "training_materials",
+  "other",
+  "internet",
+  "meals",
+  "honorarium",
+  "maintenance",
+  "insurance",
+  "legal_fees",
+  "office_equipment",
+  "training_tools",
+  "construction",
+  "ppe",
+  "misc_direct",
+  "misc_indirect",
+] as const
 
 export const createTransferSchema = z.object({
   fromBankId: z.string().min(1, "Source bank is required"),
   toBankId: z.string().min(1, "Destination bank is required"),
   amount: z.number().positive("Amount must be greater than zero"),
-  description: z.string().min(1, "Description is required"),
-  reference: z.string().optional(),
+  description: z.string().trim().min(1, "Description is required").max(500),
+  reference: z.string().trim().max(200).optional(),
 })
 
 export const createDisbursementSchema = z.object({
-  category: z.string().min(1, "Category is required"),
+  category: z.enum(txnCategoryOptions),
   amount: z.number().positive("Amount must be greater than zero"),
-  description: z.string().min(1, "Description is required"),
-  referenceId: z.string().optional(),
+  description: z.string().trim().min(1, "Description is required").max(500),
+  referenceId: z.string().trim().max(100).optional(),
   expenseCategory: z.enum(expenseCategoryOptions).optional(),
   profitCenter: z.enum(profitCenterOptions).optional(),
   accountingTreatment: z.enum(accountingTreatmentOptions).optional(),

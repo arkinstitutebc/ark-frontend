@@ -49,9 +49,7 @@ test.describe("Notifications fan-out + bell", () => {
     // Deactivate via admin API. Best-effort.
     try {
       await loginAsAdmin(page)
-      await page.request.patch(`${API_URL}/api/admin/users/${invited.id}`, {
-        data: { isActive: false },
-      })
+      await page.request.post(`${API_URL}/api/admin/users/${invited.id}/deactivate`)
     } catch {
       // ignore
     }

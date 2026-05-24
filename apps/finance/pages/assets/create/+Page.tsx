@@ -209,7 +209,7 @@ export default function CreateAssetPage() {
                     step="0.01"
                     value={residualValue()}
                     onInput={e => setResidualValue(e.currentTarget.value)}
-                    class={cls()}
+                    class={cls(errors().residualValue)}
                   />
                 </Field>
                 <Field label="Useful Life (months)" required error={errors().usefulLifeMonths}>

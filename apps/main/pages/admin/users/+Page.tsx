@@ -23,9 +23,13 @@ import { z } from "zod"
 import { Footer, Navbar } from "@/components"
 
 const inviteSchema = z.object({
-  email: z.string().email("Enter a valid email"),
-  firstName: z.string().min(1, "First name required").max(100),
-  lastName: z.string().min(1, "Last name required").max(100),
+  email: z
+    .string()
+    .trim()
+    .email("Enter a valid email")
+    .transform(v => v.toLowerCase()),
+  firstName: z.string().trim().min(1, "First name required").max(100),
+  lastName: z.string().trim().min(1, "Last name required").max(100),
   role: z.enum(["admin", "director", "trainer"]),
   position: z
     .string()
@@ -274,12 +278,14 @@ export default function AdminUsersPage() {
               value={form().position}
               onInput={e => setForm({ ...form(), position: e.currentTarget.value })}
               placeholder="e.g. Operations Coordinator"
+              error={errors().position}
             />
             <Input
               label="Department"
               value={form().department}
               onInput={e => setForm({ ...form(), department: e.currentTarget.value })}
               placeholder="e.g. Training"
+              error={errors().department}
             />
           </div>
 

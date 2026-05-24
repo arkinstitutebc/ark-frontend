@@ -7,6 +7,7 @@ import {
   useDeactivateUser,
   useResetUserPassword,
   useUpdateUser,
+  validateForm,
 } from "@ark/api-client"
 import {
   BackLink,
@@ -21,7 +22,21 @@ import {
 } from "@ark/ui"
 import { createEffect, createMemo, createSignal, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
+import { z } from "zod"
 import { Footer, Navbar } from "@/components"
+
+const userEditSchema = z.object({
+  firstName: z.string().trim().min(1, "First name required").max(100),
+  lastName: z.string().trim().min(1, "Last name required").max(100),
+  position: z
+    .string()
+    .max(100)
+    .transform(v => v.trim()),
+  department: z
+    .string()
+    .max(100)
+    .transform(v => v.trim()),
+})
 
 export default function AdminUserDetailPage() {
   const pageContext = usePageContext()
@@ -40,6 +55,7 @@ export default function AdminUserDetailPage() {
   const [position, setPosition] = createSignal("")
   const [department, setDepartment] = createSignal("")
   const [hydrated, setHydrated] = createSignal(false)
+  const [errors, setErrors] = createSignal<Record<string, string>>({})
   const [tempCredentials, setTempCredentials] = createSignal<UserWithTempPassword | null>(null)
   const [confirmAction, setConfirmAction] = createSignal<"deactivate" | "reset" | null>(null)
 
@@ -74,6 +90,17 @@ export default function AdminUserDetailPage() {
     e.preventDefault()
     const u = target.data
     if (!u) return
+    const parsed = validateForm(userEditSchema, {
+      firstName: firstName(),
+      lastName: lastName(),
+      position: position(),
+      department: department(),
+    })
+    if (!parsed.success) {
+      setErrors(parsed.errors)
+      return
+    }
+    setErrors({})
     const payload: {
       firstName?: string
       lastName?: string
@@ -81,11 +108,12 @@ export default function AdminUserDetailPage() {
       position?: string | null
       department?: string | null
     } = {}
-    if (firstName() !== u.firstName) payload.firstName = firstName()
-    if (lastName() !== u.lastName) payload.lastName = lastName()
+    if (parsed.data.firstName !== u.firstName) payload.firstName = parsed.data.firstName
+    if (parsed.data.lastName !== u.lastName) payload.lastName = parsed.data.lastName
     if (!isSelf() && role() !== u.role) payload.role = role()
-    if (position() !== (u.position ?? "")) payload.position = position().trim() || null
-    if (department() !== (u.department ?? "")) payload.department = department().trim() || null
+    if (parsed.data.position !== (u.position ?? "")) payload.position = parsed.data.position || null
+    if (parsed.data.department !== (u.department ?? ""))
+      payload.department = parsed.data.department || null
     if (Object.keys(payload).length === 0) {
       toast.info("No changes to save.")
       return
@@ -193,23 +221,27 @@ export default function AdminUserDetailPage() {
                               label="First name"
                               value={firstName()}
                               onInput={e => setFirstName(e.currentTarget.value)}
+                              error={errors().firstName}
                             />
                             <Input
                               label="Last name"
                               value={lastName()}
                               onInput={e => setLastName(e.currentTarget.value)}
+                              error={errors().lastName}
                             />
                             <Input
                               label="Position / Role"
                               value={position()}
                               onInput={e => setPosition(e.currentTarget.value)}
                               placeholder="e.g. Operations Coordinator"
+                              error={errors().position}
                             />
                             <Input
                               label="Department"
                               value={department()}
                               onInput={e => setDepartment(e.currentTarget.value)}
                               placeholder="e.g. Training"
+                              error={errors().department}
                             />
                           </div>
                           <div>
