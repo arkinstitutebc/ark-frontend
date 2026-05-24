@@ -5,10 +5,29 @@ export const billingTutorial: {
   title: string
   subtitle: string
   intro?: JSX.Element
+  workflow?: string[]
+  checklist?: string[]
+  actions?: { label: string; href: string }[]
   sections: TutorialSection[]
 } = {
   title: "How to use the Billing portal",
   subtitle: "TESDA student receivables, payments, and statements.",
+  intro: (
+    <p>
+      Billing converts completed training obligations into receivables and records collections.
+      Payment entries also feed Finance as income transactions linked back to the receivable.
+    </p>
+  ),
+  workflow: ["Create receivable", "Collect payment", "Review balance", "Download statement"],
+  checklist: [
+    "Confirm the batch before creating the receivable.",
+    "Record payments as they arrive; partial payments are supported.",
+    "Regenerate the statement after each new payment.",
+  ],
+  actions: [
+    { label: "Open Dashboard", href: "/" },
+    { label: "Open Receivables", href: "/receivables" },
+  ],
   sections: [
     {
       id: "overview",
@@ -41,7 +60,8 @@ export const billingTutorial: {
         <p>
           Open the receivable and click <b>Record Payment</b>. Enter amount, payment method (cash,
           bank transfer, GCash, etc.), reference number, and date. The balance decreases
-          automatically. Multiple partial payments are fine.
+          automatically and Finance receives an income transaction linked to the AR. Multiple
+          partial payments are fine.
         </p>
       ),
     },

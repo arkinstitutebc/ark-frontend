@@ -7,6 +7,8 @@ export interface LearnPageProps {
   title: string
   subtitle?: string
   intro?: JSX.Element
+  workflow?: string[]
+  checklist?: string[]
   sections: TutorialSection[]
 }
 
@@ -43,6 +45,8 @@ export function LearnPage(props: LearnPageProps) {
               title={props.title}
               subtitle={props.subtitle}
               intro={props.intro}
+              workflow={props.workflow}
+              checklist={props.checklist}
               sections={props.sections}
             />
           </div>

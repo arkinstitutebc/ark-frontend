@@ -5,6 +5,9 @@ export const financeTutorial: {
   title: string
   subtitle: string
   intro?: JSX.Element
+  workflow?: string[]
+  checklist?: string[]
+  actions?: { label: string; href: string }[]
   sections: TutorialSection[]
 } = {
   title: "How to use the Finance portal",
@@ -16,6 +19,17 @@ export const financeTutorial: {
       immutable; corrections happen via reversing entries.
     </p>
   ),
+  workflow: ["Classify", "Record", "Review banks", "Report", "Reconcile"],
+  checklist: [
+    "Pick the correct bank before recording cash movement.",
+    "Use the 4 accounting axes consistently so Income Statement segments stay correct.",
+    "Use reversals or correcting entries for mistakes; do not overwrite historical transactions.",
+  ],
+  actions: [
+    { label: "Open Banks", href: "/banks" },
+    { label: "Open Disbursements", href: "/disbursements" },
+    { label: "Open Income Statement", href: "/income-statement" },
+  ],
   sections: [
     {
       id: "overview",
@@ -107,6 +121,10 @@ export const financeTutorial: {
               <b>Accounting notes</b>: any reviewer adds the closing note for audit.
             </li>
           </ol>
+          <p>
+            Management approval posts a classified expense to the ledger automatically, so reports
+            update without a second manual transaction.
+          </p>
         </>
       ),
     },

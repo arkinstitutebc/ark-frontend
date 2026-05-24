@@ -5,10 +5,30 @@ export const hrTutorial: {
   title: string
   subtitle: string
   intro?: JSX.Element
+  workflow?: string[]
+  checklist?: string[]
+  actions?: { label: string; href: string }[]
   sections: TutorialSection[]
 } = {
   title: "How to use the HR portal",
   subtitle: "Trainers, attendance, and payroll periods.",
+  intro: (
+    <p>
+      HR keeps trainer records and turns approved attendance into payroll. Processing payroll posts
+      the payroll expense into Finance, so rates and attendance need to be reviewed first.
+    </p>
+  ),
+  workflow: ["Maintain trainers", "Log attendance", "Create period", "Review entries", "Process"],
+  checklist: [
+    "Trainer hourly rate and active status are current.",
+    "Attendance dates fall inside the payroll period.",
+    "Review entries before processing because processed periods are locked.",
+  ],
+  actions: [
+    { label: "Open Trainers", href: "/" },
+    { label: "Open Attendance", href: "/attendance" },
+    { label: "Open Payroll", href: "/payroll" },
+  ],
   sections: [
     {
       id: "overview",
@@ -47,7 +67,7 @@ export const hrTutorial: {
             </li>
             <li>
               Review the entries, adjust if needed, then click <b>Process</b>. The PDF payroll
-              report becomes downloadable.
+              report becomes downloadable and one payroll expense is posted to Finance.
             </li>
           </ol>
           <p>

@@ -5,6 +5,9 @@ export const procurementTutorial: {
   title: string
   subtitle: string
   intro?: JSX.Element
+  workflow?: string[]
+  checklist?: string[]
+  actions?: { label: string; href: string }[]
   sections: TutorialSection[]
 } = {
   title: "How to use the Procurement portal",
@@ -15,6 +18,17 @@ export const procurementTutorial: {
       Everything else (categories, attachments, PDFs) supports those four moments.
     </p>
   ),
+  workflow: ["Draft PR", "Coordinator review", "Management approval", "Create PO", "Receive stock"],
+  checklist: [
+    "The request is tied to the correct batch and budget.",
+    "Items, unit prices, and totals match the supplier quote or working canvass.",
+    "Expense Category, Profit Center, Accounting Treatment, and Cost Type are set before approval.",
+  ],
+  actions: [
+    { label: "Open Requests", href: "/pr" },
+    { label: "Open Approvals", href: "/approvals" },
+    { label: "Open Orders", href: "/orders" },
+  ],
   sections: [
     {
       id: "overview",
@@ -109,7 +123,8 @@ export const procurementTutorial: {
         <p>
           Open the approved PR and click <b>Create PO</b>. Fill in the supplier, expected delivery
           date, and any notes. Items are pulled in from the PR — they stay frozen on the PO so you
-          can compare quote-vs-actual later. Save it and the PR's status flips to <b>ordered</b>.
+          can compare quote-vs-actual later. The system only allows PO creation from an{" "}
+          <b>approved</b> PR. Save it and the PR's status flips to <b>ordered</b>.
         </p>
       ),
     },

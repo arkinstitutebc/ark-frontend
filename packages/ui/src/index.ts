@@ -84,6 +84,7 @@ export { SidebarProvider, useSidebar } from "./layout/sidebar-context"
 export { SubPortalShell, type SubPortalShellProps } from "./layout/sub-portal-shell"
 export { type CurrentUser, TopBar, type TopBarProps } from "./layout/topbar"
 export {
+  type TutorialAction,
   type TutorialSection,
   TutorialShell,
   type TutorialShellProps,

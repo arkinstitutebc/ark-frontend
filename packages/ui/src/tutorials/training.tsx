@@ -5,10 +5,29 @@ export const trainingTutorial: {
   title: string
   subtitle: string
   intro?: JSX.Element
+  workflow?: string[]
+  checklist?: string[]
+  actions?: { label: string; href: string }[]
   sections: TutorialSection[]
 } = {
   title: "How to use the Training portal",
   subtitle: "Batches, students, venues, and TESDA program records.",
+  intro: (
+    <p>
+      Start here when setting up program delivery. Training is the source of truth for batches and
+      student enrollment; Procurement, Billing, and reports reuse this batch data downstream.
+    </p>
+  ),
+  workflow: ["Create batch", "Enroll students", "Attach records", "Keep batch current"],
+  checklist: [
+    "Program name, level, dates, venue, and sponsor are confirmed.",
+    "Student profile details are ready before uploading photos or PSA files.",
+    "Batch budget is reviewed because Procurement reads it for spend checks.",
+  ],
+  actions: [
+    { label: "Open Batches", href: "/batch" },
+    { label: "Open Students", href: "/students" },
+  ],
   sections: [
     {
       id: "overview",
@@ -48,6 +67,10 @@ export const trainingTutorial: {
           <p>
             You can also bulk-add from the standalone <b>Students</b> page, then assign batches
             afterwards.
+          </p>
+          <p>
+            Keep names and attachments clean before saving. These records are reused in billing,
+            reporting, and printed references.
           </p>
         </>
       ),

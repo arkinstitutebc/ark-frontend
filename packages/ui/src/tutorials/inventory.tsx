@@ -5,10 +5,30 @@ export const inventoryTutorial: {
   title: string
   subtitle: string
   intro?: JSX.Element
+  workflow?: string[]
+  checklist?: string[]
+  actions?: { label: string; href: string }[]
   sections: TutorialSection[]
 } = {
   title: "How to use the Inventory portal",
   subtitle: "Stock items, receiving deliveries, and the movement log.",
+  intro: (
+    <p>
+      Inventory closes the loop after Procurement. Receiving validates delivered items against the
+      PO, updates on-hand stock, and leaves an immutable movement trail for audit.
+    </p>
+  ),
+  workflow: ["Receive PO", "Update stock", "Review partials", "Count shelf", "Adjust variances"],
+  checklist: [
+    "Use the PO from Procurement, not a manual supplier note.",
+    "Count actual delivered quantities before saving.",
+    "Use Stock Take for full shelf reconciliation and Adjust for a single correction.",
+  ],
+  actions: [
+    { label: "Open Stock", href: "/" },
+    { label: "Open Receiving", href: "/receiving" },
+    { label: "Open Movements", href: "/movements" },
+  ],
   sections: [
     {
       id: "overview",
@@ -28,15 +48,16 @@ export const inventoryTutorial: {
         <>
           <p>
             When a PO arrives, go to <b>Receiving</b>, link the purchase order, and confirm
-            quantities. Items get auto-bumped on hand, the PO status flips to <b>received</b>, and a
-            movement row is logged for each item.
+            quantities. Items get auto-bumped on hand and a movement row is logged for each item.
+            The PO stays <b>partial</b> until cumulative received quantities match the ordered
+            quantities for every line.
           </p>
           <ol class="list-decimal pl-5 space-y-1.5">
             <li>
               Click <b>Receive PO</b>.
             </li>
             <li>Pick the PO from the dropdown.</li>
-            <li>Adjust quantities if the supplier shorted (or over-delivered).</li>
+            <li>Adjust quantities if the supplier shorted delivery. Over-receiving is blocked.</li>
             <li>Save. Movements appear in the Movements log instantly.</li>
           </ol>
         </>
@@ -96,7 +117,7 @@ export const inventoryTutorial: {
           <li>
             The status enum auto-updates from on-hand vs. reorder level — don't set it manually.
           </li>
-          <li>If receiving fails, the PO doesn't change status. Retry after fixing the issue.</li>
+          <li>If receiving fails, the PO and stock do not change. Retry after fixing the issue.</li>
           <li>Movements are immutable. Made a typo? Create a new "adjustment" row to correct.</li>
         </ul>
       ),

@@ -4,8 +4,7 @@ import type { StockItem } from "@data/types"
 import { For, Show } from "solid-js"
 
 const PROCUREMENT_PORTAL_URL =
-  (typeof import.meta !== "undefined" && import.meta.env?.VITE_PROCUREMENT_PORTAL_URL) ||
-  "https://procurement.arkinstitutebc.com"
+  import.meta.env.VITE_PROCUREMENT_PORTAL_URL || "https://procurement.arkinstitutebc.com"
 
 interface ViewItemModalProps {
   open: boolean
