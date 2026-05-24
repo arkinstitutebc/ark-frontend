@@ -79,4 +79,7 @@ TLS issuance is automatic via ACME / Let's Encrypt on first valid request after 
 
 ## Why no Docker
 
-Decided in the migration plan (`/Users/matt/.claude/plans/starry-toasting-manatee.md`). Single host, single dev, single env, our own code → bare `bun + systemd` is leaner: no daemon, no image registry, no extra network hop, no container overhead. ~$8.30/mo total.
+Single host, single production environment, and our own code: bare `bun + systemd`
+keeps the deployment path small. There is no container daemon, image registry,
+extra network hop, or container layer to debug. The backend still runs separately
+as `ark-api.service` on the same VPS.

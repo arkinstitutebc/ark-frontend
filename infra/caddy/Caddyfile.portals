@@ -1,7 +1,5 @@
 # Ark portal reverse-proxy blocks — appended to /etc/caddy/Caddyfile.
-# Caddy auto-issues TLS certs via ACME on first valid request once DNS
-# points at this VPS. Until DNS cutover (Step 7), these hostnames still
-# resolve to Vercel and these blocks are dormant.
+# Caddy auto-issues and renews TLS certs via ACME for each portal hostname.
 #
 # Source of truth: ark-frontend/infra/caddy/Caddyfile.portals
 # Install: see infra/README.md

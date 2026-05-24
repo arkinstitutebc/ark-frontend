@@ -1,5 +1,5 @@
-/* Montserrat is self-hosted via @fontsource-variable/montserrat (one woff2,
-   same-origin, brotli + immutable cache from Vercel). The JS-side import is
+/* Montserrat is bundled via @fontsource-variable/montserrat (one woff2,
+   served by each portal with the rest of the Vike assets). The JS-side import is
    in each app's +Layout.tsx — globals.css is plain CSS, so the font's
    @font-face rules ship via the JS bundle, not @import. */
 

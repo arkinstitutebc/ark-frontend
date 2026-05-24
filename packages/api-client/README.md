@@ -7,14 +7,16 @@ HTTP + auth for the backend (`api.arkinstitutebc.com`).
 ```ts
 import {
   api, API_URL,
-  useCurrentUser, useLogin, useChangePassword, performLogout,
+  useCurrentUser, useLogin, useChangePassword, useUpdateMe, useUploadAvatar, performLogout,
   useAdminUsers, useAdminUser, useInviteUser, useUpdateUser,
   useDeactivateUser, useActivateUser, useResetUserPassword,
+  useNotifications, useMarkRead, useMarkAllRead,
   type AdminUser, type AdminRole, type InviteUserInput,
   type UpdateUserInput, type UserWithTempPassword,
+  type Notification,
   validateForm,
   queryClient, QueryProvider,
-  type CurrentUser,
+  type CurrentUser, type UpdateMeInput,
 } from "@ark/api-client"
 ```
 
@@ -25,6 +27,8 @@ import {
 | `useCurrentUser()` | TanStack Query hook → `/api/auth/me` |
 | `useLogin()` | mutation → `/api/auth/login` |
 | `useChangePassword()` | mutation → `/api/auth/change-password` |
+| `useUpdateMe()` | mutation → current-user profile fields |
+| `useUploadAvatar()` | mutation → avatar upload |
 | `performLogout(url?)` | POST logout + redirect to login |
 | `useAdminUsers(includeInactive?)` | list users (admin role only) |
 | `useAdminUser(id)` | single user by id |
@@ -32,6 +36,8 @@ import {
 | `useUpdateUser()` | mutation — patch firstName/lastName/role |
 | `useDeactivateUser()` / `useActivateUser()` | mutations on `/users/:id/(de)activate` |
 | `useResetUserPassword()` | mutation → returns new `{ user, tempPassword }` |
+| `useNotifications()` | list current user's notifications |
+| `useMarkRead()` / `useMarkAllRead()` | notification read-state mutations |
 | `validateForm(schema, data)` | Zod helper → `{ success: true, data }` or `{ success: false, errors: { field: msg } }` |
 | `queryClient` | shared QueryClient (30s stale, retry: 1) |
 | `QueryProvider` | wraps app with `<QueryClientProvider>` |
