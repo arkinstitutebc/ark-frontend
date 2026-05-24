@@ -2,7 +2,7 @@ import { createCrudHooks, toast } from "@ark/ui"
 import { createMutation, useQueryClient } from "@tanstack/solid-query"
 import { api } from "../api"
 import { queryKeys } from "../query-keys"
-import type { Transfer } from "../types"
+import type { Transaction, Transfer } from "../types"
 
 interface CreateTransferInput {
   fromBankId: string
@@ -11,6 +11,12 @@ interface CreateTransferInput {
   batchId?: string
   reference?: string
   description?: string
+}
+
+interface CreateTransferResult {
+  transfer: Transfer
+  outTxn: Transaction
+  inTxn: Transaction
 }
 
 const crud = createCrudHooks<Transfer, Transfer, CreateTransferInput, Partial<Transfer>, void>({
@@ -27,7 +33,10 @@ export function useCreateTransfer() {
   const qc = useQueryClient()
   return createMutation(() => ({
     mutationFn: (data: CreateTransferInput) =>
-      api<Transfer>("/api/finance/transfers", { method: "POST", body: JSON.stringify(data) }),
+      api<CreateTransferResult>("/api/finance/transfers", {
+        method: "POST",
+        body: JSON.stringify(data),
+      }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.transfers.all })
       qc.invalidateQueries({ queryKey: queryKeys.banks.all })
