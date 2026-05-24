@@ -65,6 +65,8 @@ export function AddStudentModal(props: AddStudentModalProps) {
     setErrors({})
     createMutation.mutate(result.data, {
       onSuccess: () => {
+        qc.invalidateQueries({ queryKey: ["batches"] })
+        qc.invalidateQueries({ queryKey: ["batches", result.data.batchId, "students"] })
         resetSingle()
         props.onClose()
       },

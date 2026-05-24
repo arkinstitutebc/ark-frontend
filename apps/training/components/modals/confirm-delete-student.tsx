@@ -1,6 +1,7 @@
 import { ConfirmDialog } from "@ark/ui"
 import { useDeleteStudent } from "@data/hooks"
 import type { Student } from "@data/types"
+import { useQueryClient } from "@tanstack/solid-query"
 
 interface ConfirmDeleteStudentModalProps {
   open: boolean
@@ -14,10 +15,18 @@ interface ConfirmDeleteStudentModalProps {
  */
 export function ConfirmDeleteStudentModal(props: ConfirmDeleteStudentModalProps) {
   const mutation = useDeleteStudent()
+  const qc = useQueryClient()
 
   const handleDelete = () => {
     if (!props.student) return
-    mutation.mutate(props.student.id, { onSuccess: () => props.onClose() })
+    const batchId = props.student.batchId
+    mutation.mutate(props.student.id, {
+      onSuccess: () => {
+        qc.invalidateQueries({ queryKey: ["batches"] })
+        qc.invalidateQueries({ queryKey: ["batches", batchId, "students"] })
+        props.onClose()
+      },
+    })
   }
 
   return (
