@@ -46,7 +46,7 @@ export interface Transaction {
   linkedTxnId?: string
 }
 
-export type ArStatus = "created" | "billed" | "paid"
+export type ArStatus = "created" | "billed" | "paid" | "overdue"
 
 export interface AccountReceivable {
   id: string

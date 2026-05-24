@@ -140,6 +140,7 @@ export default function ReceivablesPage() {
               { value: "all" as FilterStatus, label: "All" },
               { value: "created" as FilterStatus, label: "Created" },
               { value: "billed" as FilterStatus, label: "Billed" },
+              { value: "overdue" as FilterStatus, label: "Overdue" },
               { value: "paid" as FilterStatus, label: "Paid" },
             ]}
           >
@@ -231,7 +232,7 @@ export default function ReceivablesPage() {
                                 {updateMutation.isPending ? "Updating..." : "Mark Billed"}
                               </button>
                             </Show>
-                            <Show when={ar.status === "billed"}>
+                            <Show when={ar.status === "billed" || ar.status === "overdue"}>
                               <button
                                 type="button"
                                 onClick={() => openPaymentModal(ar)}
@@ -243,7 +244,13 @@ export default function ReceivablesPage() {
                             <Show when={ar.status === "paid"}>
                               <span class="text-xs text-green-600">Paid</span>
                             </Show>
-                            <Show when={ar.status === "billed" || ar.status === "paid"}>
+                            <Show
+                              when={
+                                ar.status === "billed" ||
+                                ar.status === "overdue" ||
+                                ar.status === "paid"
+                              }
+                            >
                               <a
                                 href={`${import.meta.env.VITE_API_URL || "http://localhost:4000"}/api/billing/receivables/${ar.id}/pdf`}
                                 target="_blank"

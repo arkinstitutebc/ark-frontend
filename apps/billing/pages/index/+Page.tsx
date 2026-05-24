@@ -13,7 +13,9 @@ export default function Page() {
     const outstanding = data
       .filter(ar => ar.status !== "paid")
       .reduce((sum, ar) => sum + Number(ar.amount) - Number(ar.paidAmount || 0), 0)
-    const batchesBilled = data.filter(ar => ar.status === "billed" || ar.status === "paid").length
+    const batchesBilled = data.filter(
+      ar => ar.status === "billed" || ar.status === "overdue" || ar.status === "paid"
+    ).length
     const paymentsReceived = data.reduce((sum, ar) => sum + Number(ar.paidAmount || 0), 0)
     return { totalAmount, outstanding, batchesBilled, paymentsReceived, total: data.length }
   })
@@ -61,7 +63,7 @@ export default function Page() {
             <div class="bg-surface rounded-lg border border-border p-5 mb-8">
               <h3 class="text-sm font-semibold text-foreground mb-4">AR by Status</h3>
               <div class="space-y-3">
-                <For each={["created", "billed", "paid"] as const}>
+                <For each={["created", "billed", "overdue", "paid"] as const}>
                   {status => {
                     const items = () => data.filter(ar => ar.status === status)
                     return (
