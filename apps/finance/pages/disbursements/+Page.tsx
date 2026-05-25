@@ -26,7 +26,7 @@ import { validateForm } from "@data/validate"
 import { createEffect, createMemo, createSignal, For, type JSX, Show } from "solid-js"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
-type SortKey = "date" | "payee" | "description" | "reference" | "category" | "amount"
+type SortKey = "date" | "payee" | "description" | "category" | "amount"
 type SortDir = "asc" | "desc"
 const PAGE_SIZE = 20
 
@@ -229,14 +229,6 @@ export default function DisbursementsPage() {
                       </Th>
                       <Th>
                         <SortButton
-                          label="Receipt / OR"
-                          active={sortKey() === "reference"}
-                          dir={sortDir()}
-                          onClick={() => setSort("reference")}
-                        />
-                      </Th>
-                      <Th>
-                        <SortButton
                           label="Category"
                           active={sortKey() === "category"}
                           dir={sortDir()}
@@ -265,9 +257,6 @@ export default function DisbursementsPage() {
                               <span class="block truncate" title={txn.description}>
                                 {txn.description}
                               </span>
-                            </td>
-                            <td class="py-3 px-6 text-sm text-muted whitespace-nowrap">
-                              {txn.referenceId || "—"}
                             </td>
                             <td class="py-3 px-6">
                               <div class="flex flex-wrap gap-2">
@@ -401,7 +390,6 @@ function compareTxns(a: Transaction, b: Transaction, key: SortKey, dir: SortDir)
 function textValue(txn: Transaction, key: Exclude<SortKey, "amount">) {
   if (key === "date") return txn.transactionDate ?? txn.createdAt
   if (key === "category") return categoryLabel(txn.category)
-  if (key === "reference") return txn.referenceId ?? ""
   return txn[key] ?? ""
 }
 
