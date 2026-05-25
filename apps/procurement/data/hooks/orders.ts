@@ -2,7 +2,21 @@ import { createCrudHooks, toast } from "@ark/ui"
 import { createMutation, useQueryClient } from "@tanstack/solid-query"
 import { api } from "../api"
 import { queryKeys } from "../query-keys"
-import type { PrItem, PurchaseOrder } from "../types"
+import type { PoStatus, PrItem, PurchaseOrder } from "../types"
+
+interface PurchaseOrderListItem {
+  id: string
+  poCode: string
+  prId: string
+  prCode?: string | null
+  batchId: string
+  batchName?: string | null
+  supplier?: string | null
+  status: PoStatus
+  estimatedDelivery?: string | null
+}
+
+export type { PurchaseOrderListItem }
 
 interface CreatePoInput {
   poCode: string
@@ -28,7 +42,7 @@ interface OrdersListQuery {
 }
 
 const crud = createCrudHooks<
-  PurchaseOrder,
+  PurchaseOrderListItem,
   PurchaseOrder,
   CreatePoInput,
   UpdatePoInput,

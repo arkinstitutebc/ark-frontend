@@ -4,7 +4,7 @@
 
 ## Pages
 
-`/` trainers list, `/attendance`, `/payroll`, `/payroll/:period` (monthly run), `/tutorials`
+`/` trainers list, `/attendance`, `/payroll`, `/payroll/:period` (pay period detail), `/tutorials`.
 
 ## Dev
 

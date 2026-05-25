@@ -4,7 +4,7 @@
 
 ## Pages
 
-`/` stock items (with category badges), `/receiving` (PO line shape), `/count` (Stock Take bulk reconcile), `/movements` (audit log), `/tutorials`
+`/` stock items (with category badges), `/receiving` (PO receive), `/count` (stock take bulk reconcile), `/movements` (audit log), `/tutorials`.
 
 ## Dev
 

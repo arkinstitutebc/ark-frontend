@@ -3,8 +3,7 @@
 → https://portal.arkinstitutebc.com
 
 ## Pages
-
-`/` SSO hub + portal cards, `/login`, `/profile` (avatar + position/department), `/admin/users` (admin only — invite, edit, deactivate, reset password), `/admin/users/:id`, `/learn` Learning Hub, `/learn/{training,procurement,inventory,finance,billing,hr}` per-portal manuals
+`/` SSO hub + portal cards, `/login`, `/profile` (avatar + position/department), `/admin/users` (admin only — invite, edit, deactivate, reset password), `/admin/users/:id`, and learning content under `/learn` (`/learn/training`, `/learn/procurement`, `/learn/inventory`, `/learn/finance`, `/learn/billing`, `/learn/hr`).
 
 ## Dev
 

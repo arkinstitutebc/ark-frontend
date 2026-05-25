@@ -15,6 +15,9 @@ interface PurchaseOrder {
   status: string
 }
 
+const DEMO_INVENTORY_ITEM_NAME = "[DEMO] Inventory Action Kit"
+const DEMO_PO_CODE = "PO-2026-DEMO-E2E"
+
 async function firstStockItem(
   page: import("@playwright/test").Page,
   testInfo: import("@playwright/test").TestInfo
@@ -22,8 +25,9 @@ async function firstStockItem(
   const res = await page.request.get(`${API_URL}/api/inventory/stock`)
   expect(res.status()).toBe(200)
   const items = (await res.json()) as StockItem[]
-  testInfo.skip(items.length === 0, "No seeded stock items available for inventory action E2E")
-  return items[0]
+  const demoItem = items.find(item => item.name === DEMO_INVENTORY_ITEM_NAME)
+  testInfo.skip(!demoItem, "Demo stock item unavailable; run backend db:seed:demo first")
+  return demoItem
 }
 
 test.describe("Inventory actions", () => {
@@ -72,20 +76,35 @@ test.describe("Inventory actions", () => {
     await expect(page).toHaveURL(/\/movements/)
   })
 
-  test("receives an open purchase order when seeded data has one", async ({ page }, testInfo) => {
+  test("receives the seeded demo purchase order", async ({ page }, testInfo) => {
     const res = await page.request.get(`${API_URL}/api/procurement/orders`)
     expect(res.status()).toBe(200)
     const orders = (await res.json()) as PurchaseOrder[]
-    const openOrder = orders.find(order => order.status === "sent" || order.status === "partial")
-    testInfo.skip(!openOrder, "No sent or partial purchase order available for receiving E2E")
+    const openOrder = orders.find(
+      order =>
+        order.poCode === DEMO_PO_CODE && (order.status === "sent" || order.status === "partial")
+    )
+    testInfo.skip(!openOrder, "Demo receiving PO unavailable; run backend db:seed:demo first")
 
     await page.goto(`${PORTAL_URLS.inventory}/receiving`)
     await waitForReady(page)
 
     await page.getByText(openOrder.poCode).click()
-    await page.getByRole("button", { name: /^all$/i }).first().click()
+    await page
+      .getByRole("row")
+      .filter({ hasText: DEMO_INVENTORY_ITEM_NAME })
+      .locator('input[type="number"]')
+      .fill("1")
     await page.getByRole("button", { name: /complete receipt/i }).click()
 
     await expect(page.getByText(/receipt completed/i)).toBeVisible()
+    await expect
+      .poll(async () => {
+        const nextRes = await page.request.get(`${API_URL}/api/procurement/orders`)
+        expect(nextRes.status()).toBe(200)
+        const nextOrders = (await nextRes.json()) as PurchaseOrder[]
+        return nextOrders.find(order => order.poCode === DEMO_PO_CODE)?.status
+      })
+      .toBe("partial")
   })
 })

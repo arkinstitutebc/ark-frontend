@@ -1,9 +1,8 @@
 import { formatDatePH, PageContainer, PageHeader, StatCard, THead, Th } from "@ark/ui"
 import { useOrders } from "@data/hooks"
-import type { PoStatus, PurchaseOrder } from "@data/types"
+import type { PurchaseOrderListItem } from "@data/hooks/orders"
+import type { PoStatus } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
-import { navigate } from "vike/client/router"
-import { PoDocumentModal } from "@/components/po-document-modal"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
 function getEmptyStateMessage(filter: PoStatus | "all") {
@@ -12,6 +11,8 @@ function getEmptyStateMessage(filter: PoStatus | "all") {
       return { title: "No draft orders", message: "No purchase orders in draft status." }
     case "sent":
       return { title: "No sent orders", message: "No orders have been sent to suppliers." }
+    case "partial":
+      return { title: "No partial orders", message: "No orders are currently partially received." }
     case "received":
       return { title: "No received orders", message: "No orders have been received yet." }
     default:
@@ -23,13 +24,13 @@ export default function OrdersPage() {
   const query = useOrders()
   const [filter, setFilter] = createSignal<PoStatus | "all">("all")
   const [search, setSearch] = createSignal("")
-  const [selectedPo, setSelectedPo] = createSignal<PurchaseOrder | null>(null)
-  const [modalOpen, setModalOpen] = createSignal(false)
-
-  const handleViewPo = (po: PurchaseOrder) => {
-    setSelectedPo(po)
-    setModalOpen(true)
-  }
+  const filters = [
+    { value: "all" as const, label: "All" },
+    { value: "draft" as const, label: "Draft" },
+    { value: "sent" as const, label: "Sent" },
+    { value: "partial" as const, label: "Partial" },
+    { value: "received" as const, label: "Received" },
+  ]
 
   const filteredOrders = createMemo(() => {
     const data = query.data || []
@@ -50,6 +51,7 @@ export default function OrdersPage() {
       total: data.length,
       draft: data.filter(po => po.status === "draft").length,
       sent: data.filter(po => po.status === "sent").length,
+      partial: data.filter(po => po.status === "partial").length,
       received: data.filter(po => po.status === "received").length,
     }
   })
@@ -62,18 +64,19 @@ export default function OrdersPage() {
         action={
           <a
             href="/orders/create"
-            class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
           >
-            + Create PO
+            <Icons.plus class="w-4 h-4" />+ Create PO
           </a>
         }
       />
 
       {/* Stats Cards */}
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-8">
         <StatCard label="Total" value={query.isSuccess ? stats().total : "-"} />
         <StatCard label="Draft" value={query.isSuccess ? stats().draft : "-"} />
         <StatCard label="Sent" value={query.isSuccess ? stats().sent : "-"} />
+        <StatCard label="Partial" value={query.isSuccess ? stats().partial : "-"} />
         <StatCard label="Received" value={query.isSuccess ? stats().received : "-"} />
       </div>
 
@@ -90,14 +93,7 @@ export default function OrdersPage() {
           />
         </div>
         <div class="flex gap-2">
-          <For
-            each={[
-              { value: "all" as const, label: "All" },
-              { value: "draft" as const, label: "Draft" },
-              { value: "sent" as const, label: "Sent" },
-              { value: "received" as const, label: "Received" },
-            ]}
-          >
+          <For each={filters}>
             {item => (
               <button
                 type="button"
@@ -113,7 +109,7 @@ export default function OrdersPage() {
 
       {/* Table */}
       <QueryBoundary query={query}>
-        {(_data: PurchaseOrder[]) => (
+        {(_data: PurchaseOrderListItem[]) => (
           <div class="bg-surface rounded-lg border border-border overflow-hidden">
             <Show
               when={filteredOrders().length > 0}
@@ -140,11 +136,8 @@ export default function OrdersPage() {
                   </THead>
                   <tbody>
                     <For each={filteredOrders()}>
-                      {(po: PurchaseOrder) => (
-                        <tr
-                          onClick={() => navigate(`/orders/${po.id}`)}
-                          class="border-t border-border hover:bg-primary/5 cursor-pointer transition-colors"
-                        >
+                      {(po: PurchaseOrderListItem) => (
+                        <tr class="border-t border-border">
                           <td class="py-4 px-6">
                             <span class="font-mono text-sm font-medium text-foreground">
                               {po.poCode}
@@ -170,16 +163,12 @@ export default function OrdersPage() {
                             </span>
                           </td>
                           <td class="py-4 px-6 text-right">
-                            <button
-                              type="button"
-                              onClick={e => {
-                                e.stopPropagation()
-                                handleViewPo(po)
-                              }}
-                              class="text-primary hover:text-primary/80 text-sm font-medium"
+                            <a
+                              href={`/orders/${po.id}`}
+                              class="inline-flex items-center gap-1 text-primary hover:text-primary/80 text-sm font-medium"
                             >
-                              View
-                            </button>
+                              <Icons.eye class="w-4 h-4" /> Open
+                            </a>
                           </td>
                         </tr>
                       )}
@@ -191,9 +180,6 @@ export default function OrdersPage() {
           </div>
         )}
       </QueryBoundary>
-
-      {/* Document Modal */}
-      <PoDocumentModal open={modalOpen()} onClose={() => setModalOpen(false)} po={selectedPo()} />
     </PageContainer>
   )
 }

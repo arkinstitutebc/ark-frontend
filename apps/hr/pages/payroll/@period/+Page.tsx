@@ -174,7 +174,7 @@ export default function Page() {
                     <span class="font-medium">{formatDatePH(data.periodEnd)}</span>.
                   </p>
                   <p class="text-muted">
-                    If no payable attendance is found, the period will stay in draft.
+                    If no payable attendance is found, the period cannot be processed.
                   </p>
                 </div>
               }
