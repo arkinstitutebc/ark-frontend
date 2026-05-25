@@ -87,21 +87,7 @@ export default function CreateDisbursementPage() {
         referenceId: result.data.referenceId?.trim() || undefined,
       },
       {
-        onSuccess: created => {
-          // Fixed-asset disbursements get a follow-up: pre-fill the asset
-          // register so finance doesn't have to retype name / cost / category.
-          if (result.data.expenseCategory === "fixed-asset") {
-            const params = new URLSearchParams({
-              fromDisbursement: created.id,
-              name: result.data.description,
-              cost: String(result.data.amount),
-              category: result.data.category,
-              date: result.data.transactionDate,
-              ...(result.data.profitCenter ? { profitCenter: result.data.profitCenter } : {}),
-            })
-            window.location.href = `/assets/create?${params.toString()}`
-            return
-          }
+        onSuccess: () => {
           window.location.href = "/disbursements"
         },
       }
