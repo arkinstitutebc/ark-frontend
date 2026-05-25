@@ -4,13 +4,28 @@ import { categoryOptionsBySection, GL_CATALOG, glDefault } from "@data/gl-defaul
 import { useBankBalance, useCreateDisbursement } from "@data/hooks"
 import { createDisbursementSchema, profitCenterOptions } from "@data/schemas"
 import { validateForm } from "@data/validate"
-import { createMemo, createSignal, Show } from "solid-js"
+import { createMemo, createSignal, onMount, Show } from "solid-js"
 
 const profitCenterLabels: Record<ProfitCenter, string> = {
   JDVP: "JDVP",
   "TWSP-FBS": "TWSP-FBS",
   "TWSP-HSK": "TWSP-HSK",
   Admin: "Admin",
+}
+
+const PREVIOUS_DISBURSEMENT_KEY = "ark-finance-previous-disbursement"
+
+interface PreviousDisbursementForm {
+  category: TxnCategory
+  transactionDate: string
+  payee: string
+  amount: string
+  description: string
+  referenceId: string
+  expenseCategory: ExpenseCategory | ""
+  profitCenter: ProfitCenter | ""
+  accountingTreatment: string
+  needsReview: boolean
 }
 
 export default function CreateDisbursementPage() {
@@ -21,6 +36,8 @@ export default function CreateDisbursementPage() {
   const [amount, setAmount] = createSignal("")
   const [description, setDescription] = createSignal("")
   const [referenceId, setReferenceId] = createSignal("")
+  const [needsReview, setNeedsReview] = createSignal(false)
+  const [hasPrevious, setHasPrevious] = createSignal(false)
 
   // Hidden accounting defaults keep the form simple while still feeding reports.
   const initialDefaults = glDefault("supplies")
@@ -34,6 +51,10 @@ export default function CreateDisbursementPage() {
 
   const opsBalance = useBankBalance(() => "operational-hub")
   const mutation = useCreateDisbursement()
+
+  onMount(() => {
+    setHasPrevious(!!window.localStorage.getItem(PREVIOUS_DISBURSEMENT_KEY))
+  })
 
   const handleCategoryChange = (next: TxnCategory) => {
     setCategory(next)
@@ -62,8 +83,59 @@ export default function CreateDisbursementPage() {
     description().trim() !== "" &&
     !mutation.isPending
 
-  const handleSubmit = (e: Event) => {
-    e.preventDefault()
+  const currentForm = (): PreviousDisbursementForm => ({
+    category: category(),
+    transactionDate: transactionDate(),
+    payee: payee(),
+    amount: amount(),
+    description: description(),
+    referenceId: referenceId(),
+    expenseCategory: expenseCategory(),
+    profitCenter: profitCenter(),
+    accountingTreatment: accountingTreatment(),
+    needsReview: needsReview(),
+  })
+
+  const applyForm = (form: PreviousDisbursementForm) => {
+    setCategory(form.category)
+    setTransactionDate(form.transactionDate || new Date().toISOString().slice(0, 10))
+    setPayee(form.payee ?? "")
+    setAmount(form.amount ?? "")
+    setDescription(form.description ?? "")
+    setReferenceId(form.referenceId ?? "")
+    setExpenseCategory(form.expenseCategory ?? glDefault(form.category)?.expenseCategory ?? "")
+    setProfitCenter(form.profitCenter || "Admin")
+    setAccountingTreatment(
+      form.accountingTreatment ?? glDefault(form.category)?.accountingTreatment ?? ""
+    )
+    setNeedsReview(!!form.needsReview)
+  }
+
+  const rememberCurrent = () => {
+    window.localStorage.setItem(PREVIOUS_DISBURSEMENT_KEY, JSON.stringify(currentForm()))
+    setHasPrevious(true)
+  }
+
+  const usePrevious = () => {
+    const raw = window.localStorage.getItem(PREVIOUS_DISBURSEMENT_KEY)
+    if (!raw) return
+    try {
+      applyForm(JSON.parse(raw) as PreviousDisbursementForm)
+      setErrors({})
+    } catch {
+      window.localStorage.removeItem(PREVIOUS_DISBURSEMENT_KEY)
+      setHasPrevious(false)
+    }
+  }
+
+  const resetForNext = () => {
+    setAmount("")
+    setDescription("")
+    setReferenceId("")
+    setErrors({})
+  }
+
+  const submit = (afterSave: "list" | "again") => {
     if (!canSubmit()) return
 
     const data = {
@@ -76,6 +148,7 @@ export default function CreateDisbursementPage() {
       expenseCategory: expenseCategory() || undefined,
       profitCenter: profitCenter() || undefined,
       accountingTreatment: accountingTreatment() || undefined,
+      needsReview: needsReview(),
     }
 
     const result = validateForm(createDisbursementSchema, data)
@@ -93,10 +166,20 @@ export default function CreateDisbursementPage() {
       },
       {
         onSuccess: () => {
+          rememberCurrent()
+          if (afterSave === "again") {
+            resetForNext()
+            return
+          }
           window.location.href = "/disbursements"
         },
       }
     )
+  }
+
+  const handleSubmit = (e: Event) => {
+    e.preventDefault()
+    submit("list")
   }
 
   return (
@@ -109,6 +192,15 @@ export default function CreateDisbursementPage() {
             Add an old paid receipt or cash expense. Use Store / Company for who was paid.
           </p>
         </div>
+        <Show when={hasPrevious()}>
+          <button
+            type="button"
+            onClick={usePrevious}
+            class="ml-auto px-3 py-2 text-sm font-medium text-foreground border border-border rounded-lg hover:bg-surface-muted transition-colors"
+          >
+            Use previous
+          </button>
+        </Show>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -211,6 +303,15 @@ export default function CreateDisbursementPage() {
                   class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
               </div>
+              <label class="flex items-center gap-2 text-sm text-foreground">
+                <input
+                  type="checkbox"
+                  checked={needsReview()}
+                  onChange={e => setNeedsReview(e.currentTarget.checked)}
+                  class="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                />
+                Needs review
+              </label>
             </div>
 
             <div class="bg-surface rounded-lg border border-border p-6 space-y-4">
@@ -296,6 +397,14 @@ export default function CreateDisbursementPage() {
                   class="w-full px-4 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {mutation.isPending ? "Processing..." : "Record Disbursement"}
+                </button>
+                <button
+                  type="button"
+                  disabled={!canSubmit()}
+                  onClick={() => submit("again")}
+                  class="w-full px-4 py-2.5 bg-surface text-foreground border border-border text-sm font-medium rounded-lg hover:bg-surface-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Save & Add Another
                 </button>
                 <a
                   href="/disbursements"

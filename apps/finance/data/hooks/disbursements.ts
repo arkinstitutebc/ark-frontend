@@ -17,6 +17,7 @@ interface CreateDisbursementInput {
   profitCenter?: string
   accountingTreatment?: string
   costType?: string
+  needsReview?: boolean
 }
 
 type UpdateDisbursementInput = Partial<Omit<CreateDisbursementInput, "bankId" | "batchId">> & {

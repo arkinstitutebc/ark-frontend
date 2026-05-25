@@ -27,6 +27,7 @@ import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
 type SortKey = "date" | "payee" | "description" | "category" | "amount"
 type SortDir = "asc" | "desc"
+const PAGE_SIZE = 20
 
 export default function DisbursementsPage() {
   const query = useDisbursements()
@@ -34,8 +35,10 @@ export default function DisbursementsPage() {
   const deleteDisbursement = useDeleteDisbursement()
   const [search, setSearch] = createSignal("")
   const [categoryFilter, setCategoryFilter] = createSignal<TxnCategory | "all">("all")
+  const [reviewFilter, setReviewFilter] = createSignal<"all" | "needs-review">("all")
   const [sortKey, setSortKey] = createSignal<SortKey>("date")
   const [sortDir, setSortDir] = createSignal<SortDir>("desc")
+  const [page, setPage] = createSignal(1)
   const [selectedTxn, setSelectedTxn] = createSignal<Transaction | null>(null)
   const [confirmDeleteOpen, setConfirmDeleteOpen] = createSignal(false)
 
@@ -54,21 +57,35 @@ export default function DisbursementsPage() {
     { label: "All categories", value: "all" as const },
     ...categories().map(category => ({ label: categoryLabel(category), value: category })),
   ])
+  const reviewOptions = [
+    { label: "All records", value: "all" as const },
+    { label: "Needs review", value: "needs-review" as const },
+  ]
   const filteredTxns = (txns: Transaction[]) => {
     const q = search().trim().toLowerCase()
     const selectedCategory = categoryFilter()
+    const selectedReview = reviewFilter()
 
     return txns
       .filter(txn => {
         const matchesCategory = selectedCategory === "all" || txn.category === selectedCategory
+        const matchesReview = selectedReview === "all" || txn.metadata?.needsReview === true
         const text = [txn.payee, txn.description, txn.referenceId, txn.category]
           .filter(Boolean)
           .join(" ")
           .toLowerCase()
-        return matchesCategory && (!q || text.includes(q))
+        return matchesCategory && matchesReview && (!q || text.includes(q))
       })
       .sort((a, b) => compareTxns(a, b, sortKey(), sortDir()))
   }
+  createEffect(() => {
+    search()
+    categoryFilter()
+    reviewFilter()
+    sortKey()
+    sortDir()
+    setPage(1)
+  })
   const setSort = (key: SortKey) => {
     if (sortKey() === key) {
       setSortDir(sortDir() === "asc" ? "desc" : "asc")
@@ -129,6 +146,10 @@ export default function DisbursementsPage() {
       <QueryBoundary query={query}>
         {(txns: Transaction[]) => {
           const rows = createMemo(() => filteredTxns(txns))
+          const totalPages = createMemo(() => Math.max(1, Math.ceil(rows().length / PAGE_SIZE)))
+          const visibleRows = createMemo(() =>
+            rows().slice((page() - 1) * PAGE_SIZE, page() * PAGE_SIZE)
+          )
           return (
             <div class="bg-surface rounded-lg border border-border overflow-hidden">
               <div class="px-5 py-4 border-b border-border space-y-3">
@@ -140,7 +161,7 @@ export default function DisbursementsPage() {
                       : `${rows().length} of ${txns.length}`}
                   </p>
                 </div>
-                <div class="grid grid-cols-1 sm:grid-cols-[1fr_220px] gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-[1fr_220px_180px] gap-3">
                   <input
                     type="search"
                     value={search()}
@@ -153,6 +174,12 @@ export default function DisbursementsPage() {
                     onChange={value => setCategoryFilter(value)}
                     options={categoryOptions()}
                     ariaLabel="Category filter"
+                  />
+                  <Select
+                    value={reviewFilter()}
+                    onChange={setReviewFilter}
+                    options={reviewOptions}
+                    ariaLabel="Review filter"
                   />
                 </div>
               </div>
@@ -218,7 +245,7 @@ export default function DisbursementsPage() {
                       </Th>
                     </THead>
                     <tbody>
-                      <For each={rows()}>
+                      <For each={visibleRows()}>
                         {(txn: Transaction) => (
                           <Tr onClick={() => setSelectedTxn(txn)}>
                             <td class="py-4 px-6 text-sm text-muted">
@@ -227,7 +254,12 @@ export default function DisbursementsPage() {
                             <td class="py-4 px-6 text-sm text-foreground">{txn.payee ?? "—"}</td>
                             <td class="py-4 px-6 text-sm text-foreground">{txn.description}</td>
                             <td class="py-4 px-6">
-                              <StatusBadge status={categoryLabel(txn.category)} />
+                              <div class="flex flex-wrap gap-2">
+                                <StatusBadge status={categoryLabel(txn.category)} />
+                                <Show when={txn.metadata?.needsReview}>
+                                  <StatusBadge status="Needs review" />
+                                </Show>
+                              </div>
                             </td>
                             <td class="py-4 px-6 text-right text-sm font-semibold text-red-700 tabular-nums">
                               {formatPeso(Math.abs(Number(txn.amount)))}
@@ -237,6 +269,33 @@ export default function DisbursementsPage() {
                       </For>
                     </tbody>
                   </DataTable>
+                  <div class="px-5 py-3 border-t border-border flex items-center justify-between gap-3">
+                    <p class="text-xs text-muted">
+                      Showing {(page() - 1) * PAGE_SIZE + 1}-
+                      {Math.min(page() * PAGE_SIZE, rows().length)} of {rows().length}
+                    </p>
+                    <div class="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={page() <= 1}
+                        onClick={() => setPage(p => Math.max(1, p - 1))}
+                        class="px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-surface-muted disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Previous
+                      </button>
+                      <span class="text-xs text-muted">
+                        {page()} / {totalPages()}
+                      </span>
+                      <button
+                        type="button"
+                        disabled={page() >= totalPages()}
+                        onClick={() => setPage(p => Math.min(totalPages(), p + 1))}
+                        class="px-3 py-1.5 text-sm border border-border rounded-lg hover:bg-surface-muted disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        Next 20
+                      </button>
+                    </div>
+                  </div>
                 </Show>
               </Show>
             </div>
@@ -268,6 +327,19 @@ export default function DisbursementsPage() {
 function categoryLabel(category?: string) {
   if (!category) return "Other"
   return GL_CATALOG[category as TxnCategory]?.label ?? category.replace(/_/g, " ")
+}
+
+function formatDateTimePH(date: string | undefined | null) {
+  if (!date) return "-"
+  const parsed = new Date(date)
+  if (Number.isNaN(parsed.getTime())) return "-"
+  return parsed.toLocaleString("en-PH", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  })
 }
 
 function compareTxns(a: Transaction, b: Transaction, key: SortKey, dir: SortDir) {
@@ -324,6 +396,7 @@ function DisbursementDetailsModal(props: {
   const [profitCenter, setProfitCenter] = createSignal("")
   const [expenseCategory, setExpenseCategory] = createSignal("")
   const [accountingTreatment, setAccountingTreatment] = createSignal("")
+  const [needsReview, setNeedsReview] = createSignal(false)
 
   const txn = () => props.txn
   const categoryOptions = createMemo(() =>
@@ -353,6 +426,7 @@ function DisbursementDetailsModal(props: {
         glDefault(current.category ?? "other")?.accountingTreatment ??
         ""
     )
+    setNeedsReview(!!current.metadata?.needsReview)
   })
 
   const amountValue = () => {
@@ -383,6 +457,7 @@ function DisbursementDetailsModal(props: {
       expenseCategory: expenseCategory() || undefined,
       profitCenter: profitCenter() || undefined,
       accountingTreatment: accountingTreatment() || undefined,
+      needsReview: needsReview(),
     }
     const result = validateForm(updateDisbursementSchema, data)
     if (!result.success) {
@@ -469,6 +544,15 @@ function DisbursementDetailsModal(props: {
                       class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                     />
                   </Field>
+                  <label class="flex items-center gap-2 text-sm text-foreground">
+                    <input
+                      type="checkbox"
+                      checked={needsReview()}
+                      onChange={e => setNeedsReview(e.currentTarget.checked)}
+                      class="h-4 w-4 rounded border-border text-primary focus:ring-primary"
+                    />
+                    Needs review
+                  </label>
                   <ModalFooter
                     onCancel={() => setMode("view")}
                     cancelLabel="Cancel"
@@ -494,8 +578,18 @@ function DisbursementDetailsModal(props: {
                   <Detail label="Category" value={categoryLabel(current().category)} />
                   <Detail label="For" value={current().profitCenter ?? "-"} />
                   <Detail label="Receipt / OR" value={current().referenceId ?? "-"} />
+                  <Detail
+                    label="Review"
+                    value={current().metadata?.needsReview ? "Needs review" : "-"}
+                  />
                   <Detail label="Recorded by" value={current().createdBy ?? "-"} />
-                  <Detail label="Recorded at" value={formatDatePH(current().createdAt)} />
+                  <Detail label="Recorded at" value={formatDateTimePH(current().createdAt)} />
+                  <Show when={current().metadata?.updatedAt}>
+                    <Detail
+                      label="Last updated"
+                      value={`${formatDateTimePH(current().metadata?.updatedAt)} by ${current().metadata?.updatedBy ?? "-"}`}
+                    />
+                  </Show>
                 </div>
 
                 <div>

@@ -50,6 +50,11 @@ export interface Transaction {
   profitCenter?: ProfitCenter
   accountingTreatment?: AccountingTreatment
   costType?: CostType
+  metadata?: {
+    needsReview?: boolean
+    updatedAt?: string
+    updatedBy?: string
+  } | null
   createdBy: string
   createdAt: string
   linkedTxnId?: string

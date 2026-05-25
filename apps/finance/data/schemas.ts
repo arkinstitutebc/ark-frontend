@@ -58,6 +58,7 @@ export const createDisbursementSchema = z.object({
   profitCenter: z.enum(profitCenterOptions).optional(),
   accountingTreatment: z.enum(accountingTreatmentOptions).optional(),
   costType: z.enum(costTypeOptions).optional(),
+  needsReview: z.boolean().optional(),
 })
 
 export const updateDisbursementSchema = createDisbursementSchema.extend({
