@@ -1,7 +1,7 @@
 import { formatPeso, PageHeader, StatCard, THead, Th } from "@ark/ui"
 import { useBankBalance, useTransactions } from "@data/hooks"
 import type { Transaction } from "@data/types"
-import { createMemo, For } from "solid-js"
+import { createMemo, For, Show } from "solid-js"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
 // formatDate kept locally — uses a no-year compact format that's not in the shared lib
@@ -36,12 +36,17 @@ function getTxnLabel(type: string) {
 export default function Page() {
   const revenueBalance = useBankBalance(() => "revenue-vault")
   const opsBalance = useBankBalance(() => "operational-hub")
-  const transactionsQuery = useTransactions(() => ({ limit: 5 }))
+  const transactionsQuery = useTransactions(() => ({ limit: 120 }))
 
   const totalBalance = createMemo(() => {
     if (!revenueBalance.data || !opsBalance.data) return null
     return revenueBalance.data.balance + opsBalance.data.balance
   })
+  const recentTxns = createMemo(() => transactionsQuery.data?.slice(0, 5) ?? [])
+  const dailyExpenses = createMemo(() => buildDailyExpenseTrend(transactionsQuery.data ?? []))
+  const recentExpenseTotal = createMemo(() =>
+    dailyExpenses().reduce((sum, day) => sum + day.amount, 0)
+  )
 
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
@@ -77,8 +82,21 @@ export default function Page() {
           label="Transactions"
           numeric
           value={transactionsQuery.data?.length ?? "-"}
-          hint="Recent activity"
+          hint="Recent window"
         />
+      </div>
+
+      <div class="bg-surface rounded-lg border border-border p-5 mb-8">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <h3 class="text-sm font-semibold text-foreground">Spending Over Time</h3>
+            <p class="text-xs text-muted mt-1">Daily disbursements from recent records</p>
+          </div>
+          <p class="text-sm font-semibold text-foreground tabular-nums">
+            {formatPeso(recentExpenseTotal())}
+          </p>
+        </div>
+        <SpendingTrendChart points={dailyExpenses()} />
       </div>
 
       {/* Bank Balances Detail */}
@@ -166,7 +184,7 @@ export default function Page() {
 
       {/* Recent Transactions */}
       <QueryBoundary query={transactionsQuery}>
-        {(txns: Transaction[]) => (
+        {() => (
           <div class="bg-surface rounded-lg border border-border overflow-hidden">
             <div class="px-5 py-4 border-b border-border">
               <h2 class="text-sm font-semibold text-foreground">Recent Transactions</h2>
@@ -181,7 +199,7 @@ export default function Page() {
                   <Th>Date</Th>
                 </THead>
                 <tbody>
-                  <For each={txns}>
+                  <For each={recentTxns()}>
                     {txn => (
                       <tr class="border-t border-border hover:bg-surface-muted transition-colors">
                         <td class="py-4 px-6">
@@ -209,5 +227,102 @@ export default function Page() {
         )}
       </QueryBoundary>
     </div>
+  )
+}
+
+interface DailyExpensePoint {
+  date: string
+  amount: number
+}
+
+function buildDailyExpenseTrend(txns: Transaction[]): DailyExpensePoint[] {
+  const byDate = new Map<string, number>()
+  for (const txn of txns) {
+    if (txn.type !== "expense") continue
+    const date = (txn.transactionDate ?? txn.createdAt).slice(0, 10)
+    byDate.set(date, (byDate.get(date) ?? 0) + Math.abs(Number(txn.amount)))
+  }
+
+  return [...byDate.entries()]
+    .sort(([a], [b]) => a.localeCompare(b))
+    .slice(-14)
+    .map(([date, amount]) => ({ date, amount }))
+}
+
+function SpendingTrendChart(props: { points: DailyExpensePoint[] }) {
+  const width = 760
+  const height = 180
+  const padding = 16
+  const points = () => props.points
+  const max = () => Math.max(...points().map(point => point.amount), 1)
+  const coordinates = () => {
+    const data = points()
+    if (data.length === 1) {
+      return [
+        { x: width / 2, y: height - padding - (data[0].amount / max()) * (height - padding * 2) },
+      ]
+    }
+    return data.map((point, index) => ({
+      x: padding + (index / Math.max(data.length - 1, 1)) * (width - padding * 2),
+      y: height - padding - (point.amount / max()) * (height - padding * 2),
+    }))
+  }
+  const linePath = () =>
+    coordinates()
+      .map((point, index) => `${index === 0 ? "M" : "L"}${point.x},${point.y}`)
+      .join(" ")
+
+  return (
+    <Show
+      when={points().length > 0}
+      fallback={
+        <div class="h-44 flex items-center justify-center text-sm text-muted">No spending yet.</div>
+      }
+    >
+      <div class="h-52">
+        <svg
+          viewBox={`0 0 ${width} ${height}`}
+          class="w-full h-44"
+          role="img"
+          aria-label="Daily spending trend"
+        >
+          <line
+            x1={padding}
+            y1={height - padding}
+            x2={width - padding}
+            y2={height - padding}
+            stroke="var(--color-border)"
+          />
+          <path
+            d={linePath()}
+            fill="none"
+            stroke="var(--color-primary)"
+            stroke-width="3"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+          <For each={coordinates()}>
+            {(point, index) => (
+              <circle
+                cx={point.x}
+                cy={point.y}
+                r="4"
+                fill="var(--color-surface)"
+                stroke="var(--color-primary)"
+                stroke-width="2"
+              >
+                <title>
+                  {formatDate(points()[index()].date)} - {formatPeso(points()[index()].amount)}
+                </title>
+              </circle>
+            )}
+          </For>
+        </svg>
+        <div class="flex justify-between gap-2 text-[11px] text-muted">
+          <span>{formatDate(points()[0].date)}</span>
+          <span>{formatDate(points()[points().length - 1].date)}</span>
+        </div>
+      </div>
+    </Show>
   )
 }

@@ -26,7 +26,7 @@ import { validateForm } from "@data/validate"
 import { createEffect, createMemo, createSignal, For, type JSX, Show } from "solid-js"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
-type SortKey = "date" | "payee" | "description" | "category" | "amount"
+type SortKey = "date" | "payee" | "description" | "reference" | "category" | "amount"
 type SortDir = "asc" | "desc"
 const PAGE_SIZE = 20
 
@@ -229,6 +229,14 @@ export default function DisbursementsPage() {
                       </Th>
                       <Th>
                         <SortButton
+                          label="Receipt / OR"
+                          active={sortKey() === "reference"}
+                          dir={sortDir()}
+                          onClick={() => setSort("reference")}
+                        />
+                      </Th>
+                      <Th>
+                        <SortButton
                           label="Category"
                           active={sortKey() === "category"}
                           dir={sortDir()}
@@ -248,13 +256,20 @@ export default function DisbursementsPage() {
                     <tbody>
                       <For each={visibleRows()}>
                         {(txn: Transaction) => (
-                          <Tr onClick={() => setSelectedTxn(txn)}>
-                            <td class="py-4 px-6 text-sm text-muted">
+                          <Tr onClick={() => setSelectedTxn(txn)} class="cursor-pointer">
+                            <td class="py-3 px-6 text-sm text-muted whitespace-nowrap">
                               {formatDatePH(txn.transactionDate ?? txn.createdAt)}
                             </td>
-                            <td class="py-4 px-6 text-sm text-foreground">{txn.payee ?? "—"}</td>
-                            <td class="py-4 px-6 text-sm text-foreground">{txn.description}</td>
-                            <td class="py-4 px-6">
+                            <td class="py-3 px-6 text-sm text-foreground">{txn.payee ?? "—"}</td>
+                            <td class="py-3 px-6 text-sm text-foreground max-w-[340px]">
+                              <span class="block truncate" title={txn.description}>
+                                {txn.description}
+                              </span>
+                            </td>
+                            <td class="py-3 px-6 text-sm text-muted whitespace-nowrap">
+                              {txn.referenceId || "—"}
+                            </td>
+                            <td class="py-3 px-6">
                               <div class="flex flex-wrap gap-2">
                                 <StatusBadge status={categoryLabel(txn.category)} />
                                 <Show when={txn.metadata?.needsReview}>
@@ -262,7 +277,7 @@ export default function DisbursementsPage() {
                                 </Show>
                               </div>
                             </td>
-                            <td class="py-4 px-6 text-right text-sm font-semibold text-red-700 tabular-nums">
+                            <td class="py-3 px-6 text-right text-sm font-semibold text-red-700 tabular-nums whitespace-nowrap">
                               {formatPeso(Math.abs(Number(txn.amount)))}
                             </td>
                           </Tr>
@@ -386,6 +401,7 @@ function compareTxns(a: Transaction, b: Transaction, key: SortKey, dir: SortDir)
 function textValue(txn: Transaction, key: Exclude<SortKey, "amount">) {
   if (key === "date") return txn.transactionDate ?? txn.createdAt
   if (key === "category") return categoryLabel(txn.category)
+  if (key === "reference") return txn.referenceId ?? ""
   return txn[key] ?? ""
 }
 
