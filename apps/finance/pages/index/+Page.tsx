@@ -99,15 +99,17 @@ export default function Page() {
               <button
                 type="button"
                 onClick={() => setChartMode("daily")}
-                class={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${chartMode() === "daily" ? "bg-surface-muted text-foreground" : "text-muted hover:text-foreground"}`}
+                class={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${chartMode() === "daily" ? "bg-surface-muted text-foreground" : "text-muted hover:text-foreground"}`}
               >
+                <Icons.clock class="w-3.5 h-3.5" />
                 Daily
               </button>
               <button
                 type="button"
                 onClick={() => setChartMode("category")}
-                class={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${chartMode() === "category" ? "bg-surface-muted text-foreground" : "text-muted hover:text-foreground"}`}
+                class={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${chartMode() === "category" ? "bg-surface-muted text-foreground" : "text-muted hover:text-foreground"}`}
               >
+                <Icons.barChart3 class="w-3.5 h-3.5" />
                 Category
               </button>
             </div>
