@@ -6,11 +6,6 @@ import { createDisbursementSchema, profitCenterOptions } from "@data/schemas"
 import { validateForm } from "@data/validate"
 import { createMemo, createSignal, For, Show } from "solid-js"
 
-const expenseCategoryLabels: Record<ExpenseCategory, string> = {
-  "cost-of-services": "Cost of Services",
-  "admin-expense": "Admin Expense",
-  "fixed-asset": "Fixed Asset",
-}
 const profitCenterLabels: Record<ProfitCenter, string> = {
   JDVP: "JDVP",
   "TWSP-FBS": "TWSP-FBS",
@@ -244,26 +239,18 @@ export default function CreateDisbursementPage() {
                   clearly for that program.
                 </p>
               </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <span class="block text-sm font-medium text-foreground mb-1">For</span>
-                  <Select
-                    options={profitCenterOptions.map(v => ({
-                      label: profitCenterLabels[v],
-                      value: v,
-                    }))}
-                    value={profitCenter() || undefined}
-                    onChange={v => setProfitCenter(v as ProfitCenter)}
-                    placeholder="—"
-                    ariaLabel="For"
-                  />
-                </div>
-                <div class="rounded-lg border border-border bg-surface-muted/40 px-3 py-2 text-sm">
-                  <div class="text-xs text-muted mb-1">Accounting type</div>
-                  <div class="font-medium text-foreground">
-                    {expenseCategoryLabels[expenseCategory() as ExpenseCategory] ?? "Auto"}
-                  </div>
-                </div>
+              <div class="max-w-sm">
+                <span class="block text-sm font-medium text-foreground mb-1">For</span>
+                <Select
+                  options={profitCenterOptions.map(v => ({
+                    label: profitCenterLabels[v],
+                    value: v,
+                  }))}
+                  value={profitCenter() || undefined}
+                  onChange={v => setProfitCenter(v as ProfitCenter)}
+                  placeholder="—"
+                  ariaLabel="For"
+                />
               </div>
             </div>
           </div>
