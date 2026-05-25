@@ -38,6 +38,8 @@ export interface Transaction {
   type: TxnType
   category?: TxnCategory
   amount: number
+  transactionDate?: string
+  payee?: string
   description: string
   referenceId?: string
   batchId?: string

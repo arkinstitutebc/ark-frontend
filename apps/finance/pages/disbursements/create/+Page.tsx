@@ -1,20 +1,8 @@
-import type {
-  AccountingTreatment,
-  CostType,
-  ExpenseCategory,
-  ProfitCenter,
-  TxnCategory,
-} from "@ark/data-types"
+import type { ExpenseCategory, ProfitCenter, TxnCategory } from "@ark/data-types"
 import { BackLink, formatPeso, Select } from "@ark/ui"
 import { categoryOptionsBySection, GL_CATALOG, glDefault } from "@data/gl-defaults"
 import { useBankBalance, useCreateDisbursement } from "@data/hooks"
-import {
-  accountingTreatmentOptions,
-  costTypeOptions,
-  createDisbursementSchema,
-  expenseCategoryOptions,
-  profitCenterOptions,
-} from "@data/schemas"
+import { createDisbursementSchema, profitCenterOptions } from "@data/schemas"
 import { validateForm } from "@data/validate"
 import { createMemo, createSignal, For, Show } from "solid-js"
 
@@ -29,39 +17,25 @@ const profitCenterLabels: Record<ProfitCenter, string> = {
   "TWSP-HSK": "TWSP-HSK",
   Admin: "Admin",
 }
-const accountingTreatmentLabels: Record<AccountingTreatment, string> = {
-  variable: "Variable",
-  "traceable-fixed": "Traceable Fixed",
-  "common-overhead": "Common / Overhead",
-  capital: "Capital",
-}
-const costTypeLabels: Record<CostType, string> = {
-  "FBS-variable": "FBS Variable",
-  "HSK-variable": "HSK Variable",
-  common: "Common",
-}
 
 export default function CreateDisbursementPage() {
   const [errors, setErrors] = createSignal<Record<string, string>>({})
   const [category, setCategory] = createSignal<TxnCategory>("supplies")
+  const [transactionDate, setTransactionDate] = createSignal(new Date().toISOString().slice(0, 10))
+  const [payee, setPayee] = createSignal("")
   const [amount, setAmount] = createSignal("")
   const [description, setDescription] = createSignal("")
   const [referenceId, setReferenceId] = createSignal("")
 
-  // 4 accounting-classification dropdowns. They start prefilled from the
-  // initial category's defaults and re-prefill on category change UNLESS the
-  // user has manually overridden a field.
+  // Hidden accounting defaults keep the form simple while still feeding reports.
   const initialDefaults = glDefault("supplies")
   const [expenseCategory, setExpenseCategory] = createSignal<ExpenseCategory | "">(
     initialDefaults?.expenseCategory ?? ""
   )
   const [profitCenter, setProfitCenter] = createSignal<ProfitCenter | "">("Admin")
-  const [accountingTreatment, setAccountingTreatment] = createSignal<AccountingTreatment | "">(
+  const [accountingTreatment, setAccountingTreatment] = createSignal(
     initialDefaults?.accountingTreatment ?? ""
   )
-  const [costType, setCostType] = createSignal<CostType | "">("")
-  const [touchedExpenseCat, setTouchedExpenseCat] = createSignal(false)
-  const [touchedTreatment, setTouchedTreatment] = createSignal(false)
 
   const opsBalance = useBankBalance(() => "operational-hub")
   const mutation = useCreateDisbursement()
@@ -70,8 +44,8 @@ export default function CreateDisbursementPage() {
     setCategory(next)
     const def = glDefault(next)
     if (def) {
-      if (!touchedExpenseCat()) setExpenseCategory(def.expenseCategory)
-      if (!touchedTreatment()) setAccountingTreatment(def.accountingTreatment)
+      setExpenseCategory(def.expenseCategory)
+      setAccountingTreatment(def.accountingTreatment)
     }
   }
 
@@ -81,7 +55,11 @@ export default function CreateDisbursementPage() {
     const v = parseFloat(amount())
     return Number.isNaN(v) ? 0 : v
   }
-  const canSubmit = () => amountValue() > 0 && description().trim() !== "" && !mutation.isPending
+  const canSubmit = () =>
+    transactionDate().trim() !== "" &&
+    amountValue() > 0 &&
+    description().trim() !== "" &&
+    !mutation.isPending
 
   const handleSubmit = (e: Event) => {
     e.preventDefault()
@@ -89,13 +67,14 @@ export default function CreateDisbursementPage() {
 
     const data = {
       category: category(),
+      transactionDate: transactionDate(),
+      payee: payee().trim() || undefined,
       amount: amountValue(),
       description: description(),
       referenceId: referenceId() || undefined,
       expenseCategory: expenseCategory() || undefined,
       profitCenter: profitCenter() || undefined,
       accountingTreatment: accountingTreatment() || undefined,
-      costType: costType() || undefined,
     }
 
     const result = validateForm(createDisbursementSchema, data)
@@ -121,7 +100,7 @@ export default function CreateDisbursementPage() {
               name: result.data.description,
               cost: String(result.data.amount),
               category: result.data.category,
-              date: created.createdAt.slice(0, 10),
+              date: result.data.transactionDate,
               ...(result.data.profitCenter ? { profitCenter: result.data.profitCenter } : {}),
             })
             window.location.href = `/assets/create?${params.toString()}`
@@ -140,8 +119,7 @@ export default function CreateDisbursementPage() {
         <div>
           <h1 class="text-2xl font-semibold text-foreground">New Disbursement</h1>
           <p class="text-sm text-muted mt-1">
-            Record a cash disbursement from Operational Hub. Pick a category — accounting
-            classifications pre-fill from the matrix, you can override.
+            Add an old paid receipt or cash expense. Use Store / Company for who was paid.
           </p>
         </div>
       </div>
@@ -150,9 +128,42 @@ export default function CreateDisbursementPage() {
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div class="lg:col-span-2 space-y-6">
             <div class="bg-surface rounded-lg border border-border p-6 space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label for="dis-date" class="block text-sm font-medium text-foreground mb-1">
+                    Date
+                  </label>
+                  <input
+                    id="dis-date"
+                    type="date"
+                    value={transactionDate()}
+                    onInput={e => setTransactionDate(e.currentTarget.value)}
+                    class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().transactionDate ? "border-red-300" : "border-border"}`}
+                  />
+                  <Show when={errors().transactionDate}>
+                    <p class="text-xs text-red-600 mt-1">{errors().transactionDate}</p>
+                  </Show>
+                </div>
+                <div>
+                  <label for="dis-payee" class="block text-sm font-medium text-foreground mb-1">
+                    Store / Company <span class="text-muted">(optional)</span>
+                  </label>
+                  <input
+                    id="dis-payee"
+                    type="text"
+                    value={payee()}
+                    onInput={e => setPayee(e.currentTarget.value)}
+                    placeholder="e.g. Wilcon, Meralco, contractor name"
+                    class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().payee ? "border-red-300" : "border-border"}`}
+                  />
+                  <Show when={errors().payee}>
+                    <p class="text-xs text-red-600 mt-1">{errors().payee}</p>
+                  </Show>
+                </div>
+              </div>
               <div>
                 <label for="dis-category" class="block text-sm font-medium text-foreground mb-1">
-                  Category (GL line item)
+                  Category
                 </label>
                 <select
                   id="dis-category"
@@ -196,14 +207,14 @@ export default function CreateDisbursementPage() {
               </div>
               <div>
                 <label for="dis-description" class="block text-sm font-medium text-foreground mb-1">
-                  Description
+                  What was bought / paid?
                 </label>
                 <input
                   id="dis-description"
                   type="text"
                   value={description()}
                   onInput={e => setDescription(e.currentTarget.value)}
-                  placeholder="What was this expense for?"
+                  placeholder="e.g. cement and hollow blocks for annex"
                   class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().description ? "border-red-300" : "border-border"}`}
                 />
                 <Show when={errors().description}>
@@ -212,14 +223,14 @@ export default function CreateDisbursementPage() {
               </div>
               <div>
                 <label for="dis-reference" class="block text-sm font-medium text-foreground mb-1">
-                  Reference <span class="text-muted">(optional)</span>
+                  Receipt / OR number <span class="text-muted">(optional)</span>
                 </label>
                 <input
                   id="dis-reference"
                   type="text"
                   value={referenceId()}
                   onInput={e => setReferenceId(e.currentTarget.value)}
-                  placeholder="e.g., PO-001 or PR-2026-00042"
+                  placeholder="e.g. OR 12345, Invoice 0081"
                   class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                 />
               </div>
@@ -227,33 +238,15 @@ export default function CreateDisbursementPage() {
 
             <div class="bg-surface rounded-lg border border-border p-6 space-y-4">
               <div>
-                <h2 class="text-lg font-semibold text-foreground">Accounting Classification</h2>
+                <h2 class="text-lg font-semibold text-foreground">Where should this count?</h2>
                 <p class="text-xs text-muted mt-1">
-                  Pre-filled from the category. Override only if this expense doesn't match the
-                  default (e.g. an Internet Allowance that's actually for office IT, not training).
+                  Pick Admin for general office expenses. Pick a program only when the receipt is
+                  clearly for that program.
                 </p>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <span class="block text-sm font-medium text-foreground mb-1">
-                    Expense Category
-                  </span>
-                  <Select
-                    options={expenseCategoryOptions.map(v => ({
-                      label: expenseCategoryLabels[v],
-                      value: v,
-                    }))}
-                    value={expenseCategory() || undefined}
-                    onChange={v => {
-                      setExpenseCategory(v as ExpenseCategory)
-                      setTouchedExpenseCat(true)
-                    }}
-                    placeholder="—"
-                    ariaLabel="Expense Category"
-                  />
-                </div>
-                <div>
-                  <span class="block text-sm font-medium text-foreground mb-1">Profit Center</span>
+                  <span class="block text-sm font-medium text-foreground mb-1">For</span>
                   <Select
                     options={profitCenterOptions.map(v => ({
                       label: profitCenterLabels[v],
@@ -262,36 +255,14 @@ export default function CreateDisbursementPage() {
                     value={profitCenter() || undefined}
                     onChange={v => setProfitCenter(v as ProfitCenter)}
                     placeholder="—"
-                    ariaLabel="Profit Center"
+                    ariaLabel="For"
                   />
                 </div>
-                <div>
-                  <span class="block text-sm font-medium text-foreground mb-1">
-                    Accounting Treatment
-                  </span>
-                  <Select
-                    options={accountingTreatmentOptions.map(v => ({
-                      label: accountingTreatmentLabels[v],
-                      value: v,
-                    }))}
-                    value={accountingTreatment() || undefined}
-                    onChange={v => {
-                      setAccountingTreatment(v as AccountingTreatment)
-                      setTouchedTreatment(true)
-                    }}
-                    placeholder="—"
-                    ariaLabel="Accounting Treatment"
-                  />
-                </div>
-                <div>
-                  <span class="block text-sm font-medium text-foreground mb-1">Cost Type</span>
-                  <Select
-                    options={costTypeOptions.map(v => ({ label: costTypeLabels[v], value: v }))}
-                    value={costType() || undefined}
-                    onChange={v => setCostType(v as CostType)}
-                    placeholder="—"
-                    ariaLabel="Cost Type"
-                  />
+                <div class="rounded-lg border border-border bg-surface-muted/40 px-3 py-2 text-sm">
+                  <div class="text-xs text-muted mb-1">Accounting type</div>
+                  <div class="font-medium text-foreground">
+                    {expenseCategoryLabels[expenseCategory() as ExpenseCategory] ?? "Auto"}
+                  </div>
                 </div>
               </div>
             </div>
@@ -306,13 +277,17 @@ export default function CreateDisbursementPage() {
                   <span class="font-medium">Operational Hub</span>
                 </div>
                 <div class="flex justify-between gap-3">
-                  <span class="text-muted shrink-0">Line item</span>
+                  <span class="text-muted shrink-0">Category</span>
                   <span class="font-medium text-right">
                     {GL_CATALOG[category()]?.label ?? category()}
                   </span>
                 </div>
+                <div class="flex justify-between gap-3">
+                  <span class="text-muted shrink-0">Store / Company</span>
+                  <span class="font-medium text-right">{payee().trim() || "—"}</span>
+                </div>
                 <div class="flex justify-between">
-                  <span class="text-muted">Profit center</span>
+                  <span class="text-muted">For</span>
                   <span class="font-medium">{profitCenter() || "—"}</span>
                 </div>
                 <div class="flex justify-between">

@@ -32,8 +32,8 @@ const navItems: NavItem[] = [
     href: "/income-statement",
     icon: FileText,
   },
-  { id: "gl-accounts", label: "GL Accounts", href: "/gl-accounts", icon: BookOpen },
   { id: "assets", label: "Assets", href: "/assets", icon: Package },
+  { id: "gl-accounts", label: "GL Accounts", href: "/gl-accounts", icon: BookOpen },
   { id: "tutorials", label: "How To", href: "/tutorials", icon: HelpCircle },
 ]
 

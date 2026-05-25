@@ -42,6 +42,8 @@ export const createTransferSchema = z.object({
 
 export const createDisbursementSchema = z.object({
   category: z.enum(txnCategoryOptions),
+  transactionDate: z.string().min(1, "Date is required"),
+  payee: z.string().trim().max(200).optional(),
   amount: z.number().positive("Amount must be greater than zero"),
   description: z.string().trim().min(1, "Description is required").max(500),
   referenceId: z.string().trim().max(100).optional(),

@@ -8,6 +8,8 @@ interface CreateDisbursementInput {
   bankId: string
   amount: number
   category: string
+  transactionDate?: string
+  payee?: string
   description: string
   batchId?: string
   referenceId?: string

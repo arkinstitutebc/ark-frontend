@@ -63,15 +63,20 @@ export default function DisbursementsPage() {
             >
               <DataTable>
                 <THead>
+                  <Th>Date</Th>
+                  <Th>Store / Company</Th>
                   <Th>Description</Th>
                   <Th>Category</Th>
                   <Th align="right">Amount</Th>
-                  <Th>Date</Th>
                 </THead>
                 <tbody>
                   <For each={txns}>
                     {(txn: Transaction) => (
                       <Tr>
+                        <td class="py-4 px-6 text-sm text-muted">
+                          {formatDatePH(txn.transactionDate ?? txn.createdAt)}
+                        </td>
+                        <td class="py-4 px-6 text-sm text-foreground">{txn.payee ?? "—"}</td>
                         <td class="py-4 px-6 text-sm text-foreground">{txn.description}</td>
                         <td class="py-4 px-6">
                           <StatusBadge status={txn.category || "other"} />
@@ -79,7 +84,6 @@ export default function DisbursementsPage() {
                         <td class="py-4 px-6 text-right text-sm font-semibold text-red-700 tabular-nums">
                           {formatPeso(Math.abs(Number(txn.amount)))}
                         </td>
-                        <td class="py-4 px-6 text-sm text-muted">{formatDatePH(txn.createdAt)}</td>
                       </Tr>
                     )}
                   </For>
