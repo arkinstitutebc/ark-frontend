@@ -1,7 +1,7 @@
-import { formatDatePH, formatPeso, PageHeader, THead, Th } from "@ark/ui"
-import { useBankBalance, useBanks, useTransactions } from "@data/hooks"
-import type { Bank, Transaction } from "@data/types"
-import { createSignal, For } from "solid-js"
+import { formatDatePH, formatPeso, PageHeader, Select, THead, Th } from "@ark/ui"
+import { useBankBalance, useBanks, useTransactions, useTransfers } from "@data/hooks"
+import type { Bank, Transaction, Transfer } from "@data/types"
+import { createSignal, For, Show } from "solid-js"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
 function getTxnLabel(type: string) {
@@ -30,6 +30,7 @@ export default function Page() {
   const [selectedBank, setSelectedBank] = createSignal<string>("all")
 
   const banksQuery = useBanks()
+  const transfersQuery = useTransfers()
   const revenueBalance = useBankBalance(() => "revenue-vault")
   const opsBalance = useBankBalance(() => "operational-hub")
   const transactionsQuery = useTransactions(() => {
@@ -42,10 +43,23 @@ export default function Page() {
     if (bankId === "operational-hub") return opsBalance.data?.balance ?? null
     return null
   }
+  const getBankName = (bankId: string) =>
+    (banksQuery.data || []).find((bank: Bank) => bank.id === bankId)?.name || bankId
 
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
-      <PageHeader title="Bank Accounts" subtitle="View balances and transaction history" />
+      <PageHeader
+        title="Banks & Transfers"
+        subtitle="View balances, transfer history, and bank transactions"
+        action={
+          <a
+            href="/transfers/create"
+            class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            + New Transfer
+          </a>
+        }
+      />
 
       {/* Bank Cards */}
       <QueryBoundary query={banksQuery}>
@@ -91,35 +105,69 @@ export default function Page() {
             </div>
 
             {/* Filter */}
-            <div class="flex items-center gap-2 mb-4">
-              <button
-                type="button"
-                onClick={() => setSelectedBank("all")}
-                class={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                  selectedBank() === "all"
-                    ? "bg-primary text-white"
-                    : "bg-surface text-foreground border border-border hover:bg-surface-muted"
-                }`}
-              >
-                All Banks
-              </button>
-              <For each={banks}>
-                {(bank: Bank) => (
-                  <button
-                    type="button"
-                    onClick={() => setSelectedBank(bank.id)}
-                    class={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                      selectedBank() === bank.id
-                        ? "bg-primary text-white"
-                        : "bg-surface text-foreground border border-border hover:bg-surface-muted"
-                    }`}
-                  >
-                    {bank.bankName}
-                  </button>
-                )}
-              </For>
+            <div class="mb-4 max-w-xs">
+              <Select
+                value={selectedBank()}
+                onChange={setSelectedBank}
+                options={[
+                  { label: "All Banks", value: "all" },
+                  ...banks.map((bank: Bank) => ({ label: bank.bankName, value: bank.id })),
+                ]}
+                ariaLabel="Bank filter"
+              />
             </div>
           </>
+        )}
+      </QueryBoundary>
+
+      <QueryBoundary query={transfersQuery}>
+        {(transfers: Transfer[]) => (
+          <div class="bg-surface rounded-lg border border-border overflow-hidden mb-6">
+            <div class="px-5 py-4 border-b border-border flex items-center justify-between">
+              <h2 class="text-sm font-semibold text-foreground">Transfer History</h2>
+              <p class="text-xs text-muted">{transfers.length} transfers</p>
+            </div>
+            <Show
+              when={transfers.length > 0}
+              fallback={
+                <div class="py-10 text-center">
+                  <Icons.arrowLeftRight class="w-10 h-10 mx-auto mb-3 text-muted" />
+                  <p class="text-sm font-medium text-foreground">No transfers found</p>
+                </div>
+              }
+            >
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <THead>
+                    <Th>Transfer Flow</Th>
+                    <Th align="right">Amount</Th>
+                    <Th>Reference</Th>
+                    <Th>Date</Th>
+                  </THead>
+                  <tbody>
+                    <For each={transfers}>
+                      {(t: Transfer) => (
+                        <tr class="border-t border-border hover:bg-surface-muted transition-colors">
+                          <td class="py-4 px-6">
+                            <div class="flex items-center gap-2 text-sm">
+                              <span class="text-muted">{getBankName(t.fromBankId)}</span>
+                              <Icons.arrowRight class="w-4 h-4 text-muted" />
+                              <span class="text-muted">{getBankName(t.toBankId)}</span>
+                            </div>
+                          </td>
+                          <td class="py-4 px-6 text-right text-sm font-semibold text-foreground tabular-nums">
+                            {formatPeso(Number(t.amount))}
+                          </td>
+                          <td class="py-4 px-6 text-sm text-muted">{t.reference || "-"}</td>
+                          <td class="py-4 px-6 text-sm text-muted">{formatDatePH(t.createdAt)}</td>
+                        </tr>
+                      )}
+                    </For>
+                  </tbody>
+                </table>
+              </div>
+            </Show>
+          </div>
         )}
       </QueryBoundary>
 

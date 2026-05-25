@@ -1,3 +1,5 @@
+import type { AccountingTreatment, CostType, ExpenseCategory, ProfitCenter } from "./procurement"
+
 export type BankId = "revenue-vault" | "operational-hub"
 
 export interface Bank {
@@ -42,7 +44,12 @@ export interface Transaction {
   payee?: string
   description: string
   referenceId?: string
+  referenceType?: string
   batchId?: string
+  expenseCategory?: ExpenseCategory
+  profitCenter?: ProfitCenter
+  accountingTreatment?: AccountingTreatment
+  costType?: CostType
   createdBy: string
   createdAt: string
   linkedTxnId?: string

@@ -1,4 +1,4 @@
-import { formatDatePH, PageHeader, StatCard, THead, Th } from "@ark/ui"
+import { formatDatePH, PageHeader, Select, StatCard, THead, Th } from "@ark/ui"
 import { useAttendance, useTrainers } from "@data/hooks"
 import type { AttendanceStatus, HrAttendance, Trainer } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -72,16 +72,16 @@ export default function Page() {
             class="pl-9 pr-4 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
           />
         </div>
-        <select
+        <Select
           value={filterTrainer()}
-          onChange={e => setFilterTrainer(e.currentTarget.value)}
-          class="px-3 py-2 border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-        >
-          <option value="all">All Trainers</option>
-          <For each={trainersQuery.data || []}>
-            {(t: Trainer) => <option value={t.id}>{t.name}</option>}
-          </For>
-        </select>
+          onChange={setFilterTrainer}
+          options={[
+            { label: "All Trainers", value: "all" },
+            ...(trainersQuery.data || []).map((t: Trainer) => ({ label: t.name, value: t.id })),
+          ]}
+          ariaLabel="Trainer filter"
+          class="min-w-48"
+        />
         <div class="flex gap-2">
           <For
             each={[

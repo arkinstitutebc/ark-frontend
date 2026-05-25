@@ -1,4 +1,4 @@
-import { Icons, Modal } from "@ark/ui"
+import { Icons, Modal, Select } from "@ark/ui"
 import { adjustStockSchema } from "@data/schemas"
 import type { StockItem } from "@data/types"
 import { validateForm } from "@data/validate"
@@ -227,17 +227,15 @@ export function AdjustStockModal(props: AdjustStockModalProps) {
               <label for="adjustment-reason" class="block text-sm font-medium text-foreground mb-2">
                 Reason <span class="text-red-500">*</span>
               </label>
-              <select
+              <Select
                 id="adjustment-reason"
                 value={reason()}
-                onChange={e => setReason(e.currentTarget.value)}
-                class={`w-full px-4 py-2.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface ${errors().reason ? "border-red-300" : "border-border"}`}
-              >
-                <option value="">Select a reason...</option>
-                {ADJUSTMENT_REASONS.map(r => (
-                  <option value={r.value}>{r.label}</option>
-                ))}
-              </select>
+                onChange={setReason}
+                placeholder="Select a reason..."
+                options={ADJUSTMENT_REASONS.map(r => ({ label: r.label, value: r.value }))}
+                ariaLabel="Adjustment reason"
+                class={errors().reason ? "rounded-lg ring-1 ring-red-300" : ""}
+              />
               <Show when={errors().reason}>
                 <p class="text-xs text-red-600 mt-1">{errors().reason}</p>
               </Show>

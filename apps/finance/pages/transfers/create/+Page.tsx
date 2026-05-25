@@ -72,7 +72,7 @@ export default function CreateTransferPage() {
       },
       {
         onSuccess: () => {
-          window.location.href = "/transfers"
+          window.location.href = "/banks"
         },
       }
     )
@@ -81,7 +81,7 @@ export default function CreateTransferPage() {
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
       <div class="flex items-center gap-3 mb-8">
-        <BackLink variant="icon" label="Back to transfers" href="/transfers" />
+        <BackLink variant="icon" label="Back to banks and transfers" href="/banks" />
         <div>
           <h1 class="text-2xl font-semibold text-foreground">New Fund Transfer</h1>
           <p class="text-sm text-muted mt-1">
@@ -291,7 +291,7 @@ export default function CreateTransferPage() {
                   {mutation.isPending ? "Processing..." : "Create Transfer"}
                 </button>
                 <a
-                  href="/transfers"
+                  href="/banks"
                   class="block w-full px-4 py-2.5 bg-surface text-foreground border border-border text-sm font-medium rounded-lg hover:bg-surface-muted transition-colors text-center"
                 >
                   Cancel

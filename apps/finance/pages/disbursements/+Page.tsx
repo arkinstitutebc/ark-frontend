@@ -1,8 +1,28 @@
-import { DataTable, formatDatePH, formatPeso, PageHeader, StatCard, THead, Th, Tr } from "@ark/ui"
-import { GL_CATALOG } from "@data/gl-defaults"
-import { useBankBalance, useDisbursements } from "@data/hooks"
+import {
+  ConfirmDialog,
+  DataTable,
+  formatDatePH,
+  formatPeso,
+  Modal,
+  ModalFooter,
+  PageHeader,
+  Select,
+  StatCard,
+  THead,
+  Th,
+  Tr,
+} from "@ark/ui"
+import { categoryOptionsBySection, GL_CATALOG, glDefault } from "@data/gl-defaults"
+import {
+  useBankBalance,
+  useDeleteDisbursement,
+  useDisbursements,
+  useUpdateDisbursement,
+} from "@data/hooks"
+import { profitCenterOptions, updateDisbursementSchema } from "@data/schemas"
 import type { Transaction, TxnCategory } from "@data/types"
-import { createMemo, createSignal, For, Show } from "solid-js"
+import { validateForm } from "@data/validate"
+import { createEffect, createMemo, createSignal, For, type JSX, Show } from "solid-js"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
 type SortKey = "date" | "payee" | "description" | "category" | "amount"
@@ -11,10 +31,13 @@ type SortDir = "asc" | "desc"
 export default function DisbursementsPage() {
   const query = useDisbursements()
   const opsBalance = useBankBalance(() => "operational-hub")
+  const deleteDisbursement = useDeleteDisbursement()
   const [search, setSearch] = createSignal("")
   const [categoryFilter, setCategoryFilter] = createSignal<TxnCategory | "all">("all")
   const [sortKey, setSortKey] = createSignal<SortKey>("date")
   const [sortDir, setSortDir] = createSignal<SortDir>("desc")
+  const [selectedTxn, setSelectedTxn] = createSignal<Transaction | null>(null)
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = createSignal(false)
 
   const totalExpenses = createMemo(() => {
     if (!query.data) return null
@@ -27,6 +50,10 @@ export default function DisbursementsPage() {
     }
     return [...values].sort((a, b) => categoryLabel(a).localeCompare(categoryLabel(b)))
   })
+  const categoryOptions = createMemo(() => [
+    { label: "All categories", value: "all" as const },
+    ...categories().map(category => ({ label: categoryLabel(category), value: category })),
+  ])
   const filteredTxns = (txns: Transaction[]) => {
     const q = search().trim().toLowerCase()
     const selectedCategory = categoryFilter()
@@ -49,6 +76,22 @@ export default function DisbursementsPage() {
     }
     setSortKey(key)
     setSortDir(key === "amount" ? "desc" : "asc")
+  }
+  const canMutate = (txn: Transaction) =>
+    txn.type === "expense" && !["payroll", "reimbursement"].includes(txn.referenceType ?? "")
+  const requestDelete = (txn: Transaction) => {
+    setSelectedTxn(txn)
+    setConfirmDeleteOpen(true)
+  }
+  const confirmDelete = () => {
+    const txn = selectedTxn()
+    if (!txn) return
+    deleteDisbursement.mutate(txn.id, {
+      onSuccess: () => {
+        setConfirmDeleteOpen(false)
+        setSelectedTxn(null)
+      },
+    })
   }
 
   return (
@@ -105,16 +148,12 @@ export default function DisbursementsPage() {
                     placeholder="Search store, item, receipt, category"
                     class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   />
-                  <select
+                  <Select
                     value={categoryFilter()}
-                    onChange={e => setCategoryFilter(e.currentTarget.value as TxnCategory | "all")}
-                    class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                  >
-                    <option value="all">All categories</option>
-                    <For each={categories()}>
-                      {category => <option value={category}>{categoryLabel(category)}</option>}
-                    </For>
-                  </select>
+                    onChange={value => setCategoryFilter(value)}
+                    options={categoryOptions()}
+                    ariaLabel="Category filter"
+                  />
                 </div>
               </div>
               <Show
@@ -181,7 +220,7 @@ export default function DisbursementsPage() {
                     <tbody>
                       <For each={rows()}>
                         {(txn: Transaction) => (
-                          <Tr>
+                          <Tr onClick={() => setSelectedTxn(txn)}>
                             <td class="py-4 px-6 text-sm text-muted">
                               {formatDatePH(txn.transactionDate ?? txn.createdAt)}
                             </td>
@@ -204,6 +243,24 @@ export default function DisbursementsPage() {
           )
         }}
       </QueryBoundary>
+
+      <DisbursementDetailsModal
+        txn={selectedTxn()}
+        onClose={() => setSelectedTxn(null)}
+        onDelete={requestDelete}
+        canMutate={canMutate}
+      />
+
+      <ConfirmDialog
+        open={confirmDeleteOpen()}
+        onClose={() => setConfirmDeleteOpen(false)}
+        title="Delete disbursement?"
+        description="This removes the expense from reports and bank balance. Payroll and reimbursement postings stay protected."
+        confirmLabel="Delete"
+        danger
+        pending={deleteDisbursement.isPending}
+        onConfirm={confirmDelete}
+      />
     </div>
   )
 }
@@ -246,5 +303,261 @@ function SortButton(props: {
         {props.active ? (props.dir === "asc" ? "▲" : "▼") : "↕"}
       </span>
     </button>
+  )
+}
+
+function DisbursementDetailsModal(props: {
+  txn: Transaction | null
+  onClose: () => void
+  onDelete: (txn: Transaction) => void
+  canMutate: (txn: Transaction) => boolean
+}) {
+  const updateDisbursement = useUpdateDisbursement()
+  const [mode, setMode] = createSignal<"view" | "edit">("view")
+  const [errors, setErrors] = createSignal<Record<string, string>>({})
+  const [transactionDate, setTransactionDate] = createSignal("")
+  const [payee, setPayee] = createSignal("")
+  const [category, setCategory] = createSignal<TxnCategory>("supplies")
+  const [amount, setAmount] = createSignal("")
+  const [description, setDescription] = createSignal("")
+  const [referenceId, setReferenceId] = createSignal("")
+  const [profitCenter, setProfitCenter] = createSignal("")
+  const [expenseCategory, setExpenseCategory] = createSignal("")
+  const [accountingTreatment, setAccountingTreatment] = createSignal("")
+
+  const txn = () => props.txn
+  const categoryOptions = createMemo(() =>
+    categoryOptionsBySection().flatMap(group => [
+      { label: group.label, value: `group-${group.label}`, disabled: true },
+      ...group.options,
+    ])
+  )
+
+  createEffect(() => {
+    const current = props.txn
+    if (!current) return
+    setMode("view")
+    setErrors({})
+    setTransactionDate((current.transactionDate ?? current.createdAt).slice(0, 10))
+    setPayee(current.payee ?? "")
+    setCategory(current.category ?? "other")
+    setAmount(String(Math.abs(Number(current.amount))))
+    setDescription(current.description ?? "")
+    setReferenceId(current.referenceId ?? "")
+    setProfitCenter(current.profitCenter ?? "Admin")
+    setExpenseCategory(
+      current.expenseCategory ?? glDefault(current.category ?? "other")?.expenseCategory ?? ""
+    )
+    setAccountingTreatment(
+      current.accountingTreatment ??
+        glDefault(current.category ?? "other")?.accountingTreatment ??
+        ""
+    )
+  })
+
+  const amountValue = () => {
+    const value = Number.parseFloat(amount())
+    return Number.isNaN(value) ? 0 : value
+  }
+
+  const handleCategoryChange = (next: string) => {
+    const typed = next as TxnCategory
+    setCategory(typed)
+    const defaults = glDefault(typed)
+    if (defaults) {
+      setExpenseCategory(defaults.expenseCategory)
+      setAccountingTreatment(defaults.accountingTreatment)
+    }
+  }
+
+  const save = () => {
+    const current = txn()
+    if (!current) return
+    const data = {
+      category: category(),
+      transactionDate: transactionDate(),
+      payee: payee().trim(),
+      amount: amountValue(),
+      description: description(),
+      referenceId: referenceId().trim(),
+      expenseCategory: expenseCategory() || undefined,
+      profitCenter: profitCenter() || undefined,
+      accountingTreatment: accountingTreatment() || undefined,
+    }
+    const result = validateForm(updateDisbursementSchema, data)
+    if (!result.success) {
+      setErrors(result.errors)
+      return
+    }
+    setErrors({})
+    updateDisbursement.mutate(
+      { id: current.id, ...result.data },
+      {
+        onSuccess: () => {
+          props.onClose()
+        },
+      }
+    )
+  }
+
+  return (
+    <Modal open={!!props.txn} onClose={props.onClose} title="Disbursement Details" size="lg">
+      <Show when={txn()}>
+        {current => (
+          <div class="space-y-5">
+            <Show
+              when={mode() === "view"}
+              fallback={
+                <div class="space-y-4">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <Field label="Date" error={errors().transactionDate}>
+                      <input
+                        type="date"
+                        value={transactionDate()}
+                        onInput={e => setTransactionDate(e.currentTarget.value)}
+                        class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      />
+                    </Field>
+                    <Field label="Amount (PHP)" error={errors().amount}>
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        value={amount()}
+                        onInput={e => setAmount(e.currentTarget.value)}
+                        class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      />
+                    </Field>
+                    <Field label="Store / Company" error={errors().payee}>
+                      <input
+                        type="text"
+                        value={payee()}
+                        onInput={e => setPayee(e.currentTarget.value)}
+                        class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      />
+                    </Field>
+                    <Field label="Category" error={errors().category}>
+                      <Select
+                        value={category()}
+                        onChange={handleCategoryChange}
+                        options={categoryOptions()}
+                        ariaLabel="Category"
+                      />
+                    </Field>
+                    <Field label="Receipt / OR" error={errors().referenceId}>
+                      <input
+                        type="text"
+                        value={referenceId()}
+                        onInput={e => setReferenceId(e.currentTarget.value)}
+                        class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                      />
+                    </Field>
+                    <Field label="For" error={errors().profitCenter}>
+                      <Select
+                        value={profitCenter()}
+                        onChange={setProfitCenter}
+                        options={profitCenterOptions.map(value => ({ label: value, value }))}
+                        ariaLabel="For"
+                      />
+                    </Field>
+                  </div>
+                  <Field label="What was bought / paid?" error={errors().description}>
+                    <input
+                      type="text"
+                      value={description()}
+                      onInput={e => setDescription(e.currentTarget.value)}
+                      class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                    />
+                  </Field>
+                  <ModalFooter
+                    onCancel={() => setMode("view")}
+                    cancelLabel="Cancel"
+                    onSubmit={save}
+                    submitLabel="Save"
+                    submitting={updateDisbursement.isPending}
+                  />
+                </div>
+              }
+            >
+              <div class="space-y-5">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                  <Detail
+                    label="Date"
+                    value={formatDatePH(current().transactionDate ?? current().createdAt)}
+                  />
+                  <Detail
+                    label="Amount"
+                    value={formatPeso(Math.abs(Number(current().amount)))}
+                    strong
+                  />
+                  <Detail label="Store / Company" value={current().payee ?? "-"} />
+                  <Detail label="Category" value={categoryLabel(current().category)} />
+                  <Detail label="For" value={current().profitCenter ?? "-"} />
+                  <Detail label="Receipt / OR" value={current().referenceId ?? "-"} />
+                  <Detail label="Recorded by" value={current().createdBy ?? "-"} />
+                  <Detail label="Recorded at" value={formatDatePH(current().createdAt)} />
+                </div>
+
+                <div>
+                  <p class="text-xs font-medium uppercase tracking-wide text-muted mb-1">
+                    What was bought / paid?
+                  </p>
+                  <p class="text-sm text-foreground">{current().description || "-"}</p>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-4 border-t border-border">
+                  <button
+                    type="button"
+                    onClick={props.onClose}
+                    class="px-4 py-2 text-sm font-medium text-foreground hover:bg-surface-muted rounded-lg transition-colors"
+                  >
+                    Close
+                  </button>
+                  <Show when={props.canMutate(current())}>
+                    <button
+                      type="button"
+                      onClick={() => setMode("edit")}
+                      class="px-4 py-2 text-sm font-medium text-foreground border border-border hover:bg-surface-muted rounded-lg transition-colors"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => props.onDelete(current())}
+                      class="px-4 py-2 text-sm font-medium text-white bg-accent hover:bg-accent/90 rounded-lg transition-colors"
+                    >
+                      Delete
+                    </button>
+                  </Show>
+                </div>
+              </div>
+            </Show>
+          </div>
+        )}
+      </Show>
+    </Modal>
+  )
+}
+
+function Field(props: { label: string; error?: string; children: JSX.Element }) {
+  return (
+    <div>
+      <p class="block text-sm font-medium text-foreground mb-1">{props.label}</p>
+      {props.children}
+      <Show when={props.error}>
+        <p class="text-xs text-red-600 mt-1">{props.error}</p>
+      </Show>
+    </div>
+  )
+}
+
+function Detail(props: { label: string; value: string; strong?: boolean }) {
+  return (
+    <div>
+      <p class="text-xs font-medium uppercase tracking-wide text-muted mb-1">{props.label}</p>
+      <p class={`text-sm ${props.strong ? "font-semibold tabular-nums" : ""} text-foreground`}>
+        {props.value}
+      </p>
+    </div>
   )
 }

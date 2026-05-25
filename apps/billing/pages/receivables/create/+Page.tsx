@@ -1,4 +1,4 @@
-import { BackLink, formatPeso } from "@ark/ui"
+import { BackLink, formatPeso, Select } from "@ark/ui"
 import { api } from "@data/api"
 import { useCreateAr } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
@@ -6,7 +6,7 @@ import { createArSchema } from "@data/schemas"
 import type { Batch } from "@data/types"
 import { validateForm } from "@data/validate"
 import { createQuery } from "@tanstack/solid-query"
-import { createSignal, For, Show } from "solid-js"
+import { createSignal, Show } from "solid-js"
 import { Icons } from "@/components/ui"
 
 export default function CreateBillingPage() {
@@ -84,21 +84,18 @@ export default function CreateBillingPage() {
                   <label for="batch-select" class="block text-sm font-medium text-foreground mb-1">
                     Select Batch
                   </label>
-                  <select
+                  <Select
                     id="batch-select"
                     value={selectedBatchId()}
-                    onChange={e => setSelectedBatchId(e.currentTarget.value)}
-                    class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary bg-surface ${errors().batchId ? "border-red-300" : "border-border"}`}
-                  >
-                    <option value="">Choose a batch...</option>
-                    <For each={batchesQuery.data || []}>
-                      {(batch: Batch) => (
-                        <option value={batch.id}>
-                          {batch.batchCode} — {batch.trainingName}
-                        </option>
-                      )}
-                    </For>
-                  </select>
+                    onChange={setSelectedBatchId}
+                    placeholder="Choose a batch..."
+                    options={(batchesQuery.data || []).map((batch: Batch) => ({
+                      label: `${batch.batchCode} - ${batch.trainingName}`,
+                      value: batch.id,
+                    }))}
+                    ariaLabel="Select Batch"
+                    class={errors().batchId ? "rounded-lg ring-1 ring-red-300" : ""}
+                  />
                   <Show when={errors().batchId}>
                     <p class="text-xs text-red-600 mt-1">{errors().batchId}</p>
                   </Show>

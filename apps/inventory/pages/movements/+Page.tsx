@@ -1,4 +1,4 @@
-import { PageHeader, THead, Th, type ToneKind, tonePillClass } from "@ark/ui"
+import { PageHeader, Select, THead, Th, type ToneKind, tonePillClass } from "@ark/ui"
 import { formatMovementQuantity, movementQuantityClass } from "@data/format"
 import { useMovements } from "@data/hooks"
 import type { StockMovement } from "@data/types"
@@ -78,20 +78,18 @@ export default function MovementsPage() {
               <div class="flex items-center justify-between">
                 <h2 class="text-lg font-semibold text-foreground">Movement History</h2>
                 <div class="flex items-center gap-3">
-                  <select
+                  <Select
                     value={typeFilter()}
-                    onChange={e =>
-                      setTypeFilter(
-                        e.currentTarget.value as typeof typeFilter extends () => infer T ? T : never
-                      )
-                    }
-                    class="px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-                  >
-                    <option value="all">All Types</option>
-                    <option value="in">Stock In</option>
-                    <option value="out">Stock Out</option>
-                    <option value="adjustment">Adjustments</option>
-                  </select>
+                    onChange={setTypeFilter}
+                    options={[
+                      { label: "All Types", value: "all" },
+                      { label: "Stock In", value: "in" },
+                      { label: "Stock Out", value: "out" },
+                      { label: "Adjustments", value: "adjustment" },
+                    ]}
+                    ariaLabel="Movement type filter"
+                    class="w-44"
+                  />
                   <div class="relative">
                     <Icons.search class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
                     <input

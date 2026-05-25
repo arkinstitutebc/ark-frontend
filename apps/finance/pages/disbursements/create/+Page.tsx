@@ -1,10 +1,10 @@
 import type { ExpenseCategory, ProfitCenter, TxnCategory } from "@ark/data-types"
-import { BackLink, formatPeso, Select } from "@ark/ui"
+import { BackLink, formatPeso, Select, type SelectOption } from "@ark/ui"
 import { categoryOptionsBySection, GL_CATALOG, glDefault } from "@data/gl-defaults"
 import { useBankBalance, useCreateDisbursement } from "@data/hooks"
 import { createDisbursementSchema, profitCenterOptions } from "@data/schemas"
 import { validateForm } from "@data/validate"
-import { createMemo, createSignal, For, Show } from "solid-js"
+import { createMemo, createSignal, Show } from "solid-js"
 
 const profitCenterLabels: Record<ProfitCenter, string> = {
   JDVP: "JDVP",
@@ -44,7 +44,12 @@ export default function CreateDisbursementPage() {
     }
   }
 
-  const sectionGroups = createMemo(() => categoryOptionsBySection())
+  const categoryOptions = createMemo<SelectOption<string>[]>(() =>
+    categoryOptionsBySection().flatMap(group => [
+      { label: group.label, value: `group-${group.label}`, disabled: true },
+      ...group.options,
+    ])
+  )
 
   const amountValue = () => {
     const v = parseFloat(amount())
@@ -147,24 +152,14 @@ export default function CreateDisbursementPage() {
                 <label for="dis-category" class="block text-sm font-medium text-foreground mb-1">
                   Category
                 </label>
-                <select
+                <Select
                   id="dis-category"
                   value={category()}
-                  onChange={e => handleCategoryChange(e.currentTarget.value as TxnCategory)}
-                  class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().category ? "border-red-300" : "border-border"}`}
-                >
-                  <For each={sectionGroups()}>
-                    {group => (
-                      <Show when={group.options.length > 0}>
-                        <optgroup label={group.label}>
-                          <For each={group.options}>
-                            {opt => <option value={opt.value}>{opt.label}</option>}
-                          </For>
-                        </optgroup>
-                      </Show>
-                    )}
-                  </For>
-                </select>
+                  onChange={v => handleCategoryChange(v as TxnCategory)}
+                  options={categoryOptions()}
+                  ariaLabel="Category"
+                  class={errors().category ? "rounded-lg ring-1 ring-red-300" : ""}
+                />
                 <Show when={errors().category}>
                   <p class="text-xs text-red-600 mt-1">{errors().category}</p>
                 </Show>

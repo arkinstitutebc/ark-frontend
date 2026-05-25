@@ -11,7 +11,12 @@ export {
 } from "./assets"
 export { useCurrentUser } from "./auth"
 export { useBankBalance, useBanks } from "./banks"
-export { useCreateDisbursement, useDisbursements } from "./disbursements"
+export {
+  useCreateDisbursement,
+  useDeleteDisbursement,
+  useDisbursements,
+  useUpdateDisbursement,
+} from "./disbursements"
 export {
   type CreateGlAccountInput,
   type UpdateGlAccountInput,

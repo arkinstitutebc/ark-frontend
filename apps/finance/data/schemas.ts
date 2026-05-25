@@ -32,10 +32,17 @@ export const txnCategoryOptions = [
   "misc_indirect",
 ] as const
 
+const moneyAmount = z
+  .number()
+  .positive("Amount must be greater than zero")
+  .refine(value => Number.isInteger(Math.round(value * 1000) / 10), {
+    message: "Use up to 2 decimal places",
+  })
+
 export const createTransferSchema = z.object({
   fromBankId: z.string().min(1, "Source bank is required"),
   toBankId: z.string().min(1, "Destination bank is required"),
-  amount: z.number().positive("Amount must be greater than zero"),
+  amount: moneyAmount,
   description: z.string().trim().min(1, "Description is required").max(500),
   reference: z.string().trim().max(200).optional(),
 })
@@ -44,13 +51,18 @@ export const createDisbursementSchema = z.object({
   category: z.enum(txnCategoryOptions),
   transactionDate: z.string().min(1, "Date is required"),
   payee: z.string().trim().max(200).optional(),
-  amount: z.number().positive("Amount must be greater than zero"),
+  amount: moneyAmount,
   description: z.string().trim().min(1, "Description is required").max(500),
   referenceId: z.string().trim().max(100).optional(),
   expenseCategory: z.enum(expenseCategoryOptions).optional(),
   profitCenter: z.enum(profitCenterOptions).optional(),
   accountingTreatment: z.enum(accountingTreatmentOptions).optional(),
   costType: z.enum(costTypeOptions).optional(),
+})
+
+export const updateDisbursementSchema = createDisbursementSchema.extend({
+  payee: z.string().trim().max(200).optional(),
+  referenceId: z.string().trim().max(100).optional(),
 })
 
 const rrItemSchema = z.object({

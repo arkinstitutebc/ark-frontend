@@ -19,6 +19,10 @@ interface CreateDisbursementInput {
   costType?: string
 }
 
+type UpdateDisbursementInput = Partial<Omit<CreateDisbursementInput, "bankId" | "batchId">> & {
+  id: string
+}
+
 const crud = createCrudHooks<
   Transaction,
   Transaction,
@@ -52,6 +56,39 @@ export function useCreateDisbursement() {
       qc.invalidateQueries({ queryKey: queryKeys.banks.all })
       qc.invalidateQueries({ queryKey: queryKeys.transactions.all })
       toast.success("Disbursement recorded")
+    },
+    onError: (err: Error) => toast.error(err.message),
+  }))
+}
+
+export function useDeleteDisbursement() {
+  const qc = useQueryClient()
+  return createMutation(() => ({
+    mutationFn: (id: string) => api<void>(`/api/finance/disbursements/${id}`, { method: "DELETE" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.disbursements.all })
+      qc.invalidateQueries({ queryKey: queryKeys.banks.all })
+      qc.invalidateQueries({ queryKey: queryKeys.transactions.all })
+      toast.success("Disbursement deleted")
+    },
+    onError: (err: Error) => toast.error(err.message),
+  }))
+}
+
+export function useUpdateDisbursement() {
+  const qc = useQueryClient()
+  return createMutation(() => ({
+    mutationFn: ({ id, ...data }: UpdateDisbursementInput) =>
+      api<Transaction>(`/api/finance/disbursements/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: queryKeys.disbursements.all })
+      qc.invalidateQueries({ queryKey: queryKeys.disbursements.detail(variables.id) })
+      qc.invalidateQueries({ queryKey: queryKeys.banks.all })
+      qc.invalidateQueries({ queryKey: queryKeys.transactions.all })
+      toast.success("Disbursement updated")
     },
     onError: (err: Error) => toast.error(err.message),
   }))
