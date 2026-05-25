@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { waitForReady } from "./helpers"
+import { waitForReady } from "../helpers"
 
 /**
  * The TopProgressBar is rendered by `apps/main/pages/+Layout.tsx` (via @ark/ui).

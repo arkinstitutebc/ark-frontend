@@ -1,7 +1,7 @@
 import { expect, type Locator, type Page, test } from "@playwright/test"
-import { loginAsAdmin, requireBackend } from "./auth-helper"
-import { waitForReady } from "./helpers"
-import { PORTAL_URLS } from "./test-config"
+import { loginAsAdmin, requireBackend } from "../auth-helper"
+import { waitForReady } from "../helpers"
+import { PORTAL_URLS } from "../test-config"
 
 const TRAINING_URL = PORTAL_URLS.training
 

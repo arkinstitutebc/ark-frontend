@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { setStoredTheme, waitForReady } from "./helpers"
+import { setStoredTheme, waitForReady } from "../helpers"
 
 /**
  * Catches runtime crashes during page load + hydration. Any console.error or

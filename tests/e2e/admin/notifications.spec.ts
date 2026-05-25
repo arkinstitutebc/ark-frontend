@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test"
-import { loginAsAdmin, requireBackend } from "./auth-helper"
-import { waitForReady } from "./helpers"
-import { API_URL } from "./test-config"
+import { loginAsAdmin, requireBackend } from "../auth-helper"
+import { waitForReady } from "../helpers"
+import { API_URL } from "../test-config"
 
 /**
  * Notifications (M6) — fan-out from inviteUser, badge count, mark-all-read.

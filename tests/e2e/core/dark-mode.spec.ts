@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { effectiveBg, isDarkColor, setStoredTheme, waitForReady } from "./helpers"
+import { effectiveBg, isDarkColor, setStoredTheme, waitForReady } from "../helpers"
 
 /**
  * Real cold-start tests that exercise the actual production path:

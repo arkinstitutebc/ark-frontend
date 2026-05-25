@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test"
-import { waitForReady } from "./helpers"
+import { waitForReady } from "../helpers"
 
 /**
  * Real interactivity test: type into the form, submit, assert the request

@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test"
-import { loginAsAdmin, requireBackend } from "./auth-helper"
-import { waitForReady } from "./helpers"
+import { loginAsAdmin, requireBackend } from "../auth-helper"
+import { waitForReady } from "../helpers"
 
 /**
  * Keyboard navigation on the custom <Select> from @ark/ui.

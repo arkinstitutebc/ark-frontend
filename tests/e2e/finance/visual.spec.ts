@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test"
-import { loginAsAdmin, requireBackend } from "./auth-helper"
-import { waitForReady } from "./helpers"
-import { PORTAL_URLS } from "./test-config"
+import { loginAsAdmin, requireBackend } from "../auth-helper"
+import { waitForReady } from "../helpers"
+import { PORTAL_URLS } from "../test-config"
 
 /**
  * Visual regression for the new finance pages (Phase 3b).
