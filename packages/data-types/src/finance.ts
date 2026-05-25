@@ -60,6 +60,19 @@ export interface Transaction {
   linkedTxnId?: string
 }
 
+export type TransactionAuditAction = "create" | "update" | "delete"
+
+export interface TransactionAuditEvent {
+  id: string
+  transactionId: string
+  action: TransactionAuditAction
+  actor?: string | null
+  before?: Transaction | null
+  after?: Transaction | null
+  note?: string | null
+  createdAt: string
+}
+
 export type ArStatus = "created" | "billed" | "paid" | "overdue"
 
 export interface AccountReceivable {

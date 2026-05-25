@@ -16,6 +16,7 @@ export const queryKeys = {
   disbursements: {
     all: ["disbursements"] as const,
     detail: (id: string) => ["disbursements", id] as const,
+    audit: (id: string) => ["disbursements", id, "audit"] as const,
   },
   pnl: {
     byMonth: (month: string) => ["pnl", month] as const,

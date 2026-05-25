@@ -1,8 +1,8 @@
 import { createCrudHooks, toast } from "@ark/ui"
-import { createMutation, useQueryClient } from "@tanstack/solid-query"
+import { createMutation, createQuery, useQueryClient } from "@tanstack/solid-query"
 import { api } from "../api"
 import { queryKeys } from "../query-keys"
-import type { Transaction } from "../types"
+import type { Transaction, TransactionAuditEvent } from "../types"
 
 interface CreateDisbursementInput {
   bankId: string
@@ -43,6 +43,14 @@ const crud = createCrudHooks<
 })
 
 export const useDisbursements = crud.useList
+
+export function useDisbursementAudit(id: () => string | null | undefined) {
+  return createQuery(() => ({
+    queryKey: queryKeys.disbursements.audit(id() ?? "none"),
+    queryFn: () => api<TransactionAuditEvent[]>(`/api/finance/disbursements/${id()}/audit`),
+    enabled: !!id(),
+  }))
+}
 
 export function useCreateDisbursement() {
   const qc = useQueryClient()
@@ -87,6 +95,7 @@ export function useUpdateDisbursement() {
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: queryKeys.disbursements.all })
       qc.invalidateQueries({ queryKey: queryKeys.disbursements.detail(variables.id) })
+      qc.invalidateQueries({ queryKey: queryKeys.disbursements.audit(variables.id) })
       qc.invalidateQueries({ queryKey: queryKeys.banks.all })
       qc.invalidateQueries({ queryKey: queryKeys.transactions.all })
       toast.success("Disbursement updated")

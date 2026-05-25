@@ -16,11 +16,12 @@ import { categoryOptionsBySection, GL_CATALOG, glDefault } from "@data/gl-defaul
 import {
   useBankBalance,
   useDeleteDisbursement,
+  useDisbursementAudit,
   useDisbursements,
   useUpdateDisbursement,
 } from "@data/hooks"
 import { profitCenterOptions, updateDisbursementSchema } from "@data/schemas"
-import type { Transaction, TxnCategory } from "@data/types"
+import type { Transaction, TransactionAuditEvent, TxnCategory } from "@data/types"
 import { validateForm } from "@data/validate"
 import { createEffect, createMemo, createSignal, For, type JSX, Show } from "solid-js"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
@@ -342,6 +343,37 @@ function formatDateTimePH(date: string | undefined | null) {
   })
 }
 
+function auditActionLabel(action: TransactionAuditEvent["action"]) {
+  if (action === "create") return "Created"
+  if (action === "update") return "Updated"
+  return "Deleted"
+}
+
+function auditSummary(event: TransactionAuditEvent) {
+  if (event.action === "create") return event.note ?? "Record was created."
+  if (event.action === "delete") return event.note ?? "Record was deleted."
+
+  const before = event.before
+  const after = event.after
+  if (!before || !after) return event.note ?? ""
+
+  const changed = [
+    before.transactionDate !== after.transactionDate ? "date" : null,
+    before.payee !== after.payee ? "store/company" : null,
+    before.category !== after.category ? "category" : null,
+    Number(before.amount) !== Number(after.amount) ? "amount" : null,
+    before.description !== after.description ? "description" : null,
+    before.referenceId !== after.referenceId ? "receipt/OR" : null,
+    before.profitCenter !== after.profitCenter ? "for" : null,
+    before.expenseCategory !== after.expenseCategory ? "expense group" : null,
+    before.accountingTreatment !== after.accountingTreatment ? "treatment" : null,
+    before.costType !== after.costType ? "cost type" : null,
+    before.metadata?.needsReview !== after.metadata?.needsReview ? "review flag" : null,
+  ].filter(Boolean)
+
+  return changed.length > 0 ? `Changed ${changed.join(", ")}.` : "Saved without field changes."
+}
+
 function compareTxns(a: Transaction, b: Transaction, key: SortKey, dir: SortDir) {
   const multiplier = dir === "asc" ? 1 : -1
   const result =
@@ -385,6 +417,7 @@ function DisbursementDetailsModal(props: {
   canMutate: (txn: Transaction) => boolean
 }) {
   const updateDisbursement = useUpdateDisbursement()
+  const auditQuery = useDisbursementAudit(() => props.txn?.id)
   const [mode, setMode] = createSignal<"view" | "edit">("view")
   const [errors, setErrors] = createSignal<Record<string, string>>({})
   const [transactionDate, setTransactionDate] = createSignal("")
@@ -599,6 +632,23 @@ function DisbursementDetailsModal(props: {
                   <p class="text-sm text-foreground">{current().description || "-"}</p>
                 </div>
 
+                <div class="border-t border-border pt-4">
+                  <div class="flex items-center justify-between gap-3 mb-3">
+                    <h3 class="text-sm font-semibold text-foreground">Audit trail</h3>
+                    <Show when={auditQuery.isFetching}>
+                      <span class="text-xs text-muted">Loading...</span>
+                    </Show>
+                  </div>
+                  <Show
+                    when={(auditQuery.data?.length ?? 0) > 0}
+                    fallback={<p class="text-sm text-muted">No audit events yet.</p>}
+                  >
+                    <div class="space-y-3">
+                      <For each={auditQuery.data}>{event => <AuditEventRow event={event} />}</For>
+                    </div>
+                  </Show>
+                </div>
+
                 <div class="flex justify-end gap-3 pt-4 border-t border-border">
                   <button
                     type="button"
@@ -640,6 +690,21 @@ function Field(props: { label: string; error?: string; children: JSX.Element }) 
       {props.children}
       <Show when={props.error}>
         <p class="text-xs text-red-600 mt-1">{props.error}</p>
+      </Show>
+    </div>
+  )
+}
+
+function AuditEventRow(props: { event: TransactionAuditEvent }) {
+  return (
+    <div class="rounded-lg border border-border bg-surface-muted/40 px-3 py-2">
+      <div class="flex flex-wrap items-center justify-between gap-2">
+        <p class="text-sm font-medium text-foreground">{auditActionLabel(props.event.action)}</p>
+        <p class="text-xs text-muted">{formatDateTimePH(props.event.createdAt)}</p>
+      </div>
+      <p class="text-xs text-muted mt-1">By {props.event.actor ?? "System"}</p>
+      <Show when={auditSummary(props.event)}>
+        {summary => <p class="text-xs text-foreground mt-2">{summary()}</p>}
       </Show>
     </div>
   )

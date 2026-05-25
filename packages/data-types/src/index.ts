@@ -13,6 +13,8 @@ export type {
   IncomeStatementRowKind,
   IncomeStatementSegment,
   Transaction,
+  TransactionAuditAction,
+  TransactionAuditEvent,
   Transfer,
   TransferStatus,
   TxnCategory,

@@ -14,6 +14,7 @@ export { useBankBalance, useBanks } from "./banks"
 export {
   useCreateDisbursement,
   useDeleteDisbursement,
+  useDisbursementAudit,
   useDisbursements,
   useUpdateDisbursement,
 } from "./disbursements"
