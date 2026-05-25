@@ -50,6 +50,7 @@ export default function CreateDisbursementPage() {
     const v = parseFloat(amount())
     return Number.isNaN(v) ? 0 : v
   }
+  const projectedBalance = () => (opsBalance.data?.balance ?? 0) - amountValue()
   const canSubmit = () =>
     transactionDate().trim() !== "" &&
     amountValue() > 0 &&
@@ -283,6 +284,16 @@ export default function CreateDisbursementPage() {
                     {opsBalance.data ? formatPeso(opsBalance.data.balance) : "-"}
                   </span>
                 </div>
+                <Show when={amountValue() > 0 && opsBalance.data}>
+                  <div class="flex justify-between gap-3">
+                    <span class="text-muted">After recording</span>
+                    <span
+                      class={`tabular-nums font-medium ${projectedBalance() < 0 ? "text-red-700" : "text-foreground"}`}
+                    >
+                      {formatPeso(projectedBalance())}
+                    </span>
+                  </div>
+                </Show>
                 <div class="border-t pt-3 flex justify-between">
                   <span class="font-medium">Amount</span>
                   <span class="text-xl tabular-nums text-red-700">
