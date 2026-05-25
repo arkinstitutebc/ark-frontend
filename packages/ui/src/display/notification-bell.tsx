@@ -21,6 +21,9 @@ export interface NotificationBellProps {
   isLoading?: () => boolean
   onMarkRead: (id: string) => void
   onMarkAllRead: () => void
+  desktopAlertsSupported?: () => boolean
+  desktopAlertsEnabled?: () => boolean
+  onEnableDesktopAlerts?: () => void
   /**
    * Called when the user activates a notification (click or Enter). The default
    * is to mark it read; consumers can additionally navigate to `notif.link` or
@@ -100,6 +103,17 @@ export function NotificationBell(props: NotificationBellProps) {
               Mark all read
             </button>
           </div>
+          <Show when={props.desktopAlertsSupported?.() && !props.desktopAlertsEnabled?.()}>
+            <div class="px-4 py-2 border-b border-border">
+              <button
+                type="button"
+                onClick={() => props.onEnableDesktopAlerts?.()}
+                class="w-full rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground hover:bg-surface-muted transition-colors"
+              >
+                Enable desktop alerts
+              </button>
+            </div>
+          </Show>
           <div class="max-h-72 overflow-y-auto">
             <Show
               when={props.notifications().length > 0}

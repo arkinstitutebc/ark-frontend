@@ -1,5 +1,5 @@
 import { useMarkAllRead, useMarkRead, useNotifications } from "@ark/api-client"
-import { NotificationBell, RolePill, ThemeToggle } from "@ark/ui"
+import { NotificationBell, RolePill, ThemeToggle, useLiveNotificationAlerts } from "@ark/ui"
 import { createSignal, onCleanup, onMount, Show } from "solid-js"
 import { UI } from "./ui"
 
@@ -21,6 +21,7 @@ export function Navbar(props: NavbarProps) {
   const notifQuery = useNotifications()
   const markRead = useMarkRead()
   const markAllRead = useMarkAllRead()
+  const liveAlerts = useLiveNotificationAlerts(() => notifQuery.data?.notifications ?? [])
 
   onMount(() => {
     // Capture the URL the user was on when they opened the menu so we can
@@ -78,6 +79,9 @@ export function Navbar(props: NavbarProps) {
               isLoading={() => notifQuery.isLoading}
               onMarkRead={id => markRead.mutate(id)}
               onMarkAllRead={() => markAllRead.mutate()}
+              desktopAlertsSupported={liveAlerts.desktopSupported}
+              desktopAlertsEnabled={liveAlerts.desktopEnabled}
+              onEnableDesktopAlerts={liveAlerts.requestDesktopAlerts}
             />
 
             {/* Admin dropdown */}

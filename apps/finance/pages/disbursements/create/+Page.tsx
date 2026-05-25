@@ -4,7 +4,7 @@ import { categoryOptionsBySection, GL_CATALOG, glDefault } from "@data/gl-defaul
 import { useBankBalance, useCreateDisbursement } from "@data/hooks"
 import { createDisbursementSchema, profitCenterOptions } from "@data/schemas"
 import { validateForm } from "@data/validate"
-import { createMemo, createSignal, onMount, Show } from "solid-js"
+import { createEffect, createMemo, createSignal, onCleanup, onMount, Show } from "solid-js"
 
 const profitCenterLabels: Record<ProfitCenter, string> = {
   JDVP: "JDVP",
@@ -14,6 +14,7 @@ const profitCenterLabels: Record<ProfitCenter, string> = {
 }
 
 const PREVIOUS_DISBURSEMENT_KEY = "ark-finance-previous-disbursement"
+const DRAFT_DISBURSEMENT_KEY = "ark-finance-disbursement-draft"
 
 interface PreviousDisbursementForm {
   category: TxnCategory
@@ -38,6 +39,9 @@ export default function CreateDisbursementPage() {
   const [referenceId, setReferenceId] = createSignal("")
   const [needsReview, setNeedsReview] = createSignal(false)
   const [hasPrevious, setHasPrevious] = createSignal(false)
+  const [hasDraft, setHasDraft] = createSignal(false)
+  let draftReady = false
+  let draftTimer: ReturnType<typeof setTimeout> | undefined
 
   // Hidden accounting defaults keep the form simple while still feeding reports.
   const initialDefaults = glDefault("supplies")
@@ -54,6 +58,12 @@ export default function CreateDisbursementPage() {
 
   onMount(() => {
     setHasPrevious(!!window.localStorage.getItem(PREVIOUS_DISBURSEMENT_KEY))
+    setHasDraft(!!window.localStorage.getItem(DRAFT_DISBURSEMENT_KEY))
+    draftReady = true
+  })
+
+  onCleanup(() => {
+    if (draftTimer) clearTimeout(draftTimer)
   })
 
   const handleCategoryChange = (next: TxnCategory) => {
@@ -96,6 +106,16 @@ export default function CreateDisbursementPage() {
     needsReview: needsReview(),
   })
 
+  createEffect(() => {
+    const form = currentForm()
+    if (!draftReady) return
+    if (draftTimer) clearTimeout(draftTimer)
+    draftTimer = setTimeout(() => {
+      window.localStorage.setItem(DRAFT_DISBURSEMENT_KEY, JSON.stringify(form))
+      setHasDraft(true)
+    }, 250)
+  })
+
   const applyForm = (form: PreviousDisbursementForm) => {
     setCategory(form.category)
     setTransactionDate(form.transactionDate || new Date().toISOString().slice(0, 10))
@@ -125,6 +145,18 @@ export default function CreateDisbursementPage() {
     } catch {
       window.localStorage.removeItem(PREVIOUS_DISBURSEMENT_KEY)
       setHasPrevious(false)
+    }
+  }
+
+  const restoreDraft = () => {
+    const raw = window.localStorage.getItem(DRAFT_DISBURSEMENT_KEY)
+    if (!raw) return
+    try {
+      applyForm(JSON.parse(raw) as PreviousDisbursementForm)
+      setErrors({})
+    } catch {
+      window.localStorage.removeItem(DRAFT_DISBURSEMENT_KEY)
+      setHasDraft(false)
     }
   }
 
@@ -171,6 +203,7 @@ export default function CreateDisbursementPage() {
             resetForNext()
             return
           }
+          window.localStorage.removeItem(DRAFT_DISBURSEMENT_KEY)
           window.location.href = "/disbursements"
         },
       }
@@ -199,6 +232,19 @@ export default function CreateDisbursementPage() {
             class="ml-auto px-3 py-2 text-sm font-medium text-foreground border border-border rounded-lg hover:bg-surface-muted transition-colors"
           >
             Use previous
+          </button>
+        </Show>
+        <Show when={hasDraft()}>
+          <button
+            type="button"
+            onClick={restoreDraft}
+            class={
+              hasPrevious()
+                ? "px-3 py-2 text-sm font-medium text-foreground border border-border rounded-lg hover:bg-surface-muted transition-colors"
+                : "ml-auto px-3 py-2 text-sm font-medium text-foreground border border-border rounded-lg hover:bg-surface-muted transition-colors"
+            }
+          >
+            Restore draft
           </button>
         </Show>
       </div>

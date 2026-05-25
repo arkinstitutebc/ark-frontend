@@ -40,6 +40,7 @@ export {
   StatCard,
   type StatCardProps,
 } from "./display/cards"
+export { useLiveNotificationAlerts } from "./display/live-notification-alerts"
 export {
   NotificationBell,
   type NotificationBellProps,

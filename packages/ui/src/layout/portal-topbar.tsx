@@ -5,6 +5,7 @@ import {
   useMarkRead,
   useNotifications,
 } from "@ark/api-client"
+import { useLiveNotificationAlerts } from "../display/live-notification-alerts"
 import { TopBar } from "./topbar"
 
 const DEFAULT_PORTAL_URL =
@@ -28,6 +29,7 @@ export function PortalTopBar(props: PortalTopBarProps = {}) {
   const notifQuery = useNotifications()
   const markRead = useMarkRead()
   const markAllRead = useMarkAllRead()
+  const liveAlerts = useLiveNotificationAlerts(() => notifQuery.data?.notifications ?? [])
   const portalUrl = () => props.mainPortalUrl ?? DEFAULT_PORTAL_URL
   return (
     <TopBar
@@ -40,6 +42,9 @@ export function PortalTopBar(props: PortalTopBarProps = {}) {
         isLoading: () => notifQuery.isLoading,
         onMarkRead: id => markRead.mutate(id),
         onMarkAllRead: () => markAllRead.mutate(),
+        desktopAlertsSupported: liveAlerts.desktopSupported,
+        desktopAlertsEnabled: liveAlerts.desktopEnabled,
+        onEnableDesktopAlerts: liveAlerts.requestDesktopAlerts,
       }}
     />
   )
