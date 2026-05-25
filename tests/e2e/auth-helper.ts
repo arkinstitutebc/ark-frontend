@@ -11,6 +11,12 @@ export const SEEDED_ADMIN: SeededAdmin = {
   password: process.env.E2E_ADMIN_PASSWORD || "changeme",
 }
 
+function cookieDomain(url: string): string {
+  const { hostname } = new URL(url)
+  if (hostname === "localhost" || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) return hostname
+  return `.${hostname.split(".").slice(-3).join(".")}`
+}
+
 /**
  * Skip the current test if the backend isn't reachable. Use at the top of
  * any test that does real auth or DB I/O — keeps the suite green when devs
@@ -40,8 +46,28 @@ export async function loginAsAdmin(page: Page, creds: SeededAdmin = SEEDED_ADMIN
   if (!res.ok()) {
     throw new Error(`Login failed: ${res.status()} ${await res.text()}`)
   }
-  // The Set-Cookie response is automatically applied to page.context() — no
-  // manual cookie shimming needed. Just navigate.
+  // In some Playwright runs, page.request cookie storage does not reliably
+  // hydrate the browser context for cross-port portal URLs. Mirror token
+  // cookie explicitly so page navigations are authenticated deterministically.
+  const setCookie = res.headers()["set-cookie"]
+  const token = setCookie
+    ?.split(";")
+    .map(part => part.trim())
+    .find(part => part.startsWith("token="))
+    ?.slice("token=".length)
+  if (token) {
+    await page.context().addCookies([
+      {
+        name: "token",
+        value: token,
+        domain: cookieDomain(API_URL),
+        path: "/",
+        httpOnly: true,
+        sameSite: "Lax",
+        secure: API_URL.startsWith("https://"),
+      },
+    ])
+  }
 }
 
 /** Convenience: log in then go to a path. */
