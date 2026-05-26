@@ -2,6 +2,7 @@ import { DataTable, formatDatePH, formatPeso, PageHeader, Select, THead, Th, Tr 
 import { useBankBalance, useBanks, useTransactions, useTransfers } from "@data/hooks"
 import type { Bank, Transaction, Transfer } from "@data/types"
 import { createSignal, For, Show } from "solid-js"
+import { TransferHistoryTable } from "@/components/finance/transfer-history-table"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
 function getTxnLabel(type: string) {
@@ -140,36 +141,7 @@ export default function Page() {
                 </div>
               }
             >
-              <div class="overflow-x-auto">
-                <table class="w-full">
-                  <THead>
-                    <Th>Transfer Flow</Th>
-                    <Th align="right">Amount</Th>
-                    <Th>Reference</Th>
-                    <Th>Date</Th>
-                  </THead>
-                  <tbody>
-                    <For each={transfers}>
-                      {(t: Transfer) => (
-                        <tr class="border-t border-border hover:bg-surface-muted transition-colors">
-                          <td class="py-4 px-6">
-                            <div class="flex items-center gap-2 text-sm">
-                              <span class="text-muted">{getBankName(t.fromBankId)}</span>
-                              <Icons.arrowRight class="w-4 h-4 text-muted" />
-                              <span class="text-muted">{getBankName(t.toBankId)}</span>
-                            </div>
-                          </td>
-                          <td class="py-4 px-6 text-right text-sm font-semibold text-foreground tabular-nums">
-                            {formatPeso(Number(t.amount))}
-                          </td>
-                          <td class="py-4 px-6 text-sm text-muted">{t.reference || "-"}</td>
-                          <td class="py-4 px-6 text-sm text-muted">{formatDatePH(t.createdAt)}</td>
-                        </tr>
-                      )}
-                    </For>
-                  </tbody>
-                </table>
-              </div>
+              <TransferHistoryTable transfers={transfers} getBankName={getBankName} />
             </Show>
           </div>
         )}

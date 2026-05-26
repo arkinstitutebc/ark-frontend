@@ -1,5 +1,5 @@
 import { Bell } from "lucide-solid"
-import { createSignal, For, onCleanup, onMount, Show } from "solid-js"
+import { createMemo, createSignal, For, onCleanup, onMount, Show } from "solid-js"
 
 /**
  * Minimal Notification shape — kept loose so this component does not depend
@@ -42,6 +42,17 @@ function defaultSelect(notif: NotificationItem) {
 export function NotificationBell(props: NotificationBellProps) {
   const [open, setOpen] = createSignal(false)
   let containerRef: HTMLDivElement | undefined
+  const sortedNotifications = createMemo(() =>
+    [...props.notifications()].sort((a, b) => {
+      if (a.read !== b.read) return a.read ? 1 : -1
+      return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    })
+  )
+  const unreadLabel = () => {
+    const count = props.unreadCount()
+    if (count === 0) return "All caught up"
+    return `${count} unread`
+  }
 
   function close() {
     setOpen(false)
@@ -91,9 +102,12 @@ export function NotificationBell(props: NotificationBellProps) {
       </button>
 
       <Show when={open()}>
-        <div class="absolute right-0 top-full mt-2 w-80 bg-surface rounded-xl shadow-lg border border-border py-2 z-50">
+        <div class="absolute right-0 top-full mt-2 w-[min(24rem,calc(100vw-2rem))] bg-surface rounded-xl shadow-lg border border-border py-2 z-50">
           <div class="px-4 py-3 border-b border-border flex items-center justify-between">
-            <p class="text-sm font-semibold text-foreground">Notifications</p>
+            <div>
+              <p class="text-sm font-semibold text-foreground">Notifications</p>
+              <p class="text-xs text-muted mt-0.5">{unreadLabel()}</p>
+            </div>
             <button
               type="button"
               onClick={() => props.onMarkAllRead()}
@@ -104,31 +118,32 @@ export function NotificationBell(props: NotificationBellProps) {
             </button>
           </div>
           <Show when={props.desktopAlertsSupported?.() && !props.desktopAlertsEnabled?.()}>
-            <div class="px-4 py-2 border-b border-border">
+            <div class="px-4 py-2 border-b border-border flex items-center justify-between gap-3">
+              <span class="text-xs text-muted">Desktop alerts are off</span>
               <button
                 type="button"
                 onClick={() => props.onEnableDesktopAlerts?.()}
-                class="w-full rounded-lg border border-border px-3 py-2 text-xs font-medium text-foreground hover:bg-surface-muted transition-colors"
+                class="rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-surface-muted transition-colors whitespace-nowrap"
               >
-                Enable desktop alerts
+                Enable
               </button>
             </div>
           </Show>
-          <div class="max-h-72 overflow-y-auto">
+          <div class="max-h-80 overflow-y-auto">
             <Show
-              when={props.notifications().length > 0}
+              when={sortedNotifications().length > 0}
               fallback={
                 <p class="px-4 py-8 text-center text-sm text-muted">
                   {props.isLoading?.() ? "Loading…" : "No notifications yet."}
                 </p>
               }
             >
-              <For each={props.notifications()}>
+              <For each={sortedNotifications()}>
                 {notif => (
                   <button
                     type="button"
                     onClick={() => activate(notif)}
-                    class={`w-full text-left flex gap-3 px-4 py-3 hover:bg-surface-muted border-l-2 transition-colors ${
+                    class={`w-full text-left flex gap-3 px-4 py-2.5 hover:bg-surface-muted border-l-2 transition-colors ${
                       notif.read ? "border-transparent" : "border-accent bg-accent/[0.02]"
                     }`}
                   >
@@ -137,15 +152,19 @@ export function NotificationBell(props: NotificationBellProps) {
                       data-unread={!notif.read}
                     />
                     <div class="flex-1 min-w-0">
-                      <p
-                        class={`text-sm ${notif.read ? "text-muted" : "text-foreground font-medium"}`}
-                      >
-                        {notif.title}
-                      </p>
+                      <div class="flex items-start justify-between gap-3">
+                        <p
+                          class={`text-sm leading-5 ${notif.read ? "text-muted" : "text-foreground font-medium"}`}
+                        >
+                          {notif.title}
+                        </p>
+                        <p class="text-[11px] text-muted whitespace-nowrap pt-0.5">
+                          {formatRelative(notif.createdAt)}
+                        </p>
+                      </div>
                       <Show when={notif.description}>
-                        <p class="text-xs text-muted truncate mt-0.5">{notif.description}</p>
+                        <p class="text-xs text-muted line-clamp-2 mt-0.5">{notif.description}</p>
                       </Show>
-                      <p class="text-[11px] text-muted mt-1">{formatRelative(notif.createdAt)}</p>
                     </div>
                   </button>
                 )}

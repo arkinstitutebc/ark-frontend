@@ -1,4 +1,13 @@
-import { formatPeso, PageHeader, SegmentedControl, StatCard, THead, Th } from "@ark/ui"
+import {
+  DataTable,
+  formatPeso,
+  PageHeader,
+  SegmentedControl,
+  StatCard,
+  THead,
+  Th,
+  Tr,
+} from "@ark/ui"
 import { useBankBalance, useTransactions } from "@data/hooks"
 import type { Transaction } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -216,40 +225,43 @@ export default function Page() {
             <div class="px-5 py-4 border-b border-border">
               <h2 class="text-sm font-semibold text-foreground">Recent Transactions</h2>
             </div>
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <THead>
-                  <Th>Reference</Th>
-                  <Th>Type</Th>
-                  <Th>Description</Th>
-                  <Th align="right">Amount</Th>
-                  <Th>Date</Th>
-                </THead>
-                <tbody>
-                  <For each={recentTxns()}>
-                    {txn => (
-                      <tr class="border-t border-border hover:bg-surface-muted transition-colors">
-                        <td class="py-4 px-6">
-                          <span class="text-sm font-medium text-foreground">
-                            {txn.referenceId || txn.id.slice(0, 8)}
-                          </span>
-                        </td>
-                        <td class="py-4 px-6">
-                          <StatusBadge status={getTxnLabel(txn.type)} />
-                        </td>
-                        <td class="py-4 px-6 text-sm text-muted">{txn.description}</td>
-                        <td
-                          class={`py-4 px-6 text-right text-sm font-semibold tabular-nums ${getTxnColor(txn.type)}`}
-                        >
-                          {formatPeso(Math.abs(Number(txn.amount)))}
-                        </td>
-                        <td class="py-4 px-6 text-sm text-muted">{formatDate(txn.createdAt)}</td>
-                      </tr>
-                    )}
-                  </For>
-                </tbody>
-              </table>
-            </div>
+            <DataTable>
+              <THead>
+                <Th size="dense">Date</Th>
+                <Th size="dense">Type</Th>
+                <Th size="dense">Description</Th>
+                <Th size="dense" align="right">
+                  Amount
+                </Th>
+              </THead>
+              <tbody>
+                <For each={recentTxns()}>
+                  {txn => (
+                    <Tr>
+                      <td class="py-3 px-6 text-sm text-muted whitespace-nowrap">
+                        {formatDate(txn.transactionDate ?? txn.createdAt)}
+                      </td>
+                      <td class="py-3 px-6">
+                        <StatusBadge status={getTxnLabel(txn.type)} />
+                      </td>
+                      <td class="py-3 px-6 text-sm text-foreground max-w-[440px]">
+                        <span class="block truncate" title={txn.description}>
+                          {txn.description}
+                        </span>
+                        <span class="block text-[11px] text-muted mt-0.5 truncate">
+                          {txn.referenceId || txn.id.slice(0, 8)}
+                        </span>
+                      </td>
+                      <td
+                        class={`py-3 px-6 text-right text-sm font-semibold tabular-nums ${getTxnColor(txn.type)}`}
+                      >
+                        {formatPeso(Math.abs(Number(txn.amount)))}
+                      </td>
+                    </Tr>
+                  )}
+                </For>
+              </tbody>
+            </DataTable>
           </div>
         )}
       </QueryBoundary>

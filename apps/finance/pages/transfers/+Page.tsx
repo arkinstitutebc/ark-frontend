@@ -1,19 +1,9 @@
-import { formatPeso, PageHeader, StatCard, THead, Th } from "@ark/ui"
+import { formatPeso, PageHeader, StatCard } from "@ark/ui"
 import { useBankBalance, useBanks, useTransfers } from "@data/hooks"
 import type { Bank, Transfer } from "@data/types"
-import { For, Show } from "solid-js"
+import { Show } from "solid-js"
+import { TransferHistoryTable } from "@/components/finance/transfer-history-table"
 import { Icons, QueryBoundary } from "@/components/ui"
-
-// formatDate kept locally — uses date+time format that's not in the shared lib
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("en-PH", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  })
-}
 
 export default function TransfersPage() {
   const transfersQuery = useTransfers()
@@ -69,44 +59,15 @@ export default function TransfersPage() {
               when={transfers.length > 0}
               fallback={
                 <div class="py-12 text-center">
-                  <Icons.arrowLeftRight class="w-12 h-12 mx-auto mb-3 text-muted" />
+                  <Icons.arrowLeftRight class="w-10 h-10 mx-auto mb-3 text-muted" />
                   <p class="text-sm font-medium text-foreground">No transfers found</p>
-                  <p class="text-sm text-muted mt-1">
+                  <p class="text-xs text-muted mt-1">
                     Create a transfer to move funds between banks
                   </p>
                 </div>
               }
             >
-              <div class="overflow-x-auto">
-                <table class="w-full">
-                  <THead>
-                    <Th>Transfer Flow</Th>
-                    <Th align="right">Amount</Th>
-                    <Th>Reference</Th>
-                    <Th>Date</Th>
-                  </THead>
-                  <tbody>
-                    <For each={transfers}>
-                      {(t: Transfer) => (
-                        <tr class="border-t border-border hover:bg-surface-muted transition-colors">
-                          <td class="py-4 px-6">
-                            <div class="flex items-center gap-2 text-sm">
-                              <span class="text-muted">{getBankName(t.fromBankId)}</span>
-                              <Icons.arrowRight class="w-4 h-4 text-muted" />
-                              <span class="text-muted">{getBankName(t.toBankId)}</span>
-                            </div>
-                          </td>
-                          <td class="py-4 px-6 text-right text-sm font-semibold text-foreground tabular-nums">
-                            {formatPeso(Number(t.amount))}
-                          </td>
-                          <td class="py-4 px-6 text-sm text-muted">{t.reference || "-"}</td>
-                          <td class="py-4 px-6 text-sm text-muted">{formatDate(t.createdAt)}</td>
-                        </tr>
-                      )}
-                    </For>
-                  </tbody>
-                </table>
-              </div>
+              <TransferHistoryTable transfers={transfers} getBankName={getBankName} />
             </Show>
           </div>
         )}
