@@ -1,5 +1,5 @@
-import { CheckCircle, X, XCircle } from "lucide-solid"
-import { createSignal, For, Show } from "solid-js"
+import { Check, Info, TriangleAlert, X } from "lucide-solid"
+import { createSignal, For } from "solid-js"
 import { Portal } from "solid-js/web"
 
 /**
@@ -50,40 +50,34 @@ interface ToastCardProps {
 }
 
 function ToastCard(props: ToastCardProps) {
-  const accent = () =>
-    props.item.variant === "success"
-      ? "var(--color-primary)"
-      : props.item.variant === "error"
-        ? "var(--color-accent)"
-        : "var(--color-border)"
+  const Icon =
+    props.item.variant === "success" ? Check : props.item.variant === "error" ? TriangleAlert : Info
 
   return (
     <div
-      class="animate-toast-in pointer-events-auto flex items-start gap-3 bg-surface text-foreground rounded-xl px-4 py-3.5"
+      class="animate-toast-in pointer-events-auto flex items-start gap-3 rounded-lg bg-surface px-3.5 py-3 text-foreground"
       style={{
-        "min-width": "320px",
-        "max-width": "440px",
+        width: "min(calc(100vw - 2rem), 24rem)",
         border: "1px solid var(--color-border)",
-        "border-left": `4px solid ${accent()}`,
-        "box-shadow": "0 8px 24px rgba(0, 0, 0, 0.12)",
+        "box-shadow": "0 10px 28px rgba(15, 23, 42, 0.10), 0 1px 2px rgba(15, 23, 42, 0.05)",
         "font-family": "Montserrat, sans-serif",
       }}
       role={props.item.variant === "error" ? "alert" : "status"}
     >
-      <Show when={props.item.variant === "success"}>
-        <CheckCircle class="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: accent() }} />
-      </Show>
-      <Show when={props.item.variant === "error"}>
-        <XCircle class="w-5 h-5 mt-0.5 flex-shrink-0" style={{ color: accent() }} />
-      </Show>
-      <p class="flex-1 text-sm leading-snug font-medium pt-0.5">{props.item.message}</p>
+      <span
+        class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-border bg-surface-muted text-foreground/75"
+        aria-hidden="true"
+      >
+        <Icon class="h-3.5 w-3.5" />
+      </span>
+      <p class="flex-1 pt-0.5 text-sm font-medium leading-snug">{props.item.message}</p>
       <button
         type="button"
         onClick={() => dismiss(props.item.id)}
-        class="text-muted hover:text-foreground transition-colors -mr-1 flex-shrink-0"
+        class="-mr-1 flex-shrink-0 rounded-md p-1 text-muted transition-colors hover:bg-surface-muted hover:text-foreground"
         aria-label="Dismiss"
       >
-        <X class="w-4 h-4" />
+        <X class="h-3.5 w-3.5" />
       </button>
     </div>
   )
@@ -96,7 +90,7 @@ function ToastCard(props: ToastCardProps) {
 export function AppToaster() {
   return (
     <Portal>
-      <div class="fixed top-4 right-4 z-[100] flex flex-col gap-3 pointer-events-none">
+      <div class="pointer-events-none fixed right-4 top-4 z-[100] flex flex-col gap-2">
         <For each={items()}>{item => <ToastCard item={item} />}</For>
       </div>
     </Portal>
