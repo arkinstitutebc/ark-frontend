@@ -8,6 +8,7 @@ import {
   ListChecks,
   Package,
   Receipt,
+  SlidersHorizontal,
   TrendingUp,
   Wallet,
 } from "lucide-solid"
@@ -32,6 +33,7 @@ const navItems: NavItem[] = [
   },
   { id: "assets", label: "Assets", href: "/assets", icon: Package },
   { id: "gl-accounts", label: "GL Accounts", href: "/gl-accounts", icon: BookOpen },
+  { id: "settings", label: "Settings", href: "/settings", icon: SlidersHorizontal },
   { id: "tutorials", label: "How To", href: "/tutorials", icon: HelpCircle },
 ]
 

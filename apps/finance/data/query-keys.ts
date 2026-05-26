@@ -44,4 +44,12 @@ export const queryKeys = {
     filtered: (filters?: { includeInactive?: boolean }) => ["gl-accounts", filters] as const,
     detail: (id: string) => ["gl-accounts", id] as const,
   },
+  accountingSettings: {
+    profitCenters: (filters?: { includeInactive?: boolean }) =>
+      ["accounting-settings", "profit-centers", filters] as const,
+    trainingOfferings: (filters?: { includeInactive?: boolean }) =>
+      ["accounting-settings", "training-offerings", filters] as const,
+    classificationRules: (filters?: { includeInactive?: boolean }) =>
+      ["accounting-settings", "classification-rules", filters] as const,
+  },
 } as const
