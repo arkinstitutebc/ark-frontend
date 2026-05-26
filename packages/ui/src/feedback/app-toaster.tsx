@@ -1,4 +1,4 @@
-import { Check, Info, TriangleAlert, X } from "lucide-solid"
+import { CircleAlert, CircleCheck, Info, X } from "lucide-solid"
 import { createSignal, For } from "solid-js"
 import { Portal } from "solid-js/web"
 
@@ -51,30 +51,30 @@ interface ToastCardProps {
 
 function ToastCard(props: ToastCardProps) {
   const Icon =
-    props.item.variant === "success" ? Check : props.item.variant === "error" ? TriangleAlert : Info
+    props.item.variant === "success"
+      ? CircleCheck
+      : props.item.variant === "error"
+        ? CircleAlert
+        : Info
 
   return (
     <div
-      class="animate-toast-in pointer-events-auto flex items-start gap-3 rounded-lg bg-surface px-3.5 py-3 text-foreground"
+      class="animate-toast-in pointer-events-auto grid grid-cols-[auto_1fr_auto] items-start gap-3 rounded-lg border border-border bg-surface px-4 py-3 font-sans text-foreground shadow-[0_10px_28px_rgba(15,23,42,0.10),0_1px_2px_rgba(15,23,42,0.05)]"
       style={{
-        width: "min(calc(100vw - 2rem), 24rem)",
-        border: "1px solid var(--color-border)",
-        "box-shadow": "0 10px 28px rgba(15, 23, 42, 0.10), 0 1px 2px rgba(15, 23, 42, 0.05)",
-        "font-family": "Montserrat, sans-serif",
+        width: "min(calc(100vw - 2rem), 22rem)",
       }}
       role={props.item.variant === "error" ? "alert" : "status"}
     >
-      <span
-        class="mt-0.5 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md border border-border bg-surface-muted text-foreground/75"
-        aria-hidden="true"
-      >
-        <Icon class="h-3.5 w-3.5" />
+      <span class="mt-0.5 text-muted" aria-hidden="true">
+        <Icon class="h-4 w-4" />
       </span>
-      <p class="flex-1 pt-0.5 text-sm font-medium leading-snug">{props.item.message}</p>
+      <p class="min-w-0 break-words text-[13px] font-medium leading-5 tracking-normal">
+        {props.item.message}
+      </p>
       <button
         type="button"
         onClick={() => dismiss(props.item.id)}
-        class="-mr-1 flex-shrink-0 rounded-md p-1 text-muted transition-colors hover:bg-surface-muted hover:text-foreground"
+        class="-mr-1 -mt-1 flex h-7 w-7 items-center justify-center rounded-md text-muted transition-colors hover:bg-surface-muted hover:text-foreground"
         aria-label="Dismiss"
       >
         <X class="h-3.5 w-3.5" />
