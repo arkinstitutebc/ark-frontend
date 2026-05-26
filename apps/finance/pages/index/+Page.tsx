@@ -4,11 +4,11 @@ import type { Transaction } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
-// formatDate kept locally — uses a no-year compact format that's not in the shared lib
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-PH", {
     month: "short",
     day: "numeric",
+    year: "numeric",
   })
 }
 
@@ -38,6 +38,7 @@ export default function Page() {
   const opsBalance = useBankBalance(() => "operational-hub")
   const transactionsQuery = useTransactions(() => ({ limit: 120 }))
   const [chartMode, setChartMode] = createSignal<"daily" | "category">("daily")
+  const [pointLabelMode, setPointLabelMode] = createSignal<"dots" | "amounts">("dots")
 
   const totalBalance = createMemo(() => {
     if (!revenueBalance.data || !opsBalance.data) return null
@@ -46,9 +47,6 @@ export default function Page() {
   const recentTxns = createMemo(() => transactionsQuery.data?.slice(0, 5) ?? [])
   const dailyExpenses = createMemo(() => buildDailyExpenseTrend(transactionsQuery.data ?? []))
   const categoryExpenses = createMemo(() => buildCategoryBreakdown(transactionsQuery.data ?? []))
-  const recentExpenseTotal = createMemo(() =>
-    dailyExpenses().reduce((sum, day) => sum + day.amount, 0)
-  )
 
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
@@ -94,7 +92,18 @@ export default function Page() {
             <h3 class="text-sm font-semibold text-foreground">Spending Snapshot</h3>
             <p class="text-xs text-muted mt-1">Recent disbursement records</p>
           </div>
-          <div class="flex items-center gap-3">
+          <div class="flex flex-wrap items-center gap-3">
+            <Show when={chartMode() === "daily"}>
+              <SegmentedControl
+                value={pointLabelMode()}
+                onChange={setPointLabelMode}
+                ariaLabel="Daily chart point labels"
+                options={[
+                  { label: "Dots", value: "dots", icon: Icons.minus },
+                  { label: "Amounts", value: "amounts", icon: Icons.info },
+                ]}
+              />
+            </Show>
             <SegmentedControl
               value={chartMode()}
               onChange={setChartMode}
@@ -104,16 +113,16 @@ export default function Page() {
                 { label: "Category", value: "category", icon: Icons.barChart3 },
               ]}
             />
-            <p class="text-sm font-semibold text-foreground tabular-nums">
-              {formatPeso(recentExpenseTotal())}
-            </p>
           </div>
         </div>
         <Show
           when={chartMode() === "daily"}
           fallback={<CategoryBreakdownChart points={categoryExpenses()} />}
         >
-          <SpendingTrendChart points={dailyExpenses()} />
+          <SpendingTrendChart
+            points={dailyExpenses()}
+            showValues={pointLabelMode() === "amounts"}
+          />
         </Show>
       </div>
 
@@ -286,10 +295,10 @@ function buildCategoryBreakdown(txns: Transaction[]): CategoryExpensePoint[] {
     .slice(0, 8)
 }
 
-function SpendingTrendChart(props: { points: DailyExpensePoint[] }) {
-  const width = () => Math.max(760, props.points.length * 92)
+function SpendingTrendChart(props: { points: DailyExpensePoint[]; showValues: boolean }) {
+  const width = () => Math.max(760, props.points.length * (props.showValues ? 124 : 92))
   const height = 180
-  const padding = { top: 12, right: 20, bottom: 36, left: 68 }
+  const padding = { top: 24, right: 20, bottom: 36, left: 68 }
   const points = () => props.points
   const max = () => Math.max(...points().map(point => point.amount), 1)
   const gridLines = () => [0.25, 0.5, 0.75, 1].map(ratio => ({ ratio, value: max() * ratio }))
@@ -385,6 +394,16 @@ function SpendingTrendChart(props: { points: DailyExpensePoint[] }) {
                       {formatDate(points()[index()].date)} - {formatPeso(points()[index()].amount)}
                     </title>
                   </circle>
+                  <Show when={props.showValues}>
+                    <text
+                      x={point.x}
+                      y={Math.max(11, point.y - 9)}
+                      text-anchor="middle"
+                      class="fill-foreground text-[10px] font-medium"
+                    >
+                      {formatPeso(points()[index()].amount)}
+                    </text>
+                  </Show>
                   <text
                     x={point.x}
                     y={height - 12}

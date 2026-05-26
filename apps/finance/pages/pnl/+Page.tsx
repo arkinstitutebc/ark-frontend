@@ -13,8 +13,30 @@ function downloadBlob(content: BlobPart, filename: string, mimeType: string) {
   setTimeout(() => URL.revokeObjectURL(url), 100)
 }
 
+function toMonthValue(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`
+}
+
+function monthDate(monthValue: string) {
+  const [year, month] = monthValue.split("-").map(Number)
+  return new Date(year, month - 1, 1)
+}
+
+function formatMonth(monthValue: string) {
+  return monthDate(monthValue).toLocaleDateString("en-PH", {
+    month: "long",
+    year: "numeric",
+  })
+}
+
+function shiftMonth(monthValue: string, delta: number) {
+  const date = monthDate(monthValue)
+  date.setMonth(date.getMonth() + delta)
+  return toMonthValue(date)
+}
+
 export default function PnlPage() {
-  const [selectedMonth, setSelectedMonth] = createSignal(new Date().toISOString().slice(0, 7))
+  const [selectedMonth, setSelectedMonth] = createSignal(toMonthValue(new Date()))
   const pnlQuery = usePnl(selectedMonth)
 
   const exportCsv = () => {
@@ -108,15 +130,31 @@ export default function PnlPage() {
       />
 
       <div class="flex flex-wrap gap-3 mb-6 items-end">
-        <label class="block">
+        <div class="block">
           <span class="block text-xs text-muted mb-1">Month</span>
-          <input
-            type="month"
-            value={selectedMonth()}
-            onInput={e => setSelectedMonth(e.currentTarget.value)}
-            class="px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-          />
-        </label>
+          <div class="inline-flex items-center overflow-hidden rounded-lg border border-border bg-surface">
+            <button
+              type="button"
+              onClick={() => setSelectedMonth(shiftMonth(selectedMonth(), -1))}
+              class="h-10 w-10 inline-flex items-center justify-center text-muted hover:bg-surface-muted hover:text-foreground transition-colors"
+              aria-label="Previous month"
+            >
+              <Icons.chevronLeft class="w-4 h-4" />
+            </button>
+            <div class="h-10 min-w-[172px] px-3 inline-flex items-center justify-center gap-2 border-x border-border text-sm font-medium text-foreground">
+              <Icons.calendar class="w-4 h-4 text-muted" />
+              <span>{formatMonth(selectedMonth())}</span>
+            </div>
+            <button
+              type="button"
+              onClick={() => setSelectedMonth(shiftMonth(selectedMonth(), 1))}
+              class="h-10 w-10 inline-flex items-center justify-center text-muted hover:bg-surface-muted hover:text-foreground transition-colors"
+              aria-label="Next month"
+            >
+              <Icons.chevronRight class="w-4 h-4" />
+            </button>
+          </div>
+        </div>
         <div class="flex gap-2">
           <button
             type="button"

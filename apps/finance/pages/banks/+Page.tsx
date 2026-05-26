@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso, PageHeader, Select, THead, Th } from "@ark/ui"
+import { DataTable, formatDatePH, formatPeso, PageHeader, Select, THead, Th, Tr } from "@ark/ui"
 import { useBankBalance, useBanks, useTransactions, useTransfers } from "@data/hooks"
 import type { Bank, Transaction, Transfer } from "@data/types"
 import { createSignal, For, Show } from "solid-js"
@@ -26,6 +26,10 @@ function getTxnColor(type: string) {
   }
 }
 
+function getTxnDate(txn: Transaction) {
+  return formatDatePH(txn.transactionDate ?? txn.createdAt)
+}
+
 export default function Page() {
   const [selectedBank, setSelectedBank] = createSignal<string>("all")
 
@@ -35,7 +39,7 @@ export default function Page() {
   const opsBalance = useBankBalance(() => "operational-hub")
   const transactionsQuery = useTransactions(() => {
     const bank = selectedBank()
-    return bank !== "all" ? { bankId: bank } : {}
+    return bank !== "all" ? { bankId: bank, limit: 50 } : { limit: 50 }
   })
 
   const getBalanceFor = (bankId: string): number | null => {
@@ -176,43 +180,61 @@ export default function Page() {
         {(txns: Transaction[]) => (
           <div class="bg-surface rounded-lg border border-border overflow-hidden">
             <div class="px-5 py-4 border-b border-border flex items-center justify-between">
-              <h2 class="text-sm font-semibold text-foreground">Transaction History</h2>
-              <p class="text-xs text-muted">{txns.length} transactions</p>
+              <div>
+                <h2 class="text-sm font-semibold text-foreground">Recent Transactions</h2>
+                <p class="text-xs text-muted mt-0.5">Latest bank activity by transaction date</p>
+              </div>
+              <p class="text-xs text-muted">Latest {txns.length}</p>
             </div>
-            <div class="overflow-x-auto">
-              <table class="w-full">
+            <Show
+              when={txns.length > 0}
+              fallback={
+                <div class="py-10 text-center">
+                  <Icons.receipt class="w-10 h-10 mx-auto mb-3 text-muted" />
+                  <p class="text-sm font-medium text-foreground">No transactions found</p>
+                </div>
+              }
+            >
+              <DataTable>
                 <THead>
-                  <Th>Reference</Th>
-                  <Th>Type</Th>
-                  <Th>Description</Th>
-                  <Th align="right">Amount</Th>
-                  <Th>Date</Th>
+                  <Th size="dense">Date</Th>
+                  <Th size="dense">Type</Th>
+                  <Th size="dense">Description</Th>
+                  <Th size="dense" align="right">
+                    Amount
+                  </Th>
                 </THead>
                 <tbody>
                   <For each={txns}>
                     {(txn: Transaction) => (
-                      <tr class="border-t border-border hover:bg-surface-muted transition-colors">
-                        <td class="py-4 px-6">
-                          <span class="text-sm font-medium text-foreground">
-                            {txn.referenceId || txn.id.slice(0, 8)}
-                          </span>
+                      <Tr>
+                        <td class="py-3 px-6 text-sm text-muted whitespace-nowrap">
+                          {getTxnDate(txn)}
                         </td>
-                        <td class="py-4 px-6">
+                        <td class="py-3 px-6">
                           <StatusBadge status={getTxnLabel(txn.type)} />
                         </td>
-                        <td class="py-4 px-6 text-sm text-muted">{txn.description}</td>
+                        <td class="py-3 px-6 text-sm text-foreground max-w-[440px]">
+                          <span class="block truncate" title={txn.description}>
+                            {txn.description}
+                          </span>
+                          <Show when={txn.referenceId}>
+                            <span class="block text-[11px] text-muted mt-0.5 truncate">
+                              {txn.referenceId}
+                            </span>
+                          </Show>
+                        </td>
                         <td
-                          class={`py-4 px-6 text-right text-sm font-semibold tabular-nums ${getTxnColor(txn.type)}`}
+                          class={`py-3 px-6 text-right text-sm font-semibold tabular-nums ${getTxnColor(txn.type)}`}
                         >
                           {formatPeso(Math.abs(Number(txn.amount)))}
                         </td>
-                        <td class="py-4 px-6 text-sm text-muted">{formatDatePH(txn.createdAt)}</td>
-                      </tr>
+                      </Tr>
                     )}
                   </For>
                 </tbody>
-              </table>
-            </div>
+              </DataTable>
+            </Show>
           </div>
         )}
       </QueryBoundary>
