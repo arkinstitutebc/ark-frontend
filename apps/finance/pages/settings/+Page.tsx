@@ -1,5 +1,6 @@
 import { DataTable, PageContainer, PageHeader, THead, Th } from "@ark/ui"
 import {
+  useAuditEvents,
   useClassificationRules,
   useCreateClassificationRule,
   useCreateProfitCenter,
@@ -10,13 +11,14 @@ import {
   useUpdateProfitCenter,
   useUpdateTrainingOffering,
 } from "@data/hooks"
-import { createSignal, For, Show } from "solid-js"
+import { createMemo, createSignal, For, Show } from "solid-js"
 import { Icons, QueryBoundary } from "@/components/ui"
 
 export default function FinanceSettingsPage() {
   const profitCenters = useProfitCenters(() => ({ includeInactive: true }))
   const offerings = useTrainingOfferings(() => ({ includeInactive: true }))
   const rules = useClassificationRules(() => ({ includeInactive: true }))
+  const auditEvents = useAuditEvents(() => ({ module: "finance", page: 1, limit: 12 }))
 
   const createProfitCenter = useCreateProfitCenter()
   const updateProfitCenter = useUpdateProfitCenter()
@@ -35,6 +37,12 @@ export default function FinanceSettingsPage() {
   const [ruleTreatment, setRuleTreatment] = createSignal("variable")
   const [ruleExpenseCategory, setRuleExpenseCategory] = createSignal("cost-of-services")
 
+  const activeProfitCenters = createMemo(
+    () => profitCenters.data?.filter(item => item.active).length ?? 0
+  )
+  const activeOfferings = createMemo(() => offerings.data?.filter(item => item.active).length ?? 0)
+  const activeRules = createMemo(() => rules.data?.filter(item => item.active).length ?? 0)
+
   const addProfitCenter = (e: Event) => {
     e.preventDefault()
     if (!pcCode().trim() || !pcLabel().trim()) return
@@ -49,6 +57,7 @@ export default function FinanceSettingsPage() {
           setPcCode("")
           setPcLabel("")
           setPcFund("")
+          void auditEvents.refetch()
         },
       }
     )
@@ -68,6 +77,7 @@ export default function FinanceSettingsPage() {
           setOfferingCode("")
           setOfferingLabel("")
           setOfferingSector("")
+          void auditEvents.refetch()
         },
       }
     )
@@ -88,6 +98,7 @@ export default function FinanceSettingsPage() {
           setRuleCategory("")
           setRuleTreatment("variable")
           setRuleExpenseCategory("cost-of-services")
+          void auditEvents.refetch()
         },
       }
     )
@@ -100,6 +111,12 @@ export default function FinanceSettingsPage() {
         subtitle="Manage fund sources, training offerings, and category defaults"
       />
 
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+        <StatCard label="Active fund sources" value={activeProfitCenters()} />
+        <StatCard label="Active offerings" value={activeOfferings()} />
+        <StatCard label="Active rules" value={activeRules()} />
+      </div>
+
       <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <section class="bg-surface border border-border rounded-lg overflow-hidden">
           <SettingsHeader title="Profit Centers" hint="Fund sources and P&L groups" />
@@ -111,7 +128,8 @@ export default function FinanceSettingsPage() {
             </div>
             <button
               type="submit"
-              class="inline-flex items-center gap-2 px-3 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors justify-self-start"
+              disabled={createProfitCenter.isPending || !pcCode().trim() || !pcLabel().trim()}
+              class="inline-flex items-center gap-2 px-3 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors justify-self-start disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Icons.plus class="w-4 h-4" /> Add
             </button>
@@ -138,7 +156,12 @@ export default function FinanceSettingsPage() {
                         <td class="py-3 px-4">
                           <Toggle
                             checked={item.active}
-                            onChange={active => updateProfitCenter.mutate({ id: item.id, active })}
+                            onChange={active =>
+                              updateProfitCenter.mutate(
+                                { id: item.id, active },
+                                { onSuccess: () => void auditEvents.refetch() }
+                              )
+                            }
                           />
                         </td>
                       </tr>
@@ -175,7 +198,10 @@ export default function FinanceSettingsPage() {
             </div>
             <button
               type="submit"
-              class="inline-flex items-center gap-2 px-3 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors justify-self-start"
+              disabled={
+                createOffering.isPending || !offeringCode().trim() || !offeringLabel().trim()
+              }
+              class="inline-flex items-center gap-2 px-3 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors justify-self-start disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Icons.plus class="w-4 h-4" /> Add
             </button>
@@ -202,7 +228,12 @@ export default function FinanceSettingsPage() {
                         <td class="py-3 px-4">
                           <Toggle
                             checked={item.active}
-                            onChange={active => updateOffering.mutate({ id: item.id, active })}
+                            onChange={active =>
+                              updateOffering.mutate(
+                                { id: item.id, active },
+                                { onSuccess: () => void auditEvents.refetch() }
+                              )
+                            }
                           />
                         </td>
                       </tr>
@@ -239,7 +270,8 @@ export default function FinanceSettingsPage() {
             </div>
             <button
               type="submit"
-              class="inline-flex items-center gap-2 px-3 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors justify-self-start"
+              disabled={createRule.isPending || !ruleCategory().trim()}
+              class="inline-flex items-center gap-2 px-3 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors justify-self-start disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Icons.plus class="w-4 h-4" /> Add
             </button>
@@ -268,7 +300,12 @@ export default function FinanceSettingsPage() {
                         <td class="py-3 px-4">
                           <Toggle
                             checked={item.active}
-                            onChange={active => updateRule.mutate({ id: item.id, active })}
+                            onChange={active =>
+                              updateRule.mutate(
+                                { id: item.id, active },
+                                { onSuccess: () => void auditEvents.refetch() }
+                              )
+                            }
                           />
                         </td>
                       </tr>
@@ -280,7 +317,51 @@ export default function FinanceSettingsPage() {
           </QueryBoundary>
         </section>
       </div>
+
+      <section class="bg-surface border border-border rounded-lg overflow-hidden mt-6">
+        <SettingsHeader
+          title="Recent Settings Activity"
+          hint="Latest finance setting and catalog changes"
+        />
+        <QueryBoundary query={auditEvents}>
+          {result => (
+            <DataTable>
+              <THead>
+                <Th size="dense">When</Th>
+                <Th size="dense">Change</Th>
+                <Th size="dense">By</Th>
+              </THead>
+              <tbody>
+                <For each={result.items}>
+                  {event => (
+                    <tr class="border-t border-border">
+                      <td class="py-3 px-4 text-xs text-muted whitespace-nowrap">
+                        {formatDateTime(event.createdAt)}
+                      </td>
+                      <td class="py-3 px-4 text-sm text-foreground">
+                        <span class="font-medium">{actionLabel(event.action)}</span>{" "}
+                        <span class="text-muted">{event.entityType}</span>
+                        <span class="block text-xs text-muted font-mono">{event.entityId}</span>
+                      </td>
+                      <td class="py-3 px-4 text-sm text-muted">{event.actor ?? "System"}</td>
+                    </tr>
+                  )}
+                </For>
+              </tbody>
+            </DataTable>
+          )}
+        </QueryBoundary>
+      </section>
     </PageContainer>
+  )
+}
+
+function StatCard(props: { label: string; value: number }) {
+  return (
+    <div class="bg-surface border border-border rounded-lg px-4 py-3">
+      <p class="text-xs text-muted">{props.label}</p>
+      <p class="text-2xl font-semibold text-foreground tabular-nums mt-1">{props.value}</p>
+    </div>
   )
 }
 
@@ -346,4 +427,19 @@ function Toggle(props: { checked: boolean; onChange: (checked: boolean) => void 
       />
     </button>
   )
+}
+
+function actionLabel(action: string) {
+  if (action === "deactivate") return "Deactivated"
+  if (action === "create") return "Created"
+  if (action === "update") return "Updated"
+  if (action === "delete") return "Deleted"
+  return action
+}
+
+function formatDateTime(value: string) {
+  return new Intl.DateTimeFormat("en-PH", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value))
 }

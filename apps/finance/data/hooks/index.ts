@@ -23,6 +23,7 @@ export {
   useDisposeAsset,
   useUpdateAsset,
 } from "./assets"
+export { type AuditEvent, type AuditEventFilters, useAuditEvents } from "./audit-events"
 export { useCurrentUser } from "./auth"
 export { useBankBalance, useBanks } from "./banks"
 export {

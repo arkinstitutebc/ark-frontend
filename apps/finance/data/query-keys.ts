@@ -52,4 +52,14 @@ export const queryKeys = {
     classificationRules: (filters?: { includeInactive?: boolean }) =>
       ["accounting-settings", "classification-rules", filters] as const,
   },
+  auditEvents: {
+    filtered: (filters?: {
+      page?: number
+      limit?: number
+      module?: string
+      entityType?: string
+      entityId?: string
+      action?: string
+    }) => ["audit-events", filters] as const,
+  },
 } as const
