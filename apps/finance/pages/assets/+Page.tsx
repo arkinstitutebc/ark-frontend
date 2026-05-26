@@ -1,5 +1,6 @@
 import type { Asset, AssetStatus } from "@ark/data-types"
 import {
+  DataTable,
   formatDatePH,
   formatPeso,
   PageContainer,
@@ -8,6 +9,7 @@ import {
   StatusBadge,
   THead,
   Th,
+  Tr,
 } from "@ark/ui"
 import { useAssets } from "@data/hooks"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -111,54 +113,52 @@ export default function AssetsPage() {
             </div>
           }
         >
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <THead>
-                <Th size="dense">Code</Th>
-                <Th size="dense">Name</Th>
-                <Th size="dense">Category</Th>
-                <Th size="dense">Acquired</Th>
-                <Th size="dense" align="right">
-                  Cost
-                </Th>
-                <Th size="dense" align="right">
-                  Book value
-                </Th>
-                <Th size="dense">Status</Th>
-              </THead>
-              <tbody>
-                <For each={rows()}>
-                  {asset => (
-                    <tr
-                      onClick={() => navigate(`/assets/${asset.id}`)}
-                      class="border-t border-border hover:bg-primary/5 cursor-pointer transition-colors"
-                    >
-                      <td class="py-3 px-6 font-mono text-sm font-medium text-foreground">
-                        {asset.assetCode}
-                      </td>
-                      <td class="py-3 px-6 text-sm text-foreground">{asset.name}</td>
-                      <td class="py-3 px-6 text-sm text-muted">{asset.category}</td>
-                      <td class="py-3 px-6 text-sm text-muted">
-                        {formatDatePH(asset.acquisitionDate)} (
-                        {monthsElapsedSince(asset.acquisitionDate)}mo)
-                      </td>
-                      <td class="py-3 px-6 text-right text-sm text-foreground tabular-nums">
-                        {formatPeso(Number(asset.acquisitionCost))}
-                      </td>
-                      <td class="py-3 px-6 text-right text-sm font-semibold text-foreground tabular-nums">
-                        {asset.status === "active"
-                          ? formatPeso(bookValueAt(asset, new Date()))
-                          : "—"}
-                      </td>
-                      <td class="py-3 px-6">
-                        <StatusBadge status={asset.status as AssetStatus} />
-                      </td>
-                    </tr>
-                  )}
-                </For>
-              </tbody>
-            </table>
-          </div>
+          <DataTable>
+            <THead>
+              <Th size="dense">Code</Th>
+              <Th size="dense">Name</Th>
+              <Th size="dense">Category</Th>
+              <Th size="dense">Acquired</Th>
+              <Th size="dense" align="right">
+                Cost
+              </Th>
+              <Th size="dense" align="right">
+                Book value
+              </Th>
+              <Th size="dense">Status</Th>
+            </THead>
+            <tbody>
+              <For each={rows()}>
+                {asset => (
+                  <Tr onClick={() => navigate(`/assets/${asset.id}`)} class="hover:bg-primary/5">
+                    <td class="py-3 px-6 font-mono text-sm font-medium text-foreground">
+                      {asset.assetCode}
+                    </td>
+                    <td class="py-3 px-6 text-sm text-foreground max-w-[280px]">
+                      <span class="block truncate" title={asset.name}>
+                        {asset.name}
+                      </span>
+                    </td>
+                    <td class="py-3 px-6 text-sm text-muted whitespace-nowrap">{asset.category}</td>
+                    <td class="py-3 px-6 text-sm text-muted whitespace-nowrap">
+                      {formatDatePH(asset.acquisitionDate)} (
+                      {monthsElapsedSince(asset.acquisitionDate)}
+                      mo)
+                    </td>
+                    <td class="py-3 px-6 text-right text-sm text-foreground tabular-nums">
+                      {formatPeso(Number(asset.acquisitionCost))}
+                    </td>
+                    <td class="py-3 px-6 text-right text-sm font-semibold text-foreground tabular-nums">
+                      {asset.status === "active" ? formatPeso(bookValueAt(asset, new Date())) : "—"}
+                    </td>
+                    <td class="py-3 px-6">
+                      <StatusBadge status={asset.status as AssetStatus} />
+                    </td>
+                  </Tr>
+                )}
+              </For>
+            </tbody>
+          </DataTable>
         </Show>
       </div>
     </PageContainer>

@@ -1,5 +1,15 @@
 import type { GlAccount, GlAccountSection } from "@ark/data-types"
-import { Modal, ModalFooter, PageHeader, Select, tonePillClass } from "@ark/ui"
+import {
+  DataTable,
+  Modal,
+  ModalFooter,
+  PageHeader,
+  Select,
+  THead,
+  Th,
+  Tr,
+  tonePillClass,
+} from "@ark/ui"
 import {
   type CreateGlAccountInput,
   useCreateGlAccount,
@@ -144,68 +154,72 @@ export default function Page() {
                   <header class="px-4 py-3 border-b border-border bg-surface-muted/50">
                     <h2 class="text-sm font-semibold text-foreground">{group.label}</h2>
                   </header>
-                  <div class="overflow-x-auto">
-                    <table class="w-full text-sm">
-                      <thead class="text-xs uppercase text-muted">
-                        <tr>
-                          <th class="text-left px-4 py-2 font-medium">Code</th>
-                          <th class="text-left px-4 py-2 font-medium">Label</th>
-                          <th class="text-left px-4 py-2 font-medium">Default Treatment</th>
-                          <th class="text-left px-4 py-2 font-medium">Status</th>
-                          <th class="text-right px-4 py-2 font-medium">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody class="divide-y divide-border">
-                        <For each={group.rows}>
-                          {acct => (
-                            <tr classList={{ "opacity-50": !acct.active }}>
-                              <td class="px-4 py-2 font-mono text-xs text-muted">{acct.code}</td>
-                              <td class="px-4 py-2 text-foreground">{acct.label}</td>
-                              <td class="px-4 py-2 text-muted">
-                                {acct.defaultAccountingTreatment ?? "—"}
-                              </td>
-                              <td class="px-4 py-2">
-                                <Show
-                                  when={acct.active}
-                                  fallback={
-                                    <span
-                                      class={`text-xs px-2 py-0.5 rounded ${tonePillClass("negative")}`}
-                                    >
-                                      Inactive
-                                    </span>
-                                  }
-                                >
+                  <DataTable>
+                    <THead>
+                      <Th size="compact">Code</Th>
+                      <Th size="compact">Label</Th>
+                      <Th size="compact">Default Treatment</Th>
+                      <Th size="compact">Status</Th>
+                      <Th size="compact" align="right">
+                        Actions
+                      </Th>
+                    </THead>
+                    <tbody>
+                      <For each={group.rows}>
+                        {acct => (
+                          <Tr class={acct.active ? "" : "opacity-50"} hover={false}>
+                            <td class="px-3 py-2 font-mono text-xs text-muted whitespace-nowrap">
+                              {acct.code}
+                            </td>
+                            <td class="px-3 py-2 text-sm text-foreground max-w-[300px]">
+                              <span class="block truncate" title={acct.label}>
+                                {acct.label}
+                              </span>
+                            </td>
+                            <td class="px-3 py-2 text-sm text-muted whitespace-nowrap">
+                              {acct.defaultAccountingTreatment ?? "—"}
+                            </td>
+                            <td class="px-3 py-2">
+                              <Show
+                                when={acct.active}
+                                fallback={
                                   <span
-                                    class={`text-xs px-2 py-0.5 rounded ${tonePillClass("positive")}`}
+                                    class={`text-xs px-2 py-0.5 rounded ${tonePillClass("negative")}`}
                                   >
-                                    Active
+                                    Inactive
                                   </span>
-                                </Show>
-                              </td>
-                              <td class="px-4 py-2 text-right">
+                                }
+                              >
+                                <span
+                                  class={`text-xs px-2 py-0.5 rounded ${tonePillClass("positive")}`}
+                                >
+                                  Active
+                                </span>
+                              </Show>
+                            </td>
+                            <td class="px-3 py-2 text-right whitespace-nowrap">
+                              <button
+                                type="button"
+                                onClick={() => openEdit(acct)}
+                                class="text-xs font-medium text-muted hover:text-primary px-2"
+                              >
+                                Edit
+                              </button>
+                              <Show when={acct.active}>
                                 <button
                                   type="button"
-                                  onClick={() => openEdit(acct)}
-                                  class="text-xs font-medium text-muted hover:text-primary px-2"
+                                  onClick={() => handleDeactivate(acct)}
+                                  class="text-xs font-medium text-muted hover:text-red-500 px-2"
                                 >
-                                  Edit
+                                  Deactivate
                                 </button>
-                                <Show when={acct.active}>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleDeactivate(acct)}
-                                    class="text-xs font-medium text-muted hover:text-red-500 px-2"
-                                  >
-                                    Deactivate
-                                  </button>
-                                </Show>
-                              </td>
-                            </tr>
-                          )}
-                        </For>
-                      </tbody>
-                    </table>
-                  </div>
+                              </Show>
+                            </td>
+                          </Tr>
+                        )}
+                      </For>
+                    </tbody>
+                  </DataTable>
                 </section>
               </Show>
             )}

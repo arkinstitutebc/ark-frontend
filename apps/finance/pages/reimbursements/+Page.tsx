@@ -1,16 +1,9 @@
-import {
-  formatDatePH,
-  formatPeso,
-  PageContainer,
-  PageHeader,
-  StatusBadge,
-  THead,
-  Th,
-} from "@ark/ui"
+import { PageContainer, PageHeader } from "@ark/ui"
 import { useReimbursements } from "@data/hooks"
 import type { Reimbursement } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
+import { ReimbursementTable } from "@/components/finance/reimbursement-table"
 
 const FILTERS = [
   { value: "all", label: "All" },
@@ -88,47 +81,7 @@ export default function ReimbursementsPage() {
             </div>
           }
         >
-          <div class="overflow-x-auto">
-            <table class="w-full">
-              <THead>
-                <Th size="dense">RR Code</Th>
-                <Th size="dense">Claimant</Th>
-                <Th size="dense">Activity</Th>
-                <Th size="dense">Filed</Th>
-                <Th size="dense" align="right">
-                  Amount
-                </Th>
-                <Th size="dense">Status</Th>
-              </THead>
-              <tbody>
-                <For each={rows()}>
-                  {rr => (
-                    <tr
-                      onClick={() => navigate(`/reimbursements/${rr.id}`)}
-                      class="border-t border-border hover:bg-primary/5 cursor-pointer transition-colors"
-                    >
-                      <td class="py-3 px-6 font-mono text-sm font-medium text-foreground">
-                        {rr.rrCode}
-                      </td>
-                      <td class="py-3 px-6 text-sm text-foreground">
-                        {rr.claimantName ?? rr.createdBy ?? "—"}
-                      </td>
-                      <td class="py-3 px-6 text-sm text-muted">{rr.activity ?? "—"}</td>
-                      <td class="py-3 px-6 text-sm text-muted">
-                        {formatDatePH(rr.dateFiled ?? rr.createdAt)}
-                      </td>
-                      <td class="py-3 px-6 text-right text-sm text-foreground">
-                        {formatPeso(Number(rr.totalAmount))}
-                      </td>
-                      <td class="py-3 px-6">
-                        <StatusBadge status={rr.status} />
-                      </td>
-                    </tr>
-                  )}
-                </For>
-              </tbody>
-            </table>
-          </div>
+          <ReimbursementTable rows={rows()} onOpen={id => navigate(`/reimbursements/${id}`)} />
         </Show>
       </div>
     </PageContainer>
