@@ -26,9 +26,7 @@ export const createPrSchema = z.object({
   expenseCategory: z.enum(expenseCategoryOptions, {
     errorMap: () => ({ message: "Expense category is required" }),
   }),
-  profitCenter: z.enum(profitCenterOptions, {
-    errorMap: () => ({ message: "Profit center is required" }),
-  }),
+  profitCenter: z.string().trim().min(1, "Profit center is required").max(30),
   accountingTreatment: z.enum(accountingTreatmentOptions, {
     errorMap: () => ({ message: "Accounting treatment is required" }),
   }),

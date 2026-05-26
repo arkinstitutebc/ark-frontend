@@ -16,7 +16,7 @@ import {
   Select,
   toast,
 } from "@ark/ui"
-import { useReimbursement, useUpdateRr } from "@data/hooks"
+import { useProfitCenters, useReimbursement, useUpdateRr } from "@data/hooks"
 import {
   accountingTreatmentOptions,
   costTypeOptions,
@@ -60,6 +60,7 @@ export default function EditRrPage() {
   const ctx = usePageContext()
   const id = createMemo(() => ctx.routeParams.id as string)
   const rrQuery = useReimbursement(id)
+  const profitCentersQuery = useProfitCenters(() => ({ includeInactive: false }))
   const updateMutation = useUpdateRr()
 
   const [errors, setErrors] = createSignal<Record<string, string>>({})
@@ -73,7 +74,7 @@ export default function EditRrPage() {
   const [periodEnd, setPeriodEnd] = createSignal("")
   const [referencedPrCode, setReferencedPrCode] = createSignal("")
   const [expenseCategory, setExpenseCategory] = createSignal<ExpenseCategory | "">("")
-  const [profitCenter, setProfitCenter] = createSignal<ProfitCenter | "">("")
+  const [profitCenter, setProfitCenter] = createSignal("")
   const [accountingTreatment, setAccountingTreatment] = createSignal<AccountingTreatment | "">("")
   const [costType, setCostType] = createSignal<CostType | "">("")
   const [items, setItems] = createSignal<ItemRow[]>([])
@@ -108,7 +109,7 @@ export default function EditRrPage() {
     setPeriodEnd(rr.periodEnd ? rr.periodEnd.slice(0, 10) : "")
     setReferencedPrCode(rr.referencedPrCode ?? "")
     setExpenseCategory((rr.expenseCategory ?? "") as ExpenseCategory | "")
-    setProfitCenter((rr.profitCenter ?? "") as ProfitCenter | "")
+    setProfitCenter(rr.profitCenter ?? "")
     setAccountingTreatment((rr.accountingTreatment ?? "") as AccountingTreatment | "")
     setCostType((rr.costType ?? "") as CostType | "")
     setItems(
@@ -143,6 +144,21 @@ export default function EditRrPage() {
   const total = createMemo(() =>
     items().reduce((sum, it) => sum + (Number.isFinite(it.amount) ? it.amount : 0), 0)
   )
+
+  const profitCenterSelectOptions = createMemo(() => {
+    const liveCenters = (profitCentersQuery.data ?? [])
+      .filter(center => center.active)
+      .sort((a, b) => a.sortOrder - b.sortOrder || a.label.localeCompare(b.label))
+
+    if (liveCenters.length > 0) {
+      return liveCenters.map(center => ({ label: center.label, value: center.code }))
+    }
+
+    return profitCenterOptions.map(v => ({
+      label: profitCenterLabels[v],
+      value: v,
+    }))
+  })
 
   const addItem = () =>
     setItems(prev => [
@@ -213,7 +229,7 @@ export default function EditRrPage() {
         id: id(),
         ...data,
         expenseCategory: data.expenseCategory as ExpenseCategory,
-        profitCenter: data.profitCenter as ProfitCenter,
+        profitCenter: data.profitCenter,
         accountingTreatment: data.accountingTreatment as AccountingTreatment,
         costType: data.costType as CostType,
         totalAmount: String(total()),
@@ -364,12 +380,9 @@ export default function EditRrPage() {
                   </Field>
                   <Field label="Profit Center" required error={errors().profitCenter}>
                     <Select
-                      options={profitCenterOptions.map(v => ({
-                        label: profitCenterLabels[v],
-                        value: v,
-                      }))}
+                      options={profitCenterSelectOptions()}
                       value={profitCenter() || undefined}
-                      onChange={v => setProfitCenter(v as ProfitCenter)}
+                      onChange={v => setProfitCenter(v)}
                       placeholder="Select profit center"
                       ariaLabel="Profit Center"
                     />

@@ -3,7 +3,6 @@ import type {
   CostType,
   ExpenseCategory,
   PrAttachment,
-  ProfitCenter,
   Reimbursement,
   RrItem,
   RrSupportingDocs,
@@ -26,7 +25,7 @@ export interface CreateRrInput {
   periodEnd?: string
   dateFiled: string
   expenseCategory: ExpenseCategory
-  profitCenter: ProfitCenter
+  profitCenter: string
   accountingTreatment: AccountingTreatment
   costType: CostType
   referencedPrCode?: string

@@ -43,7 +43,7 @@ export interface PurchaseRequest {
   dateNeeded?: string
   /** Accounting classification — used by finance for the segmented P&L. */
   expenseCategory?: ExpenseCategory
-  profitCenter?: ProfitCenter
+  profitCenter?: string
   accountingTreatment?: AccountingTreatment
   costType?: CostType
   items: PrItem[]

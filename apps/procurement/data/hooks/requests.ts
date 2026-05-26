@@ -8,7 +8,6 @@ import type {
   ExpenseCategory,
   PrAttachment,
   PrItem,
-  ProfitCenter,
   PrStatus,
   PurchaseRequest,
 } from "../types"
@@ -22,7 +21,7 @@ interface CreatePrInput {
   purpose: string
   dateNeeded: string
   expenseCategory: ExpenseCategory
-  profitCenter: ProfitCenter
+  profitCenter: string
   accountingTreatment: AccountingTreatment
   costType: CostType
   items: PrItem[]
@@ -39,7 +38,7 @@ interface UpdatePrInput {
   purpose?: string
   dateNeeded?: string
   expenseCategory?: ExpenseCategory
-  profitCenter?: ProfitCenter
+  profitCenter?: string
   accountingTreatment?: AccountingTreatment
   costType?: CostType
   items?: PrItem[]

@@ -84,7 +84,7 @@ export const createRrSchema = z.object({
   periodStart: z.string().optional(),
   periodEnd: z.string().optional(),
   expenseCategory: z.enum(expenseCategoryOptions),
-  profitCenter: z.enum(profitCenterOptions),
+  profitCenter: z.string().trim().min(1, "Profit center is required").max(30),
   accountingTreatment: z.enum(accountingTreatmentOptions),
   costType: z.enum(costTypeOptions),
   referencedPrCode: z.string().optional(),

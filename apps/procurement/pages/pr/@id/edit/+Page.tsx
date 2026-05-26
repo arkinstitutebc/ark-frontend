@@ -43,6 +43,13 @@ interface PrItemInput {
   remarks?: string
 }
 
+interface ProfitCenterSetting {
+  code: string
+  label: string
+  sortOrder: number
+  active: boolean
+}
+
 const units = ["pcs", "units", "sets", "pairs", "boxes", "kg", "liters", "hours", "days", "months"]
 
 const expenseCategoryLabels: Record<ExpenseCategory, string> = {
@@ -78,6 +85,11 @@ export default function EditPrPage() {
     queryFn: () => api<Batch[]>("/api/training/batches"),
   }))
   const categoriesQuery = useCategories()
+  const profitCentersQuery = createQuery(() => ({
+    queryKey: ["finance-settings", "profit-centers", { includeInactive: false }] as const,
+    queryFn: () =>
+      api<ProfitCenterSetting[]>("/api/finance/settings/profit-centers?includeInactive=false"),
+  }))
   const updatePrMutation = useUpdatePr()
 
   const [errors, setErrors] = createSignal<Record<string, string>>({})
@@ -86,7 +98,7 @@ export default function EditPrPage() {
   const [purpose, setPurpose] = createSignal("")
   const [dateNeeded, setDateNeeded] = createSignal("")
   const [expenseCategory, setExpenseCategory] = createSignal<ExpenseCategory | "">("")
-  const [profitCenter, setProfitCenter] = createSignal<ProfitCenter | "">("")
+  const [profitCenter, setProfitCenter] = createSignal("")
   const [accountingTreatment, setAccountingTreatment] = createSignal<AccountingTreatment | "">("")
   const [costType, setCostType] = createSignal<CostType | "">("")
   const [showManageCategories, setShowManageCategories] = createSignal(false)
@@ -107,7 +119,7 @@ export default function EditPrPage() {
     setPurpose(pr.purpose ?? "")
     setDateNeeded(pr.dateNeeded ? pr.dateNeeded.slice(0, 10) : "")
     setExpenseCategory((pr.expenseCategory ?? "") as ExpenseCategory | "")
-    setProfitCenter((pr.profitCenter ?? "") as ProfitCenter | "")
+    setProfitCenter(pr.profitCenter ?? "")
     setAccountingTreatment((pr.accountingTreatment ?? "") as AccountingTreatment | "")
     setCostType((pr.costType ?? "") as CostType | "")
     setItems(
@@ -201,7 +213,7 @@ export default function EditPrPage() {
         purpose: purpose(),
         dateNeeded: dateNeeded(),
         expenseCategory: expenseCategory() as ExpenseCategory,
-        profitCenter: profitCenter() as ProfitCenter,
+        profitCenter: profitCenter(),
         accountingTreatment: accountingTreatment() as AccountingTreatment,
         costType: costType() as CostType,
         items: prItems,
@@ -222,6 +234,20 @@ export default function EditPrPage() {
   const categoryOptions = createMemo(() =>
     (categoriesQuery.data ?? []).map(c => ({ label: c.name, value: c.name }))
   )
+  const profitCenterSelectOptions = createMemo(() => {
+    const liveCenters = (profitCentersQuery.data ?? [])
+      .filter(center => center.active)
+      .sort((a, b) => a.sortOrder - b.sortOrder || a.label.localeCompare(b.label))
+
+    if (liveCenters.length > 0) {
+      return liveCenters.map(center => ({ label: center.label, value: center.code }))
+    }
+
+    return profitCenterOptions.map(v => ({
+      label: profitCenterLabels[v],
+      value: v,
+    }))
+  })
   const unitOptions = createMemo(() => units.map(u => ({ label: u, value: u })))
 
   return (
@@ -388,12 +414,9 @@ export default function EditPrPage() {
                           Profit Center <span class="text-red-500">*</span>
                         </span>
                         <Select
-                          options={profitCenterOptions.map(v => ({
-                            label: profitCenterLabels[v],
-                            value: v,
-                          }))}
+                          options={profitCenterSelectOptions()}
                           value={profitCenter() || undefined}
-                          onChange={v => setProfitCenter(v as ProfitCenter)}
+                          onChange={v => setProfitCenter(v)}
                           placeholder="Select profit center"
                           ariaLabel="Profit Center"
                         />

@@ -1,10 +1,4 @@
-import type {
-  AccountingTreatment,
-  CostType,
-  ExpenseCategory,
-  PrAttachment,
-  ProfitCenter,
-} from "./procurement"
+import type { AccountingTreatment, CostType, ExpenseCategory, PrAttachment } from "./procurement"
 
 export type RrStatus = "pending" | "verified" | "approved" | "rejected"
 
@@ -43,7 +37,7 @@ export interface Reimbursement {
   periodEnd?: string | null
   dateFiled?: string | null
   expenseCategory?: ExpenseCategory | null
-  profitCenter?: ProfitCenter | null
+  profitCenter?: string | null
   accountingTreatment?: AccountingTreatment | null
   costType?: CostType | null
   referencedPrCode?: string | null
