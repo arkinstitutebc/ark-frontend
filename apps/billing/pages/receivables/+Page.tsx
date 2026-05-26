@@ -1,7 +1,7 @@
 import { formatDatePH, formatPeso, PageContainer, PageHeader, StatCard, THead, Th } from "@ark/ui"
 import { useReceivables, useRecordPayment, useUpdateAr } from "@data/hooks"
 import type { AccountReceivable, ArStatus } from "@data/types"
-import { createMemo, createSignal, For, Show } from "solid-js"
+import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { Icons, Modal, QueryBoundary, StatusBadge } from "@/components/ui"
 
 type FilterStatus = "all" | ArStatus
@@ -9,12 +9,18 @@ type FilterStatus = "all" | ArStatus
 export default function ReceivablesPage() {
   const [filterStatus, setFilterStatus] = createSignal<FilterStatus>("all")
   const [searchQuery, setSearchQuery] = createSignal("")
+  const [page, setPage] = createSignal(1)
   const [paymentModalOpen, setPaymentModalOpen] = createSignal(false)
   const [selectedAr, setSelectedAr] = createSignal<AccountReceivable | null>(null)
   const [paymentAmount, setPaymentAmount] = createSignal("")
   const [paymentNotes, setPaymentNotes] = createSignal("")
 
-  const query = useReceivables()
+  const query = useReceivables(() => ({
+    ...(filterStatus() !== "all" ? { status: filterStatus() } : {}),
+    page: page(),
+    limit: 20,
+    search: searchQuery().trim() || undefined,
+  }))
   const updateMutation = useUpdateAr()
   const paymentMutation = useRecordPayment()
   const selectedOutstanding = () => {
@@ -33,22 +39,25 @@ export default function ReceivablesPage() {
     return ""
   }
 
-  const filteredAr = createMemo(() => {
-    let items = [...(query.data || [])]
-    if (filterStatus() !== "all") items = items.filter(ar => ar.status === filterStatus())
-    const q = searchQuery().toLowerCase().trim()
-    if (q)
-      items = items.filter(
-        ar => ar.batchCode.toLowerCase().includes(q) || ar.id.toLowerCase().includes(q)
-      )
-    return items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+  const filteredAr = createMemo(() => query.data?.items ?? [])
+  const pageCount = createMemo(() =>
+    query.data ? Math.max(1, Math.ceil(query.data.total / query.data.limit)) : 1
+  )
+
+  createEffect(() => {
+    filterStatus()
+    searchQuery()
+    setPage(1)
   })
 
   const stats = createMemo(() => {
-    const data = query.data || []
-    const totalAmount = data.reduce((s, ar) => s + Number(ar.amount), 0)
-    const collected = data.reduce((s, ar) => s + Number(ar.paidAmount || 0), 0)
-    return { total: data.length, totalAmount, collected, outstanding: totalAmount - collected }
+    const summary = query.data?.summary
+    return {
+      total: query.data?.total ?? 0,
+      totalAmount: summary?.totalAmount ?? 0,
+      collected: summary?.paidAmount ?? 0,
+      outstanding: summary?.outstandingAmount ?? 0,
+    }
   })
 
   const handleMarkBilled = (ar: AccountReceivable) => {
@@ -177,11 +186,13 @@ export default function ReceivablesPage() {
       </div>
 
       <QueryBoundary query={query}>
-        {(_data: AccountReceivable[]) => (
+        {data => (
           <div class="bg-surface rounded-lg border border-border overflow-hidden">
             <div class="px-5 py-4 border-b border-border flex items-center justify-between">
               <h2 class="text-sm font-semibold text-foreground">Receivables</h2>
-              <p class="text-xs text-muted">{filteredAr().length} records</p>
+              <p class="text-xs text-muted">
+                {filteredAr().length} of {data.total} records
+              </p>
             </div>
             <Show
               when={filteredAr().length > 0}
@@ -266,6 +277,31 @@ export default function ReceivablesPage() {
                     </For>
                   </tbody>
                 </table>
+              </div>
+            </Show>
+            <Show when={data.total > data.limit}>
+              <div class="flex items-center justify-between border-t border-border px-5 py-3">
+                <p class="text-xs text-muted">
+                  Page {page()} of {pageCount()}
+                </p>
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={page() <= 1 || query.isFetching}
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    class="px-3 py-1.5 rounded-md border border-border text-xs font-medium text-foreground hover:bg-surface-muted disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    disabled={page() >= pageCount() || query.isFetching}
+                    onClick={() => setPage(p => Math.min(pageCount(), p + 1))}
+                    class="px-3 py-1.5 rounded-md border border-border text-xs font-medium text-foreground hover:bg-surface-muted disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
             </Show>
           </div>

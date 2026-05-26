@@ -1,6 +1,5 @@
 import { formatDatePH, formatPeso, PageHeader, StatCard, THead, Th } from "@ark/ui"
 import { useReceivables } from "@data/hooks"
-import type { AccountReceivable } from "@data/types"
 import { createMemo, For } from "solid-js"
 import { QueryBoundary, StatusBadge } from "@/components/ui"
 
@@ -8,20 +7,22 @@ export default function Page() {
   const query = useReceivables()
 
   const arStats = createMemo(() => {
-    const data = query.data || []
-    const totalAmount = data.reduce((sum, ar) => sum + Number(ar.amount), 0)
-    const outstanding = data
-      .filter(ar => ar.status !== "paid")
-      .reduce((sum, ar) => sum + Number(ar.amount) - Number(ar.paidAmount || 0), 0)
-    const batchesBilled = data.filter(
-      ar => ar.status === "billed" || ar.status === "overdue" || ar.status === "paid"
-    ).length
-    const paymentsReceived = data.reduce((sum, ar) => sum + Number(ar.paidAmount || 0), 0)
-    return { totalAmount, outstanding, batchesBilled, paymentsReceived, total: data.length }
+    const summary = query.data?.summary
+    const billed =
+      (summary?.byStatus.billed?.count ?? 0) +
+      (summary?.byStatus.overdue?.count ?? 0) +
+      (summary?.byStatus.paid?.count ?? 0)
+    return {
+      totalAmount: summary?.totalAmount ?? 0,
+      outstanding: summary?.outstandingAmount ?? 0,
+      batchesBilled: billed,
+      paymentsReceived: summary?.paidAmount ?? 0,
+      total: query.data?.total ?? 0,
+    }
   })
 
   const recentAr = createMemo(() =>
-    [...(query.data || [])]
+    [...(query.data?.items ?? [])]
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
       .slice(0, 5)
   )
@@ -58,24 +59,24 @@ export default function Page() {
       </div>
 
       <QueryBoundary query={query}>
-        {(data: AccountReceivable[]) => (
+        {data => (
           <>
             <div class="bg-surface rounded-lg border border-border p-5 mb-8">
               <h3 class="text-sm font-semibold text-foreground mb-4">AR by Status</h3>
               <div class="space-y-3">
                 <For each={["created", "billed", "overdue", "paid"] as const}>
                   {status => {
-                    const items = () => data.filter(ar => ar.status === status)
+                    const item = () => data.summary.byStatus[status]
                     return (
                       <div class="flex items-center justify-between py-2">
                         <div class="flex items-center gap-3">
                           <StatusBadge status={status} />
                           <span class="text-sm text-muted">
-                            {items().length} receivable{items().length !== 1 ? "s" : ""}
+                            {item()?.count ?? 0} receivable{(item()?.count ?? 0) !== 1 ? "s" : ""}
                           </span>
                         </div>
                         <p class="text-sm font-semibold text-foreground tabular-nums">
-                          {formatPeso(items().reduce((sum, ar) => sum + Number(ar.amount), 0))}
+                          {formatPeso(item()?.totalAmount ?? 0)}
                         </p>
                       </div>
                     )
