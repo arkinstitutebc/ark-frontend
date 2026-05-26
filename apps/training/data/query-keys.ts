@@ -7,7 +7,8 @@ export const queryKeys = {
   },
   students: {
     all: ["students"] as const,
-    filtered: (filters?: { batchId?: string }) => ["students", filters] as const,
+    filtered: (filters?: { batchId?: string; page?: number; limit?: number; search?: string }) =>
+      ["students", filters] as const,
     detail: (id: string) => ["students", id] as const,
   },
   instructors: {

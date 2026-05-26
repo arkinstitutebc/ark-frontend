@@ -1,36 +1,40 @@
 import { PageContainer, PageHeader, Select, THead, Th } from "@ark/ui"
 import { useBatches, useStudent, useStudents } from "@data/hooks"
-import { createMemo, createSignal, For, Show } from "solid-js"
+import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { AddStudentModal, ConfirmDeleteStudentModal, EditStudentModal } from "@/components/modals"
 import { Icons, StatusBadge } from "@/components/ui"
 
 export default function StudentsPage() {
   const [filterBatch, setFilterBatch] = createSignal<string>("all")
   const [searchQuery, setSearchQuery] = createSignal("")
+  const [page, setPage] = createSignal(1)
   const [showAddModal, setShowAddModal] = createSignal(false)
   const [editingStudentId, setEditingStudentId] = createSignal<string | null>(null)
   const [deletingStudentId, setDeletingStudentId] = createSignal<string | null>(null)
 
   const batchesQuery = useBatches()
-  const studentsQuery = useStudents(() =>
-    filterBatch() !== "all" ? { batchId: filterBatch() } : {}
-  )
+  const studentsQuery = useStudents(() => ({
+    ...(filterBatch() !== "all" ? { batchId: filterBatch() } : {}),
+    page: page(),
+    limit: 20,
+    search: searchQuery().trim() || undefined,
+  }))
 
   const editingStudentQuery = useStudent(() => editingStudentId() || "")
   const deletingStudentQuery = useStudent(() => deletingStudentId() || "")
 
-  const filteredStudents = createMemo(() => {
-    let result = studentsQuery.data || []
-    if (searchQuery().trim()) {
-      const query = searchQuery().toLowerCase()
-      result = result.filter(
-        s =>
-          s.firstName.toLowerCase().includes(query) ||
-          s.lastName.toLowerCase().includes(query) ||
-          (s.studentId || "").toLowerCase().includes(query)
-      )
-    }
-    return result
+  const students = createMemo(() => studentsQuery.data?.items ?? [])
+  const totalStudents = createMemo(() => studentsQuery.data?.total ?? 0)
+  const pageCount = createMemo(() =>
+    studentsQuery.data
+      ? Math.max(1, Math.ceil(studentsQuery.data.total / studentsQuery.data.limit))
+      : 1
+  )
+
+  createEffect(() => {
+    filterBatch()
+    searchQuery()
+    setPage(1)
   })
 
   const filtersActive = createMemo(() => filterBatch() !== "all" || searchQuery().trim().length > 0)
@@ -61,7 +65,7 @@ export default function StudentsPage() {
     <PageContainer>
       <PageHeader
         title="Students"
-        subtitle={`${filteredStudents().length} student${filteredStudents().length !== 1 ? "s" : ""}`}
+        subtitle={`${totalStudents()} student${totalStudents() !== 1 ? "s" : ""}`}
         action={
           <button
             type="button"
@@ -141,7 +145,7 @@ export default function StudentsPage() {
             </THead>
             <tbody>
               <Show
-                when={filteredStudents().length > 0}
+                when={students().length > 0}
                 fallback={
                   <tr>
                     <td colSpan={6} class="py-12 text-center text-muted text-sm">
@@ -150,7 +154,7 @@ export default function StudentsPage() {
                   </tr>
                 }
               >
-                <For each={filteredStudents()}>
+                <For each={students()}>
                   {student => (
                     <tr
                       class="border-t border-border hover:bg-primary/5 transition-colors cursor-pointer"
@@ -189,6 +193,31 @@ export default function StudentsPage() {
               </Show>
             </tbody>
           </table>
+          <Show when={studentsQuery.data && totalStudents() > studentsQuery.data.limit}>
+            <div class="flex items-center justify-between border-t border-border px-5 py-3">
+              <p class="text-xs text-muted">
+                Page {page()} of {pageCount()} · {totalStudents()} students
+              </p>
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  disabled={page() <= 1 || studentsQuery.isFetching}
+                  onClick={() => setPage(p => Math.max(1, p - 1))}
+                  class="px-3 py-1.5 rounded-md border border-border text-xs font-medium text-foreground hover:bg-surface-muted disabled:opacity-50"
+                >
+                  Previous
+                </button>
+                <button
+                  type="button"
+                  disabled={page() >= pageCount() || studentsQuery.isFetching}
+                  onClick={() => setPage(p => Math.min(pageCount(), p + 1))}
+                  class="px-3 py-1.5 rounded-md border border-border text-xs font-medium text-foreground hover:bg-surface-muted disabled:opacity-50"
+                >
+                  Next
+                </button>
+              </div>
+            </div>
+          </Show>
         </div>
       </Show>
     </PageContainer>
