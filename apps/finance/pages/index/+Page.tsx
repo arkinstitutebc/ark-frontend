@@ -1,4 +1,4 @@
-import { formatPeso, PageHeader, StatCard, THead, Th } from "@ark/ui"
+import { formatPeso, PageHeader, SegmentedControl, StatCard, THead, Th } from "@ark/ui"
 import { useBankBalance, useTransactions } from "@data/hooks"
 import type { Transaction } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -95,24 +95,15 @@ export default function Page() {
             <p class="text-xs text-muted mt-1">Recent disbursement records</p>
           </div>
           <div class="flex items-center gap-3">
-            <div class="inline-flex rounded-lg border border-border p-1">
-              <button
-                type="button"
-                onClick={() => setChartMode("daily")}
-                class={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${chartMode() === "daily" ? "bg-surface-muted text-foreground" : "text-muted hover:text-foreground"}`}
-              >
-                <Icons.clock class="w-3.5 h-3.5" />
-                Daily
-              </button>
-              <button
-                type="button"
-                onClick={() => setChartMode("category")}
-                class={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${chartMode() === "category" ? "bg-surface-muted text-foreground" : "text-muted hover:text-foreground"}`}
-              >
-                <Icons.barChart3 class="w-3.5 h-3.5" />
-                Category
-              </button>
-            </div>
+            <SegmentedControl
+              value={chartMode()}
+              onChange={setChartMode}
+              ariaLabel="Spending chart view"
+              options={[
+                { label: "Daily", value: "daily", icon: Icons.clock },
+                { label: "Category", value: "category", icon: Icons.barChart3 },
+              ]}
+            />
             <p class="text-sm font-semibold text-foreground tabular-nums">
               {formatPeso(recentExpenseTotal())}
             </p>

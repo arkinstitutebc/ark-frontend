@@ -71,6 +71,11 @@ export { Field, type FieldProps, fieldInputClass } from "./forms/field"
 export { FormSection, type FormSectionProps } from "./forms/form-section"
 export { formErrorClass, formInputClass, formLabelClass } from "./forms/form-styles"
 export { Input, Textarea } from "./forms/input"
+export {
+  SegmentedControl,
+  type SegmentedControlOption,
+  type SegmentedControlProps,
+} from "./forms/segmented-control"
 export { Select, type SelectOption, type SelectProps } from "./forms/select"
 // Primitives
 export { Icons, PortalIcons } from "./icons"

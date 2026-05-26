@@ -1,5 +1,6 @@
 import type { CreateQueryResult } from "@tanstack/solid-query"
 import { createEffect, type JSX, Show } from "solid-js"
+import { PageLoading } from "../feedback/page-loading"
 
 const DEFAULT_PORTAL_URL =
   typeof import.meta !== "undefined" && import.meta.env?.VITE_MAIN_PORTAL_URL
@@ -32,7 +33,7 @@ export function AuthGate(props: AuthGateProps) {
       when={!props.userQuery.isPending && !props.userQuery.isError}
       fallback={
         <div class="flex h-screen items-center justify-center">
-          <div class="animate-pulse text-sm text-muted">Loading…</div>
+          <PageLoading />
         </div>
       }
     >
