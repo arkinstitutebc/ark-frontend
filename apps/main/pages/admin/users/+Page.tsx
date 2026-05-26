@@ -10,12 +10,18 @@ import {
 import {
   BackLink,
   Button,
+  DataTable,
   Icons,
   Input,
   Modal,
   PageLoading,
+  RolePill,
   Select,
+  StatusBadge,
   TableSkeleton,
+  THead,
+  Th,
+  Tr,
   toast,
 } from "@ark/ui"
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
@@ -157,20 +163,18 @@ export default function AdminUsersPage() {
                 <Show
                   when={usersQuery.isError}
                   fallback={
-                    <table class="w-full text-sm">
-                      <thead class="bg-surface-muted text-muted text-xs uppercase tracking-wide">
-                        <tr>
-                          <th class="px-5 py-3 text-left font-medium">Name</th>
-                          <th class="px-5 py-3 text-left font-medium">Email</th>
-                          <th class="px-5 py-3 text-left font-medium">Role</th>
-                          <th class="px-5 py-3 text-left font-medium">Status</th>
-                          <th class="px-5 py-3 text-right font-medium">Actions</th>
-                        </tr>
-                      </thead>
+                    <DataTable>
+                      <THead>
+                        <Th>Name</Th>
+                        <Th>Email</Th>
+                        <Th>Role</Th>
+                        <Th>Status</Th>
+                        <Th align="right">Actions</Th>
+                      </THead>
                       <tbody>
                         <For each={sortedUsers()}>
                           {user => (
-                            <tr class="border-t border-border hover:bg-surface-muted">
+                            <Tr hover={false}>
                               <td class="px-5 py-3 text-foreground">
                                 {user.firstName} {user.lastName}
                                 <Show when={user.mustChangePassword}>
@@ -181,32 +185,22 @@ export default function AdminUsersPage() {
                                 </Show>
                               </td>
                               <td class="px-5 py-3 text-muted">{user.email}</td>
-                              <td class="px-5 py-3 text-foreground capitalize">{user.role}</td>
                               <td class="px-5 py-3">
-                                <Show
-                                  when={user.isActive}
-                                  fallback={
-                                    <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs bg-surface-muted text-muted">
-                                      <span class="w-1.5 h-1.5 rounded-full bg-muted" />
-                                      Inactive
-                                    </span>
-                                  }
-                                >
-                                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-xs bg-green-50 text-green-700">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-green-500" />
-                                    Active
-                                  </span>
-                                </Show>
+                                <RolePill role={user.role} showAdminLabel />
+                              </td>
+                              <td class="px-5 py-3">
+                                <StatusBadge status={user.isActive ? "Active" : "Inactive"} />
                               </td>
                               <td class="px-5 py-3 text-right">
                                 <a
                                   href={`/admin/users/${user.id}`}
-                                  class="text-sm text-primary hover:underline"
+                                  class="inline-flex items-center gap-1.5 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-foreground hover:bg-surface-muted transition-colors"
                                 >
+                                  <Icons.settings class="w-3.5 h-3.5 text-muted" />
                                   Manage
                                 </a>
                               </td>
-                            </tr>
+                            </Tr>
                           )}
                         </For>
                         <Show when={sortedUsers().length === 0}>
@@ -217,7 +211,7 @@ export default function AdminUsersPage() {
                           </tr>
                         </Show>
                       </tbody>
-                    </table>
+                    </DataTable>
                   }
                 >
                   <div class="p-12 text-center text-sm text-red-600">
