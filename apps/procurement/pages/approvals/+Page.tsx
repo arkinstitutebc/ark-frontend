@@ -1,7 +1,7 @@
 import { categoryToneClass, formatDatePH, formatPeso, PageContainer, PageHeader } from "@ark/ui"
 import { useApprovePr, useCoordinatorReviewPr, useRejectPr, useRequests } from "@data/hooks"
 import type { PrStatus, PurchaseRequest } from "@data/types"
-import { createMemo, createSignal, For, Show } from "solid-js"
+import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { type ApprovalAction, ApprovalDetailsModal } from "@/components/approval-details-modal"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
@@ -172,41 +172,45 @@ function ApprovalCard(props: {
 }
 
 export default function ApprovalsPage() {
-  const query = useRequests()
   const approveMutation = useApprovePr()
   const rejectMutation = useRejectPr()
   const coordinatorReviewMutation = useCoordinatorReviewPr()
 
   const [filter, setFilter] = createSignal<PrStatus | "all">("pending")
   const [search, setSearch] = createSignal("")
+  const [page, setPage] = createSignal(1)
   const [selectedPr, setSelectedPr] = createSignal<PurchaseRequest | null>(null)
   const [modalOpen, setModalOpen] = createSignal(false)
   const [modalMode, setModalMode] = createSignal<ApprovalAction>("view")
+  const query = useRequests(() => ({
+    ...(filter() !== "all" ? { status: filter() } : {}),
+    page: page(),
+    limit: 20,
+    search: search().trim() || undefined,
+  }))
 
   const isProcessing = () =>
     approveMutation.isPending || rejectMutation.isPending || coordinatorReviewMutation.isPending
 
-  const filteredRequests = createMemo(() => {
-    const data = query.data || []
-    return data.filter(r => {
-      const matchStatus = filter() === "all" || r.status === filter()
-      const matchSearch =
-        !search() ||
-        r.prCode?.toLowerCase().includes(search().toLowerCase()) ||
-        r.batchName?.toLowerCase().includes(search().toLowerCase()) ||
-        r.category?.toLowerCase().includes(search().toLowerCase())
-      return matchStatus && matchSearch
-    })
+  const requests = createMemo(() => query.data?.items ?? [])
+  const pageCount = createMemo(() =>
+    query.data ? Math.max(1, Math.ceil(query.data.total / query.data.limit)) : 1
+  )
+
+  createEffect(() => {
+    filter()
+    search()
+    setPage(1)
   })
 
   const stats = createMemo(() => {
-    const data = query.data || []
+    const byStatus = query.data?.summary.byStatus
     return {
-      total: data.length,
-      pending: data.filter(r => r.status === "pending").length,
-      underReview: data.filter(r => r.status === "under_review").length,
-      approved: data.filter(r => r.status === "approved").length,
-      rejected: data.filter(r => r.status === "rejected").length,
+      total: query.data?.total ?? 0,
+      pending: byStatus?.pending?.count ?? 0,
+      underReview: byStatus?.under_review?.count ?? 0,
+      approved: byStatus?.approved?.count ?? 0,
+      rejected: byStatus?.rejected?.count ?? 0,
     }
   })
 
@@ -325,35 +329,62 @@ export default function ApprovalsPage() {
 
       {/* Card Grid */}
       <QueryBoundary query={query}>
-        {(_data: PurchaseRequest[]) => (
-          <Show
-            when={filteredRequests().length > 0}
-            fallback={(() => {
-              const emptyState = getEmptyStateMessage(filter())
-              return (
-                <div class="py-16 text-center">
-                  <emptyState.icon class="w-12 h-12 mx-auto mb-3 text-muted" />
-                  <p class="text-sm font-medium text-foreground">{emptyState.title}</p>
-                  <p class="text-sm text-muted mt-1">{emptyState.message}</p>
+        {data => (
+          <>
+            <Show
+              when={requests().length > 0}
+              fallback={(() => {
+                const emptyState = getEmptyStateMessage(filter())
+                return (
+                  <div class="py-16 text-center">
+                    <emptyState.icon class="w-12 h-12 mx-auto mb-3 text-muted" />
+                    <p class="text-sm font-medium text-foreground">{emptyState.title}</p>
+                    <p class="text-sm text-muted mt-1">{emptyState.message}</p>
+                  </div>
+                )
+              })()}
+            >
+              <div class="grid grid-cols-1 gap-4">
+                <For each={requests()}>
+                  {pr => (
+                    <ApprovalCard
+                      pr={pr}
+                      onCoordinatorReview={handleCoordinatorReview}
+                      onApprove={handleApprove}
+                      onReject={handleReject}
+                      onViewDetails={handleViewDetails}
+                      processing={isProcessing()}
+                    />
+                  )}
+                </For>
+              </div>
+            </Show>
+            <Show when={data.total > data.limit}>
+              <div class="mt-4 flex items-center justify-between">
+                <p class="text-xs text-muted">
+                  Page {page()} of {pageCount()} · {data.total} requests
+                </p>
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={page() <= 1 || query.isFetching}
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    class="px-3 py-1.5 rounded-md border border-border text-xs font-medium text-foreground hover:bg-surface-muted disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    disabled={page() >= pageCount() || query.isFetching}
+                    onClick={() => setPage(p => Math.min(pageCount(), p + 1))}
+                    class="px-3 py-1.5 rounded-md border border-border text-xs font-medium text-foreground hover:bg-surface-muted disabled:opacity-50"
+                  >
+                    Next
+                  </button>
                 </div>
-              )
-            })()}
-          >
-            <div class="grid grid-cols-1 gap-4">
-              <For each={filteredRequests()}>
-                {pr => (
-                  <ApprovalCard
-                    pr={pr}
-                    onCoordinatorReview={handleCoordinatorReview}
-                    onApprove={handleApprove}
-                    onReject={handleReject}
-                    onViewDetails={handleViewDetails}
-                    processing={isProcessing()}
-                  />
-                )}
-              </For>
-            </div>
-          </Show>
+              </div>
+            </Show>
+          </>
         )}
       </QueryBoundary>
 

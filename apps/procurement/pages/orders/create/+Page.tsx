@@ -7,7 +7,7 @@ import { createEffect, createMemo, createSignal, For, onMount, Show } from "soli
 import { navigate } from "vike/client/router"
 
 export default function CreatePoPage() {
-  const approvedPrsQuery = useRequests(() => ({ status: "approved" }))
+  const approvedPrsQuery = useRequests(() => ({ status: "approved", limit: 500 }))
   const createPoMutation = useCreatePo()
 
   const [errors, setErrors] = createSignal<Record<string, string>>({})
@@ -24,7 +24,7 @@ export default function CreatePoPage() {
   })
 
   const approvedPrs = createMemo(() => {
-    return (approvedPrsQuery.data || []) as PurchaseRequest[]
+    return (approvedPrsQuery.data?.items ?? []) as PurchaseRequest[]
   })
 
   const selectedPr = createMemo(() => {

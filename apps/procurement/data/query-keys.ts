@@ -1,6 +1,13 @@
 export const queryKeys = {
   requests: {
     all: ["requests"] as const,
+    filtered: (filters?: {
+      status?: string
+      batchId?: string
+      page?: number
+      limit?: number
+      search?: string
+    }) => ["requests", filters] as const,
     byStatus: (status?: string) => ["requests", { status }] as const,
     detail: (id: string) => ["requests", id] as const,
   },

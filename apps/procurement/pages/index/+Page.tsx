@@ -11,38 +11,42 @@ import {
 } from "@ark/ui"
 import { useRequests } from "@data/hooks"
 import type { PrStatus, PurchaseRequest } from "@data/types"
-import { createMemo, createSignal, For, Show } from "solid-js"
+import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
 import { PrDocumentModal } from "@/components/pr-document-modal"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
 export default function Page() {
-  const query = useRequests()
   const [filter, setFilter] = createSignal<PrStatus | "all">("all")
   const [search, setSearch] = createSignal("")
+  const [page, setPage] = createSignal(1)
   const [selectedPr, setSelectedPr] = createSignal<PurchaseRequest | null>(null)
   const [modalOpen, setModalOpen] = createSignal(false)
+  const query = useRequests(() => ({
+    ...(filter() !== "all" ? { status: filter() } : {}),
+    page: page(),
+    limit: 20,
+    search: search().trim() || undefined,
+  }))
 
-  const filteredRequests = createMemo(() => {
-    const data = query.data || []
-    return data.filter(r => {
-      const matchStatus = filter() === "all" || r.status === filter()
-      const matchSearch =
-        !search() ||
-        r.prCode?.toLowerCase().includes(search().toLowerCase()) ||
-        r.batchName?.toLowerCase().includes(search().toLowerCase()) ||
-        r.category?.toLowerCase().includes(search().toLowerCase())
-      return matchStatus && matchSearch
-    })
+  const requests = createMemo(() => query.data?.items ?? [])
+  const pageCount = createMemo(() =>
+    query.data ? Math.max(1, Math.ceil(query.data.total / query.data.limit)) : 1
+  )
+
+  createEffect(() => {
+    filter()
+    search()
+    setPage(1)
   })
 
   const stats = createMemo(() => {
-    const data = query.data || []
+    const byStatus = query.data?.summary.byStatus
     return {
-      total: data.length,
-      pending: data.filter(r => r.status === "pending").length,
-      approved: data.filter(r => r.status === "approved").length,
-      ordered: data.filter(r => r.status === "ordered").length,
+      total: query.data?.total ?? 0,
+      pending: byStatus?.pending?.count ?? 0,
+      approved: byStatus?.approved?.count ?? 0,
+      ordered: byStatus?.ordered?.count ?? 0,
     }
   })
 
@@ -102,10 +106,10 @@ export default function Page() {
       </div>
 
       <QueryBoundary query={query}>
-        {(_data: PurchaseRequest[]) => (
+        {data => (
           <div class="bg-surface rounded-lg border border-border overflow-hidden">
             <Show
-              when={filteredRequests().length > 0}
+              when={requests().length > 0}
               fallback={
                 <div class="py-16 text-center">
                   <Icons.fileText class="w-12 h-12 mx-auto mb-3 text-muted" />
@@ -124,7 +128,7 @@ export default function Page() {
                   <Th align="right">Actions</Th>
                 </THead>
                 <tbody>
-                  <For each={filteredRequests()}>
+                  <For each={requests()}>
                     {(pr: PurchaseRequest) => (
                       <tr
                         onClick={() => navigate(`/pr/${pr.id}`)}
@@ -176,6 +180,31 @@ export default function Page() {
                   </For>
                 </tbody>
               </DataTable>
+            </Show>
+            <Show when={data.total > data.limit}>
+              <div class="flex items-center justify-between border-t border-border px-5 py-3">
+                <p class="text-xs text-muted">
+                  Page {page()} of {pageCount()} · {data.total} requests
+                </p>
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={page() <= 1 || query.isFetching}
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    class="px-3 py-1.5 rounded-md border border-border text-xs font-medium text-foreground hover:bg-surface-muted disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    disabled={page() >= pageCount() || query.isFetching}
+                    onClick={() => setPage(p => Math.min(pageCount(), p + 1))}
+                    class="px-3 py-1.5 rounded-md border border-border text-xs font-medium text-foreground hover:bg-surface-muted disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
             </Show>
           </div>
         )}
