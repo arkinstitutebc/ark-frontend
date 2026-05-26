@@ -1,8 +1,33 @@
-import type { ExpenseCategory, ProfitCenter, TxnCategory } from "@ark/data-types"
+import type {
+  AccountingTreatment,
+  CostType,
+  ExpenseCategory,
+  GlAccountSection,
+  ProfitCenter,
+  TxnCategory,
+} from "@ark/data-types"
 import { BackLink, formatPeso, Select, type SelectOption } from "@ark/ui"
-import { categoryOptionsBySection, GL_CATALOG, glDefault } from "@data/gl-defaults"
-import { useBankBalance, useCreateDisbursement } from "@data/hooks"
-import { createDisbursementSchema, profitCenterOptions } from "@data/schemas"
+import {
+  categoryOptionsBySection,
+  GL_CATALOG,
+  GL_SECTION_LABELS,
+  GL_SECTIONS,
+  glDefault,
+} from "@data/gl-defaults"
+import {
+  useBankBalance,
+  useClassificationRules,
+  useCreateDisbursement,
+  useGlAccounts,
+  useProfitCenters,
+} from "@data/hooks"
+import {
+  accountingTreatmentOptions,
+  costTypeOptions,
+  createDisbursementSchema,
+  expenseCategoryOptions,
+  profitCenterOptions,
+} from "@data/schemas"
 import { validateForm } from "@data/validate"
 import { createEffect, createMemo, createSignal, onCleanup, onMount, Show } from "solid-js"
 
@@ -24,10 +49,25 @@ interface PreviousDisbursementForm {
   description: string
   referenceId: string
   expenseCategory: ExpenseCategory | ""
-  profitCenter: ProfitCenter | ""
+  profitCenter: string
   accountingTreatment: string
+  costType: CostType | ""
   needsReview: boolean
 }
+
+const fallbackProfitCenterOptions = profitCenterOptions.map(v => ({
+  label: profitCenterLabels[v],
+  value: v,
+}))
+
+const validExpenseCategory = (value?: string | null): value is ExpenseCategory =>
+  !!value && expenseCategoryOptions.includes(value as ExpenseCategory)
+
+const validAccountingTreatment = (value?: string | null): value is AccountingTreatment =>
+  !!value && accountingTreatmentOptions.includes(value as AccountingTreatment)
+
+const validCostType = (value?: string | null): value is CostType =>
+  !!value && costTypeOptions.includes(value as CostType)
 
 export default function CreateDisbursementPage() {
   const [errors, setErrors] = createSignal<Record<string, string>>({})
@@ -48,12 +88,16 @@ export default function CreateDisbursementPage() {
   const [expenseCategory, setExpenseCategory] = createSignal<ExpenseCategory | "">(
     initialDefaults?.expenseCategory ?? ""
   )
-  const [profitCenter, setProfitCenter] = createSignal<ProfitCenter | "">("Admin")
+  const [profitCenter, setProfitCenter] = createSignal("Admin")
   const [accountingTreatment, setAccountingTreatment] = createSignal(
     initialDefaults?.accountingTreatment ?? ""
   )
+  const [costType, setCostType] = createSignal<CostType | "">("")
 
   const opsBalance = useBankBalance(() => "operational-hub")
+  const glAccountsQuery = useGlAccounts(() => ({ includeInactive: false }))
+  const profitCentersQuery = useProfitCenters(() => ({ includeInactive: false }))
+  const classificationRulesQuery = useClassificationRules(() => ({ includeInactive: false }))
   const mutation = useCreateDisbursement()
 
   onMount(() => {
@@ -66,21 +110,98 @@ export default function CreateDisbursementPage() {
     if (draftTimer) clearTimeout(draftTimer)
   })
 
-  const handleCategoryChange = (next: TxnCategory) => {
-    setCategory(next)
-    const def = glDefault(next)
-    if (def) {
-      setExpenseCategory(def.expenseCategory)
-      setAccountingTreatment(def.accountingTreatment)
-    }
+  const classificationRule = (nextCategory = category(), nextProfitCenter = profitCenter()) => {
+    const rules = classificationRulesQuery.data ?? []
+    const matches = rules
+      .filter(rule => rule.active && rule.glAccountCode === nextCategory)
+      .sort((a, b) => a.sortOrder - b.sortOrder)
+
+    return (
+      matches.find(rule => rule.profitCenterCode === nextProfitCenter) ??
+      matches.find(rule => !rule.profitCenterCode) ??
+      null
+    )
   }
 
-  const categoryOptions = createMemo<SelectOption<string>[]>(() =>
-    categoryOptionsBySection().flatMap(group => [
+  const applyAccountingDefaults = (
+    nextCategory = category(),
+    nextProfitCenter = profitCenter(),
+    syncReview = true
+  ) => {
+    const rule = classificationRule(nextCategory, nextProfitCenter)
+    const fallback = glDefault(nextCategory)
+
+    if (validExpenseCategory(rule?.defaultExpenseCategory)) {
+      setExpenseCategory(rule.defaultExpenseCategory)
+    } else {
+      setExpenseCategory(fallback?.expenseCategory ?? "")
+    }
+
+    if (validAccountingTreatment(rule?.defaultAccountingTreatment)) {
+      setAccountingTreatment(rule.defaultAccountingTreatment)
+    } else {
+      setAccountingTreatment(fallback?.accountingTreatment ?? "")
+    }
+
+    setCostType(validCostType(rule?.defaultCostType) ? rule.defaultCostType : "")
+    if (syncReview) setNeedsReview(!!rule?.requiresAssetReview)
+  }
+
+  const handleCategoryChange = (next: TxnCategory) => {
+    setCategory(next)
+    applyAccountingDefaults(next, profitCenter())
+  }
+
+  createEffect(() => {
+    applyAccountingDefaults(category(), profitCenter(), false)
+  })
+
+  const categoryLabel = (code: string) =>
+    glAccountsQuery.data?.find(account => account.code === code)?.label ??
+    GL_CATALOG[code as TxnCategory]?.label ??
+    code
+
+  const categoryOptions = createMemo<SelectOption<string>[]>(() => {
+    const liveAccounts = (glAccountsQuery.data ?? [])
+      .filter(account => account.active && account.section !== "revenue")
+      .sort((a, b) => a.sortOrder - b.sortOrder || a.label.localeCompare(b.label))
+
+    if (liveAccounts.length > 0) {
+      const sections = [
+        ...GL_SECTIONS,
+        ...Array.from(new Set(liveAccounts.map(account => account.section))).filter(
+          section => !GL_SECTIONS.includes(section as never)
+        ),
+      ] as GlAccountSection[]
+
+      return sections.flatMap(section => {
+        const accounts = liveAccounts.filter(account => account.section === section)
+        if (accounts.length === 0) return []
+        return [
+          {
+            label: GL_SECTION_LABELS[section as keyof typeof GL_SECTION_LABELS] ?? section,
+            value: `group-${section}`,
+            disabled: true,
+          },
+          ...accounts.map(account => ({ label: account.label, value: account.code })),
+        ]
+      })
+    }
+
+    return categoryOptionsBySection().flatMap(group => [
       { label: group.label, value: `group-${group.label}`, disabled: true },
       ...group.options,
     ])
-  )
+  })
+
+  const profitCenterSelectOptions = createMemo<SelectOption<string>[]>(() => {
+    const liveCenters = (profitCentersQuery.data ?? [])
+      .filter(center => center.active)
+      .sort((a, b) => a.sortOrder - b.sortOrder || a.label.localeCompare(b.label))
+
+    if (liveCenters.length === 0) return fallbackProfitCenterOptions
+    return liveCenters.map(center => ({ label: center.label, value: center.code }))
+  })
 
   const amountValue = () => {
     const v = parseFloat(amount())
@@ -103,6 +224,7 @@ export default function CreateDisbursementPage() {
     expenseCategory: expenseCategory(),
     profitCenter: profitCenter(),
     accountingTreatment: accountingTreatment(),
+    costType: costType(),
     needsReview: needsReview(),
   })
 
@@ -128,6 +250,7 @@ export default function CreateDisbursementPage() {
     setAccountingTreatment(
       form.accountingTreatment ?? glDefault(form.category)?.accountingTreatment ?? ""
     )
+    setCostType(form.costType ?? "")
     setNeedsReview(!!form.needsReview)
   }
 
@@ -180,6 +303,7 @@ export default function CreateDisbursementPage() {
       expenseCategory: expenseCategory() || undefined,
       profitCenter: profitCenter() || undefined,
       accountingTreatment: accountingTreatment() || undefined,
+      costType: costType() || undefined,
       needsReview: needsReview(),
     }
 
@@ -371,12 +495,12 @@ export default function CreateDisbursementPage() {
               <div class="max-w-sm">
                 <span class="block text-sm font-medium text-foreground mb-1">For</span>
                 <Select
-                  options={profitCenterOptions.map(v => ({
-                    label: profitCenterLabels[v],
-                    value: v,
-                  }))}
+                  options={profitCenterSelectOptions()}
                   value={profitCenter() || undefined}
-                  onChange={v => setProfitCenter(v as ProfitCenter)}
+                  onChange={v => {
+                    setProfitCenter(v)
+                    applyAccountingDefaults(category(), v)
+                  }}
                   placeholder="—"
                   ariaLabel="For"
                 />
@@ -394,9 +518,7 @@ export default function CreateDisbursementPage() {
                 </div>
                 <div class="flex justify-between gap-3">
                   <span class="text-muted shrink-0">Category</span>
-                  <span class="font-medium text-right">
-                    {GL_CATALOG[category()]?.label ?? category()}
-                  </span>
+                  <span class="font-medium text-right">{categoryLabel(category())}</span>
                 </div>
                 <div class="flex justify-between gap-3">
                   <span class="text-muted shrink-0">Store / Company</span>

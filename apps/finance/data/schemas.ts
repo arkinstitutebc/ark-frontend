@@ -55,7 +55,7 @@ export const createDisbursementSchema = z.object({
   description: z.string().trim().min(1, "Description is required").max(500),
   referenceId: z.string().trim().max(100).optional(),
   expenseCategory: z.enum(expenseCategoryOptions).optional(),
-  profitCenter: z.enum(profitCenterOptions).optional(),
+  profitCenter: z.string().trim().min(1).max(30).optional(),
   accountingTreatment: z.enum(accountingTreatmentOptions).optional(),
   costType: z.enum(costTypeOptions).optional(),
   needsReview: z.boolean().optional(),
