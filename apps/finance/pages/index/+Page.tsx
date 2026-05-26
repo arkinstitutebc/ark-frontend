@@ -53,9 +53,10 @@ export default function Page() {
     if (!revenueBalance.data || !opsBalance.data) return null
     return revenueBalance.data.balance + opsBalance.data.balance
   })
-  const recentTxns = createMemo(() => transactionsQuery.data?.slice(0, 5) ?? [])
-  const dailyExpenses = createMemo(() => buildDailyExpenseTrend(transactionsQuery.data ?? []))
-  const categoryExpenses = createMemo(() => buildCategoryBreakdown(transactionsQuery.data ?? []))
+  const transactions = createMemo(() => transactionsQuery.data?.items ?? [])
+  const recentTxns = createMemo(() => transactions().slice(0, 5))
+  const dailyExpenses = createMemo(() => buildDailyExpenseTrend(transactions()))
+  const categoryExpenses = createMemo(() => buildCategoryBreakdown(transactions()))
 
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
@@ -90,7 +91,7 @@ export default function Page() {
         <StatCard
           label="Transactions"
           numeric
-          value={transactionsQuery.data?.length ?? "-"}
+          value={transactionsQuery.data?.total ?? "-"}
           hint="Recent window"
         />
       </div>

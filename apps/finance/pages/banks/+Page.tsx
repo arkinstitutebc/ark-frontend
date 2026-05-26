@@ -149,17 +149,19 @@ export default function Page() {
 
       {/* Transactions */}
       <QueryBoundary query={transactionsQuery}>
-        {(txns: Transaction[]) => (
+        {data => (
           <div class="bg-surface rounded-lg border border-border overflow-hidden">
             <div class="px-5 py-4 border-b border-border flex items-center justify-between">
               <div>
                 <h2 class="text-sm font-semibold text-foreground">Recent Transactions</h2>
                 <p class="text-xs text-muted mt-0.5">Latest bank activity by transaction date</p>
               </div>
-              <p class="text-xs text-muted">Latest {txns.length}</p>
+              <p class="text-xs text-muted">
+                Latest {data.items.length} of {data.total}
+              </p>
             </div>
             <Show
-              when={txns.length > 0}
+              when={data.items.length > 0}
               fallback={
                 <div class="py-10 text-center">
                   <Icons.receipt class="w-10 h-10 mx-auto mb-3 text-muted" />
@@ -177,7 +179,7 @@ export default function Page() {
                   </Th>
                 </THead>
                 <tbody>
-                  <For each={txns}>
+                  <For each={data.items}>
                     {(txn: Transaction) => (
                       <Tr>
                         <td class="py-3 px-6 text-sm text-muted whitespace-nowrap">
