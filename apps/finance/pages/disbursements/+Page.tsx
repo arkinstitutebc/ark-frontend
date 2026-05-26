@@ -66,6 +66,9 @@ export default function DisbursementsPage() {
     { label: "All records", value: "all" as const },
     { label: "Needs review", value: "needs-review" as const },
   ]
+  const hasActiveFilters = createMemo(
+    () => search().trim().length > 0 || categoryFilter() !== "all" || reviewFilter() !== "all"
+  )
   createEffect(() => {
     search()
     categoryFilter()
@@ -73,6 +76,12 @@ export default function DisbursementsPage() {
     sortKey()
     sortDir()
     setPage(1)
+  })
+  createEffect(() => {
+    const data = query.data
+    if (!data) return
+    const lastPage = Math.max(1, Math.ceil(data.total / PAGE_SIZE))
+    if (page() > lastPage) setPage(lastPage)
   })
   const setSort = (key: SortKey) => {
     if (sortKey() === key) {
@@ -169,7 +178,9 @@ export default function DisbursementsPage() {
                 fallback={
                   <div class="py-12 text-center">
                     <Icons.receipt class="w-12 h-12 mx-auto mb-3 text-muted" />
-                    <p class="text-sm font-medium text-foreground">No disbursements yet</p>
+                    <p class="text-sm font-medium text-foreground">
+                      {hasActiveFilters() ? "No matching disbursements" : "No disbursements yet"}
+                    </p>
                   </div>
                 }
               >
