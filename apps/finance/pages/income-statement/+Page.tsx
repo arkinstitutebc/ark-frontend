@@ -1,8 +1,9 @@
 import { API_URL } from "@ark/api-client"
 import type { IncomeStatementSegment } from "@ark/data-types"
-import { formatPeso, Icons, PageContainer, PageHeader } from "@ark/ui"
+import { DataTable, formatPeso, Icons, PageContainer, PageHeader, THead, Th, Tr } from "@ark/ui"
 import { useIncomeStatement } from "@data/hooks"
 import { createMemo, createSignal, For, Show } from "solid-js"
+import { DateRangeControls, type DateRangePreset } from "@/components/finance/report-controls"
 
 const SEGMENT_LABEL: Record<IncomeStatementSegment, string> = {
   JDVP: "JDVP",
@@ -46,13 +47,21 @@ export default function IncomeStatementPage() {
   const initial = currentQuarter()
   const [from, setFrom] = createSignal(initial.from)
   const [to, setTo] = createSignal(initial.to)
+  const [preset, setPreset] = createSignal<DateRangePreset>("current-quarter")
 
   const range = createMemo(() => ({ from: from(), to: to() }))
   const query = useIncomeStatement(range)
 
-  const setRange = (r: { from: string; to: string }) => {
+  const setRange = (r: { from: string; to: string }, nextPreset: DateRangePreset) => {
     setFrom(r.from)
     setTo(r.to)
+    setPreset(nextPreset)
+  }
+
+  const applyPreset = (value: Exclude<DateRangePreset, "custom">) => {
+    if (value === "current-quarter") setRange(currentQuarter(), value)
+    if (value === "last-quarter") setRange(lastQuarter(), value)
+    if (value === "year-to-date") setRange(yearToDate(), value)
   }
 
   const pdfHref = () => `${API_URL}/api/finance/income-statement/pdf?from=${from()}&to=${to()}`
@@ -74,48 +83,21 @@ export default function IncomeStatementPage() {
         }
       />
 
-      <div class="flex flex-wrap gap-3 mb-6 items-end">
-        <label class="block">
-          <span class="block text-xs text-muted mb-1">From</span>
-          <input
-            type="date"
-            value={from()}
-            onInput={e => setFrom(e.currentTarget.value)}
-            class="px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-          />
-        </label>
-        <label class="block">
-          <span class="block text-xs text-muted mb-1">To</span>
-          <input
-            type="date"
-            value={to()}
-            onInput={e => setTo(e.currentTarget.value)}
-            class="px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-          />
-        </label>
-        <div class="flex gap-2">
-          <button
-            type="button"
-            onClick={() => setRange(currentQuarter())}
-            class="px-3 py-2 rounded-lg text-sm font-medium bg-surface text-foreground border border-border hover:bg-surface-muted"
-          >
-            Current quarter
-          </button>
-          <button
-            type="button"
-            onClick={() => setRange(lastQuarter())}
-            class="px-3 py-2 rounded-lg text-sm font-medium bg-surface text-foreground border border-border hover:bg-surface-muted"
-          >
-            Last quarter
-          </button>
-          <button
-            type="button"
-            onClick={() => setRange(yearToDate())}
-            class="px-3 py-2 rounded-lg text-sm font-medium bg-surface text-foreground border border-border hover:bg-surface-muted"
-          >
-            Year to date
-          </button>
-        </div>
+      <div class="mb-6">
+        <DateRangeControls
+          from={from()}
+          to={to()}
+          preset={preset()}
+          onFromChange={value => {
+            setFrom(value)
+            setPreset("custom")
+          }}
+          onToChange={value => {
+            setTo(value)
+            setPreset("custom")
+          }}
+          onPresetChange={applyPreset}
+        />
       </div>
 
       <Show
@@ -130,87 +112,77 @@ export default function IncomeStatementPage() {
       >
         {data => (
           <div class="bg-surface rounded-lg border border-border overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full text-sm">
-                <thead class="bg-surface-muted border-b border-border">
-                  <tr>
-                    <th class="text-left px-6 py-3 text-xs font-semibold text-muted uppercase">
-                      Line Item
-                    </th>
-                    <For each={data.segments}>
-                      {seg => (
-                        <th class="text-right px-6 py-3 text-xs font-semibold text-muted uppercase">
-                          {SEGMENT_LABEL[seg]}
-                        </th>
-                      )}
-                    </For>
-                    <th class="text-right px-6 py-3 text-xs font-semibold text-muted uppercase">
-                      Total
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <For each={data.rows}>
-                    {row => {
-                      const isHeader = row.kind === "header"
-                      const isSubtotal = row.kind === "subtotal"
-                      const isComputed = row.kind === "computed"
-                      const indent = row.indent ?? 0
-                      const labelClass = isComputed
-                        ? "px-6 py-3 font-semibold text-foreground uppercase tracking-wide text-xs"
-                        : isHeader
-                          ? "px-6 py-2 font-semibold text-muted uppercase text-xs bg-surface-muted/50"
-                          : isSubtotal
-                            ? "px-6 py-2 font-semibold text-foreground"
-                            : "px-6 py-1.5 text-foreground"
-                      const valueClass = isComputed
-                        ? "px-6 py-3 text-right font-semibold text-foreground tabular-nums"
+            <DataTable>
+              <THead>
+                <Th size="dense">Line Item</Th>
+                <For each={data.segments}>
+                  {seg => (
+                    <Th size="dense" align="right">
+                      {SEGMENT_LABEL[seg]}
+                    </Th>
+                  )}
+                </For>
+                <Th size="dense" align="right">
+                  Total
+                </Th>
+              </THead>
+              <tbody>
+                <For each={data.rows}>
+                  {row => {
+                    const isHeader = row.kind === "header"
+                    const isSubtotal = row.kind === "subtotal"
+                    const isComputed = row.kind === "computed"
+                    const indent = row.indent ?? 0
+                    const labelClass = isComputed
+                      ? "px-6 py-3 font-semibold text-foreground uppercase tracking-wide text-xs"
+                      : isHeader
+                        ? "px-6 py-2 font-semibold text-muted uppercase text-xs bg-surface-muted/50"
                         : isSubtotal
-                          ? "px-6 py-2 text-right font-semibold text-foreground tabular-nums"
-                          : "px-6 py-1.5 text-right text-foreground tabular-nums"
-                      const rowClass = isComputed
-                        ? "border-t border-border bg-surface-muted"
-                        : isSubtotal
-                          ? "border-t border-border"
-                          : ""
-                      const totalClass = isComputed
-                        ? "px-6 py-3 text-right font-semibold text-foreground tabular-nums"
-                        : isSubtotal
-                          ? "px-6 py-2 text-right font-semibold text-foreground tabular-nums"
-                          : "px-6 py-1.5 text-right text-foreground tabular-nums"
-                      const labelStyle =
-                        indent > 0 ? `padding-left: ${24 + indent * 16}px` : undefined
+                          ? "px-6 py-2 font-semibold text-foreground"
+                          : "px-6 py-1.5 text-foreground"
+                    const valueClass = isComputed
+                      ? "px-6 py-3 text-right font-semibold text-foreground tabular-nums"
+                      : isSubtotal
+                        ? "px-6 py-2 text-right font-semibold text-foreground tabular-nums"
+                        : "px-6 py-1.5 text-right text-foreground tabular-nums"
+                    const rowClass = isComputed ? "bg-surface-muted" : isSubtotal ? "" : ""
+                    const totalClass = isComputed
+                      ? "px-6 py-3 text-right font-semibold text-foreground tabular-nums"
+                      : isSubtotal
+                        ? "px-6 py-2 text-right font-semibold text-foreground tabular-nums"
+                        : "px-6 py-1.5 text-right text-foreground tabular-nums"
+                    const labelStyle =
+                      indent > 0 ? `padding-left: ${24 + indent * 16}px` : undefined
 
-                      return (
-                        <tr class={rowClass}>
-                          <td class={labelClass} style={labelStyle}>
-                            {row.label}
-                          </td>
-                          <Show
-                            when={!isHeader}
-                            fallback={
-                              <>
-                                <For each={data.segments}>{() => <td />}</For>
-                                <td />
-                              </>
-                            }
-                          >
-                            <For each={data.segments}>
-                              {seg => (
-                                <td class={valueClass}>
-                                  {row.bySegment[seg] ? formatPeso(row.bySegment[seg]) : "—"}
-                                </td>
-                              )}
-                            </For>
-                            <td class={totalClass}>{row.total ? formatPeso(row.total) : "—"}</td>
-                          </Show>
-                        </tr>
-                      )
-                    }}
-                  </For>
-                </tbody>
-              </table>
-            </div>
+                    return (
+                      <Tr class={rowClass} hover={!isHeader && !isComputed}>
+                        <td class={labelClass} style={labelStyle}>
+                          {row.label}
+                        </td>
+                        <Show
+                          when={!isHeader}
+                          fallback={
+                            <>
+                              <For each={data.segments}>{() => <td />}</For>
+                              <td />
+                            </>
+                          }
+                        >
+                          <For each={data.segments}>
+                            {seg => (
+                              <td class={valueClass}>
+                                {row.bySegment[seg] ? formatPeso(row.bySegment[seg]) : "—"}
+                              </td>
+                            )}
+                          </For>
+                          <td class={totalClass}>{row.total ? formatPeso(row.total) : "—"}</td>
+                        </Show>
+                      </Tr>
+                    )
+                  }}
+                </For>
+              </tbody>
+            </DataTable>
             <div class="px-6 py-3 border-t border-border text-xs text-muted">
               Period: {data.periodFrom} → {data.periodTo} · Net Operating Income:{" "}
               <span class="text-foreground font-semibold">

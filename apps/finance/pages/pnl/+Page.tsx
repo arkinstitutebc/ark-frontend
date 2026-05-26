@@ -1,6 +1,7 @@
-import { formatPeso, PageContainer, PageHeader } from "@ark/ui"
+import { DataTable, formatPeso, PageContainer, PageHeader, THead, Th, Tr } from "@ark/ui"
 import { type PnlReport, usePnl } from "@data/hooks"
 import { createSignal, For, Show } from "solid-js"
+import { currentMonthValue, MonthStepper } from "@/components/finance/report-controls"
 import { Icons, QueryBoundary } from "@/components/ui"
 
 function downloadBlob(content: BlobPart, filename: string, mimeType: string) {
@@ -13,30 +14,8 @@ function downloadBlob(content: BlobPart, filename: string, mimeType: string) {
   setTimeout(() => URL.revokeObjectURL(url), 100)
 }
 
-function toMonthValue(date: Date) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`
-}
-
-function monthDate(monthValue: string) {
-  const [year, month] = monthValue.split("-").map(Number)
-  return new Date(year, month - 1, 1)
-}
-
-function formatMonth(monthValue: string) {
-  return monthDate(monthValue).toLocaleDateString("en-PH", {
-    month: "long",
-    year: "numeric",
-  })
-}
-
-function shiftMonth(monthValue: string, delta: number) {
-  const date = monthDate(monthValue)
-  date.setMonth(date.getMonth() + delta)
-  return toMonthValue(date)
-}
-
 export default function PnlPage() {
-  const [selectedMonth, setSelectedMonth] = createSignal(toMonthValue(new Date()))
+  const [selectedMonth, setSelectedMonth] = createSignal(currentMonthValue())
   const pnlQuery = usePnl(selectedMonth)
 
   const exportCsv = () => {
@@ -130,31 +109,7 @@ export default function PnlPage() {
       />
 
       <div class="flex flex-wrap gap-3 mb-6 items-end">
-        <div class="block">
-          <span class="block text-xs text-muted mb-1">Month</span>
-          <div class="inline-flex items-center overflow-hidden rounded-lg border border-border bg-surface">
-            <button
-              type="button"
-              onClick={() => setSelectedMonth(shiftMonth(selectedMonth(), -1))}
-              class="h-10 w-10 inline-flex items-center justify-center text-muted hover:bg-surface-muted hover:text-foreground transition-colors"
-              aria-label="Previous month"
-            >
-              <Icons.chevronLeft class="w-4 h-4" />
-            </button>
-            <div class="h-10 min-w-[172px] px-3 inline-flex items-center justify-center gap-2 border-x border-border text-sm font-medium text-foreground">
-              <Icons.calendar class="w-4 h-4 text-muted" />
-              <span>{formatMonth(selectedMonth())}</span>
-            </div>
-            <button
-              type="button"
-              onClick={() => setSelectedMonth(shiftMonth(selectedMonth(), 1))}
-              class="h-10 w-10 inline-flex items-center justify-center text-muted hover:bg-surface-muted hover:text-foreground transition-colors"
-              aria-label="Next month"
-            >
-              <Icons.chevronRight class="w-4 h-4" />
-            </button>
-          </div>
-        </div>
+        <MonthStepper value={selectedMonth()} onChange={setSelectedMonth} />
         <div class="flex gap-2">
           <button
             type="button"
@@ -178,67 +133,62 @@ export default function PnlPage() {
       <QueryBoundary query={pnlQuery}>
         {(data: PnlReport) => (
           <div class="bg-surface rounded-lg border border-border overflow-hidden">
-            <div class="overflow-x-auto">
-              <table class="w-full">
-                <thead class="bg-surface-muted border-b border-border">
-                  <tr>
-                    <th class="py-3 px-5 text-left text-xs font-semibold text-muted uppercase tracking-wider min-w-[250px]">
-                      Line Item
-                    </th>
-                    <For each={data.batches}>
-                      {b => (
-                        <th class="py-3 px-5 text-right text-xs font-semibold text-muted uppercase tracking-wider min-w-[130px]">
-                          {b.batchCode}
-                        </th>
-                      )}
-                    </For>
-                    <th class="py-3 px-5 text-right text-xs font-semibold text-muted uppercase tracking-wider min-w-[130px]">
-                      Total
-                    </th>
-                    <th class="py-3 px-5 text-right text-xs font-semibold text-muted uppercase tracking-wider min-w-[80px]">
-                      Ratio
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <For each={data.rows}>
-                    {row => (
-                      <tr
-                        class={`border-t transition-colors ${row.isSubtotal ? "border-border bg-surface-muted" : "border-border hover:bg-surface-muted/50"}`}
+            <DataTable>
+              <THead>
+                <Th size="dense" class="min-w-[250px]">
+                  Line Item
+                </Th>
+                <For each={data.batches}>
+                  {b => (
+                    <Th size="dense" align="right" class="min-w-[130px]">
+                      {b.batchCode}
+                    </Th>
+                  )}
+                </For>
+                <Th size="dense" align="right" class="min-w-[130px]">
+                  Total
+                </Th>
+                <Th size="dense" align="right" class="min-w-[80px]">
+                  Ratio
+                </Th>
+              </THead>
+              <tbody>
+                <For each={data.rows}>
+                  {row => (
+                    <Tr
+                      hover={!row.isHeader && !row.isSubtotal}
+                      class={row.isSubtotal ? "bg-surface-muted" : ""}
+                    >
+                      <td
+                        class={`py-3 px-5 text-sm ${row.isHeader || row.isSubtotal ? "font-semibold text-foreground" : row.indent ? "pl-10 text-muted" : "text-foreground"}`}
                       >
-                        <td
-                          class={`py-3 px-5 text-sm ${row.isHeader || row.isSubtotal ? "font-semibold text-foreground" : row.indent ? "pl-10 text-muted" : "text-foreground"}`}
-                        >
-                          {row.label}
-                          <Show when={row.description}>
-                            <span class="block text-[11px] text-muted font-normal mt-0.5">
-                              {row.description}
-                            </span>
-                          </Show>
-                        </td>
-                        <For each={data.batches}>
-                          {b => (
-                            <td
-                              class={`py-3 px-5 text-right text-sm tabular-nums ${row.isHeader || row.isSubtotal ? "font-semibold text-foreground" : row.indent ? "text-muted" : "text-foreground"}`}
-                            >
-                              {row.values[b.id] ? formatPeso(row.values[b.id]) : "-"}
-                            </td>
-                          )}
-                        </For>
-                        <td
-                          class={`py-3 px-5 text-right text-sm tabular-nums font-semibold ${row.isSubtotal ? "text-foreground" : "text-foreground"}`}
-                        >
-                          {row.values.total ? formatPeso(row.values.total) : "-"}
-                        </td>
-                        <td class="py-3 px-5 text-right text-sm tabular-nums text-muted">
-                          {row.values.ratio !== undefined ? `${row.values.ratio}%` : ""}
-                        </td>
-                      </tr>
-                    )}
-                  </For>
-                </tbody>
-              </table>
-            </div>
+                        {row.label}
+                        <Show when={row.description}>
+                          <span class="block text-[11px] text-muted font-normal mt-0.5">
+                            {row.description}
+                          </span>
+                        </Show>
+                      </td>
+                      <For each={data.batches}>
+                        {b => (
+                          <td
+                            class={`py-3 px-5 text-right text-sm tabular-nums ${row.isHeader || row.isSubtotal ? "font-semibold text-foreground" : row.indent ? "text-muted" : "text-foreground"}`}
+                          >
+                            {row.values[b.id] ? formatPeso(row.values[b.id]) : "-"}
+                          </td>
+                        )}
+                      </For>
+                      <td class="py-3 px-5 text-right text-sm tabular-nums font-semibold text-foreground">
+                        {row.values.total ? formatPeso(row.values.total) : "-"}
+                      </td>
+                      <td class="py-3 px-5 text-right text-sm tabular-nums text-muted">
+                        {row.values.ratio !== undefined ? `${row.values.ratio}%` : ""}
+                      </td>
+                    </Tr>
+                  )}
+                </For>
+              </tbody>
+            </DataTable>
           </div>
         )}
       </QueryBoundary>
