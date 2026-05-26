@@ -1,8 +1,8 @@
-import { createCrudHooks, toast } from "@ark/ui"
+import { toast } from "@ark/ui"
 import { createMutation, createQuery, useQueryClient } from "@tanstack/solid-query"
 import { api } from "../api"
 import { queryKeys } from "../query-keys"
-import type { Transaction, TransactionAuditEvent } from "../types"
+import type { Transaction, TransactionAuditEvent, TxnCategory } from "../types"
 
 interface CreateDisbursementInput {
   bankId: string
@@ -24,25 +24,39 @@ type UpdateDisbursementInput = Partial<Omit<CreateDisbursementInput, "bankId" | 
   id: string
 }
 
-const crud = createCrudHooks<
-  Transaction,
-  Transaction,
-  CreateDisbursementInput,
-  Partial<Transaction>,
-  void
->({
-  basePath: "/api/finance/disbursements",
-  domain: "disbursements",
-  label: "Disbursement",
-  messages: { create: false },
-  queryKeys: {
-    all: queryKeys.disbursements.all,
-    list: () => queryKeys.disbursements.all,
-    detail: id => queryKeys.disbursements.detail(id),
-  },
-})
+export interface DisbursementListFilters {
+  page?: number
+  limit?: number
+  search?: string
+  category?: TxnCategory
+  review?: "needs-review"
+  sortKey?: "date" | "payee" | "description" | "category" | "amount"
+  sortDir?: "asc" | "desc"
+}
 
-export const useDisbursements = crud.useList
+export interface DisbursementListResponse {
+  items: Transaction[]
+  total: number
+  totalAmount: number
+  page: number
+  limit: number
+}
+
+export function useDisbursements(filters?: () => DisbursementListFilters) {
+  return createQuery(() => {
+    const q = filters?.() ?? { page: 1, limit: 20 }
+    const params = new URLSearchParams()
+    for (const [key, value] of Object.entries(q)) {
+      if (value !== undefined && value !== "" && value !== "all") params.set(key, String(value))
+    }
+    const qs = params.toString()
+    return {
+      queryKey: [...queryKeys.disbursements.all, q] as const,
+      queryFn: () =>
+        api<DisbursementListResponse>(`/api/finance/disbursements${qs ? `?${qs}` : ""}`),
+    }
+  })
+}
 
 export function useDisbursementAudit(id: () => string | null | undefined) {
   return createQuery(() => ({

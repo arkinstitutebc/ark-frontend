@@ -31,9 +31,6 @@ type SortDir = "asc" | "desc"
 const PAGE_SIZE = 20
 
 export default function DisbursementsPage() {
-  const query = useDisbursements()
-  const opsBalance = useBankBalance(() => "operational-hub")
-  const deleteDisbursement = useDeleteDisbursement()
   const [search, setSearch] = createSignal("")
   const [categoryFilter, setCategoryFilter] = createSignal<TxnCategory | "all">("all")
   const [reviewFilter, setReviewFilter] = createSignal<"all" | "needs-review">("all")
@@ -42,43 +39,33 @@ export default function DisbursementsPage() {
   const [page, setPage] = createSignal(1)
   const [selectedTxn, setSelectedTxn] = createSignal<Transaction | null>(null)
   const [confirmDeleteOpen, setConfirmDeleteOpen] = createSignal(false)
+  const query = useDisbursements(() => {
+    const category = categoryFilter()
+    return {
+      page: page(),
+      limit: PAGE_SIZE,
+      search: search().trim() || undefined,
+      category: category === "all" ? undefined : category,
+      review: reviewFilter() === "all" ? undefined : "needs-review",
+      sortKey: sortKey(),
+      sortDir: sortDir(),
+    }
+  })
+  const opsBalance = useBankBalance(() => "operational-hub")
+  const deleteDisbursement = useDeleteDisbursement()
 
   const totalExpenses = createMemo(() => {
     if (!query.data) return null
-    return query.data.reduce((sum, t) => sum + Math.abs(Number(t.amount)), 0)
-  })
-  const categories = createMemo(() => {
-    const values = new Set<TxnCategory>()
-    for (const txn of query.data ?? []) {
-      if (txn.category) values.add(txn.category)
-    }
-    return [...values].sort((a, b) => categoryLabel(a).localeCompare(categoryLabel(b)))
+    return query.data.totalAmount
   })
   const categoryOptions = createMemo(() => [
     { label: "All categories", value: "all" as const },
-    ...categories().map(category => ({ label: categoryLabel(category), value: category })),
+    ...categoryOptionsBySection().flatMap(section => section.options),
   ])
   const reviewOptions = [
     { label: "All records", value: "all" as const },
     { label: "Needs review", value: "needs-review" as const },
   ]
-  const filteredTxns = (txns: Transaction[]) => {
-    const q = search().trim().toLowerCase()
-    const selectedCategory = categoryFilter()
-    const selectedReview = reviewFilter()
-
-    return txns
-      .filter(txn => {
-        const matchesCategory = selectedCategory === "all" || txn.category === selectedCategory
-        const matchesReview = selectedReview === "all" || txn.metadata?.needsReview === true
-        const text = [txn.payee, txn.description, txn.referenceId, txn.category]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase()
-        return matchesCategory && matchesReview && (!q || text.includes(q))
-      })
-      .sort((a, b) => compareTxns(a, b, sortKey(), sortDir()))
-  }
   createEffect(() => {
     search()
     categoryFilter()
@@ -128,7 +115,7 @@ export default function DisbursementsPage() {
       />
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
-        <StatCard label="Total Disbursements" numeric value={query.data?.length ?? "-"} />
+        <StatCard label="Total Disbursements" numeric value={query.data?.total ?? "-"} />
         <StatCard
           label="Total Expenses"
           numeric
@@ -145,29 +132,22 @@ export default function DisbursementsPage() {
       </div>
 
       <QueryBoundary query={query}>
-        {(txns: Transaction[]) => {
-          const rows = createMemo(() => filteredTxns(txns))
-          const totalPages = createMemo(() => Math.max(1, Math.ceil(rows().length / PAGE_SIZE)))
-          const visibleRows = createMemo(() =>
-            rows().slice((page() - 1) * PAGE_SIZE, page() * PAGE_SIZE)
-          )
+        {data => {
+          const rows = createMemo(() => data.items)
+          const totalPages = createMemo(() => Math.max(1, Math.ceil(data.total / PAGE_SIZE)))
           return (
             <div class="bg-surface rounded-lg border border-border overflow-hidden">
               <div class="px-5 py-4 border-b border-border space-y-3">
                 <div class="flex items-center justify-between gap-3">
                   <h2 class="text-sm font-semibold text-foreground">Expense History</h2>
-                  <p class="text-xs text-muted">
-                    {rows().length === txns.length
-                      ? `${txns.length} disbursements`
-                      : `${rows().length} of ${txns.length}`}
-                  </p>
+                  <p class="text-xs text-muted">{data.total} disbursements</p>
                 </div>
                 <div class="grid grid-cols-1 sm:grid-cols-[1fr_220px_180px] gap-3">
                   <input
                     type="search"
                     value={search()}
                     onInput={e => setSearch(e.currentTarget.value)}
-                    placeholder="Search store, item, receipt, category"
+                    placeholder="Search store, item, category"
                     class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   />
                   <Select
@@ -185,7 +165,7 @@ export default function DisbursementsPage() {
                 </div>
               </div>
               <Show
-                when={txns.length > 0}
+                when={data.total > 0}
                 fallback={
                   <div class="py-12 text-center">
                     <Icons.receipt class="w-12 h-12 mx-auto mb-3 text-muted" />
@@ -246,7 +226,7 @@ export default function DisbursementsPage() {
                       </Th>
                     </THead>
                     <tbody>
-                      <For each={visibleRows()}>
+                      <For each={rows()}>
                         {(txn: Transaction) => (
                           <Tr onClick={() => setSelectedTxn(txn)} class="cursor-pointer">
                             <td class="py-3 px-6 text-sm text-muted whitespace-nowrap">
@@ -277,7 +257,7 @@ export default function DisbursementsPage() {
                   <div class="px-5 py-3 border-t border-border flex items-center justify-between gap-3">
                     <p class="text-xs text-muted">
                       Showing {(page() - 1) * PAGE_SIZE + 1}-
-                      {Math.min(page() * PAGE_SIZE, rows().length)} of {rows().length}
+                      {Math.min(page() * PAGE_SIZE, data.total)} of {data.total}
                     </p>
                     <div class="flex items-center gap-2">
                       <button
@@ -376,21 +356,6 @@ function auditSummary(event: TransactionAuditEvent) {
   ].filter(Boolean)
 
   return changed.length > 0 ? `Changed ${changed.join(", ")}.` : "Saved without field changes."
-}
-
-function compareTxns(a: Transaction, b: Transaction, key: SortKey, dir: SortDir) {
-  const multiplier = dir === "asc" ? 1 : -1
-  const result =
-    key === "amount"
-      ? Math.abs(Number(a.amount)) - Math.abs(Number(b.amount))
-      : textValue(a, key).localeCompare(textValue(b, key), undefined, { numeric: true })
-  return result * multiplier
-}
-
-function textValue(txn: Transaction, key: Exclude<SortKey, "amount">) {
-  if (key === "date") return txn.transactionDate ?? txn.createdAt
-  if (key === "category") return categoryLabel(txn.category)
-  return txn[key] ?? ""
 }
 
 function SortButton(props: {
