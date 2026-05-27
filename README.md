@@ -93,4 +93,4 @@ uses each app's tracked `.env.production` for public URLs and systemd `PORT`.
 
 - **SSO**: cookie set with `Domain=.arkinstitutebc.com` → log in once, all 7 portals work
 - **Auth**: each app's `+Layout.tsx` wraps with `<AuthGate>` → 401 redirects to `portal.arkinstitutebc.com/login`
-- Test logins + everything else: see workspace `STATUS.md`
+- Test logins: production seeded users are listed in `ark-services/src/db/seed-prod.ts`; ask Matt for current passwords.

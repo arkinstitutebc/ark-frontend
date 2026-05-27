@@ -4,7 +4,7 @@
 
 ## Pages
 
-`/` overview, `/banks`, `/transfers`, `/transfers/create`, `/disbursements`, `/disbursements/create` (4-axis classification + smart defaults from GL catalog), `/pnl`, `/income-statement` (segmented), `/gl-accounts` (admin), `/settings` (finance configuration), `/reimbursements`, `/reimbursements/create`, `/reimbursements/:id`, `/reimbursements/:id/edit` (pending-only), `/reimbursements/approvals`, `/tutorials`
+`/` overview, `/banks`, `/transfers`, `/transfers/create`, `/disbursements`, `/disbursements/create` (4-axis classification + smart defaults from GL catalog), `/pnl`, `/income-statement` (segmented), `/gl-accounts` (admin), `/settings` (profit centers, training offerings, classification rules, recent settings activity), `/reimbursements`, `/reimbursements/create`, `/reimbursements/:id`, `/reimbursements/:id/edit` (pending-only), `/reimbursements/approvals`, `/tutorials`
 
 ## Dev
 
