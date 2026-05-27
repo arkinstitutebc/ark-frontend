@@ -22,7 +22,7 @@ jobs:
       # Cache bun's global install cache + workspace node_modules. Speeds up
       # the install step from ~30s to a few seconds on hits, which gates
       # downstream lint + typecheck.
-      - uses: actions/cache@v4
+      - uses: actions/cache@v5
         with:
           path: |
             ~/.bun/install/cache
@@ -42,9 +42,13 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     steps:
-      - uses: webfactory/ssh-agent@v0.9.1
-        with:
-          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+      - name: configure ssh key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
       - name: pull, path-filter build, restart
         run: |
           ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null \
