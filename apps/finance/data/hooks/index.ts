@@ -1,5 +1,7 @@
 export {
   type ClassificationRuleSetting,
+  type CreateProfitCenterInput,
+  type CreateTrainingOfferingInput,
   type ProfitCenterSetting,
   type TrainingOfferingSetting,
   useClassificationRules,
