@@ -1,10 +1,7 @@
 import {
   BackLink,
   categoryToneClass,
-  formatAccountingTreatment,
-  formatCostType,
   formatDatePH,
-  formatExpenseCategory,
   formatPeso,
   InfoCard,
   PageContainer,
@@ -84,21 +81,6 @@ export default function PrDetailPage() {
               />
               <InfoCard label="Created By" value={p.createdBy} />
             </div>
-
-            <Show when={p.expenseCategory || p.profitCenter || p.accountingTreatment || p.costType}>
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <InfoCard
-                  label="Expense Category"
-                  value={formatExpenseCategory(p.expenseCategory)}
-                />
-                <InfoCard label="Profit Center" value={p.profitCenter ?? "—"} />
-                <InfoCard
-                  label="Accounting Treatment"
-                  value={formatAccountingTreatment(p.accountingTreatment)}
-                />
-                <InfoCard label="Cost Type" value={formatCostType(p.costType)} />
-              </div>
-            </Show>
 
             <div class="bg-surface rounded-lg border border-border mb-8">
               <div class="px-6 py-4 border-b border-border">

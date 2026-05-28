@@ -22,7 +22,7 @@ export const procurementTutorial: {
   checklist: [
     "The request is tied to the correct batch and budget.",
     "Items, unit prices, and totals match the supplier quote or working canvass.",
-    "Expense Category, Profit Center, Accounting Treatment, and Cost Type are set before approval.",
+    "Purpose, date needed, attachments, and category are complete before approval.",
   ],
   actions: [
     { label: "Open Requests", href: "/pr" },
@@ -91,8 +91,8 @@ export const procurementTutorial: {
           <ol class="list-decimal pl-5 space-y-1.5">
             <li>
               <b>Coordinator queue</b>: PRs in <b>pending</b> status. The coordinator reviews items
-              + classification, then sends up or sends back. Same-actor guard means the requestor
-              can't review their own PR.
+              and supporting details, then sends up or sends back. Same-actor guard means the
+              requestor can't review their own PR.
             </li>
             <li>
               <b>Management queue</b>: PRs after coordinator review. Management approves (notes
@@ -102,18 +102,6 @@ export const procurementTutorial: {
             <li>The fully-approved PR is now ready to become a PO.</li>
           </ol>
         </>
-      ),
-    },
-    {
-      id: "classifications",
-      title: "4-axis accounting classification",
-      body: (
-        <p>
-          Every PR carries four accounting axes — <b>Expense Category</b>, <b>Profit Center</b>,{" "}
-          <b>Accounting Treatment</b>, <b>Cost Type</b>. These flow downstream into the segmented
-          income statement and the asset register. Set them once when creating the PR; the rest of
-          the chain reads them automatically.
-        </p>
       ),
     },
     {

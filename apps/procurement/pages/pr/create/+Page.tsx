@@ -2,21 +2,8 @@ import { AttachmentUploader, BackLink, formatPeso, Icons, PageContainer, Select 
 import { api } from "@data/api"
 import { useCategories, useCreatePr } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
-import {
-  accountingTreatmentOptions,
-  costTypeOptions,
-  createPrSchema,
-  expenseCategoryOptions,
-  profitCenterOptions,
-} from "@data/schemas"
-import type {
-  AccountingTreatment,
-  Batch,
-  CostType,
-  ExpenseCategory,
-  PrAttachment,
-  ProfitCenter,
-} from "@data/types"
+import { createPrSchema } from "@data/schemas"
+import type { Batch, PrAttachment } from "@data/types"
 import { validateForm } from "@data/validate"
 import { createQuery } from "@tanstack/solid-query"
 import { createMemo, createSignal, Index, Show } from "solid-js"
@@ -33,37 +20,7 @@ interface PrItemInput {
   remarks?: string
 }
 
-interface ProfitCenterSetting {
-  code: string
-  label: string
-  sortOrder: number
-  active: boolean
-}
-
 const units = ["pcs", "units", "sets", "pairs", "boxes", "kg", "liters", "hours", "days", "months"]
-
-const expenseCategoryLabels: Record<ExpenseCategory, string> = {
-  "cost-of-services": "Cost of Services",
-  "admin-expense": "Admin Expense",
-  "fixed-asset": "Fixed Asset",
-}
-const profitCenterLabels: Record<ProfitCenter, string> = {
-  JDVP: "JDVP",
-  "TWSP-FBS": "TWSP-FBS",
-  "TWSP-HSK": "TWSP-HSK",
-  Admin: "Admin",
-}
-const accountingTreatmentLabels: Record<AccountingTreatment, string> = {
-  variable: "Variable",
-  "traceable-fixed": "Traceable Fixed",
-  "common-overhead": "Common / Overhead",
-  capital: "Capital",
-}
-const costTypeLabels: Record<CostType, string> = {
-  "FBS-variable": "FBS Variable",
-  "HSK-variable": "HSK Variable",
-  common: "Common",
-}
 
 export default function CreatePrPage() {
   const batchesQuery = createQuery(() => ({
@@ -71,11 +28,6 @@ export default function CreatePrPage() {
     queryFn: () => api<Batch[]>("/api/training/batches"),
   }))
   const categoriesQuery = useCategories()
-  const profitCentersQuery = createQuery(() => ({
-    queryKey: ["finance-settings", "profit-centers", { includeInactive: false }] as const,
-    queryFn: () =>
-      api<ProfitCenterSetting[]>("/api/finance/settings/profit-centers?includeInactive=false"),
-  }))
   const createPrMutation = useCreatePr()
 
   const [errors, setErrors] = createSignal<Record<string, string>>({})
@@ -83,10 +35,6 @@ export default function CreatePrPage() {
   const [category, setCategory] = createSignal("")
   const [purpose, setPurpose] = createSignal("")
   const [dateNeeded, setDateNeeded] = createSignal("")
-  const [expenseCategory, setExpenseCategory] = createSignal<ExpenseCategory | "">("")
-  const [profitCenter, setProfitCenter] = createSignal("")
-  const [accountingTreatment, setAccountingTreatment] = createSignal<AccountingTreatment | "">("")
-  const [costType, setCostType] = createSignal<CostType | "">("")
   const [showManageCategories, setShowManageCategories] = createSignal(false)
   const [items, setItems] = createSignal<PrItemInput[]>([
     { id: "1", name: "", quantity: 1, unit: "pcs", unitPrice: 0 },
@@ -137,10 +85,6 @@ export default function CreatePrPage() {
       category: category(),
       purpose: purpose(),
       dateNeeded: dateNeeded(),
-      expenseCategory: expenseCategory(),
-      profitCenter: profitCenter(),
-      accountingTreatment: accountingTreatment(),
-      costType: costType(),
       items:
         validItems.length > 0
           ? validItems
@@ -180,10 +124,6 @@ export default function CreatePrPage() {
         category: category(),
         purpose: purpose(),
         dateNeeded: dateNeeded(),
-        expenseCategory: expenseCategory() as ExpenseCategory,
-        profitCenter: profitCenter(),
-        accountingTreatment: accountingTreatment() as AccountingTreatment,
-        costType: costType() as CostType,
         items: prItems,
         attachments: attachments().length > 0 ? attachments() : undefined,
         totalAmount: String(totalAmount()),
@@ -206,20 +146,6 @@ export default function CreatePrPage() {
   const categoryOptions = createMemo(() =>
     (categoriesQuery.data ?? []).map(c => ({ label: c.name, value: c.name }))
   )
-  const profitCenterSelectOptions = createMemo(() => {
-    const liveCenters = (profitCentersQuery.data ?? [])
-      .filter(center => center.active)
-      .sort((a, b) => a.sortOrder - b.sortOrder || a.label.localeCompare(b.label))
-
-    if (liveCenters.length > 0) {
-      return liveCenters.map(center => ({ label: center.label, value: center.code }))
-    }
-
-    return profitCenterOptions.map(v => ({
-      label: profitCenterLabels[v],
-      value: v,
-    }))
-  })
   const unitOptions = createMemo(() => units.map(u => ({ label: u, value: u })))
 
   return (
@@ -342,88 +268,6 @@ export default function CreatePrPage() {
                   />
                   <Show when={errors().purpose}>
                     <p class="text-xs text-red-600 mt-1">{errors().purpose}</p>
-                  </Show>
-                </div>
-              </div>
-            </div>
-
-            <div class="bg-surface rounded-lg border border-border p-6">
-              <h2 class="text-lg font-semibold text-foreground mb-1">Accounting Classification</h2>
-              <p class="text-xs text-muted mb-4">
-                Used by finance for the segmented income statement and asset tracking.
-              </p>
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <span class="block text-sm font-medium text-foreground mb-1">
-                    Expense Category <span class="text-red-500">*</span>
-                  </span>
-                  <Select
-                    options={expenseCategoryOptions.map(v => ({
-                      label: expenseCategoryLabels[v],
-                      value: v,
-                    }))}
-                    value={expenseCategory() || undefined}
-                    onChange={v => setExpenseCategory(v as ExpenseCategory)}
-                    placeholder="Select expense category"
-                    ariaLabel="Expense Category"
-                  />
-                  <Show when={errors().expenseCategory}>
-                    <p class="text-xs text-red-600 mt-1">{errors().expenseCategory}</p>
-                  </Show>
-                </div>
-
-                <div>
-                  <span class="block text-sm font-medium text-foreground mb-1">
-                    Profit Center <span class="text-red-500">*</span>
-                  </span>
-                  <Select
-                    options={profitCenterSelectOptions()}
-                    value={profitCenter() || undefined}
-                    onChange={v => setProfitCenter(v)}
-                    placeholder="Select profit center"
-                    ariaLabel="Profit Center"
-                  />
-                  <Show when={errors().profitCenter}>
-                    <p class="text-xs text-red-600 mt-1">{errors().profitCenter}</p>
-                  </Show>
-                </div>
-
-                <div>
-                  <span class="block text-sm font-medium text-foreground mb-1">
-                    Accounting Treatment <span class="text-red-500">*</span>
-                  </span>
-                  <Select
-                    options={accountingTreatmentOptions.map(v => ({
-                      label: accountingTreatmentLabels[v],
-                      value: v,
-                    }))}
-                    value={accountingTreatment() || undefined}
-                    onChange={v => setAccountingTreatment(v as AccountingTreatment)}
-                    placeholder="Select treatment"
-                    ariaLabel="Accounting Treatment"
-                  />
-                  <Show when={errors().accountingTreatment}>
-                    <p class="text-xs text-red-600 mt-1">{errors().accountingTreatment}</p>
-                  </Show>
-                </div>
-
-                <div>
-                  <span class="block text-sm font-medium text-foreground mb-1">
-                    Cost Type <span class="text-red-500">*</span>
-                  </span>
-                  <Select
-                    options={costTypeOptions.map(v => ({
-                      label: costTypeLabels[v],
-                      value: v,
-                    }))}
-                    value={costType() || undefined}
-                    onChange={v => setCostType(v as CostType)}
-                    placeholder="Select cost type"
-                    ariaLabel="Cost Type"
-                  />
-                  <Show when={errors().costType}>
-                    <p class="text-xs text-red-600 mt-1">{errors().costType}</p>
                   </Show>
                 </div>
               </div>

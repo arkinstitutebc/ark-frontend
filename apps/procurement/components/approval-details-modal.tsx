@@ -1,13 +1,4 @@
-import {
-  categoryToneClass,
-  formatAccountingTreatment,
-  formatCostType,
-  formatDatePH,
-  formatExpenseCategory,
-  formatPeso,
-  Modal,
-  StatusBadge,
-} from "@ark/ui"
+import { categoryToneClass, formatDatePH, formatPeso, Modal, StatusBadge } from "@ark/ui"
 import type { PurchaseRequest } from "@data/types"
 import { createSignal, Show } from "solid-js"
 
@@ -131,56 +122,16 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
                 </div>
               </div>
 
-              <Show
-                when={
-                  pr().expenseCategory ||
-                  pr().profitCenter ||
-                  pr().accountingTreatment ||
-                  pr().costType ||
-                  pr().dateNeeded
-                }
-              >
+              <Show when={pr().dateNeeded}>
                 <div>
-                  <p class="text-xs text-muted mb-2">Accounting Classification</p>
+                  <p class="text-xs text-muted mb-2">Timeline</p>
                   <div class="grid grid-cols-2 gap-3">
-                    <Show when={pr().dateNeeded}>
-                      <div class="bg-surface-muted rounded-lg px-4 py-3">
-                        <p class="text-xs text-muted mb-1">Date Needed</p>
-                        <p class="text-sm font-medium text-foreground">
-                          {formatDatePH(pr().dateNeeded ?? "")}
-                        </p>
-                      </div>
-                    </Show>
-                    <Show when={pr().expenseCategory}>
-                      <div class="bg-surface-muted rounded-lg px-4 py-3">
-                        <p class="text-xs text-muted mb-1">Expense Category</p>
-                        <p class="text-sm font-medium text-foreground">
-                          {formatExpenseCategory(pr().expenseCategory)}
-                        </p>
-                      </div>
-                    </Show>
-                    <Show when={pr().profitCenter}>
-                      <div class="bg-surface-muted rounded-lg px-4 py-3">
-                        <p class="text-xs text-muted mb-1">Profit Center</p>
-                        <p class="text-sm font-medium text-foreground">{pr().profitCenter}</p>
-                      </div>
-                    </Show>
-                    <Show when={pr().accountingTreatment}>
-                      <div class="bg-surface-muted rounded-lg px-4 py-3">
-                        <p class="text-xs text-muted mb-1">Accounting Treatment</p>
-                        <p class="text-sm font-medium text-foreground">
-                          {formatAccountingTreatment(pr().accountingTreatment)}
-                        </p>
-                      </div>
-                    </Show>
-                    <Show when={pr().costType}>
-                      <div class="bg-surface-muted rounded-lg px-4 py-3">
-                        <p class="text-xs text-muted mb-1">Cost Type</p>
-                        <p class="text-sm font-medium text-foreground">
-                          {formatCostType(pr().costType)}
-                        </p>
-                      </div>
-                    </Show>
+                    <div class="bg-surface-muted rounded-lg px-4 py-3">
+                      <p class="text-xs text-muted mb-1">Date Needed</p>
+                      <p class="text-sm font-medium text-foreground">
+                        {formatDatePH(pr().dateNeeded ?? "")}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </Show>

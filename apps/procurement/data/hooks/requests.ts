@@ -2,15 +2,7 @@ import { createCrudHooks, toast } from "@ark/ui"
 import { createMutation, createQuery, useQueryClient } from "@tanstack/solid-query"
 import { api } from "../api"
 import { queryKeys } from "../query-keys"
-import type {
-  AccountingTreatment,
-  CostType,
-  ExpenseCategory,
-  PrAttachment,
-  PrItem,
-  PrStatus,
-  PurchaseRequest,
-} from "../types"
+import type { PrAttachment, PrItem, PrStatus, PurchaseRequest } from "../types"
 
 // `prCode` no longer accepted from the client — backend generates `PR-YYYY-NNNNN`.
 interface CreatePrInput {
@@ -20,10 +12,6 @@ interface CreatePrInput {
   category: string
   purpose: string
   dateNeeded: string
-  expenseCategory: ExpenseCategory
-  profitCenter: string
-  accountingTreatment: AccountingTreatment
-  costType: CostType
   items: PrItem[]
   attachments?: PrAttachment[]
   totalAmount: string
@@ -37,10 +25,6 @@ interface UpdatePrInput {
   category?: string
   purpose?: string
   dateNeeded?: string
-  expenseCategory?: ExpenseCategory
-  profitCenter?: string
-  accountingTreatment?: AccountingTreatment
-  costType?: CostType
   items?: PrItem[]
   attachments?: PrAttachment[]
   totalAmount?: string
