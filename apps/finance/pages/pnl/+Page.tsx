@@ -1,5 +1,6 @@
 import { DataTable, formatPeso, PageContainer, PageHeader, THead, Th, Tr } from "@ark/ui"
 import { type PnlReport, usePnl } from "@data/hooks"
+import type { Cell } from "exceljs"
 import { createSignal, For, Show } from "solid-js"
 import { currentMonthValue, MonthStepper } from "@/components/finance/report-controls"
 import { Icons, QueryBoundary } from "@/components/ui"
@@ -62,7 +63,7 @@ export default function PnlPage() {
       "Ratio",
     ])
     headerRow.font = { bold: true }
-    headerRow.eachCell(cell => {
+    headerRow.eachCell((cell: Cell) => {
       cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: "FFF3F4F6" } }
     })
 
