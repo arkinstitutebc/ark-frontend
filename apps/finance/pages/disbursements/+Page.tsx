@@ -30,6 +30,19 @@ type SortKey = "date" | "payee" | "description" | "category" | "amount"
 type SortDir = "asc" | "desc"
 const PAGE_SIZE = 20
 
+const ACCOUNTING_TREATMENT_LABELS: Record<string, string> = {
+  variable: "Variable",
+  "traceable-fixed": "Traceable fixed",
+  "common-overhead": "Common / admin",
+  capital: "Capital",
+}
+
+const COST_TYPE_LABELS: Record<string, string> = {
+  "FBS-variable": "FBS",
+  "HSK-variable": "HSK",
+  common: "Common",
+}
+
 export default function DisbursementsPage() {
   const [search, setSearch] = createSignal("")
   const [categoryFilter, setCategoryFilter] = createSignal<TxnCategory | "all">("all")
@@ -109,7 +122,7 @@ export default function DisbursementsPage() {
   }
 
   return (
-    <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
+    <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-[1600px] mx-auto">
       <PageHeader
         title="Disbursements"
         subtitle="Cash disbursements and operational expenses"
@@ -142,8 +155,14 @@ export default function DisbursementsPage() {
 
       <QueryBoundary query={query}>
         {data => {
-          const rows = createMemo(() => data.items)
+          const rows = createMemo(() => data.items.slice(0, PAGE_SIZE))
           const totalPages = createMemo(() => Math.max(1, Math.ceil(data.total / PAGE_SIZE)))
+          const showingFrom = createMemo(() =>
+            data.total === 0 ? 0 : (page() - 1) * PAGE_SIZE + 1
+          )
+          const showingTo = createMemo(() =>
+            Math.min((page() - 1) * PAGE_SIZE + rows().length, data.total)
+          )
           return (
             <div class="bg-surface rounded-lg border border-border overflow-hidden">
               <div class="px-5 py-4 border-b border-border space-y-3">
@@ -192,9 +211,9 @@ export default function DisbursementsPage() {
                     </p>
                   }
                 >
-                  <DataTable>
+                  <DataTable class="max-h-[560px] overflow-auto">
                     <THead>
-                      <Th>
+                      <Th class="min-w-[110px] sticky top-0 z-10 bg-surface-muted">
                         <SortButton
                           label="Date"
                           active={sortKey() === "date"}
@@ -202,7 +221,7 @@ export default function DisbursementsPage() {
                           onClick={() => setSort("date")}
                         />
                       </Th>
-                      <Th>
+                      <Th class="min-w-[180px] sticky top-0 z-10 bg-surface-muted">
                         <SortButton
                           label="Store / Company"
                           active={sortKey() === "payee"}
@@ -210,7 +229,7 @@ export default function DisbursementsPage() {
                           onClick={() => setSort("payee")}
                         />
                       </Th>
-                      <Th>
+                      <Th class="min-w-[300px] sticky top-0 z-10 bg-surface-muted">
                         <SortButton
                           label="Description"
                           active={sortKey() === "description"}
@@ -218,7 +237,7 @@ export default function DisbursementsPage() {
                           onClick={() => setSort("description")}
                         />
                       </Th>
-                      <Th>
+                      <Th class="min-w-[220px] sticky top-0 z-10 bg-surface-muted">
                         <SortButton
                           label="Category"
                           active={sortKey() === "category"}
@@ -226,7 +245,12 @@ export default function DisbursementsPage() {
                           onClick={() => setSort("category")}
                         />
                       </Th>
-                      <Th align="right">
+                      <Th class="min-w-[130px] sticky top-0 z-10 bg-surface-muted">For</Th>
+                      <Th class="min-w-[180px] sticky top-0 z-10 bg-surface-muted">Treatment</Th>
+                      <Th class="min-w-[190px] sticky top-0 z-10 bg-surface-muted">Created By</Th>
+                      <Th class="min-w-[160px] sticky top-0 z-10 bg-surface-muted">Created At</Th>
+                      <Th class="min-w-[180px] sticky top-0 z-10 bg-surface-muted">Updated At</Th>
+                      <Th align="right" class="min-w-[140px] sticky top-0 z-10 bg-surface-muted">
                         <SortButton
                           label="Amount"
                           active={sortKey() === "amount"}
@@ -257,6 +281,35 @@ export default function DisbursementsPage() {
                                 </Show>
                               </div>
                             </td>
+                            <td class="py-3 px-6 text-sm text-foreground whitespace-nowrap">
+                              {txn.profitCenter ?? "—"}
+                            </td>
+                            <td class="py-3 px-6 text-sm text-foreground">
+                              <div class="flex flex-wrap gap-2">
+                                <Show
+                                  when={txn.accountingTreatment}
+                                  fallback={<span class="text-muted">—</span>}
+                                >
+                                  {treatment => (
+                                    <StatusBadge status={accountingTreatmentLabel(treatment())} />
+                                  )}
+                                </Show>
+                                <Show when={txn.costType}>
+                                  {costType => <StatusBadge status={costTypeLabel(costType())} />}
+                                </Show>
+                              </div>
+                            </td>
+                            <td class="py-3 px-6 text-sm text-muted whitespace-nowrap">
+                              {txn.createdBy ?? "—"}
+                            </td>
+                            <td class="py-3 px-6 text-sm text-muted whitespace-nowrap">
+                              {formatDatePH(txn.createdAt)}
+                            </td>
+                            <td class="py-3 px-6 text-sm text-muted whitespace-nowrap">
+                              {txn.metadata?.updatedAt
+                                ? formatDateTimePH(txn.metadata.updatedAt)
+                                : "—"}
+                            </td>
                             <td class="py-3 px-6 text-right text-sm font-semibold text-red-700 tabular-nums whitespace-nowrap">
                               {formatPeso(Math.abs(Number(txn.amount)))}
                             </td>
@@ -267,8 +320,7 @@ export default function DisbursementsPage() {
                   </DataTable>
                   <div class="px-5 py-3 border-t border-border flex items-center justify-between gap-3">
                     <p class="text-xs text-muted">
-                      Showing {(page() - 1) * PAGE_SIZE + 1}-
-                      {Math.min(page() * PAGE_SIZE, data.total)} of {data.total}
+                      Showing {showingFrom()}-{showingTo()} of {data.total}
                     </p>
                     <div class="flex items-center gap-2">
                       <button
@@ -323,6 +375,15 @@ export default function DisbursementsPage() {
 function categoryLabel(category?: string) {
   if (!category) return "Other"
   return GL_CATALOG[category as TxnCategory]?.label ?? category.replace(/_/g, " ")
+}
+
+function accountingTreatmentLabel(value?: string) {
+  if (!value) return "—"
+  return ACCOUNTING_TREATMENT_LABELS[value] ?? value.replace(/-/g, " ")
+}
+
+function costTypeLabel(value: string) {
+  return COST_TYPE_LABELS[value] ?? value.replace(/-/g, " ")
 }
 
 function formatDateTimePH(date: string | undefined | null) {

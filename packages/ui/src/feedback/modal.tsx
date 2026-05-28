@@ -1,5 +1,5 @@
 import type { JSX } from "solid-js"
-import { Show } from "solid-js"
+import { createEffect, createUniqueId, onCleanup, Show } from "solid-js"
 import { Portal } from "solid-js/web"
 import { Icons } from "../icons"
 
@@ -17,7 +17,11 @@ const SIZE_CLASS: Record<NonNullable<ModalProps["size"]>, string> = {
   xl: "max-w-4xl",
 }
 
+const modalStack: string[] = []
+
 export function Modal(props: ModalProps) {
+  const id = createUniqueId()
+
   const handleBackdropClick = (e: MouseEvent) => {
     if (e.target === e.currentTarget) {
       props.onClose()
@@ -25,6 +29,20 @@ export function Modal(props: ModalProps) {
   }
 
   const sizeClass = () => SIZE_CLASS[props.size ?? "lg"]
+
+  createEffect(() => {
+    if (!props.open) return
+    modalStack.push(id)
+    const closeOnEscape = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && modalStack.at(-1) === id) props.onClose()
+    }
+    document.addEventListener("keydown", closeOnEscape)
+    onCleanup(() => {
+      document.removeEventListener("keydown", closeOnEscape)
+      const index = modalStack.lastIndexOf(id)
+      if (index >= 0) modalStack.splice(index, 1)
+    })
+  })
 
   return (
     <Show when={props.open}>
