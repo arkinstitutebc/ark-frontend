@@ -43,8 +43,8 @@ export default function PnlPage() {
     const data = pnlQuery.data
     if (!data) return
 
-    const { Workbook } = await import("exceljs")
-    const wb = new Workbook()
+    const ExcelJS = await import("exceljs/dist/exceljs.min.js")
+    const wb = new ExcelJS.Workbook()
     const ws = wb.addWorksheet(`P&L ${data.month}`)
 
     const batchIds = data.batches.map(b => b.id)
