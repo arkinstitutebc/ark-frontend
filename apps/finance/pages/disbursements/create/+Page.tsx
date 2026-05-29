@@ -27,6 +27,7 @@ import {
   createDisbursementSchema,
   expenseCategoryOptions,
   profitCenterOptions,
+  txnCategoryOptions,
 } from "@data/schemas"
 import { validateForm } from "@data/validate"
 import { createEffect, createMemo, createSignal, onCleanup, onMount, Show } from "solid-js"
@@ -68,6 +69,9 @@ const validAccountingTreatment = (value?: string | null): value is AccountingTre
 
 const validCostType = (value?: string | null): value is CostType =>
   !!value && costTypeOptions.includes(value as CostType)
+
+const validTxnCategory = (value?: string | null): value is TxnCategory =>
+  !!value && txnCategoryOptions.includes(value as TxnCategory)
 
 export default function CreateDisbursementPage() {
   const [errors, setErrors] = createSignal<Record<string, string>>({})
@@ -163,7 +167,9 @@ export default function CreateDisbursementPage() {
 
   const categoryOptions = createMemo<SelectOption<string>[]>(() => {
     const liveAccounts = (glAccountsQuery.data ?? [])
-      .filter(account => account.active && account.section !== "revenue")
+      .filter(
+        account => account.active && account.section !== "revenue" && validTxnCategory(account.code)
+      )
       .sort((a, b) => a.sortOrder - b.sortOrder || a.label.localeCompare(b.label))
 
     if (liveAccounts.length > 0) {
