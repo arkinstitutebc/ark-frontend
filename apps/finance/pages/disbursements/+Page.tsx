@@ -3,12 +3,12 @@ import { categoryOptionsBySection } from "@data/gl-defaults"
 import { useBankBalance, useDeleteDisbursement, useDisbursements } from "@data/hooks"
 import type { Transaction, TxnCategory } from "@data/types"
 import { createEffect, createMemo, createSignal, Show } from "solid-js"
-import { DisbursementDetailsModal } from "@/components/finance/disbursement-details-modal"
 import {
+  DisbursementDetailsModal,
   type DisbursementSortDir,
   type DisbursementSortKey,
   DisbursementTable,
-} from "@/components/finance/disbursement-table"
+} from "@/components/finance"
 import { Icons, QueryBoundary } from "@/components/ui"
 
 const PAGE_SIZE = 20
