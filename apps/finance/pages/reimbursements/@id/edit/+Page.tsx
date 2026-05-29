@@ -3,7 +3,6 @@ import type {
   CostType,
   ExpenseCategory,
   PrAttachment,
-  ProfitCenter,
   RrItem,
   RrSupportingDocs,
 } from "@ark/data-types"
@@ -37,12 +36,6 @@ const expenseCategoryLabels: Record<ExpenseCategory, string> = {
   "cost-of-services": "Cost of Services",
   "admin-expense": "Admin Expense",
   "fixed-asset": "Fixed Asset",
-}
-const profitCenterLabels: Record<ProfitCenter, string> = {
-  JDVP: "JDVP",
-  "TWSP-FBS": "TWSP-FBS",
-  "TWSP-HSK": "TWSP-HSK",
-  Admin: "Admin",
 }
 const accountingTreatmentLabels: Record<AccountingTreatment, string> = {
   variable: "Variable",
@@ -155,7 +148,7 @@ export default function EditRrPage() {
     }
 
     return profitCenterOptions.map(v => ({
-      label: profitCenterLabels[v],
+      label: v === "Admin" ? "Admin / Shared" : v,
       value: v,
     }))
   })

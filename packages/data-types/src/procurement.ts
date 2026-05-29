@@ -1,9 +1,19 @@
 export type PrStatus = "pending" | "under_review" | "approved" | "rejected" | "ordered"
 
-// Accounting classification — kept in sync with the Zod enums in
-// ark-services/src/types/procurement.ts.
+// Accounting classification — kept in sync with ark-services/src/types/classifications.ts.
 export type ExpenseCategory = "cost-of-services" | "admin-expense" | "fixed-asset"
-export type ProfitCenter = "JDVP" | "TWSP-FBS" | "TWSP-HSK" | "Admin"
+export type ProfitCenter =
+  | "JDVP"
+  | "JDVP-NIR"
+  | "JDVP-HNHS"
+  | "JDVP-NOHS"
+  | "JDVP-EBMNHS"
+  | "JDVP-LCHS"
+  | "TWSP"
+  | "TWSP-FBS"
+  | "TWSP-HSK"
+  | "BPP"
+  | "Admin"
 export type AccountingTreatment = "variable" | "traceable-fixed" | "common-overhead" | "capital"
 export type CostType = "FBS-variable" | "HSK-variable" | "common"
 

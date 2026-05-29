@@ -1,6 +1,6 @@
 import { formatDatePH, formatPeso, Modal, ModalFooter, Select } from "@ark/ui"
 import { categoryOptionsBySection, glDefault } from "@data/gl-defaults"
-import { useDisbursementAudit, useUpdateDisbursement } from "@data/hooks"
+import { useDisbursementAudit, useProfitCenters, useUpdateDisbursement } from "@data/hooks"
 import { profitCenterOptions, updateDisbursementSchema } from "@data/schemas"
 import type { Transaction, TransactionAuditEvent, TxnCategory } from "@data/types"
 import { validateForm } from "@data/validate"
@@ -22,6 +22,7 @@ interface DisbursementDetailsModalProps {
 export function DisbursementDetailsModal(props: DisbursementDetailsModalProps) {
   const updateDisbursement = useUpdateDisbursement()
   const auditQuery = useDisbursementAudit(() => props.txn?.id)
+  const profitCentersQuery = useProfitCenters(() => ({ includeInactive: false }))
   const [mode, setMode] = createSignal<"view" | "edit">("view")
   const [errors, setErrors] = createSignal<Record<string, string>>({})
   const [transactionDate, setTransactionDate] = createSignal("")
@@ -42,6 +43,20 @@ export function DisbursementDetailsModal(props: DisbursementDetailsModalProps) {
       ...group.options,
     ])
   )
+  const profitCenterSelectOptions = createMemo(() => {
+    const liveCenters = (profitCentersQuery.data ?? [])
+      .filter(center => center.active)
+      .sort((a, b) => a.sortOrder - b.sortOrder || a.label.localeCompare(b.label))
+
+    if (liveCenters.length > 0) {
+      return liveCenters.map(center => ({ label: center.label, value: center.code }))
+    }
+
+    return profitCenterOptions.map(value => ({
+      label: value === "Admin" ? "Admin / Shared" : value,
+      value,
+    }))
+  })
 
   createEffect(() => {
     const current = props.txn
@@ -131,6 +146,7 @@ export function DisbursementDetailsModal(props: DisbursementDetailsModalProps) {
                   description={description()}
                   needsReview={needsReview()}
                   categoryOptions={categoryOptions()}
+                  profitCenterOptions={profitCenterSelectOptions()}
                   submitting={updateDisbursement.isPending}
                   onTransactionDate={setTransactionDate}
                   onAmount={setAmount}
@@ -173,6 +189,7 @@ function DisbursementEditForm(props: {
   description: string
   needsReview: boolean
   categoryOptions: Array<{ label: string; value: string; disabled?: boolean }>
+  profitCenterOptions: Array<{ label: string; value: string }>
   submitting: boolean
   onTransactionDate: (value: string) => void
   onAmount: (value: string) => void
@@ -234,7 +251,7 @@ function DisbursementEditForm(props: {
           <Select
             value={props.profitCenter}
             onChange={props.onProfitCenter}
-            options={profitCenterOptions.map(value => ({ label: value, value }))}
+            options={props.profitCenterOptions}
             ariaLabel="For"
           />
         </Field>

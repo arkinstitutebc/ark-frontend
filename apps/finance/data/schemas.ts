@@ -1,7 +1,19 @@
 import { z } from "zod"
 
 export const expenseCategoryOptions = ["cost-of-services", "admin-expense", "fixed-asset"] as const
-export const profitCenterOptions = ["JDVP", "TWSP-FBS", "TWSP-HSK", "Admin"] as const
+export const profitCenterOptions = [
+  "JDVP",
+  "JDVP-NIR",
+  "JDVP-HNHS",
+  "JDVP-NOHS",
+  "JDVP-EBMNHS",
+  "JDVP-LCHS",
+  "TWSP",
+  "TWSP-FBS",
+  "TWSP-HSK",
+  "BPP",
+  "Admin",
+] as const
 export const accountingTreatmentOptions = [
   "variable",
   "traceable-fixed",

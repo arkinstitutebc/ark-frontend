@@ -3,7 +3,6 @@ import type {
   CostType,
   ExpenseCategory,
   GlAccountSection,
-  ProfitCenter,
   TxnCategory,
 } from "@ark/data-types"
 import { BackLink, formatPeso, Select, type SelectOption } from "@ark/ui"
@@ -32,13 +31,6 @@ import {
 import { validateForm } from "@data/validate"
 import { createEffect, createMemo, createSignal, onCleanup, onMount, Show } from "solid-js"
 
-const profitCenterLabels: Record<ProfitCenter, string> = {
-  JDVP: "JDVP",
-  "TWSP-FBS": "TWSP-FBS",
-  "TWSP-HSK": "TWSP-HSK",
-  Admin: "Admin",
-}
-
 const PREVIOUS_DISBURSEMENT_KEY = "ark-finance-previous-disbursement"
 const DRAFT_DISBURSEMENT_KEY = "ark-finance-disbursement-draft"
 
@@ -57,7 +49,7 @@ interface PreviousDisbursementForm {
 }
 
 const fallbackProfitCenterOptions = profitCenterOptions.map(v => ({
-  label: profitCenterLabels[v],
+  label: v === "Admin" ? "Admin / Shared" : v,
   value: v,
 }))
 
