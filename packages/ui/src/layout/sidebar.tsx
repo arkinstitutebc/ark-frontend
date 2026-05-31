@@ -44,6 +44,7 @@ export function Sidebar(props: SidebarProps) {
   const { collapsed, toggleCollapsed, mobileOpen, setMobileOpen } = useSidebar()
   const currentPath = createMemo(() => pageContext.urlPathname)
   const portalUrl = () => props.mainPortalUrl ?? DEFAULT_PORTAL_URL
+  const compact = () => collapsed() && !mobileOpen()
   const isActiveFn = (item: NavItem) => (props.isActive ?? defaultIsActive)(item, currentPath())
   const navSections = createMemo(() => {
     const groups: Array<{ label: string | null; items: NavItem[] }> = []
@@ -66,7 +67,7 @@ export function Sidebar(props: SidebarProps) {
         <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
           <props.brandIcon class="w-4.5 h-4.5 text-primary" />
         </div>
-        <Show when={!collapsed()}>
+        <Show when={!compact()}>
           <div class="overflow-hidden">
             <p class="text-sm font-semibold text-foreground truncate">{props.brandTitle}</p>
             <Show when={props.brandSubtitle}>
@@ -76,12 +77,32 @@ export function Sidebar(props: SidebarProps) {
         </Show>
       </div>
 
+      {/* Portal switch */}
+      <div class="border-b border-border px-2 py-2 flex-shrink-0">
+        <a
+          href={portalUrl()}
+          class="group relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold text-muted hover:bg-surface-muted hover:text-foreground transition-colors"
+        >
+          <Home class="w-[18px] h-[18px] flex-shrink-0 text-muted group-hover:text-foreground" />
+          <Show when={!compact()}>
+            <span>Back to Portal</span>
+          </Show>
+          <Show when={compact()}>
+            <SidebarTooltip
+              label="Back to Portal"
+              eyebrow="Workspace"
+              description="Return to the main app launcher"
+            />
+          </Show>
+        </a>
+      </div>
+
       {/* Navigation */}
       <nav class="flex-1 px-2 py-3 overflow-y-auto">
         <For each={navSections()}>
           {section => (
             <div class="mb-3 last:mb-0">
-              <Show when={section.label && !collapsed()}>
+              <Show when={section.label && !compact()}>
                 <p class="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted/70">
                   {section.label}
                 </p>
@@ -101,10 +122,10 @@ export function Sidebar(props: SidebarProps) {
                       <item.icon
                         class={`w-[18px] h-[18px] flex-shrink-0 ${isActiveFn(item) ? "text-foreground" : "text-muted group-hover:text-foreground"}`}
                       />
-                      <Show when={!collapsed()}>
+                      <Show when={!compact()}>
                         <span>{item.label}</span>
                       </Show>
-                      <Show when={collapsed()}>
+                      <Show when={compact()}>
                         <SidebarTooltip label={item.label} eyebrow={item.section} />
                       </Show>
                     </a>
@@ -116,54 +137,39 @@ export function Sidebar(props: SidebarProps) {
         </For>
       </nav>
 
-      {/* Bottom section: portal switch + account actions */}
+      {/* Bottom section: account actions */}
       <div class="border-t border-border px-2 py-3 flex-shrink-0">
-        <a
-          href={portalUrl()}
-          class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-muted hover:bg-surface-muted hover:text-foreground transition-colors"
-        >
-          <Home class="w-[18px] h-[18px] flex-shrink-0 text-muted group-hover:text-foreground" />
-          <Show when={!collapsed()}>
-            <span>Main Portal</span>
-          </Show>
-          <Show when={collapsed()}>
-            <SidebarTooltip label="Main Portal" eyebrow="Switch" />
-          </Show>
-        </a>
-
-        <div class="mt-2 pt-2 border-t border-border/70">
-          {props.onLogout ? (
-            <button
-              type="button"
-              onClick={props.onLogout}
-              class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-accent hover:bg-surface-muted transition-colors w-full text-left"
-            >
-              <LogOut class="w-[18px] h-[18px] flex-shrink-0" />
-              <Show when={!collapsed()}>
-                <span>Logout</span>
-              </Show>
-              <Show when={collapsed()}>
-                <SidebarTooltip label="Logout" eyebrow="Account" />
-              </Show>
-            </button>
-          ) : (
-            <a
-              href={`${portalUrl()}/login`}
-              class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-accent hover:bg-surface-muted transition-colors"
-            >
-              <LogOut class="w-[18px] h-[18px] flex-shrink-0" />
-              <Show when={!collapsed()}>
-                <span>Logout</span>
-              </Show>
-              <Show when={collapsed()}>
-                <SidebarTooltip label="Logout" eyebrow="Account" />
-              </Show>
-            </a>
-          )}
-        </div>
+        {props.onLogout ? (
+          <button
+            type="button"
+            onClick={props.onLogout}
+            class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-accent hover:bg-surface-muted transition-colors w-full text-left"
+          >
+            <LogOut class="w-[18px] h-[18px] flex-shrink-0" />
+            <Show when={!compact()}>
+              <span>Logout</span>
+            </Show>
+            <Show when={compact()}>
+              <SidebarTooltip label="Logout" eyebrow="Account" />
+            </Show>
+          </button>
+        ) : (
+          <a
+            href={`${portalUrl()}/login`}
+            class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-accent hover:bg-surface-muted transition-colors"
+          >
+            <LogOut class="w-[18px] h-[18px] flex-shrink-0" />
+            <Show when={!compact()}>
+              <span>Logout</span>
+            </Show>
+            <Show when={compact()}>
+              <SidebarTooltip label="Logout" eyebrow="Account" />
+            </Show>
+          </a>
+        )}
 
         {/* Version chip — quietly anchored at the bottom of the sidebar */}
-        <Show when={!collapsed()}>
+        <Show when={!compact()}>
           <p class="px-3 pt-2 text-[10px] text-muted/70 tracking-wider uppercase">v{ARK_VERSION}</p>
         </Show>
       </div>
@@ -212,7 +218,7 @@ export function Sidebar(props: SidebarProps) {
   )
 }
 
-function SidebarTooltip(props: { label: string; eyebrow?: string }) {
+function SidebarTooltip(props: { label: string; eyebrow?: string; description?: string }) {
   return (
     <span class="pointer-events-none absolute left-full top-1/2 z-[60] ml-3 hidden -translate-y-1/2 whitespace-nowrap rounded-md border border-border bg-surface px-3 py-2 text-left shadow-lg group-hover:block group-focus-visible:block">
       <Show when={props.eyebrow}>
@@ -221,6 +227,9 @@ function SidebarTooltip(props: { label: string; eyebrow?: string }) {
         </span>
       </Show>
       <span class="block text-xs font-medium text-foreground">{props.label}</span>
+      <Show when={props.description}>
+        <span class="mt-0.5 block text-[11px] font-normal text-muted">{props.description}</span>
+      </Show>
     </span>
   )
 }
