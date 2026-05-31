@@ -1,5 +1,6 @@
 import type { GlAccount, GlAccountSection } from "@ark/data-types"
 import {
+  ConfirmDialog,
   Modal,
   ModalFooter,
   PageContainer,
@@ -31,6 +32,7 @@ import {
   useUpdateProfitCenter,
   useUpdateTrainingOffering,
 } from "@data/hooks"
+import { Pencil, Power, RotateCcw } from "lucide-solid"
 import { createMemo, createSignal, For, Match, Show, Switch } from "solid-js"
 import {
   SettingsCheckbox,
@@ -51,6 +53,12 @@ import {
 import { QueryBoundary } from "@/components/ui"
 
 type SettingsTab = "accounts" | "profit-centers" | "offerings" | "rules" | "activity"
+
+type StatusConfirm =
+  | { kind: "gl"; id: string; label: string; active: boolean }
+  | { kind: "profit-center"; id: string; label: string; active: boolean }
+  | { kind: "offering"; id: string; label: string; active: boolean }
+  | { kind: "rule"; id: string; label: string; active: boolean }
 
 const TABS: Array<{ id: SettingsTab; label: string }> = [
   { id: "accounts", label: "Account Codes" },
@@ -170,6 +178,7 @@ export default function FinanceSettingsPage() {
   const [ruleModalOpen, setRuleModalOpen] = createSignal(false)
   const [editingRule, setEditingRule] = createSignal<ClassificationRuleSetting | null>(null)
   const [ruleForm, setRuleForm] = createSignal(blankRuleForm())
+  const [statusConfirm, setStatusConfirm] = createSignal<StatusConfirm | null>(null)
 
   const activeGlAccounts = createMemo(
     () => glAccounts.data?.filter(item => item.active).length ?? 0
@@ -236,6 +245,44 @@ export default function FinanceSettingsPage() {
   })
 
   const refreshAudit = () => void auditEvents.refetch()
+  const closeStatusConfirm = () => setStatusConfirm(null)
+  const statusActionLabel = () => (statusConfirm()?.active ? "Deactivate" : "Restore")
+  const statusPending = () =>
+    deactivateGl.isPending ||
+    updateGl.isPending ||
+    updateProfitCenter.isPending ||
+    updateOffering.isPending ||
+    updateRule.isPending
+
+  const confirmStatusChange = () => {
+    const target = statusConfirm()
+    if (!target) return
+
+    const onSuccess = () => {
+      refreshAudit()
+      closeStatusConfirm()
+    }
+
+    if (target.kind === "gl") {
+      if (target.active) {
+        deactivateGl.mutate(target.id, { onSuccess })
+      } else {
+        updateGl.mutate({ id: target.id, active: true }, { onSuccess })
+      }
+      return
+    }
+
+    const payload = { id: target.id, active: !target.active }
+    if (target.kind === "profit-center") {
+      updateProfitCenter.mutate(payload, { onSuccess })
+      return
+    }
+    if (target.kind === "offering") {
+      updateOffering.mutate(payload, { onSuccess })
+      return
+    }
+    updateRule.mutate(payload, { onSuccess })
+  }
 
   const openCreateGl = () => {
     setEditingGl(null)
@@ -531,13 +578,28 @@ export default function FinanceSettingsPage() {
                               </td>
                               <td class="px-3 py-2 text-right whitespace-nowrap">
                                 <SettingsRowButton onClick={() => openEditGl(acct)}>
-                                  Edit
+                                  <Pencil class="w-3.5 h-3.5" />
+                                  <span>Edit</span>
                                 </SettingsRowButton>
-                                <Show when={acct.active}>
-                                  <SettingsRowButton onClick={() => deactivateGl.mutate(acct.id)}>
-                                    Deactivate
-                                  </SettingsRowButton>
-                                </Show>
+                                <SettingsRowButton
+                                  tone={acct.active ? "danger" : "default"}
+                                  onClick={() =>
+                                    setStatusConfirm({
+                                      kind: "gl",
+                                      id: acct.id,
+                                      label: acct.label,
+                                      active: acct.active,
+                                    })
+                                  }
+                                >
+                                  <Show
+                                    when={acct.active}
+                                    fallback={<RotateCcw class="w-3.5 h-3.5" />}
+                                  >
+                                    <Power class="w-3.5 h-3.5" />
+                                  </Show>
+                                  <span>{acct.active ? "Deactivate" : "Restore"}</span>
+                                </SettingsRowButton>
                               </td>
                             </Tr>
                           )}
@@ -605,17 +667,27 @@ export default function FinanceSettingsPage() {
                               </td>
                               <td class="py-3 px-4 text-right whitespace-nowrap">
                                 <SettingsRowButton onClick={() => openEditPc(item)}>
-                                  Edit
+                                  <Pencil class="w-3.5 h-3.5" />
+                                  <span>Edit</span>
                                 </SettingsRowButton>
                                 <SettingsRowButton
+                                  tone={item.active ? "danger" : "default"}
                                   onClick={() =>
-                                    updateProfitCenter.mutate(
-                                      { id: item.id, active: !item.active },
-                                      { onSuccess: refreshAudit }
-                                    )
+                                    setStatusConfirm({
+                                      kind: "profit-center",
+                                      id: item.id,
+                                      label: item.label,
+                                      active: item.active,
+                                    })
                                   }
                                 >
-                                  {item.active ? "Deactivate" : "Restore"}
+                                  <Show
+                                    when={item.active}
+                                    fallback={<RotateCcw class="w-3.5 h-3.5" />}
+                                  >
+                                    <Power class="w-3.5 h-3.5" />
+                                  </Show>
+                                  <span>{item.active ? "Deactivate" : "Restore"}</span>
                                 </SettingsRowButton>
                               </td>
                             </tr>
@@ -684,17 +756,27 @@ export default function FinanceSettingsPage() {
                               </td>
                               <td class="py-3 px-4 text-right whitespace-nowrap">
                                 <SettingsRowButton onClick={() => openEditOffering(item)}>
-                                  Edit
+                                  <Pencil class="w-3.5 h-3.5" />
+                                  <span>Edit</span>
                                 </SettingsRowButton>
                                 <SettingsRowButton
+                                  tone={item.active ? "danger" : "default"}
                                   onClick={() =>
-                                    updateOffering.mutate(
-                                      { id: item.id, active: !item.active },
-                                      { onSuccess: refreshAudit }
-                                    )
+                                    setStatusConfirm({
+                                      kind: "offering",
+                                      id: item.id,
+                                      label: item.label,
+                                      active: item.active,
+                                    })
                                   }
                                 >
-                                  {item.active ? "Deactivate" : "Restore"}
+                                  <Show
+                                    when={item.active}
+                                    fallback={<RotateCcw class="w-3.5 h-3.5" />}
+                                  >
+                                    <Power class="w-3.5 h-3.5" />
+                                  </Show>
+                                  <span>{item.active ? "Deactivate" : "Restore"}</span>
                                 </SettingsRowButton>
                               </td>
                             </tr>
@@ -781,17 +863,29 @@ export default function FinanceSettingsPage() {
                               </td>
                               <td class="py-3 px-4 text-right whitespace-nowrap">
                                 <SettingsRowButton onClick={() => openEditRule(item)}>
-                                  Edit
+                                  <Pencil class="w-3.5 h-3.5" />
+                                  <span>Edit</span>
                                 </SettingsRowButton>
                                 <SettingsRowButton
+                                  tone={item.active ? "danger" : "default"}
                                   onClick={() =>
-                                    updateRule.mutate(
-                                      { id: item.id, active: !item.active },
-                                      { onSuccess: refreshAudit }
-                                    )
+                                    setStatusConfirm({
+                                      kind: "rule",
+                                      id: item.id,
+                                      label: item.profitCenterCode
+                                        ? `${item.glAccountCode} / ${item.profitCenterCode}`
+                                        : item.glAccountCode,
+                                      active: item.active,
+                                    })
                                   }
                                 >
-                                  {item.active ? "Deactivate" : "Restore"}
+                                  <Show
+                                    when={item.active}
+                                    fallback={<RotateCcw class="w-3.5 h-3.5" />}
+                                  >
+                                    <Power class="w-3.5 h-3.5" />
+                                  </Show>
+                                  <span>{item.active ? "Deactivate" : "Restore"}</span>
                                 </SettingsRowButton>
                               </td>
                             </tr>
@@ -1132,6 +1226,21 @@ export default function FinanceSettingsPage() {
           </SettingsStickyFooter>
         </SettingsModalForm>
       </Modal>
+
+      <ConfirmDialog
+        open={!!statusConfirm()}
+        onClose={closeStatusConfirm}
+        title={`${statusActionLabel()} ${statusConfirm()?.label ?? "setting"}?`}
+        description={
+          statusConfirm()?.active
+            ? "This hides the setting from active finance choices without deleting historical records."
+            : "This makes the setting available again in finance forms and reports."
+        }
+        confirmLabel={statusActionLabel()}
+        danger={statusConfirm()?.active}
+        pending={statusPending()}
+        onConfirm={confirmStatusChange}
+      />
     </PageContainer>
   )
 }

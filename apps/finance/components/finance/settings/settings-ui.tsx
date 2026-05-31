@@ -113,12 +113,20 @@ export function SettingsStatusPill(props: { active: boolean }) {
   )
 }
 
-export function SettingsRowButton(props: { onClick: () => void; children: JSX.Element }) {
+export function SettingsRowButton(props: {
+  onClick: () => void
+  children: JSX.Element
+  tone?: "default" | "danger"
+}) {
   return (
     <button
       type="button"
       onClick={props.onClick}
-      class="text-xs font-medium text-muted hover:text-primary px-2"
+      class={`inline-flex items-center gap-1.5 text-xs font-medium px-2 py-1 rounded-md transition-colors ${
+        props.tone === "danger"
+          ? "text-destructive hover:bg-destructive/10"
+          : "text-muted hover:text-primary hover:bg-surface-muted"
+      }`}
     >
       {props.children}
     </button>
