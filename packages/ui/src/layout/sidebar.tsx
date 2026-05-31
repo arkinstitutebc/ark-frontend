@@ -1,4 +1,4 @@
-import { ChevronLeft, type Folder, Home, LogOut } from "lucide-solid"
+import { ArrowLeft, type Folder, LogOut, PanelLeftClose, PanelLeftOpen } from "lucide-solid"
 import { type Component, createMemo, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
 import { ARK_VERSION } from "../version"
@@ -45,7 +45,32 @@ export function Sidebar(props: SidebarProps) {
   const currentPath = createMemo(() => pageContext.urlPathname)
   const portalUrl = () => props.mainPortalUrl ?? DEFAULT_PORTAL_URL
   const compact = () => collapsed() && !mobileOpen()
+  const sidebarActionLabel = () =>
+    mobileOpen() ? "Close menu" : collapsed() ? "Expand sidebar" : "Collapse sidebar"
+  const handleSidebarAction = () => {
+    if (mobileOpen()) {
+      setMobileOpen(false)
+      return
+    }
+    toggleCollapsed()
+  }
   const isActiveFn = (item: NavItem) => (props.isActive ?? defaultIsActive)(item, currentPath())
+  const navItemClass = (item: NavItem) =>
+    `group relative flex items-center ${
+      compact() ? "justify-center px-0" : "gap-3 px-3"
+    } h-10 rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+      isActiveFn(item)
+        ? "bg-primary/10 text-primary font-semibold ring-1 ring-primary/10"
+        : "text-muted hover:bg-primary/5 hover:text-foreground"
+    }`
+  const utilityActionClass = (tone: "default" | "accent" = "default") =>
+    `group relative flex items-center ${
+      compact() ? "justify-center px-0" : "gap-3 px-3"
+    } h-10 rounded-xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+      tone === "accent"
+        ? "text-accent hover:bg-accent/10"
+        : "text-muted hover:bg-primary/5 hover:text-foreground"
+    }`
   const navSections = createMemo(() => {
     const groups: Array<{ label: string | null; items: NavItem[] }> = []
     for (const item of props.navItems) {
@@ -62,68 +87,87 @@ export function Sidebar(props: SidebarProps) {
 
   const sidebarContent = () => (
     <div class="flex flex-col h-full bg-surface border-r border-border">
-      {/* Portal branding */}
-      <div class="flex items-center gap-3 px-4 h-14 border-b border-border flex-shrink-0">
-        <div class="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-          <props.brandIcon class="w-4.5 h-4.5 text-primary" />
+      {/* Portal branding + collapse control */}
+      <div
+        class={`border-b border-border flex-shrink-0 ${
+          compact()
+            ? "px-2 py-3 flex flex-col items-center gap-2"
+            : "h-16 px-3 flex items-center gap-3"
+        }`}
+      >
+        <div class="group relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/5 shadow-sm">
+          <img
+            src="/logo/ark-transpa.png"
+            alt="Ark Institute"
+            width="30"
+            height="30"
+            class="h-7 w-7 object-contain"
+          />
+          <span class="absolute -bottom-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-md border border-surface bg-primary text-white shadow-sm">
+            <props.brandIcon class="h-2.5 w-2.5" />
+          </span>
+          <Show when={compact()}>
+            <SidebarTooltip
+              label={props.brandTitle}
+              eyebrow="Ark Portal"
+              description={props.brandSubtitle}
+            />
+          </Show>
         </div>
         <Show when={!compact()}>
-          <div class="overflow-hidden">
-            <p class="text-sm font-semibold text-foreground truncate">{props.brandTitle}</p>
+          <div class="min-w-0 flex-1">
+            <p class="text-sm font-semibold text-foreground truncate leading-tight">
+              {props.brandTitle}
+            </p>
             <Show when={props.brandSubtitle}>
               <p class="text-[11px] text-muted truncate">{props.brandSubtitle}</p>
             </Show>
           </div>
         </Show>
-      </div>
-
-      {/* Portal switch */}
-      <div class="border-b border-border px-2 py-2 flex-shrink-0">
-        <a
-          href={portalUrl()}
-          class="group relative flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-semibold text-muted hover:bg-surface-muted hover:text-foreground transition-colors"
+        <button
+          type="button"
+          onClick={handleSidebarAction}
+          aria-label={sidebarActionLabel()}
+          title={sidebarActionLabel()}
+          class="group relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-surface text-muted shadow-sm transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
         >
-          <Home class="w-[18px] h-[18px] flex-shrink-0 text-muted group-hover:text-foreground" />
-          <Show when={!compact()}>
-            <span>Back to Portal</span>
+          <Show when={collapsed() && !mobileOpen()} fallback={<PanelLeftClose class="h-4 w-4" />}>
+            <PanelLeftOpen class="h-4 w-4" />
           </Show>
           <Show when={compact()}>
-            <SidebarTooltip
-              label="Back to Portal"
-              eyebrow="Workspace"
-              description="Return to the main app launcher"
-            />
+            <SidebarTooltip label={sidebarActionLabel()} eyebrow="Layout" />
           </Show>
-        </a>
+        </button>
       </div>
 
       {/* Navigation */}
       <nav class="flex-1 px-2 py-3 overflow-y-auto">
         <For each={navSections()}>
           {section => (
-            <div class="mb-3 last:mb-0">
+            <div class="mb-4 last:mb-0">
               <Show when={section.label && !compact()}>
-                <p class="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted/70">
+                <p class="px-3 pb-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-muted/70">
                   {section.label}
                 </p>
               </Show>
-              <div class="space-y-1">
+              <div class="space-y-1.5">
                 <For each={section.items}>
                   {item => (
                     <a
                       href={item.href}
                       onClick={() => setMobileOpen(false)}
-                      class={`group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                        isActiveFn(item)
-                          ? "bg-surface-muted text-foreground font-semibold"
-                          : "text-muted hover:bg-surface-muted hover:text-foreground"
-                      }`}
+                      class={navItemClass(item)}
                     >
+                      <Show when={isActiveFn(item)}>
+                        <span class="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-primary" />
+                      </Show>
                       <item.icon
-                        class={`w-[18px] h-[18px] flex-shrink-0 ${isActiveFn(item) ? "text-foreground" : "text-muted group-hover:text-foreground"}`}
+                        class={`h-[18px] w-[18px] flex-shrink-0 ${
+                          isActiveFn(item) ? "text-primary" : "text-muted group-hover:text-primary"
+                        }`}
                       />
                       <Show when={!compact()}>
-                        <span>{item.label}</span>
+                        <span class="truncate">{item.label}</span>
                       </Show>
                       <Show when={compact()}>
                         <SidebarTooltip label={item.label} eyebrow={item.section} />
@@ -139,13 +183,26 @@ export function Sidebar(props: SidebarProps) {
 
       {/* Bottom section: account actions */}
       <div class="border-t border-border px-2 py-3 flex-shrink-0">
+        <a href={portalUrl()} class={utilityActionClass()}>
+          <ArrowLeft class="h-[18px] w-[18px] flex-shrink-0 text-muted group-hover:text-primary" />
+          <Show when={!compact()}>
+            <span>Portal</span>
+          </Show>
+          <Show when={compact()}>
+            <SidebarTooltip
+              label="Back to Portal"
+              eyebrow="Workspace"
+              description="Return to the main app launcher"
+            />
+          </Show>
+        </a>
         {props.onLogout ? (
           <button
             type="button"
             onClick={props.onLogout}
-            class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-accent hover:bg-surface-muted transition-colors w-full text-left"
+            class={`${utilityActionClass("accent")} mt-1.5 w-full text-left`}
           >
-            <LogOut class="w-[18px] h-[18px] flex-shrink-0" />
+            <LogOut class="h-[18px] w-[18px] flex-shrink-0" />
             <Show when={!compact()}>
               <span>Logout</span>
             </Show>
@@ -154,11 +211,8 @@ export function Sidebar(props: SidebarProps) {
             </Show>
           </button>
         ) : (
-          <a
-            href={`${portalUrl()}/login`}
-            class="group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-accent hover:bg-surface-muted transition-colors"
-          >
-            <LogOut class="w-[18px] h-[18px] flex-shrink-0" />
+          <a href={`${portalUrl()}/login`} class={`${utilityActionClass("accent")} mt-1.5`}>
+            <LogOut class="h-[18px] w-[18px] flex-shrink-0" />
             <Show when={!compact()}>
               <span>Logout</span>
             </Show>
@@ -180,27 +234,10 @@ export function Sidebar(props: SidebarProps) {
     <>
       <aside
         class={`relative hidden md:block flex-shrink-0 h-screen transition-[width] duration-300 ease-in-out ${
-          collapsed() ? "w-14" : "w-56"
+          collapsed() ? "w-16" : "w-60"
         }`}
       >
         {sidebarContent()}
-
-        {/* Floating collapse toggle — anchored mid-edge of the sidebar's right
-            boundary. Half overlaps the content area so it reads as a divider
-            handle. Animates the chevron 180° on collapse. */}
-        <button
-          type="button"
-          onClick={toggleCollapsed}
-          aria-label={collapsed() ? "Expand sidebar" : "Collapse sidebar"}
-          title={collapsed() ? "Expand sidebar" : "Collapse sidebar"}
-          class="group absolute top-1/2 -right-3 -translate-y-1/2 z-30 flex items-center justify-center w-6 h-6 rounded-full bg-surface border border-border shadow-sm text-muted hover:text-primary hover:border-primary hover:shadow-md hover:scale-110 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
-        >
-          <ChevronLeft
-            class={`w-3.5 h-3.5 transition-transform duration-300 ease-in-out ${
-              collapsed() ? "rotate-180" : ""
-            }`}
-          />
-        </button>
       </aside>
 
       <Show when={mobileOpen()}>
