@@ -90,6 +90,7 @@ export default function DashboardPage() {
                         Admin
                       </span>
                     </div>
+
                     <h3 class="text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
                       User Management
                     </h3>
@@ -98,6 +99,31 @@ export default function DashboardPage() {
                     </p>
                     <div class="flex items-center gap-2 mt-5 text-primary font-medium text-sm group-hover:gap-3 transition-all">
                       <span>Manage users</span>
+                      <Icons.arrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </a>
+
+                  <a
+                    href="/admin/posts"
+                    class="group block bg-surface rounded-2xl shadow-lg p-6 border border-border hover:shadow-xl hover:border-primary/30 transition-all"
+                  >
+                    <div class="flex items-start justify-between mb-5">
+                      <div class="p-4 bg-primary/10 rounded-xl group-hover:bg-primary/20 transition-colors">
+                        <Icons.fileText class="w-8 h-8 text-primary" />
+                      </div>
+                      <span class="px-3 py-1 bg-accent/10 text-accent text-xs font-semibold rounded-full">
+                        Site
+                      </span>
+                    </div>
+
+                    <h3 class="text-xl font-semibold text-foreground group-hover:text-primary transition-colors">
+                      Blog Posts
+                    </h3>
+                    <p class="text-sm text-muted mt-1.5">
+                      Draft, publish, and update public Ark Institute articles.
+                    </p>
+                    <div class="flex items-center gap-2 mt-5 text-primary font-medium text-sm group-hover:gap-3 transition-all">
+                      <span>Manage posts</span>
                       <Icons.arrowRight class="w-5 h-5 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </a>
