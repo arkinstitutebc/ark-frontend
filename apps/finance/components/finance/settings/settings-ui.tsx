@@ -39,7 +39,39 @@ export function SettingsPanelHeader(props: {
 
 export function SettingsTableShell(props: { children: JSX.Element }) {
   return (
-    <div class="border border-border rounded-lg overflow-auto max-h-[520px]">{props.children}</div>
+    <div class="border border-border rounded-lg overflow-auto max-h-[min(520px,calc(100vh-20rem))]">
+      {props.children}
+    </div>
+  )
+}
+
+export function SettingsModalForm(props: { onSubmit: (e: Event) => void; children: JSX.Element }) {
+  return (
+    <form onSubmit={props.onSubmit} class="space-y-5">
+      {props.children}
+    </form>
+  )
+}
+
+export function SettingsFormGrid(props: { children: JSX.Element; columns?: "two" | "three" }) {
+  return (
+    <div
+      class={
+        props.columns === "three"
+          ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
+          : "grid grid-cols-1 sm:grid-cols-2 gap-4"
+      }
+    >
+      {props.children}
+    </div>
+  )
+}
+
+export function SettingsStickyFooter(props: { children: JSX.Element }) {
+  return (
+    <div class="sticky bottom-0 -mx-6 -mb-5 bg-surface px-6 pb-5 pt-3 border-t border-border">
+      {props.children}
+    </div>
   )
 }
 

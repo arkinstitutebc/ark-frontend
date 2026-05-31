@@ -25,12 +25,15 @@ import {
 import { createMemo, createSignal, For, Match, Show, Switch } from "solid-js"
 import {
   SettingsCheckbox,
+  SettingsFormGrid,
+  SettingsModalForm,
   SettingsNumberField,
   SettingsPanelHeader,
   SettingsRowButton,
   SettingsSelectField,
   SettingsStatCard,
   SettingsStatusPill,
+  SettingsStickyFooter,
   SettingsTableShell,
   SettingsTextArea,
   SettingsTextField,
@@ -708,8 +711,8 @@ export default function FinanceSettingsPage() {
         title={editingGl() ? "Edit Account Code" : "New Account Code"}
         size="xl"
       >
-        <form onSubmit={submitGl} class="space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <SettingsModalForm onSubmit={submitGl}>
+          <SettingsFormGrid>
             <SettingsTextField
               label="Code"
               value={glForm().code}
@@ -750,7 +753,7 @@ export default function FinanceSettingsPage() {
                 setGlForm({ ...glForm(), defaultAccountingTreatment: value || null })
               }
             />
-          </div>
+          </SettingsFormGrid>
           <SettingsTextArea
             label="Notes"
             value={glForm().notes ?? ""}
@@ -762,13 +765,15 @@ export default function FinanceSettingsPage() {
               onChange={active => setGlForm({ ...glForm(), active })}
             />
           </Show>
-          <ModalFooter
-            onCancel={closeGlModal}
-            submitInForm
-            submitLabel={editingGl() ? "Save" : "Create"}
-            submitting={createGl.isPending || updateGl.isPending}
-          />
-        </form>
+          <SettingsStickyFooter>
+            <ModalFooter
+              onCancel={closeGlModal}
+              submitInForm
+              submitLabel={editingGl() ? "Save" : "Create"}
+              submitting={createGl.isPending || updateGl.isPending}
+            />
+          </SettingsStickyFooter>
+        </SettingsModalForm>
       </Modal>
 
       <Modal
@@ -777,8 +782,8 @@ export default function FinanceSettingsPage() {
         title={editingPc() ? "Edit Fund / Program" : "New Fund / Program"}
         size="xl"
       >
-        <form onSubmit={submitPc} class="space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <SettingsModalForm onSubmit={submitPc}>
+          <SettingsFormGrid>
             <SettingsTextField
               label="Code"
               value={pcForm().code}
@@ -810,7 +815,7 @@ export default function FinanceSettingsPage() {
               value={pcForm().sortOrder ?? 0}
               onInput={value => setPcForm({ ...pcForm(), sortOrder: value })}
             />
-          </div>
+          </SettingsFormGrid>
           <SettingsTextArea
             label="Notes"
             value={pcForm().notes ?? ""}
@@ -820,13 +825,15 @@ export default function FinanceSettingsPage() {
             checked={pcForm().active ?? true}
             onChange={active => setPcForm({ ...pcForm(), active })}
           />
-          <ModalFooter
-            onCancel={closePcModal}
-            submitInForm
-            submitLabel={editingPc() ? "Save" : "Create"}
-            submitting={createProfitCenter.isPending || updateProfitCenter.isPending}
-          />
-        </form>
+          <SettingsStickyFooter>
+            <ModalFooter
+              onCancel={closePcModal}
+              submitInForm
+              submitLabel={editingPc() ? "Save" : "Create"}
+              submitting={createProfitCenter.isPending || updateProfitCenter.isPending}
+            />
+          </SettingsStickyFooter>
+        </SettingsModalForm>
       </Modal>
 
       <Modal
@@ -835,8 +842,8 @@ export default function FinanceSettingsPage() {
         title={editingOffering() ? "Edit Training Offering" : "New Training Offering"}
         size="xl"
       >
-        <form onSubmit={submitOffering} class="space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <SettingsModalForm onSubmit={submitOffering}>
+          <SettingsFormGrid>
             <SettingsTextField
               label="Code"
               value={offeringForm().code}
@@ -862,7 +869,7 @@ export default function FinanceSettingsPage() {
               value={offeringForm().sortOrder ?? 0}
               onInput={value => setOfferingForm({ ...offeringForm(), sortOrder: value })}
             />
-          </div>
+          </SettingsFormGrid>
           <SettingsTextArea
             label="Notes"
             value={offeringForm().notes ?? ""}
@@ -872,13 +879,15 @@ export default function FinanceSettingsPage() {
             checked={offeringForm().active ?? true}
             onChange={active => setOfferingForm({ ...offeringForm(), active })}
           />
-          <ModalFooter
-            onCancel={closeOfferingModal}
-            submitInForm
-            submitLabel={editingOffering() ? "Save" : "Create"}
-            submitting={createOffering.isPending || updateOffering.isPending}
-          />
-        </form>
+          <SettingsStickyFooter>
+            <ModalFooter
+              onCancel={closeOfferingModal}
+              submitInForm
+              submitLabel={editingOffering() ? "Save" : "Create"}
+              submitting={createOffering.isPending || updateOffering.isPending}
+            />
+          </SettingsStickyFooter>
+        </SettingsModalForm>
       </Modal>
 
       <Modal
@@ -887,8 +896,8 @@ export default function FinanceSettingsPage() {
         title={editingRule() ? "Edit Auto-coding Rule" : "New Auto-coding Rule"}
         size="xl"
       >
-        <form onSubmit={submitRule} class="space-y-4">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <SettingsModalForm onSubmit={submitRule}>
+          <SettingsFormGrid>
             <SettingsTextField
               label="Account Code"
               value={ruleForm().glAccountCode}
@@ -938,7 +947,7 @@ export default function FinanceSettingsPage() {
               value={ruleForm().sortOrder}
               onInput={value => setRuleForm({ ...ruleForm(), sortOrder: value })}
             />
-          </div>
+          </SettingsFormGrid>
           <SettingsTextArea
             label="Notes"
             value={ruleForm().notes}
@@ -955,13 +964,15 @@ export default function FinanceSettingsPage() {
               onChange={active => setRuleForm({ ...ruleForm(), active })}
             />
           </div>
-          <ModalFooter
-            onCancel={closeRuleModal}
-            submitInForm
-            submitLabel={editingRule() ? "Save" : "Create"}
-            submitting={createRule.isPending || updateRule.isPending}
-          />
-        </form>
+          <SettingsStickyFooter>
+            <ModalFooter
+              onCancel={closeRuleModal}
+              submitInForm
+              submitLabel={editingRule() ? "Save" : "Create"}
+              submitting={createRule.isPending || updateRule.isPending}
+            />
+          </SettingsStickyFooter>
+        </SettingsModalForm>
       </Modal>
     </PageContainer>
   )
