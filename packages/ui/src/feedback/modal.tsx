@@ -27,6 +27,11 @@ export function Modal(props: ModalProps) {
       props.onClose()
     }
   }
+  const handleBackdropKeyDown = (e: KeyboardEvent) => {
+    if ((e.key === "Enter" || e.key === " ") && e.target === e.currentTarget) {
+      props.onClose()
+    }
+  }
 
   const sizeClass = () => SIZE_CLASS[props.size ?? "lg"]
 
@@ -52,7 +57,7 @@ export function Modal(props: ModalProps) {
           aria-modal="true"
           class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 sm:p-6"
           onClick={handleBackdropClick}
-          onKeyDown={e => e.key === "Escape" && props.onClose()}
+          onKeyDown={handleBackdropKeyDown}
         >
           <div
             class={`bg-surface rounded-xl shadow-xl w-full max-h-[90vh] flex flex-col ${sizeClass()}`}
