@@ -31,6 +31,29 @@ export function DataTable(props: DataTableProps) {
   )
 }
 
+export interface ScrollableDataTableProps extends DataTableProps {
+  /** Max-height class for the scroll area. Defaults to a settings-friendly viewport cap. */
+  maxHeightClass?: string
+}
+
+/**
+ * DataTable variant for dense admin/settings lists that need vertical scrolling
+ * with visible column headers.
+ */
+export function ScrollableDataTable(props: ScrollableDataTableProps) {
+  return (
+    <DataTable
+      class={`border border-border rounded-lg ${
+        props.maxHeightClass ?? "max-h-[min(520px,calc(100vh-20rem))]"
+      } overflow-auto [&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:bg-surface-muted ${
+        props.class ?? ""
+      }`}
+    >
+      {props.children}
+    </DataTable>
+  )
+}
+
 export interface THeadProps {
   children: JSX.Element
 }

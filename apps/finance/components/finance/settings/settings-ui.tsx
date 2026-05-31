@@ -1,4 +1,4 @@
-import { DataTable, Select, tonePillClass } from "@ark/ui"
+import { Select, tonePillClass } from "@ark/ui"
 import type { JSX } from "solid-js"
 import { Show } from "solid-js"
 import { Icons } from "@/components/ui"
@@ -34,14 +34,6 @@ export function SettingsPanelHeader(props: {
         </button>
       </Show>
     </div>
-  )
-}
-
-export function SettingsDataTable(props: { children: JSX.Element }) {
-  return (
-    <DataTable class="border border-border rounded-lg max-h-[min(520px,calc(100vh-20rem))] overflow-auto [&_th]:sticky [&_th]:top-0 [&_th]:z-10 [&_th]:bg-surface-muted">
-      {props.children}
-    </DataTable>
   )
 }
 

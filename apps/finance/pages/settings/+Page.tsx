@@ -1,5 +1,14 @@
 import type { GlAccount, GlAccountSection } from "@ark/data-types"
-import { Modal, ModalFooter, PageContainer, PageHeader, THead, Th, Tr } from "@ark/ui"
+import {
+  Modal,
+  ModalFooter,
+  PageContainer,
+  PageHeader,
+  ScrollableDataTable,
+  THead,
+  Th,
+  Tr,
+} from "@ark/ui"
 import {
   type ClassificationRuleSetting,
   type CreateGlAccountInput,
@@ -25,7 +34,6 @@ import {
 import { createMemo, createSignal, For, Match, Show, Switch } from "solid-js"
 import {
   SettingsCheckbox,
-  SettingsDataTable,
   SettingsFormGrid,
   SettingsModalForm,
   SettingsNumberField,
@@ -416,7 +424,7 @@ export default function FinanceSettingsPage() {
               />
               <QueryBoundary query={glAccounts}>
                 {() => (
-                  <SettingsDataTable>
+                  <ScrollableDataTable>
                     <THead>
                       <Th size="compact">Code</Th>
                       <Th size="compact">Label</Th>
@@ -463,7 +471,7 @@ export default function FinanceSettingsPage() {
                         )}
                       </For>
                     </tbody>
-                  </SettingsDataTable>
+                  </ScrollableDataTable>
                 )}
               </QueryBoundary>
             </Match>
@@ -477,7 +485,7 @@ export default function FinanceSettingsPage() {
               />
               <QueryBoundary query={profitCenters}>
                 {() => (
-                  <SettingsDataTable>
+                  <ScrollableDataTable>
                     <THead>
                       <Th size="dense">Code</Th>
                       <Th size="dense">Label</Th>
@@ -521,7 +529,7 @@ export default function FinanceSettingsPage() {
                         )}
                       </For>
                     </tbody>
-                  </SettingsDataTable>
+                  </ScrollableDataTable>
                 )}
               </QueryBoundary>
             </Match>
@@ -535,7 +543,7 @@ export default function FinanceSettingsPage() {
               />
               <QueryBoundary query={offerings}>
                 {() => (
-                  <SettingsDataTable>
+                  <ScrollableDataTable>
                     <THead>
                       <Th size="dense">Code</Th>
                       <Th size="dense">Offering</Th>
@@ -579,7 +587,7 @@ export default function FinanceSettingsPage() {
                         )}
                       </For>
                     </tbody>
-                  </SettingsDataTable>
+                  </ScrollableDataTable>
                 )}
               </QueryBoundary>
             </Match>
@@ -593,7 +601,7 @@ export default function FinanceSettingsPage() {
               />
               <QueryBoundary query={rules}>
                 {() => (
-                  <SettingsDataTable>
+                  <ScrollableDataTable>
                     <THead>
                       <Th size="dense">Account Code</Th>
                       <Th size="dense">Fund / Program</Th>
@@ -644,7 +652,7 @@ export default function FinanceSettingsPage() {
                         )}
                       </For>
                     </tbody>
-                  </SettingsDataTable>
+                  </ScrollableDataTable>
                 )}
               </QueryBoundary>
             </Match>
@@ -656,7 +664,7 @@ export default function FinanceSettingsPage() {
               />
               <QueryBoundary query={auditEvents}>
                 {result => (
-                  <SettingsDataTable>
+                  <ScrollableDataTable>
                     <THead>
                       <Th size="dense">When</Th>
                       <Th size="dense">Change</Th>
@@ -681,7 +689,7 @@ export default function FinanceSettingsPage() {
                         )}
                       </For>
                     </tbody>
-                  </SettingsDataTable>
+                  </ScrollableDataTable>
                 )}
               </QueryBoundary>
             </Match>

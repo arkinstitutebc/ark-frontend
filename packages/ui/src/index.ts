@@ -25,6 +25,8 @@ export { type CrudConfig, createCrudHooks } from "./data/create-crud-hooks"
 export {
   DataTable,
   type DataTableProps,
+  ScrollableDataTable,
+  type ScrollableDataTableProps,
   THead,
   type THeadProps,
   Th,
