@@ -58,15 +58,15 @@ export function Sidebar(props: SidebarProps) {
   const navItemClass = (item: NavItem) =>
     `group relative flex items-center ${
       compact() ? "justify-center px-0" : "gap-3 px-3"
-    } h-10 rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+    } ${compact() ? "h-9" : "h-10"} rounded-xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
       isActiveFn(item)
-        ? "bg-primary/10 text-primary font-semibold ring-1 ring-primary/10"
+        ? "bg-primary/10 text-primary font-semibold"
         : "text-muted hover:bg-primary/5 hover:text-foreground"
     }`
   const utilityActionClass = (tone: "default" | "accent" = "default") =>
     `group relative flex items-center ${
       compact() ? "justify-center px-0" : "gap-3 px-3"
-    } h-10 rounded-xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+    } ${compact() ? "h-9" : "h-10"} rounded-xl text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
       tone === "accent"
         ? "text-accent hover:bg-accent/10"
         : "text-muted hover:bg-primary/5 hover:text-foreground"
@@ -89,23 +89,29 @@ export function Sidebar(props: SidebarProps) {
     <div class="flex flex-col h-full bg-surface border-r border-border">
       {/* Portal branding + collapse control */}
       <div
-        class={`border-b border-border flex-shrink-0 ${
+        class={`flex-shrink-0 ${
           compact()
-            ? "px-2 py-3 flex flex-col items-center gap-2"
+            ? "px-2 pt-3 pb-2 flex flex-col items-center gap-2"
             : "h-16 px-3 flex items-center gap-3"
         }`}
       >
-        <div class="group relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/5 shadow-sm">
+        <div
+          class={`group relative flex shrink-0 items-center justify-center rounded-xl border border-primary/15 bg-primary/5 ${
+            compact() ? "h-9 w-9" : "h-10 w-10 shadow-sm"
+          }`}
+        >
           <img
             src="/logo/ark-transpa.png"
             alt="Ark Institute"
             width="30"
             height="30"
-            class="h-7 w-7 object-contain"
+            class={compact() ? "h-6 w-6 object-contain" : "h-7 w-7 object-contain"}
           />
-          <span class="absolute -bottom-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-md border border-surface bg-primary text-white shadow-sm">
-            <props.brandIcon class="h-2.5 w-2.5" />
-          </span>
+          <Show when={!compact()}>
+            <span class="absolute -bottom-1 -right-1 flex h-4.5 w-4.5 items-center justify-center rounded-md border border-surface bg-primary text-white shadow-sm">
+              <props.brandIcon class="h-2.5 w-2.5" />
+            </span>
+          </Show>
           <Show when={compact()}>
             <SidebarTooltip
               label={props.brandTitle}
@@ -129,7 +135,9 @@ export function Sidebar(props: SidebarProps) {
           onClick={handleSidebarAction}
           aria-label={sidebarActionLabel()}
           title={sidebarActionLabel()}
-          class="group relative flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-border bg-surface text-muted shadow-sm transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+          class={`group relative flex shrink-0 items-center justify-center rounded-lg border border-border bg-surface text-muted transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary ${
+            compact() ? "h-9 w-9" : "h-8 w-8 shadow-sm"
+          }`}
         >
           <Show when={collapsed() && !mobileOpen()} fallback={<PanelLeftClose class="h-4 w-4" />}>
             <PanelLeftOpen class="h-4 w-4" />
@@ -158,9 +166,6 @@ export function Sidebar(props: SidebarProps) {
                       onClick={() => setMobileOpen(false)}
                       class={navItemClass(item)}
                     >
-                      <Show when={isActiveFn(item)}>
-                        <span class="absolute left-0 top-2 bottom-2 w-0.5 rounded-r-full bg-primary" />
-                      </Show>
                       <item.icon
                         class={`h-[18px] w-[18px] flex-shrink-0 ${
                           isActiveFn(item) ? "text-primary" : "text-muted group-hover:text-primary"
