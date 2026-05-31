@@ -38,6 +38,7 @@ import {
   SettingsCheckbox,
   SettingsEmptyRow,
   SettingsFormGrid,
+  SettingsFormSection,
   SettingsModalForm,
   SettingsNumberField,
   SettingsPanelHeader,
@@ -964,59 +965,69 @@ export default function FinanceSettingsPage() {
         size="xl"
       >
         <SettingsModalForm onSubmit={submitGl}>
-          <SettingsFormGrid>
-            <SettingsTextField
-              label="Code"
-              value={glForm().code}
-              onInput={value => setGlForm({ ...glForm(), code: value })}
-              placeholder="internet"
-              required
-              disabled={!!editingGl()}
+          <SettingsFormSection title="Account Details">
+            <SettingsFormGrid>
+              <SettingsTextField
+                label="Code"
+                value={glForm().code}
+                onInput={value => setGlForm({ ...glForm(), code: value })}
+                placeholder="internet"
+                required
+                disabled={!!editingGl()}
+              />
+              <SettingsTextField
+                label="Label"
+                value={glForm().label}
+                onInput={value => setGlForm({ ...glForm(), label: value })}
+                placeholder="Internet Allowance"
+                required
+              />
+              <SettingsSelectField
+                label="Section"
+                options={SECTION_OPTIONS}
+                value={glForm().section}
+                onChange={value => setGlForm({ ...glForm(), section: value as GlAccountSection })}
+              />
+              <SettingsNumberField
+                label="Sort Order"
+                value={glForm().sortOrder ?? 0}
+                onInput={value => setGlForm({ ...glForm(), sortOrder: value })}
+              />
+            </SettingsFormGrid>
+          </SettingsFormSection>
+          <SettingsFormSection title="Accounting Defaults">
+            <SettingsFormGrid>
+              <SettingsSelectField
+                label="Default Expense Category"
+                options={EXPENSE_CATEGORY_OPTIONS}
+                value={glForm().defaultExpenseCategory ?? ""}
+                onChange={value =>
+                  setGlForm({ ...glForm(), defaultExpenseCategory: value || null })
+                }
+              />
+              <SettingsSelectField
+                label="Default Treatment"
+                options={TREATMENT_OPTIONS}
+                value={glForm().defaultAccountingTreatment ?? ""}
+                onChange={value =>
+                  setGlForm({ ...glForm(), defaultAccountingTreatment: value || null })
+                }
+              />
+            </SettingsFormGrid>
+          </SettingsFormSection>
+          <SettingsFormSection title="Notes & Status">
+            <SettingsTextArea
+              label="Notes"
+              value={glForm().notes ?? ""}
+              onInput={value => setGlForm({ ...glForm(), notes: value })}
             />
-            <SettingsTextField
-              label="Label"
-              value={glForm().label}
-              onInput={value => setGlForm({ ...glForm(), label: value })}
-              placeholder="Internet Allowance"
-              required
-            />
-            <SettingsSelectField
-              label="Section"
-              options={SECTION_OPTIONS}
-              value={glForm().section}
-              onChange={value => setGlForm({ ...glForm(), section: value as GlAccountSection })}
-            />
-            <SettingsNumberField
-              label="Sort Order"
-              value={glForm().sortOrder ?? 0}
-              onInput={value => setGlForm({ ...glForm(), sortOrder: value })}
-            />
-            <SettingsSelectField
-              label="Default Expense Category"
-              options={EXPENSE_CATEGORY_OPTIONS}
-              value={glForm().defaultExpenseCategory ?? ""}
-              onChange={value => setGlForm({ ...glForm(), defaultExpenseCategory: value || null })}
-            />
-            <SettingsSelectField
-              label="Default Treatment"
-              options={TREATMENT_OPTIONS}
-              value={glForm().defaultAccountingTreatment ?? ""}
-              onChange={value =>
-                setGlForm({ ...glForm(), defaultAccountingTreatment: value || null })
-              }
-            />
-          </SettingsFormGrid>
-          <SettingsTextArea
-            label="Notes"
-            value={glForm().notes ?? ""}
-            onInput={value => setGlForm({ ...glForm(), notes: value })}
-          />
-          <Show when={editingGl()}>
-            <SettingsCheckbox
-              checked={glForm().active ?? true}
-              onChange={active => setGlForm({ ...glForm(), active })}
-            />
-          </Show>
+            <Show when={editingGl()}>
+              <SettingsCheckbox
+                checked={glForm().active ?? true}
+                onChange={active => setGlForm({ ...glForm(), active })}
+              />
+            </Show>
+          </SettingsFormSection>
           <SettingsStickyFooter>
             <ModalFooter
               onCancel={closeGlModal}
@@ -1035,48 +1046,56 @@ export default function FinanceSettingsPage() {
         size="xl"
       >
         <SettingsModalForm onSubmit={submitPc}>
-          <SettingsFormGrid>
-            <SettingsTextField
-              label="Code"
-              value={pcForm().code}
-              onInput={value => setPcForm({ ...pcForm(), code: value })}
-              placeholder="TWSP-FBS"
-              required
+          <SettingsFormSection title="Fund / Program Details">
+            <SettingsFormGrid>
+              <SettingsTextField
+                label="Code"
+                value={pcForm().code}
+                onInput={value => setPcForm({ ...pcForm(), code: value })}
+                placeholder="TWSP-FBS"
+                required
+              />
+              <SettingsTextField
+                label="Label"
+                value={pcForm().label}
+                onInput={value => setPcForm({ ...pcForm(), label: value })}
+                placeholder="TWSP Food and Beverage"
+                required
+              />
+              <SettingsNumberField
+                label="Sort Order"
+                value={pcForm().sortOrder ?? 0}
+                onInput={value => setPcForm({ ...pcForm(), sortOrder: value })}
+              />
+            </SettingsFormGrid>
+          </SettingsFormSection>
+          <SettingsFormSection title="Reporting Attributes">
+            <SettingsFormGrid>
+              <SettingsTextField
+                label="Fund Source"
+                value={pcForm().fundSource ?? ""}
+                onInput={value => setPcForm({ ...pcForm(), fundSource: value })}
+                placeholder="TESDA"
+              />
+              <SettingsTextField
+                label="Segment Group"
+                value={pcForm().segmentGroup ?? ""}
+                onInput={value => setPcForm({ ...pcForm(), segmentGroup: value })}
+                placeholder="TWSP"
+              />
+            </SettingsFormGrid>
+          </SettingsFormSection>
+          <SettingsFormSection title="Notes & Status">
+            <SettingsTextArea
+              label="Notes"
+              value={pcForm().notes ?? ""}
+              onInput={value => setPcForm({ ...pcForm(), notes: value })}
             />
-            <SettingsTextField
-              label="Label"
-              value={pcForm().label}
-              onInput={value => setPcForm({ ...pcForm(), label: value })}
-              placeholder="TWSP Food and Beverage"
-              required
+            <SettingsCheckbox
+              checked={pcForm().active ?? true}
+              onChange={active => setPcForm({ ...pcForm(), active })}
             />
-            <SettingsTextField
-              label="Fund Source"
-              value={pcForm().fundSource ?? ""}
-              onInput={value => setPcForm({ ...pcForm(), fundSource: value })}
-              placeholder="TESDA"
-            />
-            <SettingsTextField
-              label="Segment Group"
-              value={pcForm().segmentGroup ?? ""}
-              onInput={value => setPcForm({ ...pcForm(), segmentGroup: value })}
-              placeholder="TWSP"
-            />
-            <SettingsNumberField
-              label="Sort Order"
-              value={pcForm().sortOrder ?? 0}
-              onInput={value => setPcForm({ ...pcForm(), sortOrder: value })}
-            />
-          </SettingsFormGrid>
-          <SettingsTextArea
-            label="Notes"
-            value={pcForm().notes ?? ""}
-            onInput={value => setPcForm({ ...pcForm(), notes: value })}
-          />
-          <SettingsCheckbox
-            checked={pcForm().active ?? true}
-            onChange={active => setPcForm({ ...pcForm(), active })}
-          />
+          </SettingsFormSection>
           <SettingsStickyFooter>
             <ModalFooter
               onCancel={closePcModal}
@@ -1095,42 +1114,46 @@ export default function FinanceSettingsPage() {
         size="xl"
       >
         <SettingsModalForm onSubmit={submitOffering}>
-          <SettingsFormGrid>
-            <SettingsTextField
-              label="Code"
-              value={offeringForm().code}
-              onInput={value => setOfferingForm({ ...offeringForm(), code: value })}
-              placeholder="SMAW"
-              required
+          <SettingsFormSection title="Offering Details">
+            <SettingsFormGrid>
+              <SettingsTextField
+                label="Code"
+                value={offeringForm().code}
+                onInput={value => setOfferingForm({ ...offeringForm(), code: value })}
+                placeholder="SMAW"
+                required
+              />
+              <SettingsTextField
+                label="Label"
+                value={offeringForm().label}
+                onInput={value => setOfferingForm({ ...offeringForm(), label: value })}
+                placeholder="SMAW NC II"
+                required
+              />
+              <SettingsTextField
+                label="Sector"
+                value={offeringForm().sector ?? ""}
+                onInput={value => setOfferingForm({ ...offeringForm(), sector: value })}
+                placeholder="Metals"
+              />
+              <SettingsNumberField
+                label="Sort Order"
+                value={offeringForm().sortOrder ?? 0}
+                onInput={value => setOfferingForm({ ...offeringForm(), sortOrder: value })}
+              />
+            </SettingsFormGrid>
+          </SettingsFormSection>
+          <SettingsFormSection title="Notes & Status">
+            <SettingsTextArea
+              label="Notes"
+              value={offeringForm().notes ?? ""}
+              onInput={value => setOfferingForm({ ...offeringForm(), notes: value })}
             />
-            <SettingsTextField
-              label="Label"
-              value={offeringForm().label}
-              onInput={value => setOfferingForm({ ...offeringForm(), label: value })}
-              placeholder="SMAW NC II"
-              required
+            <SettingsCheckbox
+              checked={offeringForm().active ?? true}
+              onChange={active => setOfferingForm({ ...offeringForm(), active })}
             />
-            <SettingsTextField
-              label="Sector"
-              value={offeringForm().sector ?? ""}
-              onInput={value => setOfferingForm({ ...offeringForm(), sector: value })}
-              placeholder="Metals"
-            />
-            <SettingsNumberField
-              label="Sort Order"
-              value={offeringForm().sortOrder ?? 0}
-              onInput={value => setOfferingForm({ ...offeringForm(), sortOrder: value })}
-            />
-          </SettingsFormGrid>
-          <SettingsTextArea
-            label="Notes"
-            value={offeringForm().notes ?? ""}
-            onInput={value => setOfferingForm({ ...offeringForm(), notes: value })}
-          />
-          <SettingsCheckbox
-            checked={offeringForm().active ?? true}
-            onChange={active => setOfferingForm({ ...offeringForm(), active })}
-          />
+          </SettingsFormSection>
           <SettingsStickyFooter>
             <ModalFooter
               onCancel={closeOfferingModal}
@@ -1149,73 +1172,85 @@ export default function FinanceSettingsPage() {
         size="xl"
       >
         <SettingsModalForm onSubmit={submitRule}>
-          <SettingsFormGrid>
-            <SettingsTextField
-              label="Account Code"
-              value={ruleForm().glAccountCode}
-              onInput={value => setRuleForm({ ...ruleForm(), glAccountCode: value })}
-              placeholder="training_tools"
-              required
-            />
-            <SettingsTextField
-              label="Fund / Program"
-              value={ruleForm().profitCenterCode}
-              onInput={value => setRuleForm({ ...ruleForm(), profitCenterCode: value })}
-              placeholder="TWSP-FBS"
-            />
-            <SettingsSelectField
-              label="Default Expense Category"
-              options={EXPENSE_CATEGORY_OPTIONS.slice(1)}
-              value={ruleForm().defaultExpenseCategory}
-              onChange={value => setRuleForm({ ...ruleForm(), defaultExpenseCategory: value })}
-            />
-            <SettingsSelectField
-              label="Default Treatment"
-              options={TREATMENT_OPTIONS.slice(1)}
-              value={ruleForm().defaultAccountingTreatment}
-              onChange={value => setRuleForm({ ...ruleForm(), defaultAccountingTreatment: value })}
-            />
-            <SettingsTextField
-              label="Cost Type"
-              value={ruleForm().defaultCostType}
-              onInput={value => setRuleForm({ ...ruleForm(), defaultCostType: value })}
-              placeholder="common"
-            />
-            <SettingsTextField
-              label="Asset Category"
-              value={ruleForm().defaultAssetCategory}
-              onInput={value => setRuleForm({ ...ruleForm(), defaultAssetCategory: value })}
-              placeholder="equipment"
-            />
-            <SettingsNumberField
-              label="Useful Life Months"
-              value={ruleForm().defaultUsefulLifeMonths ?? 0}
-              onInput={value =>
-                setRuleForm({ ...ruleForm(), defaultUsefulLifeMonths: value || undefined })
-              }
-            />
-            <SettingsNumberField
-              label="Sort Order"
-              value={ruleForm().sortOrder}
-              onInput={value => setRuleForm({ ...ruleForm(), sortOrder: value })}
-            />
-          </SettingsFormGrid>
-          <SettingsTextArea
-            label="Notes"
-            value={ruleForm().notes}
-            onInput={value => setRuleForm({ ...ruleForm(), notes: value })}
-          />
-          <div class="grid gap-2">
+          <SettingsFormSection title="Rule Scope">
+            <SettingsFormGrid>
+              <SettingsTextField
+                label="Account Code"
+                value={ruleForm().glAccountCode}
+                onInput={value => setRuleForm({ ...ruleForm(), glAccountCode: value })}
+                placeholder="training_tools"
+                required
+              />
+              <SettingsTextField
+                label="Fund / Program"
+                value={ruleForm().profitCenterCode}
+                onInput={value => setRuleForm({ ...ruleForm(), profitCenterCode: value })}
+                placeholder="TWSP-FBS"
+              />
+              <SettingsNumberField
+                label="Sort Order"
+                value={ruleForm().sortOrder}
+                onInput={value => setRuleForm({ ...ruleForm(), sortOrder: value })}
+              />
+            </SettingsFormGrid>
+          </SettingsFormSection>
+          <SettingsFormSection title="Default Classification">
+            <SettingsFormGrid>
+              <SettingsSelectField
+                label="Default Expense Category"
+                options={EXPENSE_CATEGORY_OPTIONS.slice(1)}
+                value={ruleForm().defaultExpenseCategory}
+                onChange={value => setRuleForm({ ...ruleForm(), defaultExpenseCategory: value })}
+              />
+              <SettingsSelectField
+                label="Default Treatment"
+                options={TREATMENT_OPTIONS.slice(1)}
+                value={ruleForm().defaultAccountingTreatment}
+                onChange={value =>
+                  setRuleForm({ ...ruleForm(), defaultAccountingTreatment: value })
+                }
+              />
+              <SettingsTextField
+                label="Cost Type"
+                value={ruleForm().defaultCostType}
+                onInput={value => setRuleForm({ ...ruleForm(), defaultCostType: value })}
+                placeholder="common"
+              />
+            </SettingsFormGrid>
+          </SettingsFormSection>
+          <SettingsFormSection title="Asset Handling">
+            <SettingsFormGrid>
+              <SettingsTextField
+                label="Asset Category"
+                value={ruleForm().defaultAssetCategory}
+                onInput={value => setRuleForm({ ...ruleForm(), defaultAssetCategory: value })}
+                placeholder="equipment"
+              />
+              <SettingsNumberField
+                label="Useful Life Months"
+                value={ruleForm().defaultUsefulLifeMonths ?? 0}
+                onInput={value =>
+                  setRuleForm({ ...ruleForm(), defaultUsefulLifeMonths: value || undefined })
+                }
+              />
+            </SettingsFormGrid>
             <SettingsCheckbox
               checked={ruleForm().requiresAssetReview}
               onChange={requiresAssetReview => setRuleForm({ ...ruleForm(), requiresAssetReview })}
               label="Requires asset review"
             />
+          </SettingsFormSection>
+          <SettingsFormSection title="Notes & Status">
+            <SettingsTextArea
+              label="Notes"
+              value={ruleForm().notes}
+              onInput={value => setRuleForm({ ...ruleForm(), notes: value })}
+            />
             <SettingsCheckbox
               checked={ruleForm().active}
               onChange={active => setRuleForm({ ...ruleForm(), active })}
             />
-          </div>
+          </SettingsFormSection>
           <SettingsStickyFooter>
             <ModalFooter
               onCancel={closeRuleModal}

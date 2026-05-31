@@ -72,9 +72,27 @@ export function SettingsEmptyRow(props: { colSpan: number; title: string; detail
 
 export function SettingsModalForm(props: { onSubmit: (e: Event) => void; children: JSX.Element }) {
   return (
-    <form onSubmit={props.onSubmit} class="space-y-5">
+    <form onSubmit={props.onSubmit} class="space-y-4">
       {props.children}
     </form>
+  )
+}
+
+export function SettingsFormSection(props: {
+  title: string
+  description?: string
+  children: JSX.Element
+}) {
+  return (
+    <section class="rounded-lg border border-border bg-surface-muted/40 p-4">
+      <div class="mb-3">
+        <h3 class="text-sm font-semibold text-foreground">{props.title}</h3>
+        <Show when={props.description}>
+          <p class="text-xs text-muted mt-0.5">{props.description}</p>
+        </Show>
+      </div>
+      <div class="space-y-3">{props.children}</div>
+    </section>
   )
 }
 
@@ -83,8 +101,8 @@ export function SettingsFormGrid(props: { children: JSX.Element; columns?: "two"
     <div
       class={
         props.columns === "three"
-          ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
-          : "grid grid-cols-1 sm:grid-cols-2 gap-4"
+          ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3"
+          : "grid grid-cols-1 sm:grid-cols-2 gap-3"
       }
     >
       {props.children}
