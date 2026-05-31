@@ -1,5 +1,5 @@
 import type { GlAccount, GlAccountSection } from "@ark/data-types"
-import { DataTable, Modal, ModalFooter, PageContainer, PageHeader, THead, Th, Tr } from "@ark/ui"
+import { Modal, ModalFooter, PageContainer, PageHeader, THead, Th, Tr } from "@ark/ui"
 import {
   type ClassificationRuleSetting,
   type CreateGlAccountInput,
@@ -25,6 +25,7 @@ import {
 import { createMemo, createSignal, For, Match, Show, Switch } from "solid-js"
 import {
   SettingsCheckbox,
+  SettingsDataTable,
   SettingsFormGrid,
   SettingsModalForm,
   SettingsNumberField,
@@ -34,7 +35,6 @@ import {
   SettingsStatCard,
   SettingsStatusPill,
   SettingsStickyFooter,
-  SettingsTableShell,
   SettingsTextArea,
   SettingsTextField,
 } from "@/components/finance/settings/settings-ui"
@@ -416,56 +416,54 @@ export default function FinanceSettingsPage() {
               />
               <QueryBoundary query={glAccounts}>
                 {() => (
-                  <SettingsTableShell>
-                    <DataTable>
-                      <THead>
-                        <Th size="compact">Code</Th>
-                        <Th size="compact">Label</Th>
-                        <Th size="compact">Section</Th>
-                        <Th size="compact">Default Treatment</Th>
-                        <Th size="compact">Status</Th>
-                        <Th size="compact" align="right">
-                          Actions
-                        </Th>
-                      </THead>
-                      <tbody>
-                        <For each={sortedGlAccounts()}>
-                          {acct => (
-                            <Tr class={acct.active ? "" : "opacity-50"} hover={false}>
-                              <td class="px-3 py-2 font-mono text-xs text-muted whitespace-nowrap">
-                                {acct.code}
-                              </td>
-                              <td class="px-3 py-2 text-sm text-foreground min-w-[220px]">
-                                <span class="block font-medium">{acct.label}</span>
-                                <Show when={acct.notes}>
-                                  <span class="block text-xs text-muted">{acct.notes}</span>
-                                </Show>
-                              </td>
-                              <td class="px-3 py-2 text-sm text-muted whitespace-nowrap">
-                                {SECTION_LABELS[acct.section]}
-                              </td>
-                              <td class="px-3 py-2 text-sm text-muted whitespace-nowrap">
-                                {acct.defaultAccountingTreatment ?? "-"}
-                              </td>
-                              <td class="px-3 py-2">
-                                <SettingsStatusPill active={acct.active} />
-                              </td>
-                              <td class="px-3 py-2 text-right whitespace-nowrap">
-                                <SettingsRowButton onClick={() => openEditGl(acct)}>
-                                  Edit
+                  <SettingsDataTable>
+                    <THead>
+                      <Th size="compact">Code</Th>
+                      <Th size="compact">Label</Th>
+                      <Th size="compact">Section</Th>
+                      <Th size="compact">Default Treatment</Th>
+                      <Th size="compact">Status</Th>
+                      <Th size="compact" align="right">
+                        Actions
+                      </Th>
+                    </THead>
+                    <tbody>
+                      <For each={sortedGlAccounts()}>
+                        {acct => (
+                          <Tr class={acct.active ? "" : "opacity-50"} hover={false}>
+                            <td class="px-3 py-2 font-mono text-xs text-muted whitespace-nowrap">
+                              {acct.code}
+                            </td>
+                            <td class="px-3 py-2 text-sm text-foreground min-w-[220px]">
+                              <span class="block font-medium">{acct.label}</span>
+                              <Show when={acct.notes}>
+                                <span class="block text-xs text-muted">{acct.notes}</span>
+                              </Show>
+                            </td>
+                            <td class="px-3 py-2 text-sm text-muted whitespace-nowrap">
+                              {SECTION_LABELS[acct.section]}
+                            </td>
+                            <td class="px-3 py-2 text-sm text-muted whitespace-nowrap">
+                              {acct.defaultAccountingTreatment ?? "-"}
+                            </td>
+                            <td class="px-3 py-2">
+                              <SettingsStatusPill active={acct.active} />
+                            </td>
+                            <td class="px-3 py-2 text-right whitespace-nowrap">
+                              <SettingsRowButton onClick={() => openEditGl(acct)}>
+                                Edit
+                              </SettingsRowButton>
+                              <Show when={acct.active}>
+                                <SettingsRowButton onClick={() => deactivateGl.mutate(acct.id)}>
+                                  Deactivate
                                 </SettingsRowButton>
-                                <Show when={acct.active}>
-                                  <SettingsRowButton onClick={() => deactivateGl.mutate(acct.id)}>
-                                    Deactivate
-                                  </SettingsRowButton>
-                                </Show>
-                              </td>
-                            </Tr>
-                          )}
-                        </For>
-                      </tbody>
-                    </DataTable>
-                  </SettingsTableShell>
+                              </Show>
+                            </td>
+                          </Tr>
+                        )}
+                      </For>
+                    </tbody>
+                  </SettingsDataTable>
                 )}
               </QueryBoundary>
             </Match>
@@ -479,55 +477,51 @@ export default function FinanceSettingsPage() {
               />
               <QueryBoundary query={profitCenters}>
                 {() => (
-                  <SettingsTableShell>
-                    <DataTable>
-                      <THead>
-                        <Th size="dense">Code</Th>
-                        <Th size="dense">Label</Th>
-                        <Th size="dense">Fund</Th>
-                        <Th size="dense">Status</Th>
-                        <Th size="dense" align="right">
-                          Actions
-                        </Th>
-                      </THead>
-                      <tbody>
-                        <For each={sortedProfitCenters()}>
-                          {item => (
-                            <tr class={`border-t border-border ${item.active ? "" : "opacity-50"}`}>
-                              <td class="py-3 px-4 text-sm font-mono text-foreground">
-                                {item.code}
-                              </td>
-                              <td class="py-3 px-4 text-sm text-foreground">
-                                <span class="font-medium">{item.label}</span>
-                                <Show when={item.notes}>
-                                  <span class="block text-xs text-muted">{item.notes}</span>
-                                </Show>
-                              </td>
-                              <td class="py-3 px-4 text-sm text-muted">{item.fundSource ?? "-"}</td>
-                              <td class="py-3 px-4">
-                                <SettingsStatusPill active={item.active} />
-                              </td>
-                              <td class="py-3 px-4 text-right whitespace-nowrap">
-                                <SettingsRowButton onClick={() => openEditPc(item)}>
-                                  Edit
-                                </SettingsRowButton>
-                                <SettingsRowButton
-                                  onClick={() =>
-                                    updateProfitCenter.mutate(
-                                      { id: item.id, active: !item.active },
-                                      { onSuccess: refreshAudit }
-                                    )
-                                  }
-                                >
-                                  {item.active ? "Deactivate" : "Restore"}
-                                </SettingsRowButton>
-                              </td>
-                            </tr>
-                          )}
-                        </For>
-                      </tbody>
-                    </DataTable>
-                  </SettingsTableShell>
+                  <SettingsDataTable>
+                    <THead>
+                      <Th size="dense">Code</Th>
+                      <Th size="dense">Label</Th>
+                      <Th size="dense">Fund</Th>
+                      <Th size="dense">Status</Th>
+                      <Th size="dense" align="right">
+                        Actions
+                      </Th>
+                    </THead>
+                    <tbody>
+                      <For each={sortedProfitCenters()}>
+                        {item => (
+                          <tr class={`border-t border-border ${item.active ? "" : "opacity-50"}`}>
+                            <td class="py-3 px-4 text-sm font-mono text-foreground">{item.code}</td>
+                            <td class="py-3 px-4 text-sm text-foreground">
+                              <span class="font-medium">{item.label}</span>
+                              <Show when={item.notes}>
+                                <span class="block text-xs text-muted">{item.notes}</span>
+                              </Show>
+                            </td>
+                            <td class="py-3 px-4 text-sm text-muted">{item.fundSource ?? "-"}</td>
+                            <td class="py-3 px-4">
+                              <SettingsStatusPill active={item.active} />
+                            </td>
+                            <td class="py-3 px-4 text-right whitespace-nowrap">
+                              <SettingsRowButton onClick={() => openEditPc(item)}>
+                                Edit
+                              </SettingsRowButton>
+                              <SettingsRowButton
+                                onClick={() =>
+                                  updateProfitCenter.mutate(
+                                    { id: item.id, active: !item.active },
+                                    { onSuccess: refreshAudit }
+                                  )
+                                }
+                              >
+                                {item.active ? "Deactivate" : "Restore"}
+                              </SettingsRowButton>
+                            </td>
+                          </tr>
+                        )}
+                      </For>
+                    </tbody>
+                  </SettingsDataTable>
                 )}
               </QueryBoundary>
             </Match>
@@ -541,55 +535,51 @@ export default function FinanceSettingsPage() {
               />
               <QueryBoundary query={offerings}>
                 {() => (
-                  <SettingsTableShell>
-                    <DataTable>
-                      <THead>
-                        <Th size="dense">Code</Th>
-                        <Th size="dense">Offering</Th>
-                        <Th size="dense">Sector</Th>
-                        <Th size="dense">Status</Th>
-                        <Th size="dense" align="right">
-                          Actions
-                        </Th>
-                      </THead>
-                      <tbody>
-                        <For each={sortedOfferings()}>
-                          {item => (
-                            <tr class={`border-t border-border ${item.active ? "" : "opacity-50"}`}>
-                              <td class="py-3 px-4 text-sm font-mono text-foreground">
-                                {item.code}
-                              </td>
-                              <td class="py-3 px-4 text-sm text-foreground">
-                                <span class="font-medium">{item.label}</span>
-                                <Show when={item.notes}>
-                                  <span class="block text-xs text-muted">{item.notes}</span>
-                                </Show>
-                              </td>
-                              <td class="py-3 px-4 text-sm text-muted">{item.sector ?? "-"}</td>
-                              <td class="py-3 px-4">
-                                <SettingsStatusPill active={item.active} />
-                              </td>
-                              <td class="py-3 px-4 text-right whitespace-nowrap">
-                                <SettingsRowButton onClick={() => openEditOffering(item)}>
-                                  Edit
-                                </SettingsRowButton>
-                                <SettingsRowButton
-                                  onClick={() =>
-                                    updateOffering.mutate(
-                                      { id: item.id, active: !item.active },
-                                      { onSuccess: refreshAudit }
-                                    )
-                                  }
-                                >
-                                  {item.active ? "Deactivate" : "Restore"}
-                                </SettingsRowButton>
-                              </td>
-                            </tr>
-                          )}
-                        </For>
-                      </tbody>
-                    </DataTable>
-                  </SettingsTableShell>
+                  <SettingsDataTable>
+                    <THead>
+                      <Th size="dense">Code</Th>
+                      <Th size="dense">Offering</Th>
+                      <Th size="dense">Sector</Th>
+                      <Th size="dense">Status</Th>
+                      <Th size="dense" align="right">
+                        Actions
+                      </Th>
+                    </THead>
+                    <tbody>
+                      <For each={sortedOfferings()}>
+                        {item => (
+                          <tr class={`border-t border-border ${item.active ? "" : "opacity-50"}`}>
+                            <td class="py-3 px-4 text-sm font-mono text-foreground">{item.code}</td>
+                            <td class="py-3 px-4 text-sm text-foreground">
+                              <span class="font-medium">{item.label}</span>
+                              <Show when={item.notes}>
+                                <span class="block text-xs text-muted">{item.notes}</span>
+                              </Show>
+                            </td>
+                            <td class="py-3 px-4 text-sm text-muted">{item.sector ?? "-"}</td>
+                            <td class="py-3 px-4">
+                              <SettingsStatusPill active={item.active} />
+                            </td>
+                            <td class="py-3 px-4 text-right whitespace-nowrap">
+                              <SettingsRowButton onClick={() => openEditOffering(item)}>
+                                Edit
+                              </SettingsRowButton>
+                              <SettingsRowButton
+                                onClick={() =>
+                                  updateOffering.mutate(
+                                    { id: item.id, active: !item.active },
+                                    { onSuccess: refreshAudit }
+                                  )
+                                }
+                              >
+                                {item.active ? "Deactivate" : "Restore"}
+                              </SettingsRowButton>
+                            </td>
+                          </tr>
+                        )}
+                      </For>
+                    </tbody>
+                  </SettingsDataTable>
                 )}
               </QueryBoundary>
             </Match>
@@ -603,60 +593,58 @@ export default function FinanceSettingsPage() {
               />
               <QueryBoundary query={rules}>
                 {() => (
-                  <SettingsTableShell>
-                    <DataTable>
-                      <THead>
-                        <Th size="dense">Account Code</Th>
-                        <Th size="dense">Fund / Program</Th>
-                        <Th size="dense">Defaults</Th>
-                        <Th size="dense">Status</Th>
-                        <Th size="dense" align="right">
-                          Actions
-                        </Th>
-                      </THead>
-                      <tbody>
-                        <For each={sortedRules()}>
-                          {item => (
-                            <tr class={`border-t border-border ${item.active ? "" : "opacity-50"}`}>
-                              <td class="py-3 px-4 text-sm font-mono text-foreground">
-                                {item.glAccountCode}
-                              </td>
-                              <td class="py-3 px-4 text-sm text-muted">
-                                {item.profitCenterCode ?? "-"}
-                              </td>
-                              <td class="py-3 px-4 text-xs text-muted">
-                                <span class="block text-foreground">
-                                  {item.defaultExpenseCategory ?? "-"}
-                                </span>
-                                {item.defaultAccountingTreatment ?? "-"}
-                                <Show when={item.requiresAssetReview}>
-                                  <span class="ml-2 text-primary">Asset review</span>
-                                </Show>
-                              </td>
-                              <td class="py-3 px-4">
-                                <SettingsStatusPill active={item.active} />
-                              </td>
-                              <td class="py-3 px-4 text-right whitespace-nowrap">
-                                <SettingsRowButton onClick={() => openEditRule(item)}>
-                                  Edit
-                                </SettingsRowButton>
-                                <SettingsRowButton
-                                  onClick={() =>
-                                    updateRule.mutate(
-                                      { id: item.id, active: !item.active },
-                                      { onSuccess: refreshAudit }
-                                    )
-                                  }
-                                >
-                                  {item.active ? "Deactivate" : "Restore"}
-                                </SettingsRowButton>
-                              </td>
-                            </tr>
-                          )}
-                        </For>
-                      </tbody>
-                    </DataTable>
-                  </SettingsTableShell>
+                  <SettingsDataTable>
+                    <THead>
+                      <Th size="dense">Account Code</Th>
+                      <Th size="dense">Fund / Program</Th>
+                      <Th size="dense">Defaults</Th>
+                      <Th size="dense">Status</Th>
+                      <Th size="dense" align="right">
+                        Actions
+                      </Th>
+                    </THead>
+                    <tbody>
+                      <For each={sortedRules()}>
+                        {item => (
+                          <tr class={`border-t border-border ${item.active ? "" : "opacity-50"}`}>
+                            <td class="py-3 px-4 text-sm font-mono text-foreground">
+                              {item.glAccountCode}
+                            </td>
+                            <td class="py-3 px-4 text-sm text-muted">
+                              {item.profitCenterCode ?? "-"}
+                            </td>
+                            <td class="py-3 px-4 text-xs text-muted">
+                              <span class="block text-foreground">
+                                {item.defaultExpenseCategory ?? "-"}
+                              </span>
+                              {item.defaultAccountingTreatment ?? "-"}
+                              <Show when={item.requiresAssetReview}>
+                                <span class="ml-2 text-primary">Asset review</span>
+                              </Show>
+                            </td>
+                            <td class="py-3 px-4">
+                              <SettingsStatusPill active={item.active} />
+                            </td>
+                            <td class="py-3 px-4 text-right whitespace-nowrap">
+                              <SettingsRowButton onClick={() => openEditRule(item)}>
+                                Edit
+                              </SettingsRowButton>
+                              <SettingsRowButton
+                                onClick={() =>
+                                  updateRule.mutate(
+                                    { id: item.id, active: !item.active },
+                                    { onSuccess: refreshAudit }
+                                  )
+                                }
+                              >
+                                {item.active ? "Deactivate" : "Restore"}
+                              </SettingsRowButton>
+                            </td>
+                          </tr>
+                        )}
+                      </For>
+                    </tbody>
+                  </SettingsDataTable>
                 )}
               </QueryBoundary>
             </Match>
@@ -668,36 +656,32 @@ export default function FinanceSettingsPage() {
               />
               <QueryBoundary query={auditEvents}>
                 {result => (
-                  <SettingsTableShell>
-                    <DataTable>
-                      <THead>
-                        <Th size="dense">When</Th>
-                        <Th size="dense">Change</Th>
-                        <Th size="dense">By</Th>
-                      </THead>
-                      <tbody>
-                        <For each={result.items}>
-                          {event => (
-                            <tr class="border-t border-border">
-                              <td class="py-3 px-4 text-xs text-muted whitespace-nowrap">
-                                {formatDateTime(event.createdAt)}
-                              </td>
-                              <td class="py-3 px-4 text-sm text-foreground">
-                                <span class="font-medium">{actionLabel(event.action)}</span>{" "}
-                                <span class="text-muted">{event.entityType}</span>
-                                <span class="block text-xs text-muted font-mono">
-                                  {event.entityId}
-                                </span>
-                              </td>
-                              <td class="py-3 px-4 text-sm text-muted">
-                                {event.actor ?? "System"}
-                              </td>
-                            </tr>
-                          )}
-                        </For>
-                      </tbody>
-                    </DataTable>
-                  </SettingsTableShell>
+                  <SettingsDataTable>
+                    <THead>
+                      <Th size="dense">When</Th>
+                      <Th size="dense">Change</Th>
+                      <Th size="dense">By</Th>
+                    </THead>
+                    <tbody>
+                      <For each={result.items}>
+                        {event => (
+                          <tr class="border-t border-border">
+                            <td class="py-3 px-4 text-xs text-muted whitespace-nowrap">
+                              {formatDateTime(event.createdAt)}
+                            </td>
+                            <td class="py-3 px-4 text-sm text-foreground">
+                              <span class="font-medium">{actionLabel(event.action)}</span>{" "}
+                              <span class="text-muted">{event.entityType}</span>
+                              <span class="block text-xs text-muted font-mono">
+                                {event.entityId}
+                              </span>
+                            </td>
+                            <td class="py-3 px-4 text-sm text-muted">{event.actor ?? "System"}</td>
+                          </tr>
+                        )}
+                      </For>
+                    </tbody>
+                  </SettingsDataTable>
                 )}
               </QueryBoundary>
             </Match>
