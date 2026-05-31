@@ -34,11 +34,13 @@ import {
 import { createMemo, createSignal, For, Match, Show, Switch } from "solid-js"
 import {
   SettingsCheckbox,
+  SettingsEmptyRow,
   SettingsFormGrid,
   SettingsModalForm,
   SettingsNumberField,
   SettingsPanelHeader,
   SettingsRowButton,
+  SettingsSearchInput,
   SettingsSelectField,
   SettingsStatCard,
   SettingsStatusPill,
@@ -129,6 +131,11 @@ const blankRuleForm = () => ({
   active: true,
 })
 
+function matchesSearch(query: string, values: string[]) {
+  const needle = query.toLowerCase()
+  return values.some(value => value.toLowerCase().includes(needle))
+}
+
 export default function FinanceSettingsPage() {
   const glAccounts = useGlAccounts(() => ({ includeInactive: true }))
   const profitCenters = useProfitCenters(() => ({ includeInactive: true }))
@@ -147,6 +154,8 @@ export default function FinanceSettingsPage() {
   const updateRule = useUpdateClassificationRule()
 
   const [tab, setTab] = createSignal<SettingsTab>("accounts")
+  const [accountSearch, setAccountSearch] = createSignal("")
+  const [ruleSearch, setRuleSearch] = createSignal("")
   const [glModalOpen, setGlModalOpen] = createSignal(false)
   const [editingGl, setEditingGl] = createSignal<GlAccount | null>(null)
   const [glForm, setGlForm] = createSignal<CreateGlAccountInput>(blankGlForm())
@@ -197,6 +206,34 @@ export default function FinanceSettingsPage() {
         (a.profitCenterCode ?? "").localeCompare(b.profitCenterCode ?? "")
     )
   )
+  const filteredGlAccounts = createMemo(() => {
+    const query = accountSearch().trim()
+    if (!query) return sortedGlAccounts()
+    return sortedGlAccounts().filter(item =>
+      matchesSearch(query, [
+        item.code,
+        item.label,
+        SECTION_LABELS[item.section],
+        item.defaultAccountingTreatment ?? "",
+        item.notes ?? "",
+      ])
+    )
+  })
+  const filteredRules = createMemo(() => {
+    const query = ruleSearch().trim()
+    if (!query) return sortedRules()
+    return sortedRules().filter(item =>
+      matchesSearch(query, [
+        item.glAccountCode,
+        item.profitCenterCode ?? "",
+        item.defaultExpenseCategory ?? "",
+        item.defaultAccountingTreatment ?? "",
+        item.defaultCostType ?? "",
+        item.defaultAssetCategory ?? "",
+        item.notes ?? "",
+      ])
+    )
+  })
 
   const refreshAudit = () => void auditEvents.refetch()
 
@@ -421,55 +458,91 @@ export default function FinanceSettingsPage() {
                 hint="Chart of accounts used by disbursements and reports"
                 actionLabel="New Account"
                 onAction={openCreateGl}
+                trailing={
+                  <SettingsSearchInput
+                    value={accountSearch()}
+                    onInput={setAccountSearch}
+                    placeholder="Search accounts"
+                  />
+                }
               />
               <QueryBoundary query={glAccounts}>
                 {() => (
                   <ScrollableDataTable>
                     <THead>
-                      <Th size="compact">Code</Th>
-                      <Th size="compact">Label</Th>
-                      <Th size="compact">Section</Th>
-                      <Th size="compact">Default Treatment</Th>
-                      <Th size="compact">Status</Th>
-                      <Th size="compact" align="right">
+                      <Th size="compact" class="w-[190px]">
+                        Code
+                      </Th>
+                      <Th size="compact" class="min-w-[260px]">
+                        Label
+                      </Th>
+                      <Th size="compact" class="w-[170px]">
+                        Section
+                      </Th>
+                      <Th size="compact" class="w-[170px]">
+                        Default Treatment
+                      </Th>
+                      <Th size="compact" class="w-[100px]">
+                        Status
+                      </Th>
+                      <Th size="compact" align="right" class="w-[160px]">
                         Actions
                       </Th>
                     </THead>
                     <tbody>
-                      <For each={sortedGlAccounts()}>
-                        {acct => (
-                          <Tr class={acct.active ? "" : "opacity-50"} hover={false}>
-                            <td class="px-3 py-2 font-mono text-xs text-muted whitespace-nowrap">
-                              {acct.code}
-                            </td>
-                            <td class="px-3 py-2 text-sm text-foreground min-w-[220px]">
-                              <span class="block font-medium">{acct.label}</span>
-                              <Show when={acct.notes}>
-                                <span class="block text-xs text-muted">{acct.notes}</span>
-                              </Show>
-                            </td>
-                            <td class="px-3 py-2 text-sm text-muted whitespace-nowrap">
-                              {SECTION_LABELS[acct.section]}
-                            </td>
-                            <td class="px-3 py-2 text-sm text-muted whitespace-nowrap">
-                              {acct.defaultAccountingTreatment ?? "-"}
-                            </td>
-                            <td class="px-3 py-2">
-                              <SettingsStatusPill active={acct.active} />
-                            </td>
-                            <td class="px-3 py-2 text-right whitespace-nowrap">
-                              <SettingsRowButton onClick={() => openEditGl(acct)}>
-                                Edit
-                              </SettingsRowButton>
-                              <Show when={acct.active}>
-                                <SettingsRowButton onClick={() => deactivateGl.mutate(acct.id)}>
-                                  Deactivate
+                      <Show
+                        when={filteredGlAccounts().length > 0}
+                        fallback={
+                          <SettingsEmptyRow
+                            colSpan={6}
+                            title={
+                              accountSearch().trim()
+                                ? "No matching account codes"
+                                : "No account codes yet"
+                            }
+                            detail={
+                              accountSearch().trim()
+                                ? "Try another code, label, section, or treatment."
+                                : "Create an account code to start classifying transactions."
+                            }
+                          />
+                        }
+                      >
+                        <For each={filteredGlAccounts()}>
+                          {acct => (
+                            <Tr class={acct.active ? "" : "opacity-50"} hover={false}>
+                              <td class="px-3 py-2 font-mono text-xs text-muted whitespace-nowrap">
+                                {acct.code}
+                              </td>
+                              <td class="px-3 py-2 text-sm text-foreground min-w-[220px]">
+                                <span class="block font-medium">{acct.label}</span>
+                                <Show when={acct.notes}>
+                                  <span class="block text-xs text-muted">{acct.notes}</span>
+                                </Show>
+                              </td>
+                              <td class="px-3 py-2 text-sm text-muted whitespace-nowrap">
+                                {SECTION_LABELS[acct.section]}
+                              </td>
+                              <td class="px-3 py-2 text-sm text-muted whitespace-nowrap">
+                                {acct.defaultAccountingTreatment ?? "-"}
+                              </td>
+                              <td class="px-3 py-2">
+                                <SettingsStatusPill active={acct.active} />
+                              </td>
+                              <td class="px-3 py-2 text-right whitespace-nowrap">
+                                <SettingsRowButton onClick={() => openEditGl(acct)}>
+                                  Edit
                                 </SettingsRowButton>
-                              </Show>
-                            </td>
-                          </Tr>
-                        )}
-                      </For>
+                                <Show when={acct.active}>
+                                  <SettingsRowButton onClick={() => deactivateGl.mutate(acct.id)}>
+                                    Deactivate
+                                  </SettingsRowButton>
+                                </Show>
+                              </td>
+                            </Tr>
+                          )}
+                        </For>
+                      </Show>
                     </tbody>
                   </ScrollableDataTable>
                 )}
@@ -487,47 +560,68 @@ export default function FinanceSettingsPage() {
                 {() => (
                   <ScrollableDataTable>
                     <THead>
-                      <Th size="dense">Code</Th>
-                      <Th size="dense">Label</Th>
-                      <Th size="dense">Fund</Th>
-                      <Th size="dense">Status</Th>
-                      <Th size="dense" align="right">
+                      <Th size="dense" class="w-[180px]">
+                        Code
+                      </Th>
+                      <Th size="dense" class="min-w-[260px]">
+                        Label
+                      </Th>
+                      <Th size="dense" class="w-[180px]">
+                        Fund
+                      </Th>
+                      <Th size="dense" class="w-[100px]">
+                        Status
+                      </Th>
+                      <Th size="dense" align="right" class="w-[160px]">
                         Actions
                       </Th>
                     </THead>
                     <tbody>
-                      <For each={sortedProfitCenters()}>
-                        {item => (
-                          <tr class={`border-t border-border ${item.active ? "" : "opacity-50"}`}>
-                            <td class="py-3 px-4 text-sm font-mono text-foreground">{item.code}</td>
-                            <td class="py-3 px-4 text-sm text-foreground">
-                              <span class="font-medium">{item.label}</span>
-                              <Show when={item.notes}>
-                                <span class="block text-xs text-muted">{item.notes}</span>
-                              </Show>
-                            </td>
-                            <td class="py-3 px-4 text-sm text-muted">{item.fundSource ?? "-"}</td>
-                            <td class="py-3 px-4">
-                              <SettingsStatusPill active={item.active} />
-                            </td>
-                            <td class="py-3 px-4 text-right whitespace-nowrap">
-                              <SettingsRowButton onClick={() => openEditPc(item)}>
-                                Edit
-                              </SettingsRowButton>
-                              <SettingsRowButton
-                                onClick={() =>
-                                  updateProfitCenter.mutate(
-                                    { id: item.id, active: !item.active },
-                                    { onSuccess: refreshAudit }
-                                  )
-                                }
-                              >
-                                {item.active ? "Deactivate" : "Restore"}
-                              </SettingsRowButton>
-                            </td>
-                          </tr>
-                        )}
-                      </For>
+                      <Show
+                        when={sortedProfitCenters().length > 0}
+                        fallback={
+                          <SettingsEmptyRow
+                            colSpan={5}
+                            title="No funds or programs yet"
+                            detail="Create a fund or program to make it available in finance forms."
+                          />
+                        }
+                      >
+                        <For each={sortedProfitCenters()}>
+                          {item => (
+                            <tr class={`border-t border-border ${item.active ? "" : "opacity-50"}`}>
+                              <td class="py-3 px-4 text-sm font-mono text-foreground">
+                                {item.code}
+                              </td>
+                              <td class="py-3 px-4 text-sm text-foreground">
+                                <span class="font-medium">{item.label}</span>
+                                <Show when={item.notes}>
+                                  <span class="block text-xs text-muted">{item.notes}</span>
+                                </Show>
+                              </td>
+                              <td class="py-3 px-4 text-sm text-muted">{item.fundSource ?? "-"}</td>
+                              <td class="py-3 px-4">
+                                <SettingsStatusPill active={item.active} />
+                              </td>
+                              <td class="py-3 px-4 text-right whitespace-nowrap">
+                                <SettingsRowButton onClick={() => openEditPc(item)}>
+                                  Edit
+                                </SettingsRowButton>
+                                <SettingsRowButton
+                                  onClick={() =>
+                                    updateProfitCenter.mutate(
+                                      { id: item.id, active: !item.active },
+                                      { onSuccess: refreshAudit }
+                                    )
+                                  }
+                                >
+                                  {item.active ? "Deactivate" : "Restore"}
+                                </SettingsRowButton>
+                              </td>
+                            </tr>
+                          )}
+                        </For>
+                      </Show>
                     </tbody>
                   </ScrollableDataTable>
                 )}
@@ -545,47 +639,68 @@ export default function FinanceSettingsPage() {
                 {() => (
                   <ScrollableDataTable>
                     <THead>
-                      <Th size="dense">Code</Th>
-                      <Th size="dense">Offering</Th>
-                      <Th size="dense">Sector</Th>
-                      <Th size="dense">Status</Th>
-                      <Th size="dense" align="right">
+                      <Th size="dense" class="w-[180px]">
+                        Code
+                      </Th>
+                      <Th size="dense" class="min-w-[280px]">
+                        Offering
+                      </Th>
+                      <Th size="dense" class="w-[180px]">
+                        Sector
+                      </Th>
+                      <Th size="dense" class="w-[100px]">
+                        Status
+                      </Th>
+                      <Th size="dense" align="right" class="w-[160px]">
                         Actions
                       </Th>
                     </THead>
                     <tbody>
-                      <For each={sortedOfferings()}>
-                        {item => (
-                          <tr class={`border-t border-border ${item.active ? "" : "opacity-50"}`}>
-                            <td class="py-3 px-4 text-sm font-mono text-foreground">{item.code}</td>
-                            <td class="py-3 px-4 text-sm text-foreground">
-                              <span class="font-medium">{item.label}</span>
-                              <Show when={item.notes}>
-                                <span class="block text-xs text-muted">{item.notes}</span>
-                              </Show>
-                            </td>
-                            <td class="py-3 px-4 text-sm text-muted">{item.sector ?? "-"}</td>
-                            <td class="py-3 px-4">
-                              <SettingsStatusPill active={item.active} />
-                            </td>
-                            <td class="py-3 px-4 text-right whitespace-nowrap">
-                              <SettingsRowButton onClick={() => openEditOffering(item)}>
-                                Edit
-                              </SettingsRowButton>
-                              <SettingsRowButton
-                                onClick={() =>
-                                  updateOffering.mutate(
-                                    { id: item.id, active: !item.active },
-                                    { onSuccess: refreshAudit }
-                                  )
-                                }
-                              >
-                                {item.active ? "Deactivate" : "Restore"}
-                              </SettingsRowButton>
-                            </td>
-                          </tr>
-                        )}
-                      </For>
+                      <Show
+                        when={sortedOfferings().length > 0}
+                        fallback={
+                          <SettingsEmptyRow
+                            colSpan={5}
+                            title="No training offerings yet"
+                            detail="Create offerings to align finance settings with training programs."
+                          />
+                        }
+                      >
+                        <For each={sortedOfferings()}>
+                          {item => (
+                            <tr class={`border-t border-border ${item.active ? "" : "opacity-50"}`}>
+                              <td class="py-3 px-4 text-sm font-mono text-foreground">
+                                {item.code}
+                              </td>
+                              <td class="py-3 px-4 text-sm text-foreground">
+                                <span class="font-medium">{item.label}</span>
+                                <Show when={item.notes}>
+                                  <span class="block text-xs text-muted">{item.notes}</span>
+                                </Show>
+                              </td>
+                              <td class="py-3 px-4 text-sm text-muted">{item.sector ?? "-"}</td>
+                              <td class="py-3 px-4">
+                                <SettingsStatusPill active={item.active} />
+                              </td>
+                              <td class="py-3 px-4 text-right whitespace-nowrap">
+                                <SettingsRowButton onClick={() => openEditOffering(item)}>
+                                  Edit
+                                </SettingsRowButton>
+                                <SettingsRowButton
+                                  onClick={() =>
+                                    updateOffering.mutate(
+                                      { id: item.id, active: !item.active },
+                                      { onSuccess: refreshAudit }
+                                    )
+                                  }
+                                >
+                                  {item.active ? "Deactivate" : "Restore"}
+                                </SettingsRowButton>
+                              </td>
+                            </tr>
+                          )}
+                        </For>
+                      </Show>
                     </tbody>
                   </ScrollableDataTable>
                 )}
@@ -598,59 +713,91 @@ export default function FinanceSettingsPage() {
                 hint="Defaults that reduce accounting choices in day-to-day forms"
                 actionLabel="New Rule"
                 onAction={openCreateRule}
+                trailing={
+                  <SettingsSearchInput
+                    value={ruleSearch()}
+                    onInput={setRuleSearch}
+                    placeholder="Search rules"
+                  />
+                }
               />
               <QueryBoundary query={rules}>
                 {() => (
                   <ScrollableDataTable>
                     <THead>
-                      <Th size="dense">Account Code</Th>
-                      <Th size="dense">Fund / Program</Th>
-                      <Th size="dense">Defaults</Th>
-                      <Th size="dense">Status</Th>
-                      <Th size="dense" align="right">
+                      <Th size="dense" class="w-[190px]">
+                        Account Code
+                      </Th>
+                      <Th size="dense" class="w-[180px]">
+                        Fund / Program
+                      </Th>
+                      <Th size="dense" class="min-w-[260px]">
+                        Defaults
+                      </Th>
+                      <Th size="dense" class="w-[100px]">
+                        Status
+                      </Th>
+                      <Th size="dense" align="right" class="w-[160px]">
                         Actions
                       </Th>
                     </THead>
                     <tbody>
-                      <For each={sortedRules()}>
-                        {item => (
-                          <tr class={`border-t border-border ${item.active ? "" : "opacity-50"}`}>
-                            <td class="py-3 px-4 text-sm font-mono text-foreground">
-                              {item.glAccountCode}
-                            </td>
-                            <td class="py-3 px-4 text-sm text-muted">
-                              {item.profitCenterCode ?? "-"}
-                            </td>
-                            <td class="py-3 px-4 text-xs text-muted">
-                              <span class="block text-foreground">
-                                {item.defaultExpenseCategory ?? "-"}
-                              </span>
-                              {item.defaultAccountingTreatment ?? "-"}
-                              <Show when={item.requiresAssetReview}>
-                                <span class="ml-2 text-primary">Asset review</span>
-                              </Show>
-                            </td>
-                            <td class="py-3 px-4">
-                              <SettingsStatusPill active={item.active} />
-                            </td>
-                            <td class="py-3 px-4 text-right whitespace-nowrap">
-                              <SettingsRowButton onClick={() => openEditRule(item)}>
-                                Edit
-                              </SettingsRowButton>
-                              <SettingsRowButton
-                                onClick={() =>
-                                  updateRule.mutate(
-                                    { id: item.id, active: !item.active },
-                                    { onSuccess: refreshAudit }
-                                  )
-                                }
-                              >
-                                {item.active ? "Deactivate" : "Restore"}
-                              </SettingsRowButton>
-                            </td>
-                          </tr>
-                        )}
-                      </For>
+                      <Show
+                        when={filteredRules().length > 0}
+                        fallback={
+                          <SettingsEmptyRow
+                            colSpan={5}
+                            title={
+                              ruleSearch().trim() ? "No matching auto-coding rules" : "No rules yet"
+                            }
+                            detail={
+                              ruleSearch().trim()
+                                ? "Try another account, fund, category, or treatment."
+                                : "Create rules to apply accounting defaults in forms."
+                            }
+                          />
+                        }
+                      >
+                        <For each={filteredRules()}>
+                          {item => (
+                            <tr class={`border-t border-border ${item.active ? "" : "opacity-50"}`}>
+                              <td class="py-3 px-4 text-sm font-mono text-foreground">
+                                {item.glAccountCode}
+                              </td>
+                              <td class="py-3 px-4 text-sm text-muted">
+                                {item.profitCenterCode ?? "-"}
+                              </td>
+                              <td class="py-3 px-4 text-xs text-muted">
+                                <span class="block text-foreground">
+                                  {item.defaultExpenseCategory ?? "-"}
+                                </span>
+                                {item.defaultAccountingTreatment ?? "-"}
+                                <Show when={item.requiresAssetReview}>
+                                  <span class="ml-2 text-primary">Asset review</span>
+                                </Show>
+                              </td>
+                              <td class="py-3 px-4">
+                                <SettingsStatusPill active={item.active} />
+                              </td>
+                              <td class="py-3 px-4 text-right whitespace-nowrap">
+                                <SettingsRowButton onClick={() => openEditRule(item)}>
+                                  Edit
+                                </SettingsRowButton>
+                                <SettingsRowButton
+                                  onClick={() =>
+                                    updateRule.mutate(
+                                      { id: item.id, active: !item.active },
+                                      { onSuccess: refreshAudit }
+                                    )
+                                  }
+                                >
+                                  {item.active ? "Deactivate" : "Restore"}
+                                </SettingsRowButton>
+                              </td>
+                            </tr>
+                          )}
+                        </For>
+                      </Show>
                     </tbody>
                   </ScrollableDataTable>
                 )}
@@ -666,28 +813,47 @@ export default function FinanceSettingsPage() {
                 {result => (
                   <ScrollableDataTable>
                     <THead>
-                      <Th size="dense">When</Th>
-                      <Th size="dense">Change</Th>
-                      <Th size="dense">By</Th>
+                      <Th size="dense" class="w-[180px]">
+                        When
+                      </Th>
+                      <Th size="dense" class="min-w-[320px]">
+                        Change
+                      </Th>
+                      <Th size="dense" class="w-[220px]">
+                        By
+                      </Th>
                     </THead>
                     <tbody>
-                      <For each={result.items}>
-                        {event => (
-                          <tr class="border-t border-border">
-                            <td class="py-3 px-4 text-xs text-muted whitespace-nowrap">
-                              {formatDateTime(event.createdAt)}
-                            </td>
-                            <td class="py-3 px-4 text-sm text-foreground">
-                              <span class="font-medium">{actionLabel(event.action)}</span>{" "}
-                              <span class="text-muted">{event.entityType}</span>
-                              <span class="block text-xs text-muted font-mono">
-                                {event.entityId}
-                              </span>
-                            </td>
-                            <td class="py-3 px-4 text-sm text-muted">{event.actor ?? "System"}</td>
-                          </tr>
-                        )}
-                      </For>
+                      <Show
+                        when={result.items.length > 0}
+                        fallback={
+                          <SettingsEmptyRow
+                            colSpan={3}
+                            title="No settings activity yet"
+                            detail="Finance setting changes will appear here."
+                          />
+                        }
+                      >
+                        <For each={result.items}>
+                          {event => (
+                            <tr class="border-t border-border">
+                              <td class="py-3 px-4 text-xs text-muted whitespace-nowrap">
+                                {formatDateTime(event.createdAt)}
+                              </td>
+                              <td class="py-3 px-4 text-sm text-foreground">
+                                <span class="font-medium">{actionLabel(event.action)}</span>{" "}
+                                <span class="text-muted">{event.entityType}</span>
+                                <span class="block text-xs text-muted font-mono">
+                                  {event.entityId}
+                                </span>
+                              </td>
+                              <td class="py-3 px-4 text-sm text-muted">
+                                {event.actor ?? "System"}
+                              </td>
+                            </tr>
+                          )}
+                        </For>
+                      </Show>
                     </tbody>
                   </ScrollableDataTable>
                 )}

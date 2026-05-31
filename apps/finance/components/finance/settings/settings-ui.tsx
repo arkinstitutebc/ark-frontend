@@ -17,23 +17,56 @@ export function SettingsPanelHeader(props: {
   hint: string
   actionLabel?: string
   onAction?: () => void
+  trailing?: JSX.Element
 }) {
   return (
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+    <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-3 mb-4">
       <div>
         <h2 class="text-base font-semibold text-foreground">{props.title}</h2>
         <p class="text-xs text-muted mt-0.5">{props.hint}</p>
       </div>
-      <Show when={props.actionLabel && props.onAction}>
-        <button
-          type="button"
-          onClick={props.onAction}
-          class="inline-flex items-center gap-2 px-3 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors self-start sm:self-auto"
-        >
-          <Icons.plus class="w-4 h-4" /> {props.actionLabel}
-        </button>
-      </Show>
+      <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+        <Show when={props.trailing}>{props.trailing}</Show>
+        <Show when={props.actionLabel && props.onAction}>
+          <button
+            type="button"
+            onClick={props.onAction}
+            class="inline-flex items-center gap-2 px-3 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors self-start sm:self-auto"
+          >
+            <Icons.plus class="w-4 h-4" /> {props.actionLabel}
+          </button>
+        </Show>
+      </div>
     </div>
+  )
+}
+
+export function SettingsSearchInput(props: {
+  value: string
+  onInput: (value: string) => void
+  placeholder: string
+}) {
+  return (
+    <input
+      type="search"
+      value={props.value}
+      onInput={e => props.onInput(e.currentTarget.value)}
+      placeholder={props.placeholder}
+      class="w-full sm:w-64 px-3 py-2 border border-border rounded-lg text-sm bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+    />
+  )
+}
+
+export function SettingsEmptyRow(props: { colSpan: number; title: string; detail?: string }) {
+  return (
+    <tr class="border-t border-border">
+      <td colSpan={props.colSpan} class="px-4 py-10 text-center">
+        <p class="text-sm font-medium text-foreground">{props.title}</p>
+        <Show when={props.detail}>
+          <p class="text-xs text-muted mt-1">{props.detail}</p>
+        </Show>
+      </td>
+    </tr>
   )
 }
 
