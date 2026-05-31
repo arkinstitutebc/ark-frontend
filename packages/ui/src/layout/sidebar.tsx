@@ -9,6 +9,7 @@ export interface NavItem {
   label: string
   href: string
   icon: typeof Folder
+  section?: string
 }
 
 export interface SidebarProps {
@@ -44,6 +45,19 @@ export function Sidebar(props: SidebarProps) {
   const currentPath = createMemo(() => pageContext.urlPathname)
   const portalUrl = () => props.mainPortalUrl ?? DEFAULT_PORTAL_URL
   const isActiveFn = (item: NavItem) => (props.isActive ?? defaultIsActive)(item, currentPath())
+  const navSections = createMemo(() => {
+    const groups: Array<{ label: string | null; items: NavItem[] }> = []
+    for (const item of props.navItems) {
+      const label = item.section ?? null
+      const current = groups.at(-1)
+      if (!current || current.label !== label) {
+        groups.push({ label, items: [item] })
+      } else {
+        current.items.push(item)
+      }
+    }
+    return groups
+  })
 
   const sidebarContent = () => (
     <div class="flex flex-col h-full bg-surface border-r border-border">
@@ -63,30 +77,43 @@ export function Sidebar(props: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav class="flex-1 px-2 py-3 space-y-1 overflow-y-auto">
-        <For each={props.navItems}>
-          {item => (
-            <a
-              href={item.href}
-              onClick={() => setMobileOpen(false)}
-              class={`group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                isActiveFn(item)
-                  ? "bg-surface-muted text-foreground font-semibold"
-                  : "text-muted hover:bg-surface-muted hover:text-foreground"
-              }`}
-            >
-              <item.icon
-                class={`w-[18px] h-[18px] flex-shrink-0 ${isActiveFn(item) ? "text-foreground" : "text-muted group-hover:text-foreground"}`}
-              />
-              <Show when={!collapsed()}>
-                <span>{item.label}</span>
+      <nav class="flex-1 px-2 py-3 overflow-y-auto">
+        <For each={navSections()}>
+          {section => (
+            <div class="mb-3 last:mb-0">
+              <Show when={section.label && !collapsed()}>
+                <p class="px-3 pb-1 text-[10px] font-semibold uppercase tracking-wider text-muted/70">
+                  {section.label}
+                </p>
               </Show>
-              <Show when={collapsed()}>
-                <span class="absolute left-full ml-2 px-2 py-1 bg-foreground text-background text-xs rounded hidden group-hover:block whitespace-nowrap z-50">
-                  {item.label}
-                </span>
-              </Show>
-            </a>
+              <div class="space-y-1">
+                <For each={section.items}>
+                  {item => (
+                    <a
+                      href={item.href}
+                      onClick={() => setMobileOpen(false)}
+                      class={`group relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                        isActiveFn(item)
+                          ? "bg-surface-muted text-foreground font-semibold"
+                          : "text-muted hover:bg-surface-muted hover:text-foreground"
+                      }`}
+                    >
+                      <item.icon
+                        class={`w-[18px] h-[18px] flex-shrink-0 ${isActiveFn(item) ? "text-foreground" : "text-muted group-hover:text-foreground"}`}
+                      />
+                      <Show when={!collapsed()}>
+                        <span>{item.label}</span>
+                      </Show>
+                      <Show when={collapsed()}>
+                        <span class="absolute left-full ml-2 px-2 py-1 bg-foreground text-background text-xs rounded hidden group-hover:block whitespace-nowrap z-50">
+                          {item.label}
+                        </span>
+                      </Show>
+                    </a>
+                  )}
+                </For>
+              </div>
+            </div>
           )}
         </For>
       </nav>
