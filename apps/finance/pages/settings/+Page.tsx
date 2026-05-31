@@ -1,16 +1,5 @@
 import type { GlAccount, GlAccountSection } from "@ark/data-types"
-import {
-  DataTable,
-  Modal,
-  ModalFooter,
-  PageContainer,
-  PageHeader,
-  Select,
-  THead,
-  Th,
-  Tr,
-  tonePillClass,
-} from "@ark/ui"
+import { DataTable, Modal, ModalFooter, PageContainer, PageHeader, THead, Th, Tr } from "@ark/ui"
 import {
   type ClassificationRuleSetting,
   type CreateGlAccountInput,
@@ -33,9 +22,20 @@ import {
   useUpdateProfitCenter,
   useUpdateTrainingOffering,
 } from "@data/hooks"
-import type { JSX } from "solid-js"
 import { createMemo, createSignal, For, Match, Show, Switch } from "solid-js"
-import { Icons, QueryBoundary } from "@/components/ui"
+import {
+  SettingsCheckbox,
+  SettingsNumberField,
+  SettingsPanelHeader,
+  SettingsRowButton,
+  SettingsSelectField,
+  SettingsStatCard,
+  SettingsStatusPill,
+  SettingsTableShell,
+  SettingsTextArea,
+  SettingsTextField,
+} from "@/components/finance/settings/settings-ui"
+import { QueryBoundary } from "@/components/ui"
 
 type SettingsTab = "accounts" | "profit-centers" | "offerings" | "rules" | "activity"
 
@@ -375,10 +375,10 @@ export default function FinanceSettingsPage() {
       />
 
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-        <StatCard label="Active account codes" value={activeGlAccounts()} />
-        <StatCard label="Active funds/programs" value={activeProfitCenters()} />
-        <StatCard label="Active offerings" value={activeOfferings()} />
-        <StatCard label="Active rules" value={activeRules()} />
+        <SettingsStatCard label="Active account codes" value={activeGlAccounts()} />
+        <SettingsStatCard label="Active funds/programs" value={activeProfitCenters()} />
+        <SettingsStatCard label="Active offerings" value={activeOfferings()} />
+        <SettingsStatCard label="Active rules" value={activeRules()} />
       </div>
 
       <div class="bg-surface border border-border rounded-lg overflow-hidden">
@@ -405,7 +405,7 @@ export default function FinanceSettingsPage() {
         <div class="p-4">
           <Switch>
             <Match when={tab() === "accounts"}>
-              <PanelHeader
+              <SettingsPanelHeader
                 title="Account Codes"
                 hint="Chart of accounts used by disbursements and reports"
                 actionLabel="New Account"
@@ -413,7 +413,7 @@ export default function FinanceSettingsPage() {
               />
               <QueryBoundary query={glAccounts}>
                 {() => (
-                  <ScrollableTable>
+                  <SettingsTableShell>
                     <DataTable>
                       <THead>
                         <Th size="compact">Code</Th>
@@ -445,14 +445,16 @@ export default function FinanceSettingsPage() {
                                 {acct.defaultAccountingTreatment ?? "-"}
                               </td>
                               <td class="px-3 py-2">
-                                <StatusPill active={acct.active} />
+                                <SettingsStatusPill active={acct.active} />
                               </td>
                               <td class="px-3 py-2 text-right whitespace-nowrap">
-                                <RowButton onClick={() => openEditGl(acct)}>Edit</RowButton>
+                                <SettingsRowButton onClick={() => openEditGl(acct)}>
+                                  Edit
+                                </SettingsRowButton>
                                 <Show when={acct.active}>
-                                  <RowButton onClick={() => deactivateGl.mutate(acct.id)}>
+                                  <SettingsRowButton onClick={() => deactivateGl.mutate(acct.id)}>
                                     Deactivate
-                                  </RowButton>
+                                  </SettingsRowButton>
                                 </Show>
                               </td>
                             </Tr>
@@ -460,13 +462,13 @@ export default function FinanceSettingsPage() {
                         </For>
                       </tbody>
                     </DataTable>
-                  </ScrollableTable>
+                  </SettingsTableShell>
                 )}
               </QueryBoundary>
             </Match>
 
             <Match when={tab() === "profit-centers"}>
-              <PanelHeader
+              <SettingsPanelHeader
                 title="Funds / Programs"
                 hint="Profit centers and fund sources used by finance workflows"
                 actionLabel="New Fund"
@@ -474,7 +476,7 @@ export default function FinanceSettingsPage() {
               />
               <QueryBoundary query={profitCenters}>
                 {() => (
-                  <ScrollableTable>
+                  <SettingsTableShell>
                     <DataTable>
                       <THead>
                         <Th size="dense">Code</Th>
@@ -500,11 +502,13 @@ export default function FinanceSettingsPage() {
                               </td>
                               <td class="py-3 px-4 text-sm text-muted">{item.fundSource ?? "-"}</td>
                               <td class="py-3 px-4">
-                                <StatusPill active={item.active} />
+                                <SettingsStatusPill active={item.active} />
                               </td>
                               <td class="py-3 px-4 text-right whitespace-nowrap">
-                                <RowButton onClick={() => openEditPc(item)}>Edit</RowButton>
-                                <RowButton
+                                <SettingsRowButton onClick={() => openEditPc(item)}>
+                                  Edit
+                                </SettingsRowButton>
+                                <SettingsRowButton
                                   onClick={() =>
                                     updateProfitCenter.mutate(
                                       { id: item.id, active: !item.active },
@@ -513,20 +517,20 @@ export default function FinanceSettingsPage() {
                                   }
                                 >
                                   {item.active ? "Deactivate" : "Restore"}
-                                </RowButton>
+                                </SettingsRowButton>
                               </td>
                             </tr>
                           )}
                         </For>
                       </tbody>
                     </DataTable>
-                  </ScrollableTable>
+                  </SettingsTableShell>
                 )}
               </QueryBoundary>
             </Match>
 
             <Match when={tab() === "offerings"}>
-              <PanelHeader
+              <SettingsPanelHeader
                 title="Training Offerings"
                 hint="Program catalog used by training batches and reports"
                 actionLabel="New Offering"
@@ -534,7 +538,7 @@ export default function FinanceSettingsPage() {
               />
               <QueryBoundary query={offerings}>
                 {() => (
-                  <ScrollableTable>
+                  <SettingsTableShell>
                     <DataTable>
                       <THead>
                         <Th size="dense">Code</Th>
@@ -560,11 +564,13 @@ export default function FinanceSettingsPage() {
                               </td>
                               <td class="py-3 px-4 text-sm text-muted">{item.sector ?? "-"}</td>
                               <td class="py-3 px-4">
-                                <StatusPill active={item.active} />
+                                <SettingsStatusPill active={item.active} />
                               </td>
                               <td class="py-3 px-4 text-right whitespace-nowrap">
-                                <RowButton onClick={() => openEditOffering(item)}>Edit</RowButton>
-                                <RowButton
+                                <SettingsRowButton onClick={() => openEditOffering(item)}>
+                                  Edit
+                                </SettingsRowButton>
+                                <SettingsRowButton
                                   onClick={() =>
                                     updateOffering.mutate(
                                       { id: item.id, active: !item.active },
@@ -573,20 +579,20 @@ export default function FinanceSettingsPage() {
                                   }
                                 >
                                   {item.active ? "Deactivate" : "Restore"}
-                                </RowButton>
+                                </SettingsRowButton>
                               </td>
                             </tr>
                           )}
                         </For>
                       </tbody>
                     </DataTable>
-                  </ScrollableTable>
+                  </SettingsTableShell>
                 )}
               </QueryBoundary>
             </Match>
 
             <Match when={tab() === "rules"}>
-              <PanelHeader
+              <SettingsPanelHeader
                 title="Auto-coding Rules"
                 hint="Defaults that reduce accounting choices in day-to-day forms"
                 actionLabel="New Rule"
@@ -594,7 +600,7 @@ export default function FinanceSettingsPage() {
               />
               <QueryBoundary query={rules}>
                 {() => (
-                  <ScrollableTable>
+                  <SettingsTableShell>
                     <DataTable>
                       <THead>
                         <Th size="dense">Account Code</Th>
@@ -625,11 +631,13 @@ export default function FinanceSettingsPage() {
                                 </Show>
                               </td>
                               <td class="py-3 px-4">
-                                <StatusPill active={item.active} />
+                                <SettingsStatusPill active={item.active} />
                               </td>
                               <td class="py-3 px-4 text-right whitespace-nowrap">
-                                <RowButton onClick={() => openEditRule(item)}>Edit</RowButton>
-                                <RowButton
+                                <SettingsRowButton onClick={() => openEditRule(item)}>
+                                  Edit
+                                </SettingsRowButton>
+                                <SettingsRowButton
                                   onClick={() =>
                                     updateRule.mutate(
                                       { id: item.id, active: !item.active },
@@ -638,26 +646,26 @@ export default function FinanceSettingsPage() {
                                   }
                                 >
                                   {item.active ? "Deactivate" : "Restore"}
-                                </RowButton>
+                                </SettingsRowButton>
                               </td>
                             </tr>
                           )}
                         </For>
                       </tbody>
                     </DataTable>
-                  </ScrollableTable>
+                  </SettingsTableShell>
                 )}
               </QueryBoundary>
             </Match>
 
             <Match when={tab() === "activity"}>
-              <PanelHeader
+              <SettingsPanelHeader
                 title="Recent Settings Activity"
                 hint="Latest finance setting and catalog changes"
               />
               <QueryBoundary query={auditEvents}>
                 {result => (
-                  <ScrollableTable>
+                  <SettingsTableShell>
                     <DataTable>
                       <THead>
                         <Th size="dense">When</Th>
@@ -686,7 +694,7 @@ export default function FinanceSettingsPage() {
                         </For>
                       </tbody>
                     </DataTable>
-                  </ScrollableTable>
+                  </SettingsTableShell>
                 )}
               </QueryBoundary>
             </Match>
@@ -702,7 +710,7 @@ export default function FinanceSettingsPage() {
       >
         <form onSubmit={submitGl} class="space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <TextField
+            <SettingsTextField
               label="Code"
               value={glForm().code}
               onInput={value => setGlForm({ ...glForm(), code: value })}
@@ -710,31 +718,31 @@ export default function FinanceSettingsPage() {
               required
               disabled={!!editingGl()}
             />
-            <TextField
+            <SettingsTextField
               label="Label"
               value={glForm().label}
               onInput={value => setGlForm({ ...glForm(), label: value })}
               placeholder="Internet Allowance"
               required
             />
-            <SelectBox
+            <SettingsSelectField
               label="Section"
               options={SECTION_OPTIONS}
               value={glForm().section}
               onChange={value => setGlForm({ ...glForm(), section: value as GlAccountSection })}
             />
-            <NumberField
+            <SettingsNumberField
               label="Sort Order"
               value={glForm().sortOrder ?? 0}
               onInput={value => setGlForm({ ...glForm(), sortOrder: value })}
             />
-            <SelectBox
+            <SettingsSelectField
               label="Default Expense Category"
               options={EXPENSE_CATEGORY_OPTIONS}
               value={glForm().defaultExpenseCategory ?? ""}
               onChange={value => setGlForm({ ...glForm(), defaultExpenseCategory: value || null })}
             />
-            <SelectBox
+            <SettingsSelectField
               label="Default Treatment"
               options={TREATMENT_OPTIONS}
               value={glForm().defaultAccountingTreatment ?? ""}
@@ -743,13 +751,13 @@ export default function FinanceSettingsPage() {
               }
             />
           </div>
-          <TextArea
+          <SettingsTextArea
             label="Notes"
             value={glForm().notes ?? ""}
             onInput={value => setGlForm({ ...glForm(), notes: value })}
           />
           <Show when={editingGl()}>
-            <ActiveCheckbox
+            <SettingsCheckbox
               checked={glForm().active ?? true}
               onChange={active => setGlForm({ ...glForm(), active })}
             />
@@ -771,44 +779,44 @@ export default function FinanceSettingsPage() {
       >
         <form onSubmit={submitPc} class="space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <TextField
+            <SettingsTextField
               label="Code"
               value={pcForm().code}
               onInput={value => setPcForm({ ...pcForm(), code: value })}
               placeholder="TWSP-FBS"
               required
             />
-            <TextField
+            <SettingsTextField
               label="Label"
               value={pcForm().label}
               onInput={value => setPcForm({ ...pcForm(), label: value })}
               placeholder="TWSP Food and Beverage"
               required
             />
-            <TextField
+            <SettingsTextField
               label="Fund Source"
               value={pcForm().fundSource ?? ""}
               onInput={value => setPcForm({ ...pcForm(), fundSource: value })}
               placeholder="TESDA"
             />
-            <TextField
+            <SettingsTextField
               label="Segment Group"
               value={pcForm().segmentGroup ?? ""}
               onInput={value => setPcForm({ ...pcForm(), segmentGroup: value })}
               placeholder="TWSP"
             />
-            <NumberField
+            <SettingsNumberField
               label="Sort Order"
               value={pcForm().sortOrder ?? 0}
               onInput={value => setPcForm({ ...pcForm(), sortOrder: value })}
             />
           </div>
-          <TextArea
+          <SettingsTextArea
             label="Notes"
             value={pcForm().notes ?? ""}
             onInput={value => setPcForm({ ...pcForm(), notes: value })}
           />
-          <ActiveCheckbox
+          <SettingsCheckbox
             checked={pcForm().active ?? true}
             onChange={active => setPcForm({ ...pcForm(), active })}
           />
@@ -829,38 +837,38 @@ export default function FinanceSettingsPage() {
       >
         <form onSubmit={submitOffering} class="space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <TextField
+            <SettingsTextField
               label="Code"
               value={offeringForm().code}
               onInput={value => setOfferingForm({ ...offeringForm(), code: value })}
               placeholder="SMAW"
               required
             />
-            <TextField
+            <SettingsTextField
               label="Label"
               value={offeringForm().label}
               onInput={value => setOfferingForm({ ...offeringForm(), label: value })}
               placeholder="SMAW NC II"
               required
             />
-            <TextField
+            <SettingsTextField
               label="Sector"
               value={offeringForm().sector ?? ""}
               onInput={value => setOfferingForm({ ...offeringForm(), sector: value })}
               placeholder="Metals"
             />
-            <NumberField
+            <SettingsNumberField
               label="Sort Order"
               value={offeringForm().sortOrder ?? 0}
               onInput={value => setOfferingForm({ ...offeringForm(), sortOrder: value })}
             />
           </div>
-          <TextArea
+          <SettingsTextArea
             label="Notes"
             value={offeringForm().notes ?? ""}
             onInput={value => setOfferingForm({ ...offeringForm(), notes: value })}
           />
-          <ActiveCheckbox
+          <SettingsCheckbox
             checked={offeringForm().active ?? true}
             onChange={active => setOfferingForm({ ...offeringForm(), active })}
           />
@@ -881,68 +889,68 @@ export default function FinanceSettingsPage() {
       >
         <form onSubmit={submitRule} class="space-y-4">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <TextField
+            <SettingsTextField
               label="Account Code"
               value={ruleForm().glAccountCode}
               onInput={value => setRuleForm({ ...ruleForm(), glAccountCode: value })}
               placeholder="training_tools"
               required
             />
-            <TextField
+            <SettingsTextField
               label="Fund / Program"
               value={ruleForm().profitCenterCode}
               onInput={value => setRuleForm({ ...ruleForm(), profitCenterCode: value })}
               placeholder="TWSP-FBS"
             />
-            <SelectBox
+            <SettingsSelectField
               label="Default Expense Category"
               options={EXPENSE_CATEGORY_OPTIONS.slice(1)}
               value={ruleForm().defaultExpenseCategory}
               onChange={value => setRuleForm({ ...ruleForm(), defaultExpenseCategory: value })}
             />
-            <SelectBox
+            <SettingsSelectField
               label="Default Treatment"
               options={TREATMENT_OPTIONS.slice(1)}
               value={ruleForm().defaultAccountingTreatment}
               onChange={value => setRuleForm({ ...ruleForm(), defaultAccountingTreatment: value })}
             />
-            <TextField
+            <SettingsTextField
               label="Cost Type"
               value={ruleForm().defaultCostType}
               onInput={value => setRuleForm({ ...ruleForm(), defaultCostType: value })}
               placeholder="common"
             />
-            <TextField
+            <SettingsTextField
               label="Asset Category"
               value={ruleForm().defaultAssetCategory}
               onInput={value => setRuleForm({ ...ruleForm(), defaultAssetCategory: value })}
               placeholder="equipment"
             />
-            <NumberField
+            <SettingsNumberField
               label="Useful Life Months"
               value={ruleForm().defaultUsefulLifeMonths ?? 0}
               onInput={value =>
                 setRuleForm({ ...ruleForm(), defaultUsefulLifeMonths: value || undefined })
               }
             />
-            <NumberField
+            <SettingsNumberField
               label="Sort Order"
               value={ruleForm().sortOrder}
               onInput={value => setRuleForm({ ...ruleForm(), sortOrder: value })}
             />
           </div>
-          <TextArea
+          <SettingsTextArea
             label="Notes"
             value={ruleForm().notes}
             onInput={value => setRuleForm({ ...ruleForm(), notes: value })}
           />
           <div class="grid gap-2">
-            <ActiveCheckbox
+            <SettingsCheckbox
               checked={ruleForm().requiresAssetReview}
               onChange={requiresAssetReview => setRuleForm({ ...ruleForm(), requiresAssetReview })}
               label="Requires asset review"
             />
-            <ActiveCheckbox
+            <SettingsCheckbox
               checked={ruleForm().active}
               onChange={active => setRuleForm({ ...ruleForm(), active })}
             />
@@ -956,158 +964,6 @@ export default function FinanceSettingsPage() {
         </form>
       </Modal>
     </PageContainer>
-  )
-}
-
-function StatCard(props: { label: string; value: number }) {
-  return (
-    <div class="bg-surface border border-border rounded-lg px-4 py-3">
-      <p class="text-xs text-muted">{props.label}</p>
-      <p class="text-2xl font-semibold text-foreground tabular-nums mt-1">{props.value}</p>
-    </div>
-  )
-}
-
-function PanelHeader(props: {
-  title: string
-  hint: string
-  actionLabel?: string
-  onAction?: () => void
-}) {
-  return (
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
-      <div>
-        <h2 class="text-base font-semibold text-foreground">{props.title}</h2>
-        <p class="text-xs text-muted mt-0.5">{props.hint}</p>
-      </div>
-      <Show when={props.actionLabel && props.onAction}>
-        <button
-          type="button"
-          onClick={props.onAction}
-          class="inline-flex items-center gap-2 px-3 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors self-start sm:self-auto"
-        >
-          <Icons.plus class="w-4 h-4" /> {props.actionLabel}
-        </button>
-      </Show>
-    </div>
-  )
-}
-
-function ScrollableTable(props: { children: JSX.Element }) {
-  return (
-    <div class="border border-border rounded-lg overflow-auto max-h-[520px]">{props.children}</div>
-  )
-}
-
-function StatusPill(props: { active: boolean }) {
-  return (
-    <Show
-      when={props.active}
-      fallback={
-        <span class={`text-xs px-2 py-0.5 rounded ${tonePillClass("negative")}`}>Inactive</span>
-      }
-    >
-      <span class={`text-xs px-2 py-0.5 rounded ${tonePillClass("positive")}`}>Active</span>
-    </Show>
-  )
-}
-
-function RowButton(props: { onClick: () => void; children: JSX.Element }) {
-  return (
-    <button
-      type="button"
-      onClick={props.onClick}
-      class="text-xs font-medium text-muted hover:text-primary px-2"
-    >
-      {props.children}
-    </button>
-  )
-}
-
-function TextField(props: {
-  label: string
-  value: string
-  onInput: (value: string) => void
-  placeholder?: string
-  required?: boolean
-  disabled?: boolean
-}) {
-  return (
-    <label class="grid gap-1">
-      <span class="text-sm font-medium text-foreground">{props.label}</span>
-      <input
-        value={props.value}
-        onInput={e => props.onInput(e.currentTarget.value)}
-        placeholder={props.placeholder}
-        required={props.required}
-        disabled={props.disabled}
-        class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:bg-surface-muted"
-      />
-    </label>
-  )
-}
-
-function NumberField(props: { label: string; value: number; onInput: (value: number) => void }) {
-  return (
-    <label class="grid gap-1">
-      <span class="text-sm font-medium text-foreground">{props.label}</span>
-      <input
-        type="number"
-        value={props.value}
-        onInput={e => props.onInput(Number(e.currentTarget.value) || 0)}
-        class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-      />
-    </label>
-  )
-}
-
-function TextArea(props: { label: string; value: string; onInput: (value: string) => void }) {
-  return (
-    <label class="grid gap-1">
-      <span class="text-sm font-medium text-foreground">{props.label}</span>
-      <textarea
-        rows={2}
-        value={props.value}
-        onInput={e => props.onInput(e.currentTarget.value)}
-        class="w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-      />
-    </label>
-  )
-}
-
-function SelectBox(props: {
-  label: string
-  value: string
-  onChange: (value: string) => void
-  options: Array<{ label: string; value: string }>
-}) {
-  return (
-    <div>
-      <span class="block text-sm font-medium text-foreground mb-1">{props.label}</span>
-      <Select
-        options={props.options}
-        value={props.value}
-        onChange={props.onChange}
-        ariaLabel={props.label}
-      />
-    </div>
-  )
-}
-
-function ActiveCheckbox(props: {
-  checked: boolean
-  onChange: (checked: boolean) => void
-  label?: string
-}) {
-  return (
-    <label class="flex items-center gap-2 text-sm">
-      <input
-        type="checkbox"
-        checked={props.checked}
-        onChange={e => props.onChange(e.currentTarget.checked)}
-      />
-      <span class="text-foreground">{props.label ?? "Active"}</span>
-    </label>
   )
 }
 
