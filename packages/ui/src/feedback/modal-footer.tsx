@@ -7,6 +7,7 @@ interface ModalFooterProps {
   /** If true, the submit button is `type="submit"` so it triggers the form. */
   submitInForm?: boolean
   submitLabel?: string
+  submitLoadingLabel?: string
   cancelLabel?: string
   submitting?: boolean
   disabled?: boolean
@@ -30,7 +31,8 @@ export function ModalFooter(props: ModalFooterProps) {
   const submitText = () => {
     return props.submitLabel ?? (props.danger ? "Delete" : "Save")
   }
-  const submitLoadingText = () => (props.danger ? "Deleting..." : "Saving...")
+  const submitLoadingText = () =>
+    props.submitLoadingLabel ?? (props.danger ? "Deleting..." : "Saving...")
 
   return (
     <div class="flex justify-end gap-3 pt-4 border-t border-border">
