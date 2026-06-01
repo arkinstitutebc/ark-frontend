@@ -26,6 +26,7 @@ export {
 export {
   type CloudinarySignature,
   type CloudinaryUploadResult,
+  type ContentAttachment,
   type ContentPost,
   type ContentPostInput,
   uploadContentCover,

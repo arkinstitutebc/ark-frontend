@@ -9,6 +9,8 @@ import {
   validateForm,
 } from "@ark/api-client"
 import {
+  type AttachmentRef,
+  AttachmentUploader,
   BackLink,
   Button,
   ConfirmDialog,
@@ -40,6 +42,7 @@ type PostFormState = {
   seoTitle: string
   seoDescription: string
   published: boolean
+  attachments: AttachmentRef[]
 }
 
 const emptyPost: PostFormState = {
@@ -51,7 +54,16 @@ const emptyPost: PostFormState = {
   seoTitle: "",
   seoDescription: "",
   published: false,
+  attachments: [],
 }
+
+const attachmentSchema = z.object({
+  name: z.string().trim().min(1).max(255),
+  url: z.string().trim().url().max(1000),
+  type: z.string().trim().max(50).optional(),
+  size: z.number().int().nonnegative().optional(),
+  uploadedAt: z.string().datetime().optional(),
+})
 
 const postSchema = z.object({
   title: z.string().trim().min(1, "Title required").max(220),
@@ -81,6 +93,7 @@ const postSchema = z.object({
     .max(500)
     .transform(v => nullableTrim(v)),
   published: z.boolean(),
+  attachments: z.array(attachmentSchema),
 })
 
 const statusOptions = [
@@ -110,6 +123,7 @@ function formFromPost(post: ContentPost): PostFormState {
     seoTitle: post.seoTitle ?? "",
     seoDescription: post.seoDescription ?? "",
     published: !!post.publishedAt,
+    attachments: post.attachments ?? [],
   }
 }
 
@@ -303,6 +317,12 @@ export default function AdminPostsPage() {
                                       Cover
                                     </a>
                                   </Show>
+                                  <Show when={(post.attachments?.length ?? 0) > 0}>
+                                    <span>
+                                      {post.attachments?.length} attachment
+                                      {post.attachments?.length === 1 ? "" : "s"}
+                                    </span>
+                                  </Show>
                                 </div>
                               </td>
                               <td class="px-6 py-4">
@@ -379,100 +399,138 @@ export default function AdminPostsPage() {
         size="xl"
       >
         <form onSubmit={submitPost} class="space-y-5">
-          <div class="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-4">
-            <Input
-              label="Title"
-              value={form().title}
-              onInput={e => {
-                const title = e.currentTarget.value
-                setForm({
-                  ...form(),
-                  title,
-                  slug: slugTouched() ? form().slug : slugify(title),
-                })
-              }}
-              error={errors().title}
-            />
-            <div class="flex flex-col gap-2">
-              <label for="post-status" class="text-sm font-medium text-foreground">
-                Status
-              </label>
-              <Select
-                id="post-status"
-                options={statusOptions}
-                value={form().published}
-                onChange={published => setForm({ ...form(), published })}
-                ariaLabel="Post status"
+          <div class="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_320px] gap-5">
+            <div class="space-y-5">
+              <div class="grid grid-cols-1 lg:grid-cols-[1fr_220px] gap-4">
+                <Input
+                  label="Title"
+                  value={form().title}
+                  onInput={e => {
+                    const title = e.currentTarget.value
+                    setForm({
+                      ...form(),
+                      title,
+                      slug: slugTouched() ? form().slug : slugify(title),
+                    })
+                  }}
+                  error={errors().title}
+                />
+                <div class="flex flex-col gap-2">
+                  <label for="post-status" class="text-sm font-medium text-foreground">
+                    Status
+                  </label>
+                  <Select
+                    id="post-status"
+                    options={statusOptions}
+                    value={form().published}
+                    onChange={published => setForm({ ...form(), published })}
+                    ariaLabel="Post status"
+                  />
+                </div>
+              </div>
+
+              <Input
+                label="Slug"
+                value={form().slug}
+                onInput={e => {
+                  setSlugTouched(true)
+                  setForm({ ...form(), slug: slugify(e.currentTarget.value) })
+                }}
+                error={errors().slug}
+              />
+
+              <div class="rounded-xl border border-border bg-surface-muted/40 p-4">
+                <p class="text-xs font-medium uppercase tracking-wide text-muted">Public path</p>
+                <p class="mt-1 break-all font-mono text-sm text-foreground">
+                  arkinstitutebc.com/blog/{form().slug || "post-slug"}
+                </p>
+              </div>
+
+              <Textarea
+                label="Excerpt"
+                rows={3}
+                value={form().excerpt}
+                onInput={e => setForm({ ...form(), excerpt: e.currentTarget.value })}
+                error={errors().excerpt}
+              />
+
+              <Textarea
+                label="Content"
+                rows={16}
+                value={form().content}
+                onInput={e => setForm({ ...form(), content: e.currentTarget.value })}
+                error={errors().content}
+                class="font-mono text-sm"
               />
             </div>
-          </div>
 
-          <Input
-            label="Slug"
-            value={form().slug}
-            onInput={e => {
-              setSlugTouched(true)
-              setForm({ ...form(), slug: slugify(e.currentTarget.value) })
-            }}
-            error={errors().slug}
-          />
+            <aside class="space-y-4">
+              <section class="rounded-xl border border-border bg-surface p-4">
+                <h3 class="text-sm font-semibold text-foreground">Cover image</h3>
+                <Show when={form().coverImageUrl}>
+                  <img
+                    src={form().coverImageUrl}
+                    alt=""
+                    class="mt-3 h-36 w-full rounded-lg border border-border object-cover"
+                  />
+                </Show>
+                <div class="mt-3 space-y-3">
+                  <Input
+                    label="Cover image URL"
+                    value={form().coverImageUrl}
+                    onInput={e => setForm({ ...form(), coverImageUrl: e.currentTarget.value })}
+                    error={errors().coverImageUrl}
+                  />
+                  <label class="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-surface-muted transition-colors cursor-pointer">
+                    <Icons.upload class="w-4 h-4 text-muted" />
+                    {uploadingCover() ? "Uploading…" : "Upload cover"}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      disabled={uploadingCover()}
+                      onChange={e => {
+                        const target = e.currentTarget
+                        uploadCover(target.files?.[0]).finally(() => {
+                          target.value = ""
+                        })
+                      }}
+                      class="hidden"
+                    />
+                  </label>
+                </div>
+              </section>
 
-          <Textarea
-            label="Excerpt"
-            rows={3}
-            value={form().excerpt}
-            onInput={e => setForm({ ...form(), excerpt: e.currentTarget.value })}
-            error={errors().excerpt}
-          />
+              <section class="rounded-xl border border-border bg-surface p-4">
+                <h3 class="text-sm font-semibold text-foreground">Attachments</h3>
+                <p class="mt-1 text-xs text-muted">
+                  Add images or PDFs that should appear below the public article.
+                </p>
+                <div class="mt-3">
+                  <AttachmentUploader
+                    attachments={form().attachments}
+                    onChange={attachments => setForm({ ...form(), attachments })}
+                    signatureEndpoint="/api/admin/content/upload-signature/attachment"
+                  />
+                </div>
+              </section>
 
-          <Textarea
-            label="Content"
-            rows={14}
-            value={form().content}
-            onInput={e => setForm({ ...form(), content: e.currentTarget.value })}
-            error={errors().content}
-            class="font-mono text-sm"
-          />
-
-          <div class="grid grid-cols-1 lg:grid-cols-[1fr_180px] gap-4 items-end">
-            <Input
-              label="Cover image URL"
-              value={form().coverImageUrl}
-              onInput={e => setForm({ ...form(), coverImageUrl: e.currentTarget.value })}
-              error={errors().coverImageUrl}
-            />
-            <label class="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2.5 text-sm font-semibold text-foreground hover:bg-surface-muted transition-colors cursor-pointer">
-              <Icons.upload class="w-4 h-4 text-muted" />
-              {uploadingCover() ? "Uploading…" : "Upload cover"}
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                disabled={uploadingCover()}
-                onChange={e => {
-                  const target = e.currentTarget
-                  uploadCover(target.files?.[0]).finally(() => {
-                    target.value = ""
-                  })
-                }}
-                class="hidden"
-              />
-            </label>
-          </div>
-
-          <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Input
-              label="SEO title"
-              value={form().seoTitle}
-              onInput={e => setForm({ ...form(), seoTitle: e.currentTarget.value })}
-              error={errors().seoTitle}
-            />
-            <Textarea
-              label="SEO description"
-              rows={3}
-              value={form().seoDescription}
-              onInput={e => setForm({ ...form(), seoDescription: e.currentTarget.value })}
-              error={errors().seoDescription}
-            />
+              <section class="rounded-xl border border-border bg-surface p-4 space-y-3">
+                <h3 class="text-sm font-semibold text-foreground">SEO</h3>
+                <Input
+                  label="SEO title"
+                  value={form().seoTitle}
+                  onInput={e => setForm({ ...form(), seoTitle: e.currentTarget.value })}
+                  error={errors().seoTitle}
+                />
+                <Textarea
+                  label="SEO description"
+                  rows={3}
+                  value={form().seoDescription}
+                  onInput={e => setForm({ ...form(), seoDescription: e.currentTarget.value })}
+                  error={errors().seoDescription}
+                />
+              </section>
+            </aside>
           </div>
 
           <ModalFooter

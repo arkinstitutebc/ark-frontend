@@ -8,6 +8,7 @@ export interface ContentPost {
   excerpt: string | null
   content: string
   coverImageUrl: string | null
+  attachments: ContentAttachment[] | null
   seoTitle: string | null
   seoDescription: string | null
   publishedAt: string | null
@@ -17,12 +18,21 @@ export interface ContentPost {
   updatedAt: string
 }
 
+export interface ContentAttachment {
+  name: string
+  url: string
+  type?: string
+  size?: number
+  uploadedAt?: string
+}
+
 export interface ContentPostInput {
   title: string
   slug: string
   excerpt?: string | null
   content: string
   coverImageUrl?: string | null
+  attachments?: ContentAttachment[] | null
   seoTitle?: string | null
   seoDescription?: string | null
   published?: boolean
