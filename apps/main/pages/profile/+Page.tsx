@@ -250,7 +250,7 @@ export default function ProfilePage() {
             <div class="px-8 py-6">
               <h2 class="text-lg font-semibold text-foreground">Profile photo</h2>
               <p class="text-sm text-muted mt-1">
-                Shown in the top-right account menu and across the portal.
+                Crop and position your photo before it appears across the portal.
               </p>
               <div class="mt-5 flex items-center gap-5">
                 <AvatarPreview
@@ -273,9 +273,11 @@ export default function ProfilePage() {
                     disabled={uploadAvatar.isPending}
                   >
                     <Icons.upload class="w-4 h-4" />
-                    {uploadAvatar.isPending ? "Uploading…" : "Upload photo"}
+                    {uploadAvatar.isPending ? "Uploading..." : "Choose and crop photo"}
                   </Button>
-                  <p class="text-xs text-muted mt-2">JPEG, PNG, or WebP. Max 2 MB.</p>
+                  <p class="text-xs text-muted mt-2">
+                    JPEG, PNG, or WebP. Max 2 MB. You can zoom out and drag before saving.
+                  </p>
                 </div>
               </div>
             </div>

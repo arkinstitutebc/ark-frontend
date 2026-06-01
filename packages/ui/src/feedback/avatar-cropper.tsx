@@ -4,7 +4,6 @@ import { Icons } from "../icons"
 import { Modal } from "./modal"
 
 const FRAME_SIZE = 280 // CSS pixels — diameter of the visible circular frame
-const MIN_ZOOM = 1
 const MAX_ZOOM = 4
 
 export interface AvatarCropperProps {
@@ -37,6 +36,7 @@ export function AvatarCropper(props: AvatarCropperProps) {
   const [imgSrc, setImgSrc] = createSignal<string | null>(null)
   const [imgLoaded, setImgLoaded] = createSignal(false)
   const [zoom, setZoom] = createSignal(1)
+  const [minZoom, setMinZoom] = createSignal(1)
   const [position, setPosition] = createSignal({ x: 0, y: 0 })
   const [busy, setBusy] = createSignal(false)
   let imgEl: HTMLImageElement | undefined
@@ -54,6 +54,7 @@ export function AvatarCropper(props: AvatarCropperProps) {
     setImgSrc(url)
     setImgLoaded(false)
     setZoom(1)
+    setMinZoom(1)
     setPosition({ x: 0, y: 0 })
     onCleanup(() => URL.revokeObjectURL(url))
   })
@@ -63,8 +64,27 @@ export function AvatarCropper(props: AvatarCropperProps) {
     // Auto-fit: scale image so its smaller dimension equals the frame.
     if (imgEl) {
       const fit = FRAME_SIZE / Math.min(imgEl.naturalWidth, imgEl.naturalHeight)
-      setZoom(Math.max(MIN_ZOOM, fit))
+      const floor = Math.min(1, fit)
+      setMinZoom(floor)
+      setZoom(fit)
     }
+  }
+
+  function clampZoom(next: number) {
+    return Math.min(MAX_ZOOM, Math.max(minZoom(), next))
+  }
+
+  function updateZoom(next: number) {
+    setZoom(clampZoom(next))
+  }
+
+  function resetCrop() {
+    if (!imgEl) return
+    const fit = FRAME_SIZE / Math.min(imgEl.naturalWidth, imgEl.naturalHeight)
+    const floor = Math.min(1, fit)
+    setMinZoom(floor)
+    setZoom(fit)
+    setPosition({ x: 0, y: 0 })
   }
 
   // ── Pointer drag ──────────────────────────────────────────────────────
@@ -84,6 +104,13 @@ export function AvatarCropper(props: AvatarCropperProps) {
   function onPointerUp(e: PointerEvent) {
     dragStart = null
     ;(e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId)
+  }
+
+  function onWheel(e: WheelEvent) {
+    if (!imgLoaded()) return
+    e.preventDefault()
+    const direction = e.deltaY > 0 ? -1 : 1
+    updateZoom(zoom() + direction * 0.08)
   }
 
   // ── Confirm: render to canvas, emit Blob ──────────────────────────────
@@ -129,26 +156,37 @@ export function AvatarCropper(props: AvatarCropperProps) {
   }
 
   return (
-    <Modal open={!!props.file} onClose={props.onCancel} title="Adjust your photo">
-      <div class="space-y-4">
-        <p class="text-sm text-muted">
-          Drag to reposition. Use the slider to zoom. The circle is what your avatar will look like.
-        </p>
-
-        {/* Cropping frame */}
-        <div class="flex justify-center">
+    <Modal open={!!props.file} onClose={props.onCancel} title="Adjust profile photo" size="xl">
+      <div class="grid gap-5 lg:grid-cols-[minmax(0,1fr)_280px]">
+        <div class="rounded-2xl border border-border bg-surface-muted/40 p-4">
+          <div class="mb-4 flex items-start justify-between gap-3">
+            <div>
+              <p class="text-sm font-semibold text-foreground">Crop preview</p>
+              <p class="mt-1 text-xs text-muted">
+                Drag the image, scroll or use controls to zoom, then save the crop.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={resetCrop}
+              disabled={!imgLoaded() || busy()}
+              class="rounded-lg border border-border bg-surface px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-surface-muted disabled:opacity-50"
+            >
+              Reset
+            </button>
+          </div>
           <div
-            class="relative bg-surface-muted overflow-hidden touch-none select-none cursor-move"
+            class="relative mx-auto overflow-hidden rounded-full border-4 border-surface bg-surface shadow-inner ring-1 ring-border touch-none select-none cursor-move"
             style={{
               width: `${FRAME_SIZE}px`,
               height: `${FRAME_SIZE}px`,
-              "border-radius": "50%",
               "user-select": "none",
             }}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
             onPointerCancel={onPointerUp}
+            onWheel={onWheel}
           >
             <Show when={imgSrc()}>
               {src => (
@@ -172,42 +210,76 @@ export function AvatarCropper(props: AvatarCropperProps) {
           </div>
         </div>
 
-        {/* Zoom slider */}
-        <div class="flex items-center gap-3">
-          <Icons.search class="w-4 h-4 text-muted" />
-          <input
-            type="range"
-            min={MIN_ZOOM}
-            max={MAX_ZOOM}
-            step={0.05}
-            value={zoom()}
-            onInput={e => setZoom(Number.parseFloat(e.currentTarget.value))}
-            class="flex-1 accent-primary"
-            aria-label="Zoom"
-          />
-          <span class="text-xs text-muted tabular-nums w-10 text-right">{zoom().toFixed(1)}×</span>
-        </div>
+        <div class="flex flex-col justify-between gap-5">
+          <div class="space-y-4">
+            <div class="rounded-xl border border-border bg-surface p-4">
+              <div class="mb-3 flex items-center justify-between">
+                <span class="text-sm font-semibold text-foreground">Zoom</span>
+                <span class="text-xs text-muted tabular-nums">{zoom().toFixed(2)}x</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => updateZoom(zoom() - 0.1)}
+                  disabled={!imgLoaded() || zoom() <= minZoom() || busy()}
+                  class="rounded-lg border border-border p-2 text-muted transition-colors hover:bg-surface-muted hover:text-foreground disabled:opacity-50"
+                  aria-label="Zoom out"
+                >
+                  <Icons.minus class="h-4 w-4" />
+                </button>
+                <input
+                  type="range"
+                  min={minZoom()}
+                  max={MAX_ZOOM}
+                  step={0.01}
+                  value={zoom()}
+                  onInput={e => updateZoom(Number.parseFloat(e.currentTarget.value))}
+                  class="min-w-0 flex-1 accent-primary"
+                  aria-label="Zoom"
+                />
+                <button
+                  type="button"
+                  onClick={() => updateZoom(zoom() + 0.1)}
+                  disabled={!imgLoaded() || zoom() >= MAX_ZOOM || busy()}
+                  class="rounded-lg border border-border p-2 text-muted transition-colors hover:bg-surface-muted hover:text-foreground disabled:opacity-50"
+                  aria-label="Zoom in"
+                >
+                  <Icons.plus class="h-4 w-4" />
+                </button>
+              </div>
+              <p class="mt-3 text-xs text-muted">
+                Zoom out to fit more of the original image, then drag to center the face.
+              </p>
+            </div>
 
-        {/* Actions */}
-        <div class="flex items-center justify-end gap-2 pt-2 border-t border-border">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={props.onCancel}
-            disabled={busy()}
-          >
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            variant="primary"
-            size="sm"
-            onClick={handleConfirm}
-            disabled={!imgLoaded() || busy()}
-          >
-            {busy() ? "Processing…" : "Use this photo"}
-          </Button>
+            <div class="rounded-xl border border-border bg-surface p-4">
+              <p class="text-sm font-semibold text-foreground">Output</p>
+              <p class="mt-1 text-xs text-muted">
+                Saved as a square PNG and displayed as a circle in the portal.
+              </p>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-2 border-t border-border pt-4">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={props.onCancel}
+              disabled={busy()}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              onClick={handleConfirm}
+              disabled={!imgLoaded() || busy()}
+            >
+              {busy() ? "Processing..." : "Use this photo"}
+            </Button>
+          </div>
         </div>
       </div>
     </Modal>
