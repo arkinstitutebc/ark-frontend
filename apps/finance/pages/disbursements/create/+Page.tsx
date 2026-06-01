@@ -5,7 +5,7 @@ import type {
   GlAccountSection,
   TxnCategory,
 } from "@ark/data-types"
-import { BackLink, formatPeso, Select, type SelectOption } from "@ark/ui"
+import { BackLink, DateInput, formatPeso, Select, type SelectOption } from "@ark/ui"
 import {
   categoryOptionsBySection,
   GL_CATALOG,
@@ -376,21 +376,14 @@ export default function CreateDisbursementPage() {
           <div class="lg:col-span-2 space-y-6">
             <div class="bg-surface rounded-lg border border-border p-6 space-y-4">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label for="dis-date" class="block text-sm font-medium text-foreground mb-1">
-                    Date
-                  </label>
-                  <input
-                    id="dis-date"
-                    type="date"
-                    value={transactionDate()}
-                    onInput={e => setTransactionDate(e.currentTarget.value)}
-                    class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().transactionDate ? "border-red-300" : "border-border"}`}
-                  />
-                  <Show when={errors().transactionDate}>
-                    <p class="text-xs text-red-600 mt-1">{errors().transactionDate}</p>
-                  </Show>
-                </div>
+                <DateInput
+                  id="dis-date"
+                  label="Date"
+                  value={transactionDate()}
+                  onValueChange={setTransactionDate}
+                  error={errors().transactionDate}
+                  showTodayButton
+                />
                 <div>
                   <label for="dis-payee" class="block text-sm font-medium text-foreground mb-1">
                     Store / Company <span class="text-muted">(optional)</span>

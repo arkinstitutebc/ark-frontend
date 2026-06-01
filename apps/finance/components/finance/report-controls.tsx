@@ -1,4 +1,4 @@
-import { formInputClass, Icons, SegmentedControl } from "@ark/ui"
+import { DateInput, Icons, SegmentedControl } from "@ark/ui"
 
 export type DateRangePreset = "current-quarter" | "last-quarter" | "year-to-date" | "custom"
 
@@ -76,24 +76,12 @@ export function MonthStepper(props: MonthStepperProps) {
 export function DateRangeControls(props: DateRangeControlsProps) {
   return (
     <div class="flex flex-wrap gap-3 items-end">
-      <label class="block w-40">
-        <span class="block text-xs text-muted mb-1">From</span>
-        <input
-          type="date"
-          value={props.from}
-          onInput={e => props.onFromChange(e.currentTarget.value)}
-          class={formInputClass()}
-        />
-      </label>
-      <label class="block w-40">
-        <span class="block text-xs text-muted mb-1">To</span>
-        <input
-          type="date"
-          value={props.to}
-          onInput={e => props.onToChange(e.currentTarget.value)}
-          class={formInputClass()}
-        />
-      </label>
+      <div class="w-40">
+        <DateInput label="From" value={props.from} onValueChange={props.onFromChange} />
+      </div>
+      <div class="w-40">
+        <DateInput label="To" value={props.to} onValueChange={props.onToChange} />
+      </div>
       <SegmentedControl
         value={props.preset}
         onChange={value => {

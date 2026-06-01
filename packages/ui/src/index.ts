@@ -76,7 +76,7 @@ export { Button } from "./forms/button"
 export { Field, type FieldProps, fieldInputClass } from "./forms/field"
 export { FormSection, type FormSectionProps } from "./forms/form-section"
 export { formErrorClass, formInputClass, formLabelClass } from "./forms/form-styles"
-export { Input, Textarea } from "./forms/input"
+export { DateInput, Input, Textarea } from "./forms/input"
 export {
   SegmentedControl,
   type SegmentedControlOption,

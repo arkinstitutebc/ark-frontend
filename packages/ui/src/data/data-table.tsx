@@ -185,23 +185,25 @@ export interface TableStateRowProps {
  */
 export function TableStateRow(props: TableStateRowProps) {
   const tone = () => props.tone ?? "muted"
-  const Icon = () => props.icon
   return (
     <tr>
       <td colSpan={props.colSpan} class="px-6 py-12">
         <div class="mx-auto flex max-w-sm flex-col items-center text-center">
-          <Show when={Icon()}>
-            {IconComponent => (
-              <div
-                class={`mb-3 flex h-11 w-11 items-center justify-center rounded-full ${
-                  tone() === "danger"
-                    ? "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300"
-                    : "bg-surface-muted text-muted"
-                }`}
-              >
-                <IconComponent class="h-5 w-5" />
-              </div>
-            )}
+          <Show when={props.icon}>
+            {IconAccessor => {
+              const Icon = IconAccessor()
+              return (
+                <div
+                  class={`mb-3 flex h-11 w-11 items-center justify-center rounded-full ${
+                    tone() === "danger"
+                      ? "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300"
+                      : "bg-surface-muted text-muted"
+                  }`}
+                >
+                  <Icon class="h-5 w-5" />
+                </div>
+              )
+            }}
           </Show>
           <p
             class={`text-sm font-semibold ${tone() === "danger" ? "text-red-700" : "text-foreground"}`}

@@ -1,4 +1,5 @@
 import { type Component, createUniqueId, type JSX, Show, splitProps } from "solid-js"
+import { Icons } from "../icons"
 import { cn } from "../utils"
 
 // Icon props are Component refs, not JSX.Element values. Solid's hydration
@@ -160,6 +161,98 @@ export function Textarea(
           local.class
         )}
       />
+      <Show when={local.error}>
+        <p id={errorId} class="text-sm text-red-500" role="alert">
+          {local.error}
+        </p>
+      </Show>
+      <Show when={!local.error && local.hint}>
+        <p id={hintId} class="text-xs text-muted">
+          {local.hint}
+        </p>
+      </Show>
+    </div>
+  )
+}
+
+type DateInputProps = Omit<JSX.InputHTMLAttributes<HTMLInputElement>, "type" | "onInput"> & {
+  label?: string
+  error?: string
+  hint?: string
+  showTodayButton?: boolean
+  onValueChange?: (value: string) => void
+}
+
+function todayValue() {
+  return new Date().toISOString().slice(0, 10)
+}
+
+export function DateInput(props: DateInputProps) {
+  const [local, inputProps] = splitProps(props, [
+    "class",
+    "error",
+    "hint",
+    "id",
+    "label",
+    "onValueChange",
+    "showTodayButton",
+  ])
+  const fallbackId = createUniqueId()
+  const inputId = () => local.id ?? fallbackId
+  const errorId = `${fallbackId}-error`
+  const hintId = `${fallbackId}-hint`
+  const describedBy = () =>
+    [
+      inputProps["aria-describedby"],
+      local.error ? errorId : undefined,
+      !local.error && local.hint ? hintId : undefined,
+    ]
+      .filter(Boolean)
+      .join(" ") || undefined
+  const canUseToday = () => !!local.showTodayButton && !!local.onValueChange && !inputProps.disabled
+
+  return (
+    <div class="flex flex-col gap-1.5">
+      <div class="flex items-center justify-between gap-3">
+        <Show when={local.label}>
+          <label for={inputId()} class="text-sm font-medium text-foreground">
+            {local.label}
+          </label>
+        </Show>
+        <Show when={canUseToday()}>
+          <button
+            type="button"
+            onClick={() => local.onValueChange?.(todayValue())}
+            class="text-xs font-medium text-primary transition-colors hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded"
+          >
+            Today
+          </button>
+        </Show>
+      </div>
+      <div class="relative">
+        <Icons.calendar
+          class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted"
+          aria-hidden="true"
+        />
+        <input
+          {...inputProps}
+          id={inputId()}
+          type="date"
+          aria-describedby={describedBy()}
+          aria-invalid={local.error ? "true" : undefined}
+          onInput={e => {
+            local.onValueChange?.(e.currentTarget.value)
+          }}
+          class={cn(
+            "block w-full rounded-lg border bg-surface py-2 pl-10 pr-3 text-sm text-foreground transition-colors",
+            "focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary/20",
+            "disabled:bg-surface-muted disabled:cursor-not-allowed disabled:text-muted",
+            local.error && "border-red-500 focus:border-red-500 focus-visible:ring-red-500/20",
+            !local.error && "border-border",
+            local.class
+          )}
+        />
+      </div>
       <Show when={local.error}>
         <p id={errorId} class="text-sm text-red-500" role="alert">
           {local.error}
