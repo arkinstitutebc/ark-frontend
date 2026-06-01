@@ -25,12 +25,16 @@ export function Field(props: FieldProps) {
       <span class="block text-sm font-medium text-foreground mb-1">
         {props.label}
         <Show when={props.required}>
-          <span class="text-red-500 ml-0.5">*</span>
+          <span class="text-red-500 ml-0.5" aria-hidden="true">
+            *
+          </span>
         </Show>
       </span>
       {props.children}
       <Show when={props.error}>
-        <p class="text-xs text-red-600 mt-1">{props.error}</p>
+        <p class="text-xs text-red-600 mt-1" role="alert">
+          {props.error}
+        </p>
       </Show>
       <Show when={!props.error && props.hint}>
         <p class="text-xs text-muted mt-1">{props.hint}</p>
