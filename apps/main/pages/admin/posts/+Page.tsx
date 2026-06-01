@@ -23,6 +23,7 @@ import {
   Select,
   StatusBadge,
   TableSkeleton,
+  TableStateRow,
   Textarea,
   THead,
   Th,
@@ -370,19 +371,29 @@ export default function AdminPostsPage() {
                           )}
                         </For>
                         <Show when={sortedPosts().length === 0}>
-                          <tr>
-                            <td colspan={5} class="px-6 py-12 text-center text-sm text-muted">
-                              No blog posts yet.
-                            </td>
-                          </tr>
+                          <TableStateRow
+                            colSpan={5}
+                            icon={Icons.fileText}
+                            heading="No blog posts yet"
+                            description="Draft the first article here, then publish when it is ready for the public site."
+                            action={{ label: "New post", onClick: openCreate }}
+                          />
                         </Show>
                       </tbody>
                     </DataTable>
                   }
                 >
-                  <div class="p-12 text-center text-sm text-red-600">
-                    Could not load posts. Please refresh.
-                  </div>
+                  <DataTable>
+                    <tbody>
+                      <TableStateRow
+                        colSpan={5}
+                        icon={Icons.alert}
+                        heading="Could not load posts"
+                        description="Refresh the page or try again in a moment."
+                        tone="danger"
+                      />
+                    </tbody>
+                  </DataTable>
                 </Show>
               </Show>
             </div>

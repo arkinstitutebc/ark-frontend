@@ -19,6 +19,7 @@ import {
   Select,
   StatusBadge,
   TableSkeleton,
+  TableStateRow,
   THead,
   Th,
   Tr,
@@ -204,19 +205,29 @@ export default function AdminUsersPage() {
                           )}
                         </For>
                         <Show when={sortedUsers().length === 0}>
-                          <tr>
-                            <td colspan={5} class="px-5 py-12 text-center text-sm text-muted">
-                              No users yet.
-                            </td>
-                          </tr>
+                          <TableStateRow
+                            colSpan={5}
+                            icon={Icons.users}
+                            heading="No users yet"
+                            description="Create the first portal account to start assigning roles."
+                            action={{ label: "Create user", onClick: openInvite }}
+                          />
                         </Show>
                       </tbody>
                     </DataTable>
                   }
                 >
-                  <div class="p-12 text-center text-sm text-red-600">
-                    Could not load users. Please refresh.
-                  </div>
+                  <DataTable>
+                    <tbody>
+                      <TableStateRow
+                        colSpan={5}
+                        icon={Icons.alert}
+                        heading="Could not load users"
+                        description="Refresh the page or try again in a moment."
+                        tone="danger"
+                      />
+                    </tbody>
+                  </DataTable>
                 </Show>
               </Show>
             </div>

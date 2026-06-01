@@ -1,4 +1,6 @@
-import type { JSX } from "solid-js"
+import type { Component, JSX } from "solid-js"
+import { Show } from "solid-js"
+import { Button } from "../forms/button"
 
 export interface DataTableProps {
   children: JSX.Element
@@ -162,6 +164,69 @@ export function SortableTh(props: SortableThProps) {
         </span>
       </button>
     </Th>
+  )
+}
+
+export interface TableStateRowProps {
+  colSpan: number
+  icon?: Component<{ class?: string }>
+  heading: string
+  description?: string
+  action?: {
+    label: string
+    onClick: () => void
+  }
+  tone?: "muted" | "danger"
+}
+
+/**
+ * Centered empty/error row that keeps feedback inside the table layout.
+ * Use this in `<tbody>` for list screens instead of raw "No rows" text.
+ */
+export function TableStateRow(props: TableStateRowProps) {
+  const tone = () => props.tone ?? "muted"
+  const Icon = () => props.icon
+  return (
+    <tr>
+      <td colSpan={props.colSpan} class="px-6 py-12">
+        <div class="mx-auto flex max-w-sm flex-col items-center text-center">
+          <Show when={Icon()}>
+            {IconComponent => (
+              <div
+                class={`mb-3 flex h-11 w-11 items-center justify-center rounded-full ${
+                  tone() === "danger"
+                    ? "bg-red-50 text-red-700 dark:bg-red-950/40 dark:text-red-300"
+                    : "bg-surface-muted text-muted"
+                }`}
+              >
+                <IconComponent class="h-5 w-5" />
+              </div>
+            )}
+          </Show>
+          <p
+            class={`text-sm font-semibold ${tone() === "danger" ? "text-red-700" : "text-foreground"}`}
+          >
+            {props.heading}
+          </p>
+          <Show when={props.description}>
+            <p class="mt-1 text-sm leading-5 text-muted">{props.description}</p>
+          </Show>
+          <Show when={props.action}>
+            {action => (
+              <Button
+                type="button"
+                size="sm"
+                variant="ghost"
+                class="mt-4"
+                onClick={action().onClick}
+              >
+                {action().label}
+              </Button>
+            )}
+          </Show>
+        </div>
+      </td>
+    </tr>
   )
 }
 

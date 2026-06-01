@@ -29,6 +29,8 @@ export {
   type ScrollableDataTableProps,
   SortableTh,
   type SortableThProps,
+  TableStateRow,
+  type TableStateRowProps,
   THead,
   type THeadProps,
   Th,
