@@ -513,23 +513,6 @@ export default function AdminPostsPage() {
                   />
                 </div>
               </section>
-
-              <section class="rounded-xl border border-border bg-surface p-4 space-y-3">
-                <h3 class="text-sm font-semibold text-foreground">SEO</h3>
-                <Input
-                  label="SEO title"
-                  value={form().seoTitle}
-                  onInput={e => setForm({ ...form(), seoTitle: e.currentTarget.value })}
-                  error={errors().seoTitle}
-                />
-                <Textarea
-                  label="SEO description"
-                  rows={3}
-                  value={form().seoDescription}
-                  onInput={e => setForm({ ...form(), seoDescription: e.currentTarget.value })}
-                  error={errors().seoDescription}
-                />
-              </section>
             </aside>
           </div>
 
