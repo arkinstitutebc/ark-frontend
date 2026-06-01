@@ -23,6 +23,8 @@ export interface SelectProps<T> {
   onChange: (value: T) => void
   placeholder?: string
   disabled?: boolean
+  error?: string
+  hint?: string
   class?: string
   id?: string
   /** aria-label fallback when no <label htmlFor> wires up */
@@ -45,6 +47,8 @@ export function Select<T>(props: SelectProps<T>): JSX.Element {
   const baseId = createUniqueId()
   const optionId = (i: number) => `${props.id ?? baseId}-option-${i}`
   const listboxId = `${props.id ?? baseId}-listbox`
+  const errorId = `${props.id ?? baseId}-error`
+  const hintId = `${props.id ?? baseId}-hint`
   let containerRef: HTMLDivElement | undefined
   let triggerRef: HTMLButtonElement | undefined
   let listboxRef: HTMLDivElement | undefined
@@ -59,12 +63,21 @@ export function Select<T>(props: SelectProps<T>): JSX.Element {
   )
   const selectedLabel = () => selectedOption()?.label ?? ""
   const placeholder = () => props.placeholder ?? "Select…"
+  const describedBy = () =>
+    [props.error ? errorId : undefined, !props.error && props.hint ? hintId : undefined]
+      .filter(Boolean)
+      .join(" ") || undefined
+
+  function initialHighlight() {
+    const selectedIdx = props.options.findIndex(o => Object.is(o.value, props.value))
+    if (selectedIdx >= 0 && !props.options[selectedIdx]?.disabled) return selectedIdx
+    return props.options.findIndex(o => !o.disabled)
+  }
 
   // When the listbox opens, jump highlight to the selected option (or first).
   createEffect(() => {
     if (!open()) return
-    const idx = props.options.findIndex(o => Object.is(o.value, props.value))
-    setHighlight(idx >= 0 ? idx : 0)
+    setHighlight(initialHighlight())
     // Scroll the highlighted option into view next tick. Guard for SSR.
     if (typeof window === "undefined") return
     queueMicrotask(() => {
@@ -92,6 +105,13 @@ export function Select<T>(props: SelectProps<T>): JSX.Element {
     return -1
   }
 
+  function lastEnabledIndex() {
+    for (let i = props.options.length - 1; i >= 0; i -= 1) {
+      if (!props.options[i]?.disabled) return i
+    }
+    return -1
+  }
+
   function onTriggerKeyDown(e: KeyboardEvent) {
     if (props.disabled) return
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
@@ -102,6 +122,14 @@ export function Select<T>(props: SelectProps<T>): JSX.Element {
       }
       const next = nextEnabled(highlight(), e.key === "ArrowDown" ? 1 : -1)
       if (next >= 0) setHighlight(next)
+    } else if (e.key === "Home" && open()) {
+      e.preventDefault()
+      const first = props.options.findIndex(o => !o.disabled)
+      if (first >= 0) setHighlight(first)
+    } else if (e.key === "End" && open()) {
+      e.preventDefault()
+      const last = lastEnabledIndex()
+      if (last >= 0) setHighlight(last)
     } else if (e.key === "Enter" || e.key === " ") {
       e.preventDefault()
       if (!open()) {
@@ -152,6 +180,8 @@ export function Select<T>(props: SelectProps<T>): JSX.Element {
         id={props.id}
         role="combobox"
         disabled={props.disabled}
+        aria-invalid={props.error ? "true" : undefined}
+        aria-describedby={describedBy()}
         aria-haspopup="listbox"
         aria-controls={listboxId}
         aria-expanded={open()}
@@ -159,7 +189,11 @@ export function Select<T>(props: SelectProps<T>): JSX.Element {
         aria-activedescendant={open() && highlight() >= 0 ? optionId(highlight()) : undefined}
         onClick={() => !props.disabled && setOpen(o => !o)}
         onKeyDown={onTriggerKeyDown}
-        class="w-full px-4 py-2.5 bg-surface text-foreground border border-border rounded-lg text-left flex items-center justify-between gap-2 transition-colors focus:outline-none focus:border-primary focus-visible:ring-2 focus-visible:ring-primary disabled:bg-surface-muted disabled:cursor-not-allowed disabled:text-muted"
+        class={`w-full px-4 py-2.5 bg-surface text-foreground border rounded-lg text-left flex items-center justify-between gap-2 transition-colors focus:outline-none focus:border-primary focus-visible:ring-2 disabled:bg-surface-muted disabled:cursor-not-allowed disabled:text-muted ${
+          props.error
+            ? "border-red-500 focus:border-red-500 focus-visible:ring-red-500/20"
+            : "border-border focus-visible:ring-primary/20"
+        }`}
       >
         <span class={`truncate ${selectedOption() ? "" : "text-muted"}`}>
           {selectedOption() ? selectedLabel() : placeholder()}
@@ -175,38 +209,53 @@ export function Select<T>(props: SelectProps<T>): JSX.Element {
           id={listboxId}
           role="listbox"
           tabindex="-1"
-          class="absolute z-50 left-0 right-0 mt-1 bg-surface border border-border rounded-lg shadow-lg py-1 max-h-64 overflow-y-auto"
+          class="absolute z-50 left-0 right-0 mt-1 animate-fade-in bg-surface border border-border rounded-lg shadow-lg py-1 max-h-64 overflow-y-auto"
         >
-          <For each={props.options}>
-            {(opt, i) => {
-              const isSelected = () => Object.is(opt.value, props.value)
-              const isHighlighted = () => highlight() === i()
-              return (
-                // biome-ignore lint/a11y/useKeyWithClickEvents: keyboard handled at trigger via aria-activedescendant pattern
-                // biome-ignore lint/a11y/useFocusableInteractive: focus stays on trigger; aria-activedescendant conveys highlighted option
-                <div
-                  id={optionId(i())}
-                  role="option"
-                  aria-selected={isSelected()}
-                  aria-disabled={opt.disabled}
-                  data-highlighted={isHighlighted()}
-                  onMouseEnter={() => !opt.disabled && setHighlight(i())}
-                  onClick={() => commit(i())}
-                  class={`px-4 py-2 text-sm flex items-center justify-between gap-2 ${
-                    opt.disabled
-                      ? "text-muted cursor-not-allowed"
-                      : isHighlighted()
-                        ? "bg-surface-muted text-foreground cursor-pointer"
-                        : "text-foreground hover:bg-surface-muted cursor-pointer"
-                  }`}
-                >
-                  <span class="truncate">{opt.label}</span>
-                  {isSelected() && <Check class="w-3.5 h-3.5 text-primary flex-shrink-0" />}
-                </div>
-              )
-            }}
-          </For>
+          <Show
+            when={props.options.length > 0}
+            fallback={<p class="px-4 py-3 text-sm text-muted">No options available.</p>}
+          >
+            <For each={props.options}>
+              {(opt, i) => {
+                const isSelected = () => Object.is(opt.value, props.value)
+                const isHighlighted = () => highlight() === i()
+                return (
+                  // biome-ignore lint/a11y/useKeyWithClickEvents: keyboard handled at trigger via aria-activedescendant pattern
+                  // biome-ignore lint/a11y/useFocusableInteractive: focus stays on trigger; aria-activedescendant conveys highlighted option
+                  <div
+                    id={optionId(i())}
+                    role="option"
+                    aria-selected={isSelected()}
+                    aria-disabled={opt.disabled ? "true" : undefined}
+                    data-highlighted={isHighlighted()}
+                    onMouseEnter={() => !opt.disabled && setHighlight(i())}
+                    onClick={() => commit(i())}
+                    class={`px-4 py-2 text-sm flex items-center justify-between gap-2 ${
+                      opt.disabled
+                        ? "text-muted cursor-not-allowed"
+                        : isHighlighted()
+                          ? "bg-surface-muted text-foreground cursor-pointer"
+                          : "text-foreground hover:bg-surface-muted cursor-pointer"
+                    }`}
+                  >
+                    <span class="truncate">{opt.label}</span>
+                    {isSelected() && <Check class="w-3.5 h-3.5 text-primary flex-shrink-0" />}
+                  </div>
+                )
+              }}
+            </For>
+          </Show>
         </div>
+      </Show>
+      <Show when={props.error}>
+        <p id={errorId} class="mt-1 text-sm text-red-500" role="alert">
+          {props.error}
+        </p>
+      </Show>
+      <Show when={!props.error && props.hint}>
+        <p id={hintId} class="mt-1 text-xs text-muted">
+          {props.hint}
+        </p>
       </Show>
     </div>
   )
