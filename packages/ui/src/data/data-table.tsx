@@ -71,6 +71,8 @@ export interface ThProps {
   children: JSX.Element
   /** Text alignment. Defaults to `"left"`. */
   align?: "left" | "right" | "center"
+  /** Sort state for accessible sortable headers. */
+  ariaSort?: "ascending" | "descending" | "none"
   /**
    * Vertical padding for the header cell. Match the body row's padding so
    * head + body line up.
@@ -104,10 +106,62 @@ export function Th(props: ThProps) {
   return (
     <th
       colSpan={props.colSpan}
+      aria-sort={props.ariaSort}
       class={`${padding()} ${align()} text-xs font-semibold text-muted uppercase tracking-wider ${props.class ?? ""}`}
     >
       {props.children}
     </th>
+  )
+}
+
+export interface SortableThProps {
+  label: string
+  active: boolean
+  dir: "asc" | "desc"
+  onClick: () => void
+  align?: "left" | "right" | "center"
+  size?: "default" | "dense" | "compact"
+  class?: string
+}
+
+/** Sortable table header with consistent affordance + aria-sort wiring. */
+export function SortableTh(props: SortableThProps) {
+  const ariaSort = () =>
+    props.active ? (props.dir === "asc" ? "ascending" : "descending") : "none"
+  const justify = () => {
+    if (props.align === "right") return "justify-end"
+    if (props.align === "center") return "justify-center"
+    return "justify-start"
+  }
+  const indicator = () => {
+    if (!props.active) return "↕"
+    return props.dir === "asc" ? "▲" : "▼"
+  }
+
+  return (
+    <Th
+      align={props.align}
+      ariaSort={ariaSort()}
+      size={props.size}
+      class={`${props.class ?? ""} sticky top-0 z-10 bg-surface-muted`}
+    >
+      <button
+        type="button"
+        onClick={props.onClick}
+        class={`group inline-flex w-full items-center gap-1.5 ${justify()} transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40`}
+        aria-label={`Sort by ${props.label}`}
+      >
+        <span>{props.label}</span>
+        <span
+          aria-hidden="true"
+          class={`text-[10px] transition-colors ${
+            props.active ? "text-foreground" : "text-muted/60 group-hover:text-muted"
+          }`}
+        >
+          {indicator()}
+        </span>
+      </button>
+    </Th>
   )
 }
 

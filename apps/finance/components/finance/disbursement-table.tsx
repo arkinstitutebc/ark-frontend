@@ -1,4 +1,4 @@
-import { DataTable, formatDatePH, formatPeso, THead, Th, Tr } from "@ark/ui"
+import { DataTable, formatDatePH, formatPeso, SortableTh, THead, Th, Tr } from "@ark/ui"
 import type { Transaction } from "@data/types"
 import { For, Show } from "solid-js"
 import { StatusBadge } from "@/components/ui"
@@ -24,52 +24,47 @@ export function DisbursementTable(props: DisbursementTableProps) {
   return (
     <DataTable class="max-h-[560px] overflow-auto">
       <THead>
-        <StickyTh class="min-w-[110px]">
-          <SortButton
-            label="Date"
-            active={props.sortKey === "date"}
-            dir={props.sortDir}
-            onClick={() => props.onSort("date")}
-          />
-        </StickyTh>
-        <StickyTh class="min-w-[180px]">
-          <SortButton
-            label="Store / Company"
-            active={props.sortKey === "payee"}
-            dir={props.sortDir}
-            onClick={() => props.onSort("payee")}
-          />
-        </StickyTh>
-        <StickyTh class="min-w-[300px]">
-          <SortButton
-            label="Description"
-            active={props.sortKey === "description"}
-            dir={props.sortDir}
-            onClick={() => props.onSort("description")}
-          />
-        </StickyTh>
-        <StickyTh class="min-w-[220px]">
-          <SortButton
-            label="Category"
-            active={props.sortKey === "category"}
-            dir={props.sortDir}
-            onClick={() => props.onSort("category")}
-          />
-        </StickyTh>
+        <SortableTh
+          label="Date"
+          active={props.sortKey === "date"}
+          dir={props.sortDir}
+          onClick={() => props.onSort("date")}
+          class="min-w-[110px]"
+        />
+        <SortableTh
+          label="Store / Company"
+          active={props.sortKey === "payee"}
+          dir={props.sortDir}
+          onClick={() => props.onSort("payee")}
+          class="min-w-[180px]"
+        />
+        <SortableTh
+          label="Description"
+          active={props.sortKey === "description"}
+          dir={props.sortDir}
+          onClick={() => props.onSort("description")}
+          class="min-w-[300px]"
+        />
+        <SortableTh
+          label="Category"
+          active={props.sortKey === "category"}
+          dir={props.sortDir}
+          onClick={() => props.onSort("category")}
+          class="min-w-[220px]"
+        />
         <StickyTh class="min-w-[130px]">For</StickyTh>
         <StickyTh class="min-w-[180px]">Treatment</StickyTh>
         <StickyTh class="min-w-[190px]">Created By</StickyTh>
         <StickyTh class="min-w-[160px]">Created At</StickyTh>
         <StickyTh class="min-w-[180px]">Updated At</StickyTh>
-        <StickyTh align="right" class="min-w-[140px]">
-          <SortButton
-            label="Amount"
-            active={props.sortKey === "amount"}
-            dir={props.sortDir}
-            onClick={() => props.onSort("amount")}
-            align="right"
-          />
-        </StickyTh>
+        <SortableTh
+          label="Amount"
+          active={props.sortKey === "amount"}
+          dir={props.sortDir}
+          onClick={() => props.onSort("amount")}
+          align="right"
+          class="min-w-[140px]"
+        />
       </THead>
       <tbody>
         <For each={props.rows}>
@@ -132,26 +127,5 @@ function StickyTh(props: {
     <Th align={props.align} class={`${props.class ?? ""} sticky top-0 z-10 bg-surface-muted`}>
       {props.children}
     </Th>
-  )
-}
-
-function SortButton(props: {
-  label: string
-  active: boolean
-  dir: DisbursementSortDir
-  onClick: () => void
-  align?: "left" | "right"
-}) {
-  return (
-    <button
-      type="button"
-      onClick={props.onClick}
-      class={`inline-flex w-full items-center gap-1 ${props.align === "right" ? "justify-end" : "justify-start"} hover:text-foreground`}
-    >
-      <span>{props.label}</span>
-      <span class={`text-[10px] ${props.active ? "text-foreground" : "text-muted/60"}`}>
-        {props.active ? (props.dir === "asc" ? "▲" : "▼") : "↕"}
-      </span>
-    </button>
   )
 }

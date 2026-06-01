@@ -70,8 +70,22 @@ function AvatarPreview(props: {
           <Icons.user class="h-10 w-10 text-white" />
         </div>
       )}
-      <span class="absolute inset-0 flex items-center justify-center rounded-full bg-black/55 text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
-        <Icons.edit class="h-5 w-5" />
+      <span
+        class={`absolute inset-0 flex items-center justify-center rounded-full bg-black/55 text-white transition-opacity ${
+          props.busy
+            ? "opacity-100"
+            : "opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100"
+        }`}
+      >
+        {props.busy ? (
+          <span
+            aria-label="Loading profile photo"
+            role="status"
+            class="h-5 w-5 animate-spin rounded-full border-2 border-white/40 border-t-white"
+          />
+        ) : (
+          <Icons.edit class="h-5 w-5" />
+        )}
       </span>
     </button>
   )
@@ -309,16 +323,11 @@ export default function ProfilePage() {
                     variant="secondary"
                     size="sm"
                     onClick={pickPhoto}
-                    disabled={uploadAvatar.isPending || loadingExistingPhoto()}
+                    loading={uploadAvatar.isPending || loadingExistingPhoto()}
+                    loadingLabel={loadingExistingPhoto() ? "Loading photo..." : "Uploading..."}
                   >
                     <Icons.upload class="w-4 h-4" />
-                    {uploadAvatar.isPending
-                      ? "Uploading..."
-                      : loadingExistingPhoto()
-                        ? "Loading photo..."
-                        : userQuery.data?.photoUrl
-                          ? "Upload different photo"
-                          : "Choose and crop photo"}
+                    {userQuery.data?.photoUrl ? "Upload different photo" : "Choose and crop photo"}
                   </Button>
                   <p class="text-xs text-muted mt-2">
                     Hover the current photo to edit its crop, or upload a different JPEG, PNG, or
@@ -368,9 +377,11 @@ export default function ProfilePage() {
                   variant="primary"
                   size="sm"
                   onClick={saveName}
+                  loading={updateMe.isPending}
+                  loadingLabel="Saving…"
                   disabled={!canSaveName()}
                 >
-                  {updateMe.isPending ? "Saving…" : "Save changes"}
+                  Save changes
                 </Button>
               </div>
             </div>
@@ -447,8 +458,15 @@ export default function ProfilePage() {
               />
 
               <div class="flex justify-end">
-                <Button type="submit" variant="primary" size="sm" disabled={!canChangePassword()}>
-                  {changePassword.isPending ? "Changing…" : "Change password"}
+                <Button
+                  type="submit"
+                  variant="primary"
+                  size="sm"
+                  loading={changePassword.isPending}
+                  loadingLabel="Changing…"
+                  disabled={!canChangePassword()}
+                >
+                  Change password
                 </Button>
               </div>
             </form>
