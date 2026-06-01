@@ -287,8 +287,14 @@ export default function AdminUsersPage() {
             <Button type="button" variant="ghost" size="sm" onClick={closeInvite}>
               Cancel
             </Button>
-            <Button type="submit" variant="primary" size="sm" disabled={invite.isPending}>
-              {invite.isPending ? "Creating…" : "Create user"}
+            <Button
+              type="submit"
+              variant="primary"
+              size="sm"
+              loading={invite.isPending}
+              loadingLabel="Creating…"
+            >
+              Create user
             </Button>
           </div>
         </form>

@@ -1,3 +1,5 @@
+import { Button } from "../forms/button"
+
 interface ModalFooterProps {
   onCancel: () => void
   /** When provided, renders a Submit button. Omit for view-only modals. */
@@ -10,6 +12,8 @@ interface ModalFooterProps {
   disabled?: boolean
   /** Tints the submit button accent (red) — for confirm-delete flows. */
   danger?: boolean
+  /** Keep Cancel usable during an in-flight submit. Defaults to false. */
+  allowCancelWhileSubmitting?: boolean
 }
 
 /**
@@ -23,40 +27,45 @@ interface ModalFooterProps {
  * Usage outside a form: pass `onSubmit` and we wire it to a click handler.
  */
 export function ModalFooter(props: ModalFooterProps) {
-  const submitClass = () =>
-    props.danger
-      ? "px-4 py-2 text-sm font-medium text-white bg-accent hover:bg-accent/90 rounded-lg transition-colors disabled:opacity-50"
-      : "px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50"
-
   const submitText = () => {
-    if (props.submitting) {
-      return props.danger ? "Deleting..." : "Saving..."
-    }
     return props.submitLabel ?? (props.danger ? "Delete" : "Save")
   }
+  const submitLoadingText = () => (props.danger ? "Deleting..." : "Saving...")
 
   return (
     <div class="flex justify-end gap-3 pt-4 border-t border-border">
-      <button
+      <Button
         type="button"
+        variant="ghost"
+        size="sm"
         onClick={props.onCancel}
-        class="px-4 py-2 text-sm font-medium text-foreground hover:bg-surface-muted rounded-lg transition-colors"
+        disabled={props.submitting && !props.allowCancelWhileSubmitting}
       >
         {props.cancelLabel ?? "Cancel"}
-      </button>
+      </Button>
       {props.submitInForm ? (
-        <button type="submit" disabled={props.submitting || props.disabled} class={submitClass()}>
-          {submitText()}
-        </button>
-      ) : props.onSubmit ? (
-        <button
-          type="button"
-          onClick={props.onSubmit}
-          disabled={props.submitting || props.disabled}
-          class={submitClass()}
+        <Button
+          type="submit"
+          variant={props.danger ? "accent" : "primary"}
+          size="sm"
+          loading={props.submitting}
+          loadingLabel={submitLoadingText()}
+          disabled={props.disabled}
         >
           {submitText()}
-        </button>
+        </Button>
+      ) : props.onSubmit ? (
+        <Button
+          type="button"
+          variant={props.danger ? "accent" : "primary"}
+          size="sm"
+          onClick={props.onSubmit}
+          loading={props.submitting}
+          loadingLabel={submitLoadingText()}
+          disabled={props.disabled}
+        >
+          {submitText()}
+        </Button>
       ) : null}
     </div>
   )

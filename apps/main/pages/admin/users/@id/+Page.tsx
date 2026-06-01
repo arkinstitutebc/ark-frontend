@@ -275,9 +275,10 @@ export default function AdminUserDetailPage() {
                               type="submit"
                               variant="primary"
                               size="sm"
-                              disabled={update.isPending}
+                              loading={update.isPending}
+                              loadingLabel="Saving…"
                             >
-                              {update.isPending ? "Saving…" : "Save changes"}
+                              Save changes
                             </Button>
                           </div>
                         </form>

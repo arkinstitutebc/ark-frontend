@@ -1,14 +1,25 @@
-import type { JSX } from "solid-js"
+import { type JSX, splitProps } from "solid-js"
 import { cn } from "../utils"
 
 export function Button(
   props: JSX.ButtonHTMLAttributes<HTMLButtonElement> & {
     variant?: "primary" | "accent" | "secondary" | "ghost"
     size?: "sm" | "md" | "lg"
+    loading?: boolean
+    loadingLabel?: string
   }
 ) {
-  const size = props.size || "md"
-  const variant = props.variant || "primary"
+  const [local, buttonProps] = splitProps(props, [
+    "children",
+    "class",
+    "disabled",
+    "loading",
+    "loadingLabel",
+    "size",
+    "variant",
+  ])
+  const size = local.size || "md"
+  const variant = local.variant || "primary"
 
   const sizeClasses = {
     sm: "px-4 py-2 text-sm",
@@ -25,15 +36,39 @@ export function Button(
 
   return (
     <button
-      {...props}
+      {...buttonProps}
+      disabled={local.disabled || local.loading}
+      aria-busy={local.loading || undefined}
       class={cn(
         "inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all disabled:opacity-50 disabled:cursor-not-allowed",
         sizeClasses,
         variantClasses,
-        props.class
+        local.class
       )}
     >
-      {props.children}
+      {local.loading ? <ButtonSpinner /> : null}
+      {local.loading && local.loadingLabel ? <span>{local.loadingLabel}</span> : local.children}
     </button>
+  )
+}
+
+function ButtonSpinner() {
+  return (
+    <svg
+      class="h-4 w-4 animate-spin"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+      role="img"
+      aria-label="Loading"
+    >
+      <title>Loading</title>
+      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
+      <path
+        class="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+      />
+    </svg>
   )
 }

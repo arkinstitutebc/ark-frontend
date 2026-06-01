@@ -275,9 +275,11 @@ export function AvatarCropper(props: AvatarCropperProps) {
               variant="primary"
               size="sm"
               onClick={handleConfirm}
+              loading={busy()}
+              loadingLabel="Processing..."
               disabled={!imgLoaded() || busy()}
             >
-              {busy() ? "Processing..." : "Use this photo"}
+              Use this photo
             </Button>
           </div>
         </div>
