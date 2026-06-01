@@ -48,22 +48,32 @@ function ProfileHeader(props: { user: CurrentUser }) {
  * Solid component is evaluated once at mount and never updates when props
  * change. `<Show fallback={JSX}>` is forbidden by SOP (commit e1d3713).
  */
-function AvatarPreview(props: { photoUrl: string | undefined; alt: string }) {
+function AvatarPreview(props: {
+  photoUrl: string | undefined
+  alt: string
+  busy?: boolean
+  onEdit: () => void
+}) {
   const hasPhoto = () => !!props.photoUrl && props.photoUrl.length > 0
   return (
-    <>
+    <button
+      type="button"
+      onClick={props.onEdit}
+      disabled={props.busy}
+      class="group relative h-20 w-20 shrink-0 rounded-full border border-border bg-surface p-0 text-left shadow-sm transition hover:border-primary/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:cursor-not-allowed disabled:opacity-70"
+      aria-label={hasPhoto() ? "Edit profile photo" : "Add profile photo"}
+    >
       {hasPhoto() ? (
-        <img
-          src={props.photoUrl}
-          alt={props.alt}
-          class="w-20 h-20 rounded-full object-cover border border-border"
-        />
+        <img src={props.photoUrl} alt={props.alt} class="h-full w-full rounded-full object-cover" />
       ) : (
-        <div class="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-sm">
-          <Icons.user class="w-10 h-10 text-white" />
+        <div class="flex h-full w-full items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary/80">
+          <Icons.user class="h-10 w-10 text-white" />
         </div>
       )}
-    </>
+      <span class="absolute inset-0 flex items-center justify-center rounded-full bg-black/55 text-white opacity-0 transition-opacity group-hover:opacity-100 group-focus-visible:opacity-100">
+        <Icons.edit class="h-5 w-5" />
+      </span>
+    </button>
   )
 }
 
@@ -132,9 +142,36 @@ export default function ProfilePage() {
   // File picked by the user; passed to <AvatarCropper> for circle-crop preview
   // before the actual upload.
   const [pendingFile, setPendingFile] = createSignal<File | null>(null)
+  const [loadingExistingPhoto, setLoadingExistingPhoto] = createSignal(false)
 
   function pickPhoto() {
     fileInputRef?.click()
+  }
+
+  async function editPhoto() {
+    const photoUrl = userQuery.data?.photoUrl
+    if (!photoUrl) {
+      pickPhoto()
+      return
+    }
+
+    setLoadingExistingPhoto(true)
+    try {
+      const res = await fetch(photoUrl, { mode: "cors" })
+      if (!res.ok) throw new Error(`Photo request failed (${res.status})`)
+
+      const blob = await res.blob()
+      if (blob.size === 0 || !blob.type.startsWith("image/")) {
+        throw new Error("Photo response was not an image")
+      }
+
+      setPendingFile(new File([blob], "current-profile-photo", { type: blob.type }))
+    } catch (_err) {
+      toast.error("Could not load current photo. Choose a new image instead.")
+      pickPhoto()
+    } finally {
+      setLoadingExistingPhoto(false)
+    }
   }
 
   function onFilePicked(e: Event) {
@@ -256,6 +293,8 @@ export default function ProfilePage() {
                 <AvatarPreview
                   photoUrl={userQuery.data?.photoUrl}
                   alt={`${userQuery.data?.firstName ?? ""} ${userQuery.data?.lastName ?? ""}`.trim()}
+                  busy={uploadAvatar.isPending || loadingExistingPhoto()}
+                  onEdit={editPhoto}
                 />
                 <div class="flex-1">
                   <input
@@ -270,13 +309,20 @@ export default function ProfilePage() {
                     variant="secondary"
                     size="sm"
                     onClick={pickPhoto}
-                    disabled={uploadAvatar.isPending}
+                    disabled={uploadAvatar.isPending || loadingExistingPhoto()}
                   >
                     <Icons.upload class="w-4 h-4" />
-                    {uploadAvatar.isPending ? "Uploading..." : "Choose and crop photo"}
+                    {uploadAvatar.isPending
+                      ? "Uploading..."
+                      : loadingExistingPhoto()
+                        ? "Loading photo..."
+                        : userQuery.data?.photoUrl
+                          ? "Upload different photo"
+                          : "Choose and crop photo"}
                   </Button>
                   <p class="text-xs text-muted mt-2">
-                    JPEG, PNG, or WebP. Max 2 MB. You can zoom out and drag before saving.
+                    Hover the current photo to edit its crop, or upload a different JPEG, PNG, or
+                    WebP. Max 2 MB.
                   </p>
                 </div>
               </div>
