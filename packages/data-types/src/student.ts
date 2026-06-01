@@ -24,6 +24,8 @@ export interface Student {
   skillsAssessmentScore?: number
   certificationIssued?: string
   certificationDate?: string
+  photoUrl?: string | null
+  psaCertificateUrl?: string | null
   createdAt: string
   updatedAt: string
 }

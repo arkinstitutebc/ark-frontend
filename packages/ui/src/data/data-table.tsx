@@ -61,7 +61,7 @@ export interface THeadProps {
 /** Renders the standard `<thead><tr>...children...</tr></thead>` shell. */
 export function THead(props: THeadProps) {
   return (
-    <thead class="bg-surface-muted border-b border-border">
+    <thead class="sticky top-0 z-10 bg-surface-muted border-b border-border">
       <tr>{props.children}</tr>
     </thead>
   )

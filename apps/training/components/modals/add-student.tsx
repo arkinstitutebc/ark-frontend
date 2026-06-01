@@ -1,4 +1,4 @@
-import { formErrorClass, formInputClass, Modal, ModalFooter, Select, toast } from "@ark/ui"
+import { formErrorClass, formInputClass, Icons, Modal, ModalFooter, Select, toast } from "@ark/ui"
 import { api } from "@data/api"
 import { useBatches, useCreateStudent } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
@@ -7,6 +7,7 @@ import type { Student } from "@data/types"
 import { validateForm } from "@data/validate"
 import { useQueryClient } from "@tanstack/solid-query"
 import { createMemo, createSignal, Index, Show } from "solid-js"
+import { batchSelectLabel } from "@/components/forms"
 
 interface AddStudentModalProps {
   open: boolean
@@ -45,7 +46,7 @@ export function AddStudentModal(props: AddStudentModalProps) {
 
   const batchOptions = createMemo(() =>
     (batchesQuery.data ?? []).map(b => ({
-      label: `${b.batchCode} — ${b.trainingName} — ${b.studentsEnrolled}/${b.studentsCapacity}`,
+      label: batchSelectLabel(b),
       value: b.id,
     }))
   )
@@ -163,29 +164,39 @@ export function AddStudentModal(props: AddStudentModalProps) {
   }
 
   return (
-    <Modal open={props.open} onClose={handleClose} title="Add New Student">
+    <Modal open={props.open} onClose={handleClose} title="Add students" size="lg">
+      <div class="mb-4 rounded-xl border border-border bg-surface-muted/40 p-4">
+        <p class="text-xs font-semibold uppercase tracking-wide text-muted">Fast enrollment</p>
+        <p class="mt-1 text-sm text-muted">
+          Add only the required fields here. Open a student later to complete their profile and
+          documents.
+        </p>
+      </div>
+
       <div class="flex gap-1 p-1 bg-surface-muted rounded-lg mb-4">
         <button
           type="button"
           onClick={() => setMode("single")}
-          class={`flex-1 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+          class={`flex flex-1 items-center justify-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
             mode() === "single"
               ? "bg-surface text-foreground shadow-sm"
               : "text-muted hover:text-foreground"
           }`}
         >
+          <Icons.user class="h-4 w-4" />
           Single
         </button>
         <button
           type="button"
           onClick={() => setMode("bulk")}
-          class={`flex-1 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
+          class={`flex flex-1 items-center justify-center gap-2 px-3 py-1.5 text-sm font-medium rounded-md transition-colors ${
             mode() === "bulk"
               ? "bg-surface text-foreground shadow-sm"
               : "text-muted hover:text-foreground"
           }`}
         >
-          Bulk Add
+          <Icons.users class="h-4 w-4" />
+          Bulk add
         </button>
       </div>
 

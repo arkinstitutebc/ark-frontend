@@ -1,17 +1,15 @@
 import { formErrorClass, formInputClass, formLabelClass, Modal, ModalFooter, Select } from "@ark/ui"
-import { TRAINING_TYPES } from "@data/constants"
 import { useCreateBatch, useInstructors, useVenues } from "@data/hooks"
 import { createBatchSchema } from "@data/schemas"
 import { validateForm } from "@data/validate"
 import { createMemo, createSignal, Show } from "solid-js"
+import { OTHER_INSTRUCTOR, trainingTypeOptions } from "@/components/forms/options"
 import { ManageVenuesModal } from "./manage-venues"
 
 interface AddBatchModalProps {
   open: boolean
   onClose: () => void
 }
-
-const OTHER_INSTRUCTOR = "__other__"
 
 export function AddBatchModal(props: AddBatchModalProps) {
   const mutation = useCreateBatch()
@@ -28,7 +26,7 @@ export function AddBatchModal(props: AddBatchModalProps) {
   const [instructorId, setInstructorId] = createSignal("")
   const [instructorOther, setInstructorOther] = createSignal("")
 
-  const trainingTypeOptions = createMemo(() => TRAINING_TYPES.map(t => ({ label: t, value: t })))
+  const trainingOptions = createMemo(trainingTypeOptions)
 
   const venueOptions = createMemo(() =>
     (venuesQuery.data ?? []).map(v => ({ label: v.name, value: v.name }))
@@ -99,12 +97,19 @@ export function AddBatchModal(props: AddBatchModalProps) {
   const labelClass = formLabelClass
 
   return (
-    <Modal open={props.open} onClose={handleClose} title="Add New Batch">
-      <form onSubmit={handleSubmit} class="space-y-4" noValidate>
+    <Modal open={props.open} onClose={handleClose} title="Create training batch" size="xl">
+      <form onSubmit={handleSubmit} class="space-y-5" noValidate>
+        <div class="rounded-xl border border-border bg-surface-muted/40 p-4">
+          <p class="text-xs font-semibold uppercase tracking-wide text-muted">Batch setup</p>
+          <p class="mt-1 text-sm text-muted">
+            Set the program, sponsor, schedule, venue, and trainer for the class.
+          </p>
+        </div>
+
         <div>
           <span class={labelClass}>Training Type</span>
           <Select
-            options={trainingTypeOptions()}
+            options={trainingOptions()}
             value={trainingName() || undefined}
             onChange={v => setTrainingName(v)}
             placeholder="Select training type"
@@ -215,7 +220,9 @@ export function AddBatchModal(props: AddBatchModalProps) {
         </div>
 
         <Show when={mutation.isError}>
-          <p class="text-sm text-red-600 dark:text-red-400">{mutation.error?.message}</p>
+          <p class="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            {mutation.error?.message}
+          </p>
         </Show>
 
         <ModalFooter

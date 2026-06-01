@@ -1,8 +1,7 @@
-import { PageContainer, PageHeader, Select, THead, Th } from "@ark/ui"
+import { Button, Icons, PageContainer, PageHeader, Select, StatusBadge, THead, Th } from "@ark/ui"
 import { useBatches, useStudent, useStudents } from "@data/hooks"
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { AddStudentModal, ConfirmDeleteStudentModal, EditStudentModal } from "@/components/modals"
-import { Icons, StatusBadge } from "@/components/ui"
 
 export default function StudentsPage() {
   const [filterBatch, setFilterBatch] = createSignal<string>("all")
@@ -61,19 +60,20 @@ export default function StudentsPage() {
     return batch?.trainingLevel || ""
   }
 
+  const activeCount = createMemo(
+    () => students().filter(s => s.status === "Enrolled" || s.status === "In Training").length
+  )
+
   return (
     <PageContainer>
       <PageHeader
         title="Students"
-        subtitle={`${totalStudents()} student${totalStudents() !== 1 ? "s" : ""}`}
+        subtitle="Enrollment records, batch assignment, contact details, and documents."
         action={
-          <button
-            type="button"
-            onClick={() => setShowAddModal(true)}
-            class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
-          >
-            + Add Student
-          </button>
+          <Button type="button" size="sm" onClick={() => setShowAddModal(true)}>
+            <Icons.plus class="h-4 w-4" />
+            Add Student
+          </Button>
         }
       />
 
@@ -93,7 +93,24 @@ export default function StudentsPage() {
         student={deletingStudentQuery.data ?? null}
       />
 
-      <div class="bg-surface border border-border rounded-lg p-3 mb-6 flex flex-wrap items-center gap-3">
+      <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
+        <div class="rounded-xl border border-border bg-surface p-4">
+          <p class="text-xs font-medium uppercase tracking-wide text-muted">Total students</p>
+          <p class="mt-2 text-2xl font-semibold text-foreground">{totalStudents()}</p>
+        </div>
+        <div class="rounded-xl border border-border bg-surface p-4">
+          <p class="text-xs font-medium uppercase tracking-wide text-muted">
+            Active in current view
+          </p>
+          <p class="mt-2 text-2xl font-semibold text-foreground">{activeCount()}</p>
+        </div>
+        <div class="rounded-xl border border-border bg-surface p-4">
+          <p class="text-xs font-medium uppercase tracking-wide text-muted">Shown page</p>
+          <p class="mt-2 text-2xl font-semibold text-foreground">{students().length}</p>
+        </div>
+      </div>
+
+      <div class="bg-surface border border-border rounded-xl p-3 mb-6 flex flex-wrap items-center gap-3">
         <div class="relative flex-1 min-w-[220px]">
           <Icons.search class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" />
           <input
@@ -117,8 +134,9 @@ export default function StudentsPage() {
           <button
             type="button"
             onClick={clearFilters}
-            class="text-sm font-medium text-muted hover:text-primary transition-colors px-2 py-2.5"
+            class="inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-primary transition-colors px-2 py-2.5"
           >
+            <Icons.close class="h-4 w-4" />
             Clear
           </button>
         </Show>
@@ -133,66 +151,89 @@ export default function StudentsPage() {
           </div>
         }
       >
-        <div class="bg-surface rounded-lg border border-border overflow-hidden">
-          <table class="w-full">
-            <THead>
-              <Th>Student ID</Th>
-              <Th>Name</Th>
-              <Th>Batch</Th>
-              <Th>Level</Th>
-              <Th>Status</Th>
-              <Th align="right">Actions</Th>
-            </THead>
-            <tbody>
-              <Show
-                when={students().length > 0}
-                fallback={
-                  <tr>
-                    <td colSpan={6} class="py-12 text-center text-muted text-sm">
-                      No students found.
-                    </td>
-                  </tr>
-                }
-              >
-                <For each={students()}>
-                  {student => (
-                    <tr
-                      class="border-t border-border hover:bg-primary/5 transition-colors cursor-pointer"
-                      onClick={() => setEditingStudentId(student.id)}
-                      title="Click to edit"
-                    >
-                      <td class="py-4 px-6 text-sm text-foreground font-mono">
-                        {student.studentId || "—"}
-                      </td>
-                      <td class="py-4 px-6 text-sm text-foreground">
-                        {student.firstName} {student.lastName}
-                      </td>
-                      <td class="py-4 px-6 text-sm text-muted">{getBatchCode(student.batchId)}</td>
-                      <td class="py-4 px-6 text-sm font-medium text-foreground">
-                        {getTrainingLevel(student.batchId)}
-                      </td>
-                      <td class="py-4 px-6">
-                        <StatusBadge status={student.status} />
-                      </td>
-                      <td class="py-4 px-6 text-right">
-                        <button
-                          type="button"
-                          onClick={e => {
-                            e.stopPropagation()
-                            setDeletingStudentId(student.id)
-                          }}
-                          class="text-muted hover:text-red-500 transition-colors p-1"
-                          title="Delete student"
-                        >
-                          <Icons.trash class="w-4 h-4" />
-                        </button>
+        <div class="bg-surface rounded-xl border border-border overflow-hidden">
+          <div class="max-h-[640px] overflow-auto">
+            <table class="w-full min-w-[760px]">
+              <THead>
+                <Th>Student ID</Th>
+                <Th>Name</Th>
+                <Th>Batch</Th>
+                <Th>Level</Th>
+                <Th>Status</Th>
+                <Th align="right">Actions</Th>
+              </THead>
+              <tbody>
+                <Show
+                  when={students().length > 0}
+                  fallback={
+                    <tr>
+                      <td colSpan={6} class="py-12 text-center text-muted text-sm">
+                        No students found.
                       </td>
                     </tr>
-                  )}
-                </For>
-              </Show>
-            </tbody>
-          </table>
+                  }
+                >
+                  <For each={students()}>
+                    {student => (
+                      <tr
+                        class="border-t border-border hover:bg-primary/5 transition-colors cursor-pointer"
+                        onClick={() => setEditingStudentId(student.id)}
+                        title="Click to edit"
+                      >
+                        <td class="py-4 px-6 text-sm text-foreground font-mono">
+                          {student.studentId || "—"}
+                        </td>
+                        <td class="py-4 px-6 text-sm text-foreground">
+                          <div class="flex items-center gap-3">
+                            <div class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-muted">
+                              <Show
+                                when={student.photoUrl}
+                                fallback={<Icons.user class="h-4 w-4 text-muted" />}
+                              >
+                                {url => (
+                                  <img src={url()} alt="" class="h-full w-full object-cover" />
+                                )}
+                              </Show>
+                            </div>
+                            <div>
+                              <p class="font-medium text-foreground">
+                                {student.firstName} {student.lastName}
+                              </p>
+                              <p class="text-xs text-muted">
+                                {student.email || student.contactNumber || "No contact yet"}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="py-4 px-6 text-sm text-muted">
+                          {getBatchCode(student.batchId)}
+                        </td>
+                        <td class="py-4 px-6 text-sm font-medium text-foreground">
+                          {getTrainingLevel(student.batchId)}
+                        </td>
+                        <td class="py-4 px-6">
+                          <StatusBadge status={student.status} />
+                        </td>
+                        <td class="py-4 px-6 text-right">
+                          <button
+                            type="button"
+                            onClick={e => {
+                              e.stopPropagation()
+                              setDeletingStudentId(student.id)
+                            }}
+                            class="rounded-md p-1 text-muted transition-colors hover:bg-red-50 hover:text-red-600"
+                            title="Delete student"
+                          >
+                            <Icons.trash class="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    )}
+                  </For>
+                </Show>
+              </tbody>
+            </table>
+          </div>
           <Show when={studentsQuery.data && totalStudents() > studentsQuery.data.limit}>
             <div class="flex items-center justify-between border-t border-border px-5 py-3">
               <p class="text-xs text-muted">

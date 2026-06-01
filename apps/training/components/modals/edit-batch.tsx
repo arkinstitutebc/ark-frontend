@@ -1,10 +1,15 @@
 import { formErrorClass, formInputClass, formLabelClass, Modal, ModalFooter, Select } from "@ark/ui"
-import { TRAINING_TYPES } from "@data/constants"
 import { useInstructors, useUpdateBatch, useVenues } from "@data/hooks"
 import { updateBatchSchema } from "@data/schemas"
 import type { Batch } from "@data/types"
 import { validateForm } from "@data/validate"
 import { createMemo, createSignal, Show } from "solid-js"
+import {
+  batchStatusOptions,
+  OTHER_INSTRUCTOR,
+  trainingLevelOptions,
+  trainingTypeOptions,
+} from "@/components/forms/options"
 import { ManageVenuesModal } from "./manage-venues"
 
 interface EditBatchModalProps {
@@ -12,10 +17,6 @@ interface EditBatchModalProps {
   onClose: () => void
   batch: Batch
 }
-
-const TRAINING_LEVELS = ["NC I", "NC II", "NC III", "NC IV", "NC V"] as const
-const STATUSES: Batch["status"][] = ["Not Started", "In Progress", "Completed", "On Hold"]
-const OTHER_INSTRUCTOR = "__other__"
 
 export function EditBatchModal(props: EditBatchModalProps) {
   const mutation = useUpdateBatch()
@@ -49,11 +50,9 @@ export function EditBatchModal(props: EditBatchModalProps) {
     }
   })
 
-  const trainingTypeOptions = createMemo(() => TRAINING_TYPES.map(t => ({ label: t, value: t })))
-
-  const trainingLevelOptions = createMemo(() => TRAINING_LEVELS.map(l => ({ label: l, value: l })))
-
-  const statusOptions = createMemo(() => STATUSES.map(s => ({ label: s, value: s })))
+  const trainingOptions = createMemo(trainingTypeOptions)
+  const levelOptions = createMemo(trainingLevelOptions)
+  const statusOptions = createMemo(batchStatusOptions)
 
   const venueOptions = createMemo(() =>
     (venuesQuery.data ?? []).map(v => ({ label: v.name, value: v.name }))
@@ -116,12 +115,19 @@ export function EditBatchModal(props: EditBatchModalProps) {
   const labelClass = formLabelClass
 
   return (
-    <Modal open={props.open} onClose={handleClose} title="Edit Batch">
-      <form onSubmit={handleSubmit} class="space-y-4" noValidate>
+    <Modal open={props.open} onClose={handleClose} title="Edit training batch" size="xl">
+      <form onSubmit={handleSubmit} class="space-y-5" noValidate>
+        <div class="rounded-xl border border-border bg-surface-muted/40 p-4">
+          <p class="font-mono text-xs text-muted">{props.batch.batchCode}</p>
+          <p class="mt-1 text-sm text-muted">
+            Update program details, schedule, venue, instructor, and delivery status.
+          </p>
+        </div>
+
         <div>
           <span class={labelClass}>Training Type</span>
           <Select
-            options={trainingTypeOptions()}
+            options={trainingOptions()}
             value={trainingName()}
             onChange={v => setTrainingName(v)}
             placeholder="Select training type"
@@ -136,7 +142,7 @@ export function EditBatchModal(props: EditBatchModalProps) {
           <div>
             <span class={labelClass}>Level</span>
             <Select
-              options={trainingLevelOptions()}
+              options={levelOptions()}
               value={trainingLevel() ?? undefined}
               onChange={v => setTrainingLevel(v as Batch["trainingLevel"])}
               placeholder="Select level"

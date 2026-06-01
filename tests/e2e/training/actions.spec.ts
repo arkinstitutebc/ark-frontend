@@ -22,7 +22,7 @@ async function createBatch(page: Page, seed: string) {
   await dialog.getByPlaceholder(/Sen\. Alan Cayetano|Juan Dela Cruz/i).fill(`QA Sponsor ${seed}`)
   await dialog.locator('input[type="date"]').nth(0).fill("2026-04-01")
   await dialog.locator('input[type="date"]').nth(1).fill("2026-04-15")
-  await selectOption(page, dialog, "Venue", "Ark Institute Big Room")
+  await selectOption(page, dialog, "Venue", "ARK Main Bldg")
   await selectOption(page, dialog, "Instructor", "Other (type below)")
   await dialog.getByPlaceholder(/Chef Maria Santos/i).fill(`QA Instructor ${seed}`)
   await dialog.getByRole("button", { name: /create batch/i }).click()

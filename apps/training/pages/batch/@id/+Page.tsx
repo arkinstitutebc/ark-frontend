@@ -12,17 +12,24 @@ import {
 import { useBatch, useBatchStudents, useStudent } from "@data/hooks"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
-import { AddStudentModal, ConfirmDeleteStudentModal, EditBatchModal } from "@/components/modals"
+import {
+  AddStudentModal,
+  ConfirmDeleteStudentModal,
+  EditBatchModal,
+  EditStudentModal,
+} from "@/components/modals"
 
 export default function BatchDetailPage() {
   const pageContext = usePageContext()
   const [showAddStudentModal, setShowAddStudentModal] = createSignal(false)
   const [showEditModal, setShowEditModal] = createSignal(false)
+  const [editingStudentId, setEditingStudentId] = createSignal<string | null>(null)
   const [deletingStudentId, setDeletingStudentId] = createSignal<string | null>(null)
 
   const id = createMemo(() => pageContext.routeParams.id as string)
   const batchQuery = useBatch(id)
   const studentsQuery = useBatchStudents(id)
+  const editingStudentQuery = useStudent(() => editingStudentId() || "")
   const deletingStudentQuery = useStudent(() => deletingStudentId() || "")
 
   return (
@@ -57,7 +64,7 @@ export default function BatchDetailPage() {
         >
           {b => (
             <>
-              <div class="flex items-start justify-between mb-8">
+              <div class="mb-8 flex flex-col gap-4 rounded-xl border border-border bg-surface p-5 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <div class="flex items-center gap-3 mb-2">
                     <h1 class="text-2xl font-semibold text-foreground">{b().batchCode}</h1>
@@ -101,7 +108,7 @@ export default function BatchDetailPage() {
                 />
               </div>
 
-              <div class="bg-surface rounded-lg border border-border mb-8">
+              <div class="bg-surface rounded-xl border border-border mb-8">
                 <div class="px-4 py-3 border-b border-border">
                   <h2 class="text-sm font-semibold text-foreground">Details</h2>
                 </div>
@@ -150,62 +157,80 @@ export default function BatchDetailPage() {
                   onClose={() => setDeletingStudentId(null)}
                   student={deletingStudentQuery.data ?? null}
                 />
+                <Show when={editingStudentQuery.data}>
+                  {student => (
+                    <EditStudentModal
+                      open={editingStudentId() !== null}
+                      onClose={() => setEditingStudentId(null)}
+                      student={student()}
+                    />
+                  )}
+                </Show>
 
                 <Show
                   when={!studentsQuery.isLoading}
                   fallback={<div class="animate-pulse h-48 bg-surface-muted rounded" />}
                 >
-                  <div class="bg-surface rounded-lg border border-border overflow-hidden">
-                    <table class="w-full">
-                      <THead>
-                        <Th>Student ID</Th>
-                        <Th>Name</Th>
-                        <Th>Status</Th>
-                        <Th align="right">Actions</Th>
-                      </THead>
-                      <tbody>
-                        <Show
-                          when={(studentsQuery.data?.length ?? 0) > 0}
-                          fallback={
-                            <tr>
-                              <td colSpan={4} class="py-12 text-center text-muted text-sm">
-                                No students enrolled yet.
-                              </td>
-                            </tr>
-                          }
-                        >
-                          <For each={studentsQuery.data}>
-                            {student => (
-                              <tr class="border-t border-border hover:bg-surface-muted transition-colors">
-                                <td class="py-4 px-6 text-sm text-foreground font-mono">
-                                  {student.studentId}
-                                </td>
-                                <td class="py-4 px-6 text-sm text-foreground">
-                                  {student.firstName} {student.lastName}
-                                </td>
-                                <td class="py-4 px-6">
-                                  <span
-                                    class={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${statusToneClass(student.status)}`}
-                                  >
-                                    {student.status}
-                                  </span>
-                                </td>
-                                <td class="py-4 px-6 text-right">
-                                  <button
-                                    type="button"
-                                    onClick={() => setDeletingStudentId(student.id)}
-                                    class="text-muted hover:text-red-500 transition-colors p-1"
-                                    title="Delete student"
-                                  >
-                                    <Icons.trash class="w-4 h-4" />
-                                  </button>
+                  <div class="bg-surface rounded-xl border border-border overflow-hidden">
+                    <div class="max-h-[560px] overflow-auto">
+                      <table class="w-full min-w-[640px]">
+                        <THead>
+                          <Th>Student ID</Th>
+                          <Th>Name</Th>
+                          <Th>Status</Th>
+                          <Th align="right">Actions</Th>
+                        </THead>
+                        <tbody>
+                          <Show
+                            when={(studentsQuery.data?.length ?? 0) > 0}
+                            fallback={
+                              <tr>
+                                <td colSpan={4} class="py-12 text-center text-muted text-sm">
+                                  No students enrolled yet.
                                 </td>
                               </tr>
-                            )}
-                          </For>
-                        </Show>
-                      </tbody>
-                    </table>
+                            }
+                          >
+                            <For each={studentsQuery.data}>
+                              {student => (
+                                <tr
+                                  class="border-t border-border hover:bg-primary/5 transition-colors cursor-pointer"
+                                  onClick={() => setEditingStudentId(student.id)}
+                                  title="Click to edit"
+                                >
+                                  <td class="py-4 px-6 text-sm text-foreground font-mono">
+                                    {student.studentId}
+                                  </td>
+                                  <td class="py-4 px-6 text-sm text-foreground">
+                                    {student.firstName} {student.lastName}
+                                  </td>
+                                  <td class="py-4 px-6">
+                                    <span
+                                      class={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${statusToneClass(student.status)}`}
+                                    >
+                                      {student.status}
+                                    </span>
+                                  </td>
+                                  <td class="py-4 px-6 text-right">
+                                    <button
+                                      type="button"
+                                      onClick={e => {
+                                        e.stopPropagation()
+                                        setDeletingStudentId(student.id)
+                                      }}
+                                      class="text-muted hover:text-red-500 transition-colors p-1"
+                                      title="Delete student"
+                                    >
+                                      <Icons.trash class="w-4 h-4" />
+                                    </button>
+                                  </td>
+                                </tr>
+                              )}
+                            </For>
+                          </Show>
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </Show>
               </div>
