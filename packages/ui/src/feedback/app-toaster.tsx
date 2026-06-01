@@ -16,22 +16,38 @@ import { Portal } from "solid-js/web"
 
 type Variant = "success" | "error" | "info"
 
+interface ToastOptions {
+  durationMs?: number
+  action?: {
+    label: string
+    onClick: () => void
+  }
+}
+
 interface ToastItem {
   id: number
   variant: Variant
   message: string
+  action?: ToastOptions["action"]
 }
 
 const [items, setItems] = createSignal<ToastItem[]>([])
 let nextId = 1
+const MAX_TOASTS = 4
+const DEFAULT_DURATION: Record<Variant, number> = {
+  success: 3000,
+  error: 6000,
+  info: 3500,
+}
 
 function dismiss(id: number) {
   setItems(prev => prev.filter(t => t.id !== id))
 }
 
-function show(variant: Variant, message: string, durationMs: number) {
+function show(variant: Variant, message: string, options?: ToastOptions) {
   const id = nextId++
-  setItems(prev => [...prev, { id, variant, message }])
+  const durationMs = options?.durationMs ?? DEFAULT_DURATION[variant]
+  setItems(prev => [...prev, { id, variant, message, action: options?.action }].slice(-MAX_TOASTS))
   if (durationMs > 0) {
     setTimeout(() => dismiss(id), durationMs)
   }
@@ -39,9 +55,9 @@ function show(variant: Variant, message: string, durationMs: number) {
 }
 
 export const toast = {
-  success: (message: string) => show("success", message, 3000),
-  error: (message: string) => show("error", message, 4500),
-  info: (message: string) => show("info", message, 3000),
+  success: (message: string, options?: ToastOptions) => show("success", message, options),
+  error: (message: string, options?: ToastOptions) => show("error", message, options),
+  info: (message: string, options?: ToastOptions) => show("info", message, options),
   dismiss,
 }
 
@@ -56,6 +72,11 @@ function ToastCard(props: ToastCardProps) {
       : props.item.variant === "error"
         ? CircleAlert
         : Info
+  const toneClass = () => {
+    if (props.item.variant === "success") return "text-green-600 dark:text-green-400"
+    if (props.item.variant === "error") return "text-red-600 dark:text-red-400"
+    return "text-primary"
+  }
 
   return (
     <div
@@ -65,12 +86,26 @@ function ToastCard(props: ToastCardProps) {
       }}
       role={props.item.variant === "error" ? "alert" : "status"}
     >
-      <span class="mt-0.5 text-muted" aria-hidden="true">
+      <span class={`mt-0.5 ${toneClass()}`} aria-hidden="true">
         <Icon class="h-4 w-4" />
       </span>
-      <p class="min-w-0 break-words text-[13px] font-medium leading-5 tracking-normal">
-        {props.item.message}
-      </p>
+      <div class="min-w-0">
+        <p class="break-words text-[13px] font-medium leading-5 tracking-normal">
+          {props.item.message}
+        </p>
+        {props.item.action && (
+          <button
+            type="button"
+            onClick={() => {
+              props.item.action?.onClick()
+              dismiss(props.item.id)
+            }}
+            class="mt-2 text-xs font-semibold text-primary transition-colors hover:text-primary/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 rounded"
+          >
+            {props.item.action.label}
+          </button>
+        )}
+      </div>
       <button
         type="button"
         onClick={() => dismiss(props.item.id)}
@@ -90,7 +125,11 @@ function ToastCard(props: ToastCardProps) {
 export function AppToaster() {
   return (
     <Portal>
-      <div class="pointer-events-none fixed right-4 top-4 z-[100] flex flex-col gap-2">
+      <div
+        class="pointer-events-none fixed right-4 top-4 z-[100] flex flex-col gap-2"
+        aria-live="polite"
+        aria-relevant="additions"
+      >
         <For each={items()}>{item => <ToastCard item={item} />}</For>
       </div>
     </Portal>
