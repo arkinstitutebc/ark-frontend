@@ -1,5 +1,5 @@
 import { ChevronDown, LogOut, Menu, User } from "lucide-solid"
-import { createSignal, onCleanup, onMount, Show } from "solid-js"
+import { createSignal, createUniqueId, onCleanup, onMount, Show } from "solid-js"
 import { NotificationBell, type NotificationBellProps } from "../display/notification-bell"
 import { RolePill } from "../display/role-pill"
 import { ThemeToggle } from "../theme/theme-toggle"
@@ -26,7 +26,10 @@ export interface TopBarProps {
 export function TopBar(props: TopBarProps) {
   const { setMobileOpen } = useSidebar()
   const [userDropdownOpen, setUserDropdownOpen] = createSignal(false)
+  const accountMenuId = createUniqueId()
   let dropdownRef: HTMLDivElement | undefined
+  let accountButtonRef: HTMLButtonElement | undefined
+  let accountMenuRef: HTMLDivElement | undefined
 
   const displayName = () => {
     const u = props.user
@@ -36,15 +39,58 @@ export function TopBar(props: TopBarProps) {
   const displayRole = () => props.user?.role || "-"
   const displayEmail = () => props.user?.email || "-"
 
+  function focusFirstMenuItem() {
+    requestAnimationFrame(() => {
+      accountMenuRef?.querySelector<HTMLElement>("[role='menuitem']")?.focus()
+    })
+  }
+
+  function openAccountMenu() {
+    setUserDropdownOpen(true)
+    focusFirstMenuItem()
+  }
+
+  function closeAccountMenu(options: { restoreFocus?: boolean } = {}) {
+    setUserDropdownOpen(false)
+    if (options.restoreFocus) requestAnimationFrame(() => accountButtonRef?.focus())
+  }
+
+  function onAccountTriggerKeyDown(e: KeyboardEvent) {
+    if (e.key === "ArrowDown") {
+      e.preventDefault()
+      openAccountMenu()
+    }
+  }
+
+  function onAccountMenuKeyDown(e: KeyboardEvent) {
+    if (e.key === "Escape") {
+      e.preventDefault()
+      closeAccountMenu({ restoreFocus: true })
+      return
+    }
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return
+
+    const items = Array.from(
+      accountMenuRef?.querySelectorAll<HTMLElement>("[role='menuitem']") ?? []
+    )
+    if (items.length === 0) return
+    e.preventDefault()
+    const currentIndex = items.indexOf(document.activeElement as HTMLElement)
+    const direction = e.key === "ArrowDown" ? 1 : -1
+    const nextIndex =
+      currentIndex < 0 ? 0 : (currentIndex + direction + items.length) % items.length
+    items[nextIndex]?.focus()
+  }
+
   onMount(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (dropdownRef && !dropdownRef.contains(e.target as Node)) {
-        setUserDropdownOpen(false)
+        closeAccountMenu()
       }
     }
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape" && userDropdownOpen()) {
-        setUserDropdownOpen(false)
+        closeAccountMenu({ restoreFocus: true })
       }
     }
     document.addEventListener("click", handleClickOutside)
@@ -78,11 +124,14 @@ export function TopBar(props: TopBarProps) {
 
           <div class="relative" ref={dropdownRef}>
             <button
+              ref={accountButtonRef}
               type="button"
               onClick={() => setUserDropdownOpen(!userDropdownOpen())}
+              onKeyDown={onAccountTriggerKeyDown}
               title={props.user ? displayName() : "Account"}
               aria-label={props.user ? `Account menu for ${displayName()}` : "Account menu"}
               aria-haspopup="menu"
+              aria-controls={accountMenuId}
               aria-expanded={userDropdownOpen()}
               class="flex items-center gap-2 p-1 rounded-lg hover:bg-surface-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
@@ -100,11 +149,20 @@ export function TopBar(props: TopBarProps) {
                   class="w-8 h-8 rounded-full object-cover shadow-sm flex-shrink-0"
                 />
               </Show>
-              <ChevronDown class="w-4 h-4 text-muted flex-shrink-0" />
+              <ChevronDown
+                class={`w-4 h-4 text-muted flex-shrink-0 transition-transform ${userDropdownOpen() ? "rotate-180" : ""}`}
+              />
             </button>
 
             <Show when={userDropdownOpen()}>
-              <div class="absolute right-0 top-full mt-2 w-56 bg-surface rounded-xl shadow-lg border border-border py-2 z-50">
+              <div
+                ref={accountMenuRef}
+                id={accountMenuId}
+                role="menu"
+                aria-label="Account menu"
+                onKeyDown={onAccountMenuKeyDown}
+                class="absolute right-0 top-full mt-2 w-56 animate-fade-in bg-surface rounded-xl shadow-lg border border-border py-2 z-50"
+              >
                 <div class="px-4 py-3 border-b border-border">
                   <p class="text-sm font-semibold text-foreground">{displayName()}</p>
                   <p class="text-xs text-muted mt-0.5 truncate">{displayEmail()}</p>
@@ -115,7 +173,8 @@ export function TopBar(props: TopBarProps) {
                 {props.profileHref ? (
                   <a
                     href={props.profileHref}
-                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-surface-muted"
+                    role="menuitem"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-surface-muted focus-visible:outline-none focus-visible:bg-surface-muted"
                   >
                     <User class="w-4 h-4 text-muted" />
                     <span>Profile</span>
@@ -123,7 +182,8 @@ export function TopBar(props: TopBarProps) {
                 ) : (
                   <button
                     type="button"
-                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-surface-muted w-full text-left"
+                    role="menuitem"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-surface-muted focus-visible:outline-none focus-visible:bg-surface-muted w-full text-left"
                   >
                     <User class="w-4 h-4 text-muted" />
                     <span>Profile</span>
@@ -133,7 +193,8 @@ export function TopBar(props: TopBarProps) {
                 <button
                   type="button"
                   onClick={props.onLogout}
-                  class="flex items-center gap-3 px-4 py-2.5 text-sm text-accent hover:bg-accent/5 w-full text-left"
+                  role="menuitem"
+                  class="flex items-center gap-3 px-4 py-2.5 text-sm text-accent hover:bg-accent/5 focus-visible:outline-none focus-visible:bg-accent/5 w-full text-left"
                 >
                   <LogOut class="w-4 h-4" />
                   <span>Logout</span>

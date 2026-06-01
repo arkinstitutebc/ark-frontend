@@ -1,5 +1,5 @@
 import { Bell } from "lucide-solid"
-import { createMemo, createSignal, For, onCleanup, onMount, Show } from "solid-js"
+import { createMemo, createSignal, createUniqueId, For, onCleanup, onMount, Show } from "solid-js"
 
 /**
  * Minimal Notification shape — kept loose so this component does not depend
@@ -41,7 +41,10 @@ function defaultSelect(notif: NotificationItem) {
 
 export function NotificationBell(props: NotificationBellProps) {
   const [open, setOpen] = createSignal(false)
+  const panelId = createUniqueId()
   let containerRef: HTMLDivElement | undefined
+  let triggerRef: HTMLButtonElement | undefined
+  let panelRef: HTMLDivElement | undefined
   const sortedNotifications = createMemo(() =>
     [...props.notifications()].sort((a, b) => {
       if (a.read !== b.read) return a.read ? 1 : -1
@@ -54,8 +57,20 @@ export function NotificationBell(props: NotificationBellProps) {
     return `${count} unread`
   }
 
-  function close() {
+  function focusFirstPanelControl() {
+    requestAnimationFrame(() => {
+      panelRef?.querySelector<HTMLElement>("button:not([disabled]), a[href]")?.focus()
+    })
+  }
+
+  function openPanel() {
+    setOpen(true)
+    focusFirstPanelControl()
+  }
+
+  function close(options: { restoreFocus?: boolean } = {}) {
     setOpen(false)
+    if (options.restoreFocus) requestAnimationFrame(() => triggerRef?.focus())
   }
 
   function activate(notif: NotificationItem) {
@@ -65,12 +80,39 @@ export function NotificationBell(props: NotificationBellProps) {
     close()
   }
 
+  function onTriggerKeyDown(e: KeyboardEvent) {
+    if (e.key === "ArrowDown") {
+      e.preventDefault()
+      openPanel()
+    }
+  }
+
+  function onPanelKeyDown(e: KeyboardEvent) {
+    if (e.key === "Escape") {
+      e.preventDefault()
+      close({ restoreFocus: true })
+      return
+    }
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return
+
+    const controls = Array.from(
+      panelRef?.querySelectorAll<HTMLElement>("button:not([disabled]), a[href]") ?? []
+    )
+    if (controls.length === 0) return
+    e.preventDefault()
+    const currentIndex = controls.indexOf(document.activeElement as HTMLElement)
+    const direction = e.key === "ArrowDown" ? 1 : -1
+    const nextIndex =
+      currentIndex < 0 ? 0 : (currentIndex + direction + controls.length) % controls.length
+    controls[nextIndex]?.focus()
+  }
+
   onMount(() => {
     const onClickOutside = (e: MouseEvent) => {
       if (containerRef && !containerRef.contains(e.target as Node)) close()
     }
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && open()) close()
+      if (e.key === "Escape" && open()) close({ restoreFocus: true })
     }
     document.addEventListener("click", onClickOutside)
     document.addEventListener("keydown", onKeyDown)
@@ -83,10 +125,13 @@ export function NotificationBell(props: NotificationBellProps) {
   return (
     <div ref={containerRef} class="relative">
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen(o => !o)}
+        onKeyDown={onTriggerKeyDown}
         aria-label={`Notifications (${props.unreadCount()} unread)`}
-        aria-haspopup="menu"
+        aria-haspopup="dialog"
+        aria-controls={panelId}
         aria-expanded={open()}
         class="relative w-10 h-10 rounded-lg hover:bg-surface-muted flex items-center justify-center transition-colors text-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
       >
@@ -102,7 +147,14 @@ export function NotificationBell(props: NotificationBellProps) {
       </button>
 
       <Show when={open()}>
-        <div class="absolute right-0 top-full mt-2 w-[min(24rem,calc(100vw-2rem))] bg-surface rounded-xl shadow-lg border border-border py-2 z-50">
+        <div
+          ref={panelRef}
+          id={panelId}
+          role="dialog"
+          aria-label="Notifications"
+          onKeyDown={onPanelKeyDown}
+          class="absolute right-0 top-full mt-2 w-[min(24rem,calc(100vw-2rem))] animate-fade-in bg-surface rounded-xl shadow-lg border border-border py-2 z-50"
+        >
           <div class="px-4 py-3 border-b border-border flex items-center justify-between">
             <div>
               <p class="text-sm font-semibold text-foreground">Notifications</p>
@@ -112,7 +164,7 @@ export function NotificationBell(props: NotificationBellProps) {
               type="button"
               onClick={() => props.onMarkAllRead()}
               disabled={props.unreadCount() === 0}
-              class="text-xs text-primary hover:underline disabled:text-muted disabled:no-underline disabled:cursor-not-allowed"
+              class="rounded-md px-1.5 py-1 text-xs text-primary hover:underline disabled:text-muted disabled:no-underline disabled:cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
             >
               Mark all read
             </button>
@@ -123,7 +175,7 @@ export function NotificationBell(props: NotificationBellProps) {
               <button
                 type="button"
                 onClick={() => props.onEnableDesktopAlerts?.()}
-                class="rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-surface-muted transition-colors whitespace-nowrap"
+                class="rounded-lg border border-border px-2.5 py-1.5 text-xs font-medium text-foreground hover:bg-surface-muted transition-colors whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               >
                 Enable
               </button>
@@ -143,7 +195,7 @@ export function NotificationBell(props: NotificationBellProps) {
                   <button
                     type="button"
                     onClick={() => activate(notif)}
-                    class={`w-full text-left flex gap-3 px-4 py-2.5 hover:bg-surface-muted border-l-2 transition-colors ${
+                    class={`w-full text-left flex gap-3 px-4 py-2.5 hover:bg-surface-muted border-l-2 transition-colors focus-visible:outline-none focus-visible:bg-surface-muted ${
                       notif.read ? "border-transparent" : "border-accent bg-accent/[0.02]"
                     }`}
                   >
@@ -175,7 +227,7 @@ export function NotificationBell(props: NotificationBellProps) {
             <div class="px-4 py-2 border-t border-border">
               <a
                 href={props.viewAllHref}
-                class="block text-center text-sm text-primary hover:underline"
+                class="block rounded-md py-1 text-center text-sm text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               >
                 View all notifications
               </a>

@@ -1,6 +1,6 @@
 import { useMarkAllRead, useMarkRead, useNotifications } from "@ark/api-client"
 import { NotificationBell, RolePill, ThemeToggle, useLiveNotificationAlerts } from "@ark/ui"
-import { createSignal, onCleanup, onMount, Show } from "solid-js"
+import { createSignal, createUniqueId, onCleanup, onMount, Show } from "solid-js"
 import { UI } from "./ui"
 
 interface NavbarProps {
@@ -12,16 +12,62 @@ interface NavbarProps {
 
 export function Navbar(props: NavbarProps) {
   const [adminDropdownOpen, setAdminDropdownOpen] = createSignal(false)
+  const accountMenuId = createUniqueId()
   // SSR-safe: starts as plain /profile; onMount appends ?return=current-url so
   // the profile page can route back after edits without forcing a window.* read
   // during render (hydration mismatch trap).
   const [profileHref, setProfileHref] = createSignal("/profile")
   let adminDropdownRef: HTMLDivElement | undefined
+  let accountButtonRef: HTMLButtonElement | undefined
+  let accountMenuRef: HTMLDivElement | undefined
 
   const notifQuery = useNotifications()
   const markRead = useMarkRead()
   const markAllRead = useMarkAllRead()
   const liveAlerts = useLiveNotificationAlerts(() => notifQuery.data?.notifications ?? [])
+
+  function focusFirstMenuItem() {
+    requestAnimationFrame(() => {
+      accountMenuRef?.querySelector<HTMLElement>("[role='menuitem']")?.focus()
+    })
+  }
+
+  function openAccountMenu() {
+    setAdminDropdownOpen(true)
+    focusFirstMenuItem()
+  }
+
+  function closeAccountMenu(options: { restoreFocus?: boolean } = {}) {
+    setAdminDropdownOpen(false)
+    if (options.restoreFocus) requestAnimationFrame(() => accountButtonRef?.focus())
+  }
+
+  function onAccountTriggerKeyDown(e: KeyboardEvent) {
+    if (e.key === "ArrowDown") {
+      e.preventDefault()
+      openAccountMenu()
+    }
+  }
+
+  function onAccountMenuKeyDown(e: KeyboardEvent) {
+    if (e.key === "Escape") {
+      e.preventDefault()
+      closeAccountMenu({ restoreFocus: true })
+      return
+    }
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp") return
+
+    const items = Array.from(
+      accountMenuRef?.querySelectorAll<HTMLElement>("[role='menuitem']") ?? []
+    )
+    if (items.length === 0) return
+    e.preventDefault()
+    const currentIndex = items.indexOf(document.activeElement as HTMLElement)
+    const direction = e.key === "ArrowDown" ? 1 : -1
+    const nextIndex =
+      currentIndex < 0 ? 0 : (currentIndex + direction + items.length) % items.length
+    items[nextIndex]?.focus()
+  }
 
   onMount(() => {
     // Capture the URL the user was on when they opened the menu so we can
@@ -33,12 +79,12 @@ export function Navbar(props: NavbarProps) {
 
     const handleClickOutside = (e: MouseEvent) => {
       if (adminDropdownRef && !adminDropdownRef.contains(e.target as Node)) {
-        setAdminDropdownOpen(false)
+        closeAccountMenu()
       }
     }
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return
-      if (adminDropdownOpen()) setAdminDropdownOpen(false)
+      if (adminDropdownOpen()) closeAccountMenu({ restoreFocus: true })
     }
     document.addEventListener("click", handleClickOutside)
     document.addEventListener("keydown", handleKeyDown)
@@ -87,11 +133,14 @@ export function Navbar(props: NavbarProps) {
             {/* Admin dropdown */}
             <div class="relative" ref={adminDropdownRef}>
               <button
+                ref={accountButtonRef}
                 type="button"
                 onClick={() => setAdminDropdownOpen(!adminDropdownOpen())}
+                onKeyDown={onAccountTriggerKeyDown}
                 title={props.userName ? props.userName : "Account"}
                 aria-label={props.userName ? `Account menu for ${props.userName}` : "Account menu"}
                 aria-haspopup="menu"
+                aria-controls={accountMenuId}
                 aria-expanded={adminDropdownOpen()}
                 class="flex items-center gap-2 p-1 rounded-lg hover:bg-surface-muted transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
@@ -109,12 +158,21 @@ export function Navbar(props: NavbarProps) {
                     class="w-9 h-9 rounded-full object-cover shadow-sm"
                   />
                 </Show>
-                <UI.chevronDown class="w-4 h-4 text-muted" />
+                <UI.chevronDown
+                  class={`w-4 h-4 text-muted transition-transform ${adminDropdownOpen() ? "rotate-180" : ""}`}
+                />
               </button>
 
               {/* Dropdown menu */}
               <Show when={adminDropdownOpen()}>
-                <div class="absolute right-0 top-full mt-2 w-56 bg-surface rounded-xl shadow-lg border border-border py-2 z-50">
+                <div
+                  ref={accountMenuRef}
+                  id={accountMenuId}
+                  role="menu"
+                  aria-label="Account menu"
+                  onKeyDown={onAccountMenuKeyDown}
+                  class="absolute right-0 top-full mt-2 w-56 animate-fade-in bg-surface rounded-xl shadow-lg border border-border py-2 z-50"
+                >
                   <div class="px-4 py-3 border-b border-border">
                     <p class="text-sm font-semibold text-foreground">{props.userName || "—"}</p>
                     <p class="text-xs text-muted mt-0.5 truncate">{props.userEmail || "—"}</p>
@@ -124,7 +182,8 @@ export function Navbar(props: NavbarProps) {
                   </div>
                   <a
                     href={profileHref()}
-                    class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-surface-muted"
+                    role="menuitem"
+                    class="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-foreground hover:bg-surface-muted focus-visible:outline-none focus-visible:bg-surface-muted"
                   >
                     <UI.user class="w-4 h-4 text-muted" />
                     <span>Manage profile</span>
@@ -132,7 +191,8 @@ export function Navbar(props: NavbarProps) {
                   <div class="h-px bg-border my-1" />
                   <a
                     href="/login"
-                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-accent hover:bg-accent/5"
+                    role="menuitem"
+                    class="flex items-center gap-3 px-4 py-2.5 text-sm text-accent hover:bg-accent/5 focus-visible:outline-none focus-visible:bg-accent/5"
                   >
                     <UI.logout class="w-4 h-4" />
                     <span>Logout</span>
