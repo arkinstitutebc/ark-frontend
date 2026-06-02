@@ -16,7 +16,12 @@ const collageImages = [
   },
 ]
 
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 export default function LoginPage() {
+  let emailInput: HTMLInputElement | undefined
+  let passwordInput: HTMLInputElement | undefined
+
   const [email, setEmail] = createSignal("")
   const [password, setPassword] = createSignal("")
   const [showPassword, setShowPassword] = createSignal(false)
@@ -24,17 +29,40 @@ export default function LoginPage() {
   const [error, setError] = createSignal<string | null>(null)
   const [fieldErrors, setFieldErrors] = createSignal<{ email?: string; password?: string }>({})
 
+  const emailError = (value: string) => {
+    if (!value) return "Enter your email address first."
+    if (!emailPattern.test(value)) return "Enter a valid email address."
+    return undefined
+  }
+
   const validate = () => {
     const next: { email?: string; password?: string } = {}
     const trimmedEmail = email().trim()
+    const emailMessage = emailError(trimmedEmail)
 
-    if (!trimmedEmail) next.email = "Enter your email address first."
-    else if (!trimmedEmail.includes("@")) next.email = "Enter a valid email address."
+    if (emailMessage) next.email = emailMessage
 
     if (!password()) next.password = "Enter your password."
 
     setFieldErrors(next)
+
+    if (next.email || next.password) {
+      requestAnimationFrame(() => {
+        if (next.email) emailInput?.focus()
+        else passwordInput?.focus()
+      })
+    }
+
     return Object.keys(next).length === 0
+  }
+
+  const validateEmailOnBlur = () => {
+    const trimmedEmail = email().trim()
+    setEmail(trimmedEmail)
+
+    if (!trimmedEmail) return
+
+    setFieldErrors(prev => ({ ...prev, email: emailError(trimmedEmail) }))
   }
 
   const handleSubmit = async (e: Event) => {
@@ -51,7 +79,7 @@ export default function LoginPage() {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email(), password: password() }),
+        body: JSON.stringify({ email: email().trim(), password: password() }),
       })
 
       if (!res.ok) {
@@ -124,6 +152,7 @@ export default function LoginPage() {
 
             <form class="space-y-5" onSubmit={handleSubmit}>
               <Input
+                ref={emailInput}
                 type="email"
                 label="Email Address"
                 placeholder="Enter your email"
@@ -132,12 +161,16 @@ export default function LoginPage() {
                   setEmail(e.currentTarget.value)
                   if (fieldErrors().email) setFieldErrors(prev => ({ ...prev, email: undefined }))
                 }}
+                onBlur={validateEmailOnBlur}
                 leftIcon={UI.mail}
                 autocomplete="email"
+                autofocus
+                inputMode="email"
                 error={fieldErrors().email}
               />
 
               <Input
+                ref={passwordInput}
                 type="password"
                 label="Password"
                 placeholder="Enter your password"
@@ -159,7 +192,7 @@ export default function LoginPage() {
               />
 
               {error() && (
-                <div class="flex items-start gap-2 border border-red-200 bg-red-50 p-3">
+                <div class="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3">
                   <UI.alert class="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500" />
                   <p class="text-sm text-red-700">{error()}</p>
                 </div>
@@ -167,8 +200,8 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
-                variant="primary"
-                class="w-full shadow-none hover:shadow-none"
+                variant="ghost"
+                class="w-full !bg-primary !text-white hover:!bg-primary/95 focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2 active:translate-y-px"
                 loading={loading()}
                 loadingLabel="Signing in..."
               >
