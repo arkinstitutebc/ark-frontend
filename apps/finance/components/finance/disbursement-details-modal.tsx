@@ -1,10 +1,19 @@
 import { DateInput, formatDatePH, formatPeso, Input, Modal, ModalFooter, Select } from "@ark/ui"
-import { categoryOptionsBySection, glDefault } from "@data/gl-defaults"
-import { useDisbursementAudit, useProfitCenters, useUpdateDisbursement } from "@data/hooks"
-import { profitCenterOptions, updateDisbursementSchema } from "@data/schemas"
+import { glDefault } from "@data/gl-defaults"
+import {
+  useDisbursementAudit,
+  useGlAccounts,
+  useProfitCenters,
+  useUpdateDisbursement,
+} from "@data/hooks"
+import { updateDisbursementSchema } from "@data/schemas"
 import type { Transaction, TransactionAuditEvent, TxnCategory } from "@data/types"
 import { validateForm } from "@data/validate"
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
+import {
+  buildDisbursementCategoryOptions,
+  buildProfitCenterOptions,
+} from "./disbursement-form-options"
 import {
   auditActionLabel,
   auditSummary,
@@ -22,6 +31,7 @@ interface DisbursementDetailsModalProps {
 export function DisbursementDetailsModal(props: DisbursementDetailsModalProps) {
   const updateDisbursement = useUpdateDisbursement()
   const auditQuery = useDisbursementAudit(() => props.txn?.id)
+  const glAccountsQuery = useGlAccounts(() => ({ includeInactive: false }))
   const profitCentersQuery = useProfitCenters(() => ({ includeInactive: false }))
   const [mode, setMode] = createSignal<"view" | "edit">("view")
   const [errors, setErrors] = createSignal<Record<string, string>>({})
@@ -37,26 +47,10 @@ export function DisbursementDetailsModal(props: DisbursementDetailsModalProps) {
   const [needsReview, setNeedsReview] = createSignal(false)
 
   const txn = () => props.txn
-  const categoryOptions = createMemo(() =>
-    categoryOptionsBySection().flatMap(group => [
-      { label: group.label, value: `group-${group.label}`, disabled: true },
-      ...group.options,
-    ])
+  const categoryOptions = createMemo(() => buildDisbursementCategoryOptions(glAccountsQuery.data))
+  const profitCenterSelectOptions = createMemo(() =>
+    buildProfitCenterOptions(profitCentersQuery.data)
   )
-  const profitCenterSelectOptions = createMemo(() => {
-    const liveCenters = (profitCentersQuery.data ?? [])
-      .filter(center => center.active)
-      .sort((a, b) => a.sortOrder - b.sortOrder || a.label.localeCompare(b.label))
-
-    if (liveCenters.length > 0) {
-      return liveCenters.map(center => ({ label: center.label, value: center.code }))
-    }
-
-    return profitCenterOptions.map(value => ({
-      label: value === "Admin" ? "Admin / Shared" : value,
-      value,
-    }))
-  })
 
   createEffect(() => {
     const current = props.txn

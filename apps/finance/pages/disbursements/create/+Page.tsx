@@ -1,18 +1,6 @@
-import type {
-  AccountingTreatment,
-  CostType,
-  ExpenseCategory,
-  GlAccountSection,
-  TxnCategory,
-} from "@ark/data-types"
+import type { AccountingTreatment, CostType, ExpenseCategory, TxnCategory } from "@ark/data-types"
 import { BackLink, Button, DateInput, formatPeso, Input, Select, type SelectOption } from "@ark/ui"
-import {
-  categoryOptionsBySection,
-  GL_CATALOG,
-  GL_SECTION_LABELS,
-  GL_SECTIONS,
-  glDefault,
-} from "@data/gl-defaults"
+import { GL_CATALOG, glDefault } from "@data/gl-defaults"
 import {
   useBankBalance,
   useClassificationRules,
@@ -25,11 +13,13 @@ import {
   costTypeOptions,
   createDisbursementSchema,
   expenseCategoryOptions,
-  profitCenterOptions,
-  txnCategoryOptions,
 } from "@data/schemas"
 import { validateForm } from "@data/validate"
 import { createEffect, createMemo, createSignal, onCleanup, onMount, Show } from "solid-js"
+import {
+  buildDisbursementCategoryOptions,
+  buildProfitCenterOptions,
+} from "@/components/finance/disbursement-form-options"
 
 const PREVIOUS_DISBURSEMENT_KEY = "ark-finance-previous-disbursement"
 const DRAFT_DISBURSEMENT_KEY = "ark-finance-disbursement-draft"
@@ -48,11 +38,6 @@ interface PreviousDisbursementForm {
   needsReview: boolean
 }
 
-const fallbackProfitCenterOptions = profitCenterOptions.map(v => ({
-  label: v === "Admin" ? "Admin / Shared" : v,
-  value: v,
-}))
-
 const validExpenseCategory = (value?: string | null): value is ExpenseCategory =>
   !!value && expenseCategoryOptions.includes(value as ExpenseCategory)
 
@@ -61,9 +46,6 @@ const validAccountingTreatment = (value?: string | null): value is AccountingTre
 
 const validCostType = (value?: string | null): value is CostType =>
   !!value && costTypeOptions.includes(value as CostType)
-
-const validTxnCategory = (value?: string | null): value is TxnCategory =>
-  !!value && txnCategoryOptions.includes(value as TxnCategory)
 
 export default function CreateDisbursementPage() {
   const [errors, setErrors] = createSignal<Record<string, string>>({})
@@ -158,49 +140,12 @@ export default function CreateDisbursementPage() {
     GL_CATALOG[code as TxnCategory]?.label ??
     code
 
-  const categoryOptions = createMemo<SelectOption<string>[]>(() => {
-    const liveAccounts = (glAccountsQuery.data ?? [])
-      .filter(
-        account => account.active && account.section !== "revenue" && validTxnCategory(account.code)
-      )
-      .sort((a, b) => a.sortOrder - b.sortOrder || a.label.localeCompare(b.label))
-
-    if (liveAccounts.length > 0) {
-      const sections = [
-        ...GL_SECTIONS,
-        ...Array.from(new Set(liveAccounts.map(account => account.section))).filter(
-          section => !GL_SECTIONS.includes(section as never)
-        ),
-      ] as GlAccountSection[]
-
-      return sections.flatMap(section => {
-        const accounts = liveAccounts.filter(account => account.section === section)
-        if (accounts.length === 0) return []
-        return [
-          {
-            label: GL_SECTION_LABELS[section as keyof typeof GL_SECTION_LABELS] ?? section,
-            value: `group-${section}`,
-            disabled: true,
-          },
-          ...accounts.map(account => ({ label: account.label, value: account.code })),
-        ]
-      })
-    }
-
-    return categoryOptionsBySection().flatMap(group => [
-      { label: group.label, value: `group-${group.label}`, disabled: true },
-      ...group.options,
-    ])
-  })
-
-  const profitCenterSelectOptions = createMemo<SelectOption<string>[]>(() => {
-    const liveCenters = (profitCentersQuery.data ?? [])
-      .filter(center => center.active)
-      .sort((a, b) => a.sortOrder - b.sortOrder || a.label.localeCompare(b.label))
-
-    if (liveCenters.length === 0) return fallbackProfitCenterOptions
-    return liveCenters.map(center => ({ label: center.label, value: center.code }))
-  })
+  const categoryOptions = createMemo<SelectOption<string>[]>(() =>
+    buildDisbursementCategoryOptions(glAccountsQuery.data)
+  )
+  const profitCenterSelectOptions = createMemo<SelectOption<string>[]>(() =>
+    buildProfitCenterOptions(profitCentersQuery.data)
+  )
 
   const amountValue = () => {
     const v = parseFloat(amount())
