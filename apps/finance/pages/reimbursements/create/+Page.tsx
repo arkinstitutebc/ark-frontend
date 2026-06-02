@@ -9,6 +9,7 @@ import type {
 import {
   AttachmentUploader,
   BackLink,
+  Button,
   DateInput,
   formatPeso,
   Icons,
@@ -371,13 +372,10 @@ export default function CreateRrPage() {
             <div class="bg-surface rounded-lg border border-border p-6">
               <div class="flex items-center justify-between mb-4">
                 <h2 class="text-lg font-semibold text-foreground">Expense Items</h2>
-                <button
-                  type="button"
-                  onClick={addItem}
-                  class="px-3 py-2 text-sm font-medium text-primary bg-primary/10 hover:bg-primary/20 rounded-lg"
-                >
-                  + Add Item
-                </button>
+                <Button type="button" onClick={addItem} variant="ghost" size="sm">
+                  <Icons.plus class="h-4 w-4" />
+                  Add Item
+                </Button>
               </div>
               <Show when={errors().items}>
                 <p class="text-xs text-red-600 mb-2">{errors().items}</p>
@@ -550,20 +548,25 @@ export default function CreateRrPage() {
                 <span class="text-lg text-foreground">{formatPeso(total())}</span>
               </div>
               <div class="mt-6 space-y-3">
-                <button
+                <Button
                   type="submit"
                   disabled={createMutation.isPending}
-                  class="w-full px-4 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+                  size="sm"
+                  class="w-full"
+                  loading={createMutation.isPending}
+                  loadingLabel="Submitting..."
                 >
-                  {createMutation.isPending ? "Submitting..." : "Submit Claim"}
-                </button>
-                <button
+                  Submit Claim
+                </Button>
+                <Button
                   type="button"
                   onClick={() => navigate("/reimbursements")}
-                  class="w-full px-4 py-2.5 bg-surface text-foreground border border-border text-sm font-medium rounded-lg hover:bg-surface-muted"
+                  variant="secondary"
+                  size="sm"
+                  class="w-full"
                 >
                   Cancel
-                </button>
+                </Button>
               </div>
               <p class="text-xs text-muted mt-4">
                 <Icons.info class="w-3 h-3 inline mr-1" />
