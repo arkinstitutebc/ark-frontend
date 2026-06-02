@@ -1,37 +1,41 @@
-import { PageContainer, PageHeader } from "@ark/ui"
+import type { Reimbursement } from "@ark/data-types"
+import { Button, formatPeso, Input, PageContainer, PageHeader, StatCard } from "@ark/ui"
 import { useReimbursements } from "@data/hooks"
-import type { Reimbursement } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
+import {
+  filterReimbursements,
+  type ReimbursementFilter,
+  type ReimbursementSortDir,
+  type ReimbursementSortKey,
+  reimbursementStats,
+  reimbursementStatusFilters,
+  sortReimbursements,
+} from "@/components/finance/reimbursement-list-helpers"
 import { ReimbursementTable } from "@/components/finance/reimbursement-table"
-
-const FILTERS = [
-  { value: "all", label: "All" },
-  { value: "pending", label: "Pending" },
-  { value: "verified", label: "Verified" },
-  { value: "approved", label: "Approved" },
-  { value: "rejected", label: "Rejected" },
-] as const
 
 export default function ReimbursementsPage() {
   const query = useReimbursements()
-  const [filter, setFilter] = createSignal<(typeof FILTERS)[number]["value"]>("all")
+  const [filter, setFilter] = createSignal<ReimbursementFilter>("all")
   const [search, setSearch] = createSignal("")
+  const [sortKey, setSortKey] = createSignal<ReimbursementSortKey>("filed")
+  const [sortDir, setSortDir] = createSignal<ReimbursementSortDir>("desc")
 
+  const allRows = createMemo(() => (query.data ?? []) as Reimbursement[])
+  const stats = createMemo(() => reimbursementStats(allRows()))
   const rows = createMemo(() => {
-    const data = (query.data ?? []) as Reimbursement[]
-    return data.filter(rr => {
-      const f = filter()
-      const matchStatus = f === "all" || rr.status === f
-      const q = search().toLowerCase()
-      const matchSearch =
-        !q ||
-        rr.rrCode?.toLowerCase().includes(q) ||
-        rr.claimantName?.toLowerCase().includes(q) ||
-        rr.activity?.toLowerCase().includes(q)
-      return matchStatus && matchSearch
-    })
+    const filtered = filterReimbursements(allRows(), filter(), search())
+    return sortReimbursements(filtered, sortKey(), sortDir())
   })
+  const hasActiveFilters = createMemo(() => filter() !== "all" || search().trim().length > 0)
+  const setSort = (key: ReimbursementSortKey) => {
+    if (sortKey() === key) {
+      setSortDir(sortDir() === "asc" ? "desc" : "asc")
+      return
+    }
+    setSortKey(key)
+    setSortDir(key === "amount" ? "desc" : "asc")
+  }
 
   return (
     <PageContainer>
@@ -41,47 +45,78 @@ export default function ReimbursementsPage() {
         action={
           <a
             href="/reimbursements/create"
-            class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
+            class="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-primary/90"
           >
             + New Claim
           </a>
         }
       />
 
-      <div class="flex flex-col sm:flex-row gap-3 mb-6">
-        <input
-          type="text"
-          placeholder="Search by RR #, claimant, or activity..."
-          value={search()}
-          onInput={e => setSearch(e.currentTarget.value)}
-          class="flex-1 px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+      <div class="grid grid-cols-2 gap-4 mb-8 lg:grid-cols-4">
+        <StatCard label="Total claims" value={query.isSuccess ? stats().total : "-"} />
+        <StatCard label="Pending" value={query.isSuccess ? stats().pending : "-"} />
+        <StatCard label="Approved" value={query.isSuccess ? stats().approved : "-"} />
+        <StatCard
+          label="Total claimed"
+          value={query.isSuccess ? formatPeso(stats().totalAmount) : "-"}
         />
-        <div class="flex gap-2 flex-wrap">
-          <For each={FILTERS}>
-            {item => (
-              <button
-                type="button"
-                onClick={() => setFilter(item.value)}
-                class={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${filter() === item.value ? "bg-primary text-white" : "bg-surface text-foreground border border-border hover:bg-surface-muted"}`}
-              >
-                {item.label}
-              </button>
-            )}
-          </For>
-        </div>
       </div>
 
       <div class="bg-surface rounded-lg border border-border overflow-hidden">
+        <div class="space-y-3 border-b border-border px-5 py-4">
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="text-sm font-semibold text-foreground">Claim History</h2>
+            <p class="text-xs text-muted">
+              {rows().length} of {allRows().length} claims
+            </p>
+          </div>
+          <div class="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_auto]">
+            <Input
+              type="search"
+              value={search()}
+              onInput={event => setSearch(event.currentTarget.value)}
+              placeholder="Search RR #, claimant, activity, partner, or fund"
+            />
+            <div class="flex flex-wrap gap-2">
+              <For each={reimbursementStatusFilters}>
+                {item => (
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant={filter() === item.value ? "primary" : "secondary"}
+                    onClick={() => setFilter(item.value)}
+                  >
+                    {item.label}
+                  </Button>
+                )}
+              </For>
+            </div>
+          </div>
+        </div>
         <Show
           when={rows().length > 0}
           fallback={
             <div class="py-16 text-center">
-              <p class="text-sm font-medium text-foreground">No reimbursement requests</p>
-              <p class="text-sm text-muted mt-1">Submit one with "+ New Claim".</p>
+              <p class="text-sm font-medium text-foreground">
+                {hasActiveFilters()
+                  ? "No matching reimbursement claims"
+                  : "No reimbursement claims"}
+              </p>
+              <p class="text-sm text-muted mt-1">
+                {hasActiveFilters()
+                  ? "Adjust the search or status filter."
+                  : "Submit one with + New Claim."}
+              </p>
             </div>
           }
         >
-          <ReimbursementTable rows={rows()} onOpen={id => navigate(`/reimbursements/${id}`)} />
+          <ReimbursementTable
+            rows={rows()}
+            sortKey={sortKey()}
+            sortDir={sortDir()}
+            onSort={setSort}
+            onOpen={id => navigate(`/reimbursements/${id}`)}
+          />
         </Show>
       </div>
     </PageContainer>

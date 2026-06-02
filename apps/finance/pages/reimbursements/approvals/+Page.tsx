@@ -1,30 +1,41 @@
-import { PageContainer, PageHeader, StatCard } from "@ark/ui"
+import type { Reimbursement } from "@ark/data-types"
+import { Button, PageContainer, PageHeader, StatCard } from "@ark/ui"
 import { useReimbursements } from "@data/hooks"
-import type { Reimbursement } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
+import {
+  type ReimbursementSortDir,
+  type ReimbursementSortKey,
+  reimbursementQueueFilters,
+  reimbursementStats,
+  sortReimbursements,
+} from "@/components/finance/reimbursement-list-helpers"
 import { ReimbursementTable } from "@/components/finance/reimbursement-table"
-
-const FILTERS = [
-  { value: "pending", label: "Finance queue" },
-  { value: "verified", label: "Management queue" },
-] as const
 
 export default function RrApprovalsPage() {
   const query = useReimbursements()
-  const [filter, setFilter] = createSignal<(typeof FILTERS)[number]["value"]>("pending")
+  const [filter, setFilter] =
+    createSignal<(typeof reimbursementQueueFilters)[number]["value"]>("pending")
+  const [sortKey, setSortKey] = createSignal<ReimbursementSortKey>("filed")
+  const [sortDir, setSortDir] = createSignal<ReimbursementSortDir>("desc")
 
   const all = createMemo(() => (query.data ?? []) as Reimbursement[])
-  const stats = createMemo(() => {
-    const data = all()
-    return {
-      pending: data.filter(rr => rr.status === "pending").length,
-      verified: data.filter(rr => rr.status === "verified").length,
-      approved: data.filter(rr => rr.status === "approved").length,
-      rejected: data.filter(rr => rr.status === "rejected").length,
+  const stats = createMemo(() => reimbursementStats(all()))
+  const rows = createMemo(() =>
+    sortReimbursements(
+      all().filter(rr => rr.status === filter()),
+      sortKey(),
+      sortDir()
+    )
+  )
+  const setSort = (key: ReimbursementSortKey) => {
+    if (sortKey() === key) {
+      setSortDir(sortDir() === "asc" ? "desc" : "asc")
+      return
     }
-  })
-  const rows = createMemo(() => all().filter(rr => rr.status === filter()))
+    setSortKey(key)
+    setSortDir(key === "amount" ? "desc" : "asc")
+  }
 
   return (
     <PageContainer>
@@ -33,28 +44,34 @@ export default function RrApprovalsPage() {
         subtitle="Two-stage queue — Finance verifies, Management approves"
       />
 
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+      <div class="grid grid-cols-2 gap-4 mb-8 sm:grid-cols-4">
         <StatCard label="Finance queue" value={query.isSuccess ? stats().pending : "-"} />
         <StatCard label="Management queue" value={query.isSuccess ? stats().verified : "-"} />
         <StatCard label="Approved" value={query.isSuccess ? stats().approved : "-"} />
         <StatCard label="Rejected" value={query.isSuccess ? stats().rejected : "-"} />
       </div>
 
-      <div class="flex gap-2 mb-6">
-        <For each={FILTERS}>
-          {item => (
-            <button
-              type="button"
-              onClick={() => setFilter(item.value)}
-              class={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${filter() === item.value ? "bg-primary text-white" : "bg-surface text-foreground border border-border hover:bg-surface-muted"}`}
-            >
-              {item.label}
-            </button>
-          )}
-        </For>
-      </div>
-
       <div class="bg-surface rounded-lg border border-border overflow-hidden">
+        <div class="space-y-3 border-b border-border px-5 py-4">
+          <div class="flex items-center justify-between gap-3">
+            <h2 class="text-sm font-semibold text-foreground">Approval Queue</h2>
+            <p class="text-xs text-muted">{rows().length} claims</p>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <For each={reimbursementQueueFilters}>
+              {item => (
+                <Button
+                  type="button"
+                  size="sm"
+                  variant={filter() === item.value ? "primary" : "secondary"}
+                  onClick={() => setFilter(item.value)}
+                >
+                  {item.label}
+                </Button>
+              )}
+            </For>
+          </div>
+        </div>
         <Show
           when={rows().length > 0}
           fallback={
@@ -70,7 +87,13 @@ export default function RrApprovalsPage() {
             </div>
           }
         >
-          <ReimbursementTable rows={rows()} onOpen={id => navigate(`/reimbursements/${id}`)} />
+          <ReimbursementTable
+            rows={rows()}
+            sortKey={sortKey()}
+            sortDir={sortDir()}
+            onSort={setSort}
+            onOpen={id => navigate(`/reimbursements/${id}`)}
+          />
         </Show>
       </div>
     </PageContainer>
