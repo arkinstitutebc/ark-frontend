@@ -9,10 +9,13 @@ import type {
 import {
   AttachmentUploader,
   BackLink,
+  DateInput,
   formatPeso,
   Icons,
+  Input,
   PageContainer,
   Select,
+  Textarea,
   toast,
 } from "@ark/ui"
 import { useProfitCenters, useReimbursement, useUpdateRr } from "@data/hooks"
@@ -24,7 +27,7 @@ import {
   profitCenterOptions,
 } from "@data/schemas"
 import { validateForm } from "@data/validate"
-import { createEffect, createMemo, createSignal, Index, type JSX, Show } from "solid-js"
+import { createEffect, createMemo, createSignal, Index, Show } from "solid-js"
 import { navigate } from "vike/client/router"
 import { usePageContext } from "vike-solid/usePageContext"
 
@@ -269,85 +272,62 @@ export default function EditRrPage() {
               <div class="bg-surface rounded-lg border border-border p-6">
                 <h2 class="text-lg font-semibold text-foreground mb-4">Claimant</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Field label="Name" required error={errors().claimantName}>
-                    <input
-                      type="text"
-                      value={claimantName()}
-                      onInput={e => setClaimantName(e.currentTarget.value)}
-                      class={inputCls(errors().claimantName)}
-                    />
-                  </Field>
-                  <Field label="Position / Role">
-                    <input
-                      type="text"
-                      value={claimantPosition()}
-                      onInput={e => setClaimantPosition(e.currentTarget.value)}
-                      class={inputCls()}
-                    />
-                  </Field>
-                  <Field label="Department">
-                    <input
-                      type="text"
-                      value={claimantDepartment()}
-                      onInput={e => setClaimantDepartment(e.currentTarget.value)}
-                      class={inputCls()}
-                    />
-                  </Field>
-                  <Field label="Date Filed" required error={errors().dateFiled}>
-                    <input
-                      type="date"
-                      value={dateFiled()}
-                      onInput={e => setDateFiled(e.currentTarget.value)}
-                      class={inputCls(errors().dateFiled)}
-                    />
-                  </Field>
+                  <Input
+                    label="Name"
+                    value={claimantName()}
+                    onInput={e => setClaimantName(e.currentTarget.value)}
+                    error={errors().claimantName}
+                  />
+                  <Input
+                    label="Position / Role"
+                    value={claimantPosition()}
+                    onInput={e => setClaimantPosition(e.currentTarget.value)}
+                    hint="Optional"
+                  />
+                  <Input
+                    label="Department"
+                    value={claimantDepartment()}
+                    onInput={e => setClaimantDepartment(e.currentTarget.value)}
+                    hint="Optional"
+                  />
+                  <DateInput
+                    label="Date Filed"
+                    value={dateFiled()}
+                    onValueChange={setDateFiled}
+                    error={errors().dateFiled}
+                    showTodayButton
+                  />
                 </div>
               </div>
 
               <div class="bg-surface rounded-lg border border-border p-6">
                 <h2 class="text-lg font-semibold text-foreground mb-4">Context</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Field label="Activity / Event">
-                    <input
-                      type="text"
-                      value={activity()}
-                      onInput={e => setActivity(e.currentTarget.value)}
-                      class={inputCls()}
-                    />
-                  </Field>
-                  <Field label="School / Partner Covered">
-                    <input
-                      type="text"
-                      value={schoolPartner()}
-                      onInput={e => setSchoolPartner(e.currentTarget.value)}
-                      class={inputCls()}
-                    />
-                  </Field>
-                  <Field label="Period Start">
-                    <input
-                      type="date"
-                      value={periodStart()}
-                      onInput={e => setPeriodStart(e.currentTarget.value)}
-                      class={inputCls()}
-                    />
-                  </Field>
-                  <Field label="Period End">
-                    <input
-                      type="date"
-                      value={periodEnd()}
-                      onInput={e => setPeriodEnd(e.currentTarget.value)}
-                      class={inputCls()}
-                    />
-                  </Field>
-                  <Field label="Referenced PR (optional)">
-                    <input
-                      type="text"
-                      value={referencedPrCode()}
-                      onInput={e => setReferencedPrCode(e.currentTarget.value)}
-                      placeholder="PR-2026-NNNNN"
-                      class={inputCls()}
-                    />
-                  </Field>
+                  <Input
+                    label="Activity / Event"
+                    value={activity()}
+                    onInput={e => setActivity(e.currentTarget.value)}
+                    hint="Optional"
+                  />
+                  <Input
+                    label="School / Partner Covered"
+                    value={schoolPartner()}
+                    onInput={e => setSchoolPartner(e.currentTarget.value)}
+                    hint="Optional"
+                  />
+                  <DateInput
+                    label="Period Start"
+                    value={periodStart()}
+                    onValueChange={setPeriodStart}
+                  />
+                  <DateInput label="Period End" value={periodEnd()} onValueChange={setPeriodEnd} />
+                  <Input
+                    label="Referenced PR"
+                    value={referencedPrCode()}
+                    onInput={e => setReferencedPrCode(e.currentTarget.value)}
+                    placeholder="PR-2026-NNNNN"
+                    hint="Optional"
+                  />
                 </div>
               </div>
 
@@ -359,8 +339,15 @@ export default function EditRrPage() {
                   Used by finance for the segmented income statement and accounting record.
                 </p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <Field label="Expense Category" required error={errors().expenseCategory}>
+                  <div>
+                    <label
+                      for="edit-rr-expense-category"
+                      class="block text-sm font-medium text-foreground mb-1"
+                    >
+                      Expense Category
+                    </label>
                     <Select
+                      id="edit-rr-expense-category"
                       options={expenseCategoryOptions.map(v => ({
                         label: expenseCategoryLabels[v],
                         value: v,
@@ -369,19 +356,35 @@ export default function EditRrPage() {
                       onChange={v => setExpenseCategory(v as ExpenseCategory)}
                       placeholder="Select expense category"
                       ariaLabel="Expense Category"
+                      error={errors().expenseCategory}
                     />
-                  </Field>
-                  <Field label="Profit Center" required error={errors().profitCenter}>
+                  </div>
+                  <div>
+                    <label
+                      for="edit-rr-profit-center"
+                      class="block text-sm font-medium text-foreground mb-1"
+                    >
+                      Profit Center
+                    </label>
                     <Select
+                      id="edit-rr-profit-center"
                       options={profitCenterSelectOptions()}
                       value={profitCenter() || undefined}
                       onChange={v => setProfitCenter(v)}
                       placeholder="Select profit center"
                       ariaLabel="Profit Center"
+                      error={errors().profitCenter}
                     />
-                  </Field>
-                  <Field label="Accounting Treatment" required error={errors().accountingTreatment}>
+                  </div>
+                  <div>
+                    <label
+                      for="edit-rr-accounting-treatment"
+                      class="block text-sm font-medium text-foreground mb-1"
+                    >
+                      Accounting Treatment
+                    </label>
                     <Select
+                      id="edit-rr-accounting-treatment"
                       options={accountingTreatmentOptions.map(v => ({
                         label: accountingTreatmentLabels[v],
                         value: v,
@@ -390,17 +393,26 @@ export default function EditRrPage() {
                       onChange={v => setAccountingTreatment(v as AccountingTreatment)}
                       placeholder="Select treatment"
                       ariaLabel="Accounting Treatment"
+                      error={errors().accountingTreatment}
                     />
-                  </Field>
-                  <Field label="Cost Type" required error={errors().costType}>
+                  </div>
+                  <div>
+                    <label
+                      for="edit-rr-cost-type"
+                      class="block text-sm font-medium text-foreground mb-1"
+                    >
+                      Cost Type
+                    </label>
                     <Select
+                      id="edit-rr-cost-type"
                       options={costTypeOptions.map(v => ({ label: costTypeLabels[v], value: v }))}
                       value={costType() || undefined}
                       onChange={v => setCostType(v as CostType)}
                       placeholder="Select cost type"
                       ariaLabel="Cost Type"
+                      error={errors().costType}
                     />
-                  </Field>
+                  </div>
                 </div>
               </div>
 
@@ -435,43 +447,38 @@ export default function EditRrPage() {
                           </Show>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
-                          <label class="block sm:col-span-1">
-                            <span class="block text-xs text-muted mb-1">Date</span>
-                            <input
-                              type="date"
+                          <div class="sm:col-span-1">
+                            <DateInput
+                              label="Date"
                               value={item().date ?? ""}
-                              onInput={e => updateItem(item().id, "date", e.currentTarget.value)}
-                              class={inputCls()}
+                              onValueChange={value => updateItem(item().id, "date", value)}
                             />
-                          </label>
-                          <label class="block sm:col-span-2">
-                            <span class="block text-xs text-muted mb-1">Description</span>
-                            <input
-                              type="text"
+                          </div>
+                          <div class="sm:col-span-2">
+                            <Input
+                              label="Description"
                               value={item().description}
                               onInput={e =>
                                 updateItem(item().id, "description", e.currentTarget.value)
                               }
-                              class={inputCls()}
                             />
-                          </label>
-                          <label class="block sm:col-span-1">
-                            <span class="block text-xs text-muted mb-1">Receipt #</span>
-                            <input
-                              type="text"
+                          </div>
+                          <div class="sm:col-span-1">
+                            <Input
+                              label="Receipt #"
                               value={item().receiptNo ?? ""}
                               onInput={e =>
                                 updateItem(item().id, "receiptNo", e.currentTarget.value)
                               }
-                              class={inputCls()}
+                              hint="Optional"
                             />
-                          </label>
-                          <label class="block sm:col-span-1">
-                            <span class="block text-xs text-muted mb-1">Amount (PHP)</span>
-                            <input
+                          </div>
+                          <div class="sm:col-span-1">
+                            <Input
                               type="number"
                               min="0"
                               step="0.01"
+                              label="Amount (PHP)"
                               value={item().amount || ""}
                               onInput={e =>
                                 updateItem(
@@ -480,9 +487,8 @@ export default function EditRrPage() {
                                   Number.parseFloat(e.currentTarget.value) || 0
                                 )
                               }
-                              class={inputCls()}
                             />
-                          </label>
+                          </div>
                           <label class="flex items-center gap-2 text-sm text-foreground sm:col-span-3">
                             <input
                               type="checkbox"
@@ -500,15 +506,12 @@ export default function EditRrPage() {
                   </Index>
                 </div>
                 <div class="mt-4">
-                  <label for="amount-words-edit" class="block text-xs text-muted mb-1">
-                    Amount in words (optional)
-                  </label>
-                  <input
+                  <Input
                     id="amount-words-edit"
-                    type="text"
+                    label="Amount in words"
                     value={amountInWords()}
                     onInput={e => setAmountInWords(e.currentTarget.value)}
-                    class={inputCls()}
+                    hint="Optional"
                   />
                 </div>
               </div>
@@ -547,33 +550,23 @@ export default function EditRrPage() {
                   />
                 </div>
                 <div class="mt-4 space-y-3">
-                  <label class="block">
-                    <span class="block text-xs text-muted mb-1">Other (specify)</span>
-                    <input
-                      type="text"
-                      value={supportingDocs().other ?? ""}
-                      onInput={e =>
-                        setSupportingDocs(p => ({ ...p, other: e.currentTarget.value }))
-                      }
-                      class={inputCls()}
-                    />
-                  </label>
-                  <label class="block">
-                    <span class="block text-xs text-muted mb-1">
-                      No receipts available — explanation
-                    </span>
-                    <textarea
-                      rows={2}
-                      value={supportingDocs().noReceiptsExplanation ?? ""}
-                      onInput={e =>
-                        setSupportingDocs(p => ({
-                          ...p,
-                          noReceiptsExplanation: e.currentTarget.value,
-                        }))
-                      }
-                      class={`${inputCls()} resize-none`}
-                    />
-                  </label>
+                  <Input
+                    label="Other"
+                    value={supportingDocs().other ?? ""}
+                    onInput={e => setSupportingDocs(p => ({ ...p, other: e.currentTarget.value }))}
+                    hint="Optional"
+                  />
+                  <Textarea
+                    label="No receipts available explanation"
+                    rows={2}
+                    value={supportingDocs().noReceiptsExplanation ?? ""}
+                    onInput={e =>
+                      setSupportingDocs(p => ({
+                        ...p,
+                        noReceiptsExplanation: e.currentTarget.value,
+                      }))
+                    }
+                  />
                 </div>
               </div>
 
@@ -626,32 +619,6 @@ export default function EditRrPage() {
       </Show>
     </PageContainer>
   )
-}
-
-function Field(props: {
-  label: string
-  required?: boolean
-  error?: string
-  children: JSX.Element
-}) {
-  return (
-    <div>
-      <span class="block text-sm font-medium text-foreground mb-1">
-        {props.label}
-        <Show when={props.required}>
-          <span class="text-red-500 ml-0.5">*</span>
-        </Show>
-      </span>
-      {props.children}
-      <Show when={props.error}>
-        <p class="text-xs text-red-600 mt-1">{props.error}</p>
-      </Show>
-    </div>
-  )
-}
-
-function inputCls(error?: string) {
-  return `w-full px-3 py-2 border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${error ? "border-red-300" : "border-border"}`
 }
 
 function DocCheckbox(props: { label: string; checked: boolean; onToggle: () => void }) {
