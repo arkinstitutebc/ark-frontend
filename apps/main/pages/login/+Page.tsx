@@ -64,12 +64,12 @@ export default function LoginPage() {
   }
 
   return (
-    <main class="min-h-screen bg-background text-foreground lg:grid lg:grid-cols-[minmax(0,1.05fr)_minmax(420px,0.95fr)]">
+    <main class="min-h-screen bg-background text-foreground lg:grid lg:grid-cols-[minmax(0,1.08fr)_minmax(420px,0.92fr)]">
       <BrandCollage />
 
-      <section class="flex min-h-[calc(100vh-18rem)] items-center justify-center px-5 py-10 sm:px-8 lg:min-h-screen lg:px-12">
-        <div class="w-full max-w-md">
-          <div class="mb-8 flex items-center gap-4 lg:hidden">
+      <section class="flex min-h-[calc(100vh-18rem)] items-center justify-center px-6 py-10 sm:px-10 lg:min-h-screen lg:px-14">
+        <div class="w-full max-w-[420px]">
+          <div class="mb-10 flex items-center gap-4 lg:hidden">
             <img
               src="/logo/ark-transpa.png"
               alt="Ark Institute Logo"
@@ -83,28 +83,29 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <div class="rounded-2xl border border-border bg-surface shadow-xl">
-            <div class="border-b border-border px-8 py-7 sm:px-10">
-              <div class="hidden items-center gap-4 lg:flex">
-                <img
-                  src="/logo/ark-transpa.png"
-                  alt="Ark Institute Logo"
-                  width="64"
-                  height="64"
-                  class="object-contain"
-                />
-                <div>
-                  <h1 class="text-2xl font-bold text-foreground">Ark Institute</h1>
-                  <p class="text-sm text-muted">ERP Portal</p>
-                </div>
-              </div>
-              <div class="lg:hidden">
-                <h1 class="text-2xl font-bold text-foreground">Sign in</h1>
-                <p class="mt-1 text-sm text-muted">Use your Ark portal account.</p>
-              </div>
+          <div class="hidden items-center gap-4 lg:flex">
+            <img
+              src="/logo/ark-transpa.png"
+              alt="Ark Institute Logo"
+              width="64"
+              height="64"
+              class="object-contain"
+            />
+            <div>
+              <h1 class="text-3xl font-bold tracking-tight text-foreground">Ark Institute</h1>
+              <p class="mt-1 text-sm text-muted">ERP Portal</p>
+            </div>
+          </div>
+
+          <div class="mt-8 border-t border-border pt-8 lg:mt-10">
+            <div class="mb-7">
+              <h2 class="text-xl font-semibold text-foreground">Sign in</h2>
+              <p class="mt-2 text-sm text-muted">
+                Access operations, training, finance, and records.
+              </p>
             </div>
 
-            <form class="space-y-5 px-8 py-8 sm:px-10" onSubmit={handleSubmit}>
+            <form class="space-y-5" onSubmit={handleSubmit}>
               <Input
                 type="email"
                 label="Email Address"
@@ -131,7 +132,7 @@ export default function LoginPage() {
               />
 
               {error() && (
-                <div class="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3">
+                <div class="flex items-start gap-2 border border-red-200 bg-red-50 p-3">
                   <UI.alert class="mt-0.5 h-5 w-5 flex-shrink-0 text-red-500" />
                   <p class="text-sm text-red-700">{error()}</p>
                 </div>
@@ -140,7 +141,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 variant="primary"
-                class="w-full shadow-glow-primary"
+                class="w-full shadow-sm"
                 loading={loading()}
                 loadingLabel="Signing in..."
               >
@@ -148,16 +149,13 @@ export default function LoginPage() {
               </Button>
             </form>
 
-            <div class="border-t border-border bg-surface-muted/50 px-8 py-5 sm:px-10">
-              <p class="text-center text-xs text-muted">Secure portal access</p>
+            <div class="mt-8 flex items-center justify-between border-t border-border pt-5 text-xs text-muted">
+              <span>Secure portal access</span>
+              <a href="https://arkinstitutebc.com" class="font-medium text-primary hover:underline">
+                arkinstitutebc.com
+              </a>
             </div>
           </div>
-
-          <p class="mt-6 text-center text-sm text-muted">
-            <a href="https://arkinstitutebc.com" class="font-medium text-primary hover:underline">
-              arkinstitutebc.com
-            </a>
-          </p>
         </div>
       </section>
     </main>
@@ -167,9 +165,9 @@ export default function LoginPage() {
 function BrandCollage() {
   return (
     <section class="relative min-h-[18rem] overflow-hidden bg-primary lg:min-h-screen">
-      <div class="absolute inset-0 grid grid-rows-3 gap-2 p-2 sm:gap-3 sm:p-3 lg:gap-4 lg:p-5">
+      <div class="absolute inset-0 grid grid-rows-3">
         {collageImages.map(image => (
-          <div class="relative overflow-hidden rounded-lg border border-white/15 shadow-2xl">
+          <div class="relative overflow-hidden border-b border-white/10 last:border-b-0">
             <img
               src={image.src}
               alt={image.alt}
@@ -177,35 +175,27 @@ function BrandCollage() {
               loading="eager"
             />
             <div class="absolute inset-0 bg-primary/45 mix-blend-multiply" />
-            <div class="absolute inset-0 bg-gradient-to-r from-primary/65 via-primary/20 to-accent/30" />
+            <div class="absolute inset-0 bg-gradient-to-r from-primary/75 via-primary/25 to-accent/35" />
           </div>
         ))}
       </div>
 
-      <div class="absolute inset-0 bg-gradient-to-t from-primary/95 via-primary/20 to-transparent" />
-      <div class="absolute inset-x-0 bottom-0 p-6 sm:p-8 lg:p-10">
-        <div class="max-w-xl rounded-lg border border-white/20 bg-primary/80 p-5 text-white shadow-2xl backdrop-blur-md">
+      <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/10 to-transparent" />
+      <div class="absolute inset-x-0 bottom-0 p-8 sm:p-10 lg:p-12">
+        <div class="max-w-xl text-white">
           <div class="flex items-center gap-4">
-            <div class="flex h-14 w-14 shrink-0 items-center justify-center rounded-lg bg-white">
-              <img
-                src="/logo/ark-transpa.png"
-                alt="Ark Institute Logo"
-                width="46"
-                height="46"
-                class="object-contain"
-              />
-            </div>
+            <img
+              src="/logo/ark-transpa.png"
+              alt="Ark Institute Logo"
+              width="54"
+              height="54"
+              class="object-contain"
+            />
             <div>
-              <p class="text-lg font-bold">Ark Institute ERP</p>
-              <p class="text-sm text-white/75">Operations, training, finance, and records.</p>
+              <p class="text-2xl font-bold tracking-tight">Ark Institute ERP</p>
+              <p class="mt-1 text-sm text-white/75">Operations, training, finance, and records.</p>
             </div>
           </div>
-          <a
-            href="https://arkinstitutebc.com"
-            class="mt-5 inline-flex text-sm font-medium text-white/80 hover:text-white"
-          >
-            arkinstitutebc.com
-          </a>
         </div>
       </div>
     </section>
