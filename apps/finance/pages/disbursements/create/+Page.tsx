@@ -20,6 +20,7 @@ import {
   buildDisbursementCategoryOptions,
   buildProfitCenterOptions,
 } from "@/components/finance/disbursement-form-options"
+import { DisbursementValidationSummary } from "@/components/finance/disbursement-validation-summary"
 
 const PREVIOUS_DISBURSEMENT_KEY = "ark-finance-previous-disbursement"
 const DRAFT_DISBURSEMENT_KEY = "ark-finance-disbursement-draft"
@@ -316,6 +317,7 @@ export default function CreateDisbursementPage() {
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div class="lg:col-span-2 space-y-6">
             <div class="bg-surface rounded-lg border border-border p-6 space-y-4">
+              <DisbursementValidationSummary errors={errors()} />
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <DateInput
                   id="dis-date"

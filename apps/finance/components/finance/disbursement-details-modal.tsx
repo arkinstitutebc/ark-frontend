@@ -20,6 +20,7 @@ import {
   categoryLabel,
   formatDateTimePH,
 } from "./disbursement-labels"
+import { DisbursementValidationSummary } from "./disbursement-validation-summary"
 
 interface DisbursementDetailsModalProps {
   txn: Transaction | null
@@ -198,6 +199,7 @@ function DisbursementEditForm(props: {
 }) {
   return (
     <div class="space-y-4">
+      <DisbursementValidationSummary errors={props.errors} />
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <DateInput
           label="Date"
