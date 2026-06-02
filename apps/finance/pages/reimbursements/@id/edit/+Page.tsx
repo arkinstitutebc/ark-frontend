@@ -31,6 +31,7 @@ import {
   rrCostTypeOptions,
   rrExpenseCategoryOptions,
 } from "@/components/finance/reimbursement-form-options"
+import { ReimbursementValidationSummary } from "@/components/finance/reimbursement-validation-summary"
 
 interface ItemRow extends RrItem {
   id: string
@@ -242,6 +243,7 @@ export default function EditRrPage() {
         <form onSubmit={handleSubmit}>
           <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="lg:col-span-2 space-y-6">
+              <ReimbursementValidationSummary errors={errors()} />
               <div class="bg-surface rounded-lg border border-border p-6">
                 <h2 class="text-lg font-semibold text-foreground mb-4">Claimant</h2>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
