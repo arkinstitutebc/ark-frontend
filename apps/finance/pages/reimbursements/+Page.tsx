@@ -1,5 +1,14 @@
 import type { Reimbursement } from "@ark/data-types"
-import { Button, formatPeso, Input, PageContainer, PageHeader, StatCard } from "@ark/ui"
+import {
+  Button,
+  formatPeso,
+  Input,
+  PageContainer,
+  PageHeader,
+  QueryBoundary,
+  StatCard,
+  TableSkeleton,
+} from "@ark/ui"
 import { useReimbursements } from "@data/hooks"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
@@ -67,7 +76,9 @@ export default function ReimbursementsPage() {
           <div class="flex items-center justify-between gap-3">
             <h2 class="text-sm font-semibold text-foreground">Claim History</h2>
             <p class="text-xs text-muted">
-              {rows().length} of {allRows().length} claims
+              {query.isSuccess
+                ? `${rows().length} of ${allRows().length} claims`
+                : "Loading claims"}
             </p>
           </div>
           <div class="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_auto]">
@@ -93,31 +104,35 @@ export default function ReimbursementsPage() {
             </div>
           </div>
         </div>
-        <Show
-          when={rows().length > 0}
-          fallback={
-            <div class="py-16 text-center">
-              <p class="text-sm font-medium text-foreground">
-                {hasActiveFilters()
-                  ? "No matching reimbursement claims"
-                  : "No reimbursement claims"}
-              </p>
-              <p class="text-sm text-muted mt-1">
-                {hasActiveFilters()
-                  ? "Adjust the search or status filter."
-                  : "Submit one with + New Claim."}
-              </p>
-            </div>
-          }
-        >
-          <ReimbursementTable
-            rows={rows()}
-            sortKey={sortKey()}
-            sortDir={sortDir()}
-            onSort={setSort}
-            onOpen={id => navigate(`/reimbursements/${id}`)}
-          />
-        </Show>
+        <QueryBoundary query={query} loadingFallback={<TableSkeleton rows={6} cols={8} />}>
+          {() => (
+            <Show
+              when={rows().length > 0}
+              fallback={
+                <div class="py-16 text-center">
+                  <p class="text-sm font-medium text-foreground">
+                    {hasActiveFilters()
+                      ? "No matching reimbursement claims"
+                      : "No reimbursement claims"}
+                  </p>
+                  <p class="text-sm text-muted mt-1">
+                    {hasActiveFilters()
+                      ? "Adjust the search or status filter."
+                      : "Submit one with + New Claim."}
+                  </p>
+                </div>
+              }
+            >
+              <ReimbursementTable
+                rows={rows()}
+                sortKey={sortKey()}
+                sortDir={sortDir()}
+                onSort={setSort}
+                onOpen={id => navigate(`/reimbursements/${id}`)}
+              />
+            </Show>
+          )}
+        </QueryBoundary>
       </div>
     </PageContainer>
   )

@@ -1,5 +1,5 @@
 import type { Reimbursement } from "@ark/data-types"
-import { Button, PageContainer, PageHeader, StatCard } from "@ark/ui"
+import { Button, PageContainer, PageHeader, QueryBoundary, StatCard, TableSkeleton } from "@ark/ui"
 import { useReimbursements } from "@data/hooks"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
@@ -55,7 +55,9 @@ export default function RrApprovalsPage() {
         <div class="space-y-3 border-b border-border px-5 py-4">
           <div class="flex items-center justify-between gap-3">
             <h2 class="text-sm font-semibold text-foreground">Approval Queue</h2>
-            <p class="text-xs text-muted">{rows().length} claims</p>
+            <p class="text-xs text-muted">
+              {query.isSuccess ? `${rows().length} claims` : "Loading claims"}
+            </p>
           </div>
           <div class="flex flex-wrap gap-2">
             <For each={reimbursementQueueFilters}>
@@ -72,29 +74,33 @@ export default function RrApprovalsPage() {
             </For>
           </div>
         </div>
-        <Show
-          when={rows().length > 0}
-          fallback={
-            <div class="py-16 text-center">
-              <p class="text-sm font-medium text-foreground">
-                {filter() === "pending" ? "Nothing to verify" : "Nothing to approve"}
-              </p>
-              <p class="text-sm text-muted mt-1">
-                {filter() === "pending"
-                  ? "New claims will land here for finance to verify."
-                  : "Verified claims await management approval here."}
-              </p>
-            </div>
-          }
-        >
-          <ReimbursementTable
-            rows={rows()}
-            sortKey={sortKey()}
-            sortDir={sortDir()}
-            onSort={setSort}
-            onOpen={id => navigate(`/reimbursements/${id}`)}
-          />
-        </Show>
+        <QueryBoundary query={query} loadingFallback={<TableSkeleton rows={6} cols={8} />}>
+          {() => (
+            <Show
+              when={rows().length > 0}
+              fallback={
+                <div class="py-16 text-center">
+                  <p class="text-sm font-medium text-foreground">
+                    {filter() === "pending" ? "Nothing to verify" : "Nothing to approve"}
+                  </p>
+                  <p class="text-sm text-muted mt-1">
+                    {filter() === "pending"
+                      ? "New claims will land here for finance to verify."
+                      : "Verified claims await management approval here."}
+                  </p>
+                </div>
+              }
+            >
+              <ReimbursementTable
+                rows={rows()}
+                sortKey={sortKey()}
+                sortDir={sortDir()}
+                onSort={setSort}
+                onOpen={id => navigate(`/reimbursements/${id}`)}
+              />
+            </Show>
+          )}
+        </QueryBoundary>
       </div>
     </PageContainer>
   )
