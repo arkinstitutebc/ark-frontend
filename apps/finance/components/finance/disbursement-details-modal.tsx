@@ -1,10 +1,10 @@
-import { formatDatePH, formatPeso, Modal, ModalFooter, Select } from "@ark/ui"
+import { DateInput, formatDatePH, formatPeso, Input, Modal, ModalFooter, Select } from "@ark/ui"
 import { categoryOptionsBySection, glDefault } from "@data/gl-defaults"
 import { useDisbursementAudit, useProfitCenters, useUpdateDisbursement } from "@data/hooks"
 import { profitCenterOptions, updateDisbursementSchema } from "@data/schemas"
 import type { Transaction, TransactionAuditEvent, TxnCategory } from "@data/types"
 import { validateForm } from "@data/validate"
-import { createEffect, createMemo, createSignal, For, type JSX, Show } from "solid-js"
+import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import {
   auditActionLabel,
   auditSummary,
@@ -205,65 +205,72 @@ function DisbursementEditForm(props: {
   return (
     <div class="space-y-4">
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Field label="Date" error={props.errors.transactionDate}>
-          <input
-            type="date"
-            value={props.transactionDate}
-            onInput={e => props.onTransactionDate(e.currentTarget.value)}
-            class={inputClass}
-          />
-        </Field>
-        <Field label="Amount (PHP)" error={props.errors.amount}>
-          <input
-            type="number"
-            min="0"
-            step="0.01"
-            value={props.amount}
-            onInput={e => props.onAmount(e.currentTarget.value)}
-            class={inputClass}
-          />
-        </Field>
-        <Field label="Store / Company" error={props.errors.payee}>
-          <input
-            type="text"
-            value={props.payee}
-            onInput={e => props.onPayee(e.currentTarget.value)}
-            class={inputClass}
-          />
-        </Field>
-        <Field label="Category" error={props.errors.category}>
+        <DateInput
+          label="Date"
+          value={props.transactionDate}
+          onValueChange={props.onTransactionDate}
+          error={props.errors.transactionDate}
+          showTodayButton
+        />
+        <Input
+          type="number"
+          min="0"
+          step="0.01"
+          label="Amount (PHP)"
+          value={props.amount}
+          onInput={e => props.onAmount(e.currentTarget.value)}
+          error={props.errors.amount}
+        />
+        <Input
+          label="Store / Company"
+          value={props.payee}
+          onInput={e => props.onPayee(e.currentTarget.value)}
+          error={props.errors.payee}
+          hint="Optional"
+        />
+        <div>
+          <label for="edit-dis-category" class="block text-sm font-medium text-foreground mb-1">
+            Category
+          </label>
           <Select
+            id="edit-dis-category"
             value={props.category}
             onChange={props.onCategory}
             options={props.categoryOptions}
             ariaLabel="Category"
+            error={props.errors.category}
           />
-        </Field>
-        <Field label="Receipt / OR" error={props.errors.referenceId}>
-          <input
-            type="text"
-            value={props.referenceId}
-            onInput={e => props.onReferenceId(e.currentTarget.value)}
-            class={inputClass}
-          />
-        </Field>
-        <Field label="For" error={props.errors.profitCenter}>
+        </div>
+        <Input
+          label="Receipt / OR"
+          value={props.referenceId}
+          onInput={e => props.onReferenceId(e.currentTarget.value)}
+          error={props.errors.referenceId}
+          hint="Optional"
+        />
+        <div>
+          <label
+            for="edit-dis-profit-center"
+            class="block text-sm font-medium text-foreground mb-1"
+          >
+            For
+          </label>
           <Select
+            id="edit-dis-profit-center"
             value={props.profitCenter}
             onChange={props.onProfitCenter}
             options={props.profitCenterOptions}
             ariaLabel="For"
+            error={props.errors.profitCenter}
           />
-        </Field>
+        </div>
       </div>
-      <Field label="What was bought / paid?" error={props.errors.description}>
-        <input
-          type="text"
-          value={props.description}
-          onInput={e => props.onDescription(e.currentTarget.value)}
-          class={inputClass}
-        />
-      </Field>
+      <Input
+        label="What was bought / paid?"
+        value={props.description}
+        onInput={e => props.onDescription(e.currentTarget.value)}
+        error={props.errors.description}
+      />
       <label class="flex items-center gap-2 text-sm text-foreground">
         <input
           type="checkbox"
@@ -369,18 +376,6 @@ function DisbursementView(props: {
   )
 }
 
-function Field(props: { label: string; error?: string; children: JSX.Element }) {
-  return (
-    <div>
-      <p class="block text-sm font-medium text-foreground mb-1">{props.label}</p>
-      {props.children}
-      <Show when={props.error}>
-        <p class="text-xs text-red-600 mt-1">{props.error}</p>
-      </Show>
-    </div>
-  )
-}
-
 function AuditEventRow(props: { event: TransactionAuditEvent }) {
   return (
     <div class="rounded-lg border border-border bg-surface-muted/40 px-3 py-2">
@@ -406,6 +401,3 @@ function Detail(props: { label: string; value: string; strong?: boolean }) {
     </div>
   )
 }
-
-const inputClass =
-  "w-full px-3 py-2 border border-border rounded-lg text-sm bg-surface focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"

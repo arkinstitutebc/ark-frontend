@@ -5,7 +5,7 @@ import type {
   GlAccountSection,
   TxnCategory,
 } from "@ark/data-types"
-import { BackLink, DateInput, formatPeso, Select, type SelectOption } from "@ark/ui"
+import { BackLink, DateInput, formatPeso, Input, Select, type SelectOption } from "@ark/ui"
 import {
   categoryOptionsBySection,
   GL_CATALOG,
@@ -384,22 +384,15 @@ export default function CreateDisbursementPage() {
                   error={errors().transactionDate}
                   showTodayButton
                 />
-                <div>
-                  <label for="dis-payee" class="block text-sm font-medium text-foreground mb-1">
-                    Store / Company <span class="text-muted">(optional)</span>
-                  </label>
-                  <input
-                    id="dis-payee"
-                    type="text"
-                    value={payee()}
-                    onInput={e => setPayee(e.currentTarget.value)}
-                    placeholder="e.g. Wilcon, Meralco, contractor name"
-                    class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().payee ? "border-red-300" : "border-border"}`}
-                  />
-                  <Show when={errors().payee}>
-                    <p class="text-xs text-red-600 mt-1">{errors().payee}</p>
-                  </Show>
-                </div>
+                <Input
+                  id="dis-payee"
+                  label="Store / Company"
+                  value={payee()}
+                  onInput={e => setPayee(e.currentTarget.value)}
+                  placeholder="e.g. Wilcon, Meralco, contractor name"
+                  error={errors().payee}
+                  hint="Optional"
+                />
               </div>
               <div>
                 <label for="dis-category" class="block text-sm font-medium text-foreground mb-1">
@@ -411,59 +404,37 @@ export default function CreateDisbursementPage() {
                   onChange={v => handleCategoryChange(v as TxnCategory)}
                   options={categoryOptions()}
                   ariaLabel="Category"
-                  class={errors().category ? "rounded-lg ring-1 ring-red-300" : ""}
-                />
-                <Show when={errors().category}>
-                  <p class="text-xs text-red-600 mt-1">{errors().category}</p>
-                </Show>
-              </div>
-              <div>
-                <label for="dis-amount" class="block text-sm font-medium text-foreground mb-1">
-                  Amount (PHP)
-                </label>
-                <input
-                  id="dis-amount"
-                  type="number"
-                  min="0"
-                  step="0.01"
-                  value={amount()}
-                  onInput={e => setAmount(e.currentTarget.value)}
-                  placeholder="0.00"
-                  class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().amount ? "border-red-300" : "border-border"}`}
-                />
-                <Show when={errors().amount}>
-                  <p class="text-xs text-red-600 mt-1">{errors().amount}</p>
-                </Show>
-              </div>
-              <div>
-                <label for="dis-description" class="block text-sm font-medium text-foreground mb-1">
-                  What was bought / paid?
-                </label>
-                <input
-                  id="dis-description"
-                  type="text"
-                  value={description()}
-                  onInput={e => setDescription(e.currentTarget.value)}
-                  placeholder="e.g. cement and hollow blocks for annex"
-                  class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary ${errors().description ? "border-red-300" : "border-border"}`}
-                />
-                <Show when={errors().description}>
-                  <p class="text-xs text-red-600 mt-1">{errors().description}</p>
-                </Show>
-              </div>
-              <div>
-                <label for="dis-reference" class="block text-sm font-medium text-foreground mb-1">
-                  Receipt / OR number <span class="text-muted">(optional)</span>
-                </label>
-                <input
-                  id="dis-reference"
-                  type="text"
-                  value={referenceId()}
-                  onInput={e => setReferenceId(e.currentTarget.value)}
-                  placeholder="e.g. OR 12345, Invoice 0081"
-                  class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                  error={errors().category}
                 />
               </div>
+              <Input
+                id="dis-amount"
+                type="number"
+                min="0"
+                step="0.01"
+                label="Amount (PHP)"
+                value={amount()}
+                onInput={e => setAmount(e.currentTarget.value)}
+                placeholder="0.00"
+                error={errors().amount}
+              />
+              <Input
+                id="dis-description"
+                label="What was bought / paid?"
+                value={description()}
+                onInput={e => setDescription(e.currentTarget.value)}
+                placeholder="e.g. cement and hollow blocks for annex"
+                error={errors().description}
+              />
+              <Input
+                id="dis-reference"
+                label="Receipt / OR number"
+                value={referenceId()}
+                onInput={e => setReferenceId(e.currentTarget.value)}
+                placeholder="e.g. OR 12345, Invoice 0081"
+                error={errors().referenceId}
+                hint="Optional"
+              />
               <label class="flex items-center gap-2 text-sm text-foreground">
                 <input
                   type="checkbox"
@@ -494,6 +465,7 @@ export default function CreateDisbursementPage() {
                   }}
                   placeholder="—"
                   ariaLabel="For"
+                  error={errors().profitCenter}
                 />
               </div>
             </div>
