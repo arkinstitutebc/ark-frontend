@@ -22,11 +22,28 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = createSignal(false)
   const [loading, setLoading] = createSignal(false)
   const [error, setError] = createSignal<string | null>(null)
+  const [fieldErrors, setFieldErrors] = createSignal<{ email?: string; password?: string }>({})
+
+  const validate = () => {
+    const next: { email?: string; password?: string } = {}
+    const trimmedEmail = email().trim()
+
+    if (!trimmedEmail) next.email = "Enter your email address first."
+    else if (!trimmedEmail.includes("@")) next.email = "Enter a valid email address."
+
+    if (!password()) next.password = "Enter your password."
+
+    setFieldErrors(next)
+    return Object.keys(next).length === 0
+  }
 
   const handleSubmit = async (e: Event) => {
     e.preventDefault()
-    setLoading(true)
     setError(null)
+
+    if (!validate()) return
+
+    setLoading(true)
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:4000"
@@ -111,9 +128,13 @@ export default function LoginPage() {
                 label="Email Address"
                 placeholder="Enter your email"
                 value={email()}
-                onInput={e => setEmail(e.currentTarget.value)}
+                onInput={e => {
+                  setEmail(e.currentTarget.value)
+                  if (fieldErrors().email) setFieldErrors(prev => ({ ...prev, email: undefined }))
+                }}
                 leftIcon={UI.mail}
                 autocomplete="email"
+                error={fieldErrors().email}
               />
 
               <Input
@@ -121,7 +142,12 @@ export default function LoginPage() {
                 label="Password"
                 placeholder="Enter your password"
                 value={password()}
-                onInput={e => setPassword(e.currentTarget.value)}
+                onInput={e => {
+                  setPassword(e.currentTarget.value)
+                  if (fieldErrors().password) {
+                    setFieldErrors(prev => ({ ...prev, password: undefined }))
+                  }
+                }}
                 leftIcon={UI.lock}
                 showPasswordToggle
                 showPassword={showPassword()}
@@ -129,6 +155,7 @@ export default function LoginPage() {
                 eyeIcon={UI.eye}
                 eyeOffIcon={UI.eyeOff}
                 autocomplete="current-password"
+                error={fieldErrors().password}
               />
 
               {error() && (
@@ -141,7 +168,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 variant="primary"
-                class="w-full shadow-sm"
+                class="w-full shadow-none hover:shadow-none"
                 loading={loading()}
                 loadingLabel="Signing in..."
               >
