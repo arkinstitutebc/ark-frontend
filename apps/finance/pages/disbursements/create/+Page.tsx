@@ -5,7 +5,7 @@ import type {
   GlAccountSection,
   TxnCategory,
 } from "@ark/data-types"
-import { BackLink, DateInput, formatPeso, Input, Select, type SelectOption } from "@ark/ui"
+import { BackLink, Button, DateInput, formatPeso, Input, Select, type SelectOption } from "@ark/ui"
 import {
   categoryOptionsBySection,
   GL_CATALOG,
@@ -76,6 +76,7 @@ export default function CreateDisbursementPage() {
   const [needsReview, setNeedsReview] = createSignal(false)
   const [hasPrevious, setHasPrevious] = createSignal(false)
   const [hasDraft, setHasDraft] = createSignal(false)
+  const [savingIntent, setSavingIntent] = createSignal<"list" | "again" | null>(null)
   let draftReady = false
   let draftTimer: ReturnType<typeof setTimeout> | undefined
 
@@ -290,6 +291,7 @@ export default function CreateDisbursementPage() {
 
   const submit = (afterSave: "list" | "again") => {
     if (!canSubmit()) return
+    setSavingIntent(afterSave)
 
     const data = {
       category: category(),
@@ -308,6 +310,7 @@ export default function CreateDisbursementPage() {
     const result = validateForm(createDisbursementSchema, data)
     if (!result.success) {
       setErrors(result.errors)
+      setSavingIntent(null)
       return
     }
     setErrors({})
@@ -328,6 +331,9 @@ export default function CreateDisbursementPage() {
           window.localStorage.removeItem(DRAFT_DISBURSEMENT_KEY)
           window.location.href = "/disbursements"
         },
+        onSettled: () => {
+          setSavingIntent(null)
+        },
       }
     )
   }
@@ -347,28 +353,18 @@ export default function CreateDisbursementPage() {
             Add an old paid receipt or cash expense. Use Store / Company for who was paid.
           </p>
         </div>
-        <Show when={hasPrevious()}>
-          <button
-            type="button"
-            onClick={usePrevious}
-            class="ml-auto px-3 py-2 text-sm font-medium text-foreground border border-border rounded-lg hover:bg-surface-muted transition-colors"
-          >
-            Use previous
-          </button>
-        </Show>
-        <Show when={hasDraft()}>
-          <button
-            type="button"
-            onClick={restoreDraft}
-            class={
-              hasPrevious()
-                ? "px-3 py-2 text-sm font-medium text-foreground border border-border rounded-lg hover:bg-surface-muted transition-colors"
-                : "ml-auto px-3 py-2 text-sm font-medium text-foreground border border-border rounded-lg hover:bg-surface-muted transition-colors"
-            }
-          >
-            Restore draft
-          </button>
-        </Show>
+        <div class="ml-auto flex flex-wrap items-center justify-end gap-2">
+          <Show when={hasPrevious()}>
+            <Button type="button" variant="ghost" size="sm" onClick={usePrevious}>
+              Use previous
+            </Button>
+          </Show>
+          <Show when={hasDraft()}>
+            <Button type="button" variant="ghost" size="sm" onClick={restoreDraft}>
+              Restore draft
+            </Button>
+          </Show>
+        </div>
       </div>
 
       <form onSubmit={handleSubmit}>
@@ -522,21 +518,28 @@ export default function CreateDisbursementPage() {
               </Show>
 
               <div class="mt-6 space-y-3">
-                <button
+                <Button
                   type="submit"
                   disabled={!canSubmit()}
-                  class="w-full px-4 py-2.5 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  size="sm"
+                  class="w-full"
+                  loading={savingIntent() === "list"}
+                  loadingLabel="Recording..."
                 >
-                  {mutation.isPending ? "Processing..." : "Record Disbursement"}
-                </button>
-                <button
+                  Record Disbursement
+                </Button>
+                <Button
                   type="button"
                   disabled={!canSubmit()}
                   onClick={() => submit("again")}
-                  class="w-full px-4 py-2.5 bg-surface text-foreground border border-border text-sm font-medium rounded-lg hover:bg-surface-muted transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  variant="secondary"
+                  size="sm"
+                  class="w-full"
+                  loading={savingIntent() === "again"}
+                  loadingLabel="Saving..."
                 >
                   Save & Add Another
-                </button>
+                </Button>
                 <a
                   href="/disbursements"
                   class="block w-full px-4 py-2.5 bg-surface text-foreground border border-border text-sm font-medium rounded-lg hover:bg-surface-muted transition-colors text-center"
