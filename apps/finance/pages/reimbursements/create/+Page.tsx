@@ -19,36 +19,19 @@ import {
   Textarea,
 } from "@ark/ui"
 import { useCreateRr, useCurrentUser, useProfitCenters } from "@data/hooks"
-import {
-  accountingTreatmentOptions,
-  costTypeOptions,
-  createRrSchema,
-  expenseCategoryOptions,
-  profitCenterOptions,
-} from "@data/schemas"
+import { createRrSchema } from "@data/schemas"
 import { validateForm } from "@data/validate"
 import { createEffect, createMemo, createSignal, Index, Show } from "solid-js"
 import { navigate } from "vike/client/router"
+import {
+  buildReimbursementProfitCenterOptions,
+  rrAccountingTreatmentOptions,
+  rrCostTypeOptions,
+  rrExpenseCategoryOptions,
+} from "@/components/finance/reimbursement-form-options"
 
 interface ItemRow extends RrItem {
   id: string
-}
-
-const expenseCategoryLabels: Record<ExpenseCategory, string> = {
-  "cost-of-services": "Cost of Services",
-  "admin-expense": "Admin Expense",
-  "fixed-asset": "Fixed Asset",
-}
-const accountingTreatmentLabels: Record<AccountingTreatment, string> = {
-  variable: "Variable",
-  "traceable-fixed": "Traceable Fixed",
-  "common-overhead": "Common / Overhead",
-  capital: "Capital",
-}
-const costTypeLabels: Record<CostType, string> = {
-  "FBS-variable": "FBS Variable",
-  "HSK-variable": "HSK Variable",
-  common: "Common",
 }
 
 export default function CreateRrPage() {
@@ -99,20 +82,9 @@ export default function CreateRrPage() {
     items().reduce((sum, it) => sum + (Number.isFinite(it.amount) ? it.amount : 0), 0)
   )
 
-  const profitCenterSelectOptions = createMemo(() => {
-    const liveCenters = (profitCentersQuery.data ?? [])
-      .filter(center => center.active)
-      .sort((a, b) => a.sortOrder - b.sortOrder || a.label.localeCompare(b.label))
-
-    if (liveCenters.length > 0) {
-      return liveCenters.map(center => ({ label: center.label, value: center.code }))
-    }
-
-    return profitCenterOptions.map(v => ({
-      label: v === "Admin" ? "Admin / Shared" : v,
-      value: v,
-    }))
-  })
+  const profitCenterSelectOptions = createMemo(() =>
+    buildReimbursementProfitCenterOptions(profitCentersQuery.data)
+  )
 
   const addItem = () =>
     setItems(prev => [
@@ -304,10 +276,7 @@ export default function CreateRrPage() {
                   </label>
                   <Select
                     id="rr-expense-category"
-                    options={expenseCategoryOptions.map(v => ({
-                      label: expenseCategoryLabels[v],
-                      value: v,
-                    }))}
+                    options={rrExpenseCategoryOptions}
                     value={expenseCategory() || undefined}
                     onChange={v => setExpenseCategory(v as ExpenseCategory)}
                     placeholder="Select expense category"
@@ -341,10 +310,7 @@ export default function CreateRrPage() {
                   </label>
                   <Select
                     id="rr-accounting-treatment"
-                    options={accountingTreatmentOptions.map(v => ({
-                      label: accountingTreatmentLabels[v],
-                      value: v,
-                    }))}
+                    options={rrAccountingTreatmentOptions}
                     value={accountingTreatment() || undefined}
                     onChange={v => setAccountingTreatment(v as AccountingTreatment)}
                     placeholder="Select treatment"
@@ -358,7 +324,7 @@ export default function CreateRrPage() {
                   </label>
                   <Select
                     id="rr-cost-type"
-                    options={costTypeOptions.map(v => ({ label: costTypeLabels[v], value: v }))}
+                    options={rrCostTypeOptions}
                     value={costType() || undefined}
                     onChange={v => setCostType(v as CostType)}
                     placeholder="Select cost type"
