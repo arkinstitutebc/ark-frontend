@@ -8,4 +8,5 @@ export type { PortalCard, UserRole } from "./portal-cards"
 
 // Feature Components
 export { PortalCards } from "./portal-cards"
+export { ResourceDock } from "./resource-dock"
 export * from "./ui"
