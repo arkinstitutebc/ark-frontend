@@ -1,7 +1,8 @@
+import { useCurrentUser } from "@ark/api-client"
 import { categoryToneClass, PageHeader, StatCard, THead, Th } from "@ark/ui"
 import { useAdjustStock, useMovements, useStock } from "@data/hooks"
 import type { StockItem } from "@data/types"
-import { createMemo, createSignal, For } from "solid-js"
+import { createMemo, createSignal, For, Show } from "solid-js"
 import { AdjustStockModal } from "@/components/adjust-stock-modal"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 import { ViewItemModal } from "@/components/view-item-modal"
@@ -10,6 +11,7 @@ export default function Page() {
   const stockQuery = useStock()
   const movementsQuery = useMovements()
   const adjustMutation = useAdjustStock()
+  const userQuery = useCurrentUser()
 
   const [adjustModalOpen, setAdjustModalOpen] = createSignal(false)
   const [viewModalOpen, setViewModalOpen] = createSignal(false)
@@ -34,6 +36,8 @@ export default function Page() {
       totalMovements: movementsQuery.data?.length ?? 0,
     }
   })
+  const canWriteStock = () =>
+    userQuery.data?.role === "admin" || userQuery.data?.role === "director"
 
   const openAdjustModal = (item: StockItem) => {
     setSelectedItem(item)
@@ -62,12 +66,14 @@ export default function Page() {
         title="Stock Overview"
         subtitle="Track inventory levels across all batches"
         action={
-          <a
-            href="/receiving"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
-          >
-            <Icons.plus class="w-4 h-4" /> New Receipt
-          </a>
+          <Show when={canWriteStock()}>
+            <a
+              href="/receiving"
+              class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
+            >
+              <Icons.plus class="w-4 h-4" /> New Receipt
+            </a>
+          </Show>
         }
       />
 
@@ -152,14 +158,16 @@ export default function Page() {
                       </td>
                       <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => openAdjustModal(item)}
-                            class="text-sm text-muted hover:text-primary font-medium"
-                          >
-                            Adjust
-                          </button>
-                          <span class="text-muted">|</span>
+                          <Show when={canWriteStock()}>
+                            <button
+                              type="button"
+                              onClick={() => openAdjustModal(item)}
+                              class="text-sm text-muted hover:text-primary font-medium"
+                            >
+                              Adjust
+                            </button>
+                            <span class="text-muted">|</span>
+                          </Show>
                           <button
                             type="button"
                             onClick={() => openViewModal(item)}
@@ -182,11 +190,15 @@ export default function Page() {
         open={viewModalOpen()}
         onClose={() => setViewModalOpen(false)}
         item={selectedItem()}
-        onAdjust={() => {
-          setViewModalOpen(false)
-          const item = selectedItem()
-          if (item) openAdjustModal(item)
-        }}
+        onAdjust={
+          canWriteStock()
+            ? () => {
+                setViewModalOpen(false)
+                const item = selectedItem()
+                if (item) openAdjustModal(item)
+              }
+            : undefined
+        }
       />
 
       <AdjustStockModal

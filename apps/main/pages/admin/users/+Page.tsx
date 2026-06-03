@@ -1,6 +1,9 @@
 import {
   type AdminRole,
   type AdminUser,
+  portalAccessLabels,
+  roleAccessSummary,
+  roleLabels,
   type UserWithTempPassword,
   useAdminUsers,
   useCurrentUser,
@@ -276,6 +279,7 @@ export default function AdminUsersPage() {
               value={form().role}
               onChange={role => setForm({ ...form(), role })}
             />
+            <RoleAccessPreview role={form().role} />
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input
@@ -312,6 +316,26 @@ export default function AdminUsersPage() {
       </Modal>
 
       <TempPasswordModal credentials={tempCredentials()} onClose={() => setTempCredentials(null)} />
+    </div>
+  )
+}
+
+function RoleAccessPreview(props: { role: AdminRole }) {
+  return (
+    <div class="mt-3 rounded-xl border border-border bg-surface-muted px-4 py-3">
+      <p class="text-xs font-semibold uppercase tracking-wide text-muted">
+        {roleLabels[props.role]} access
+      </p>
+      <p class="mt-1 text-sm text-foreground">{roleAccessSummary[props.role]}</p>
+      <div class="mt-3 flex flex-wrap gap-1.5">
+        <For each={portalAccessLabels(props.role)}>
+          {label => (
+            <span class="rounded-full bg-surface px-2.5 py-1 text-xs font-medium text-muted border border-border">
+              {label}
+            </span>
+          )}
+        </For>
+      </div>
     </div>
   )
 }

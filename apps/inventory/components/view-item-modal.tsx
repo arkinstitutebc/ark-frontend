@@ -11,7 +11,7 @@ interface ViewItemModalProps {
   open: boolean
   onClose: () => void
   item: StockItem | null
-  onAdjust: () => void
+  onAdjust?: () => void
 }
 
 export function ViewItemModal(props: ViewItemModalProps) {
@@ -72,14 +72,16 @@ export function ViewItemModal(props: ViewItemModalProps) {
                       {_item().category}
                     </span>
                   </div>
-                  <button
-                    type="button"
-                    onClick={props.onAdjust}
-                    class="px-4 py-2 text-sm font-medium text-primary bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors"
-                  >
-                    <Icons.plus class="w-4 h-4 inline mr-1" />
-                    Adjust Stock
-                  </button>
+                  <Show when={props.onAdjust}>
+                    <button
+                      type="button"
+                      onClick={props.onAdjust}
+                      class="px-4 py-2 text-sm font-medium text-primary bg-primary/10 rounded-lg hover:bg-primary/20 transition-colors"
+                    >
+                      <Icons.plus class="w-4 h-4 inline mr-1" />
+                      Adjust Stock
+                    </button>
+                  </Show>
                 </div>
 
                 {/* Stock Summary Card */}
@@ -260,16 +262,20 @@ export function ViewItemModal(props: ViewItemModalProps) {
                 >
                   Close
                 </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    props.onClose()
-                    props.onAdjust()
-                  }}
-                  class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
-                >
-                  Adjust Stock
-                </button>
+                <Show when={props.onAdjust}>
+                  {onAdjust => (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        props.onClose()
+                        onAdjust()
+                      }}
+                      class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors"
+                    >
+                      Adjust Stock
+                    </button>
+                  )}
+                </Show>
               </div>
             </div>
           )

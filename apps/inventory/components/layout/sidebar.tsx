@@ -1,5 +1,7 @@
+import { useCurrentUser } from "@ark/api-client"
 import { type NavItem, Sidebar as SharedSidebar } from "@ark/ui"
 import { Box, ClipboardList, FileText, HelpCircle, Package } from "lucide-solid"
+import { createMemo } from "solid-js"
 
 const navItems: NavItem[] = [
   { id: "stock", label: "Stock", href: "/", icon: Package },
@@ -10,12 +12,20 @@ const navItems: NavItem[] = [
 ]
 
 export function Sidebar() {
+  const userQuery = useCurrentUser()
+  const visibleItems = createMemo(() => {
+    if (userQuery.data?.role === "trainer") {
+      return navItems.filter(item => item.id !== "receiving" && item.id !== "count")
+    }
+    return navItems
+  })
+
   return (
     <SharedSidebar
       brandIcon={Package}
       brandTitle="Inventory"
       brandSubtitle="Stock & Receiving"
-      navItems={navItems}
+      navItems={visibleItems()}
     />
   )
 }

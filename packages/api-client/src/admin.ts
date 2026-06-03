@@ -1,7 +1,8 @@
 import { createMutation, createQuery, useQueryClient } from "@tanstack/solid-query"
 import { api } from "./api"
+import type { UserRole } from "./rbac"
 
-export type AdminRole = "admin" | "director" | "trainer"
+export type AdminRole = UserRole
 
 export interface AdminUser {
   id: string

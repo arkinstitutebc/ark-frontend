@@ -19,7 +19,11 @@ export function Layout(props: { children: JSX.Element }) {
         <TopProgressBar />
         <CrossPortalLoadingOverlay />
         <AppToaster />
-        <SubPortalShell sidebar={<Sidebar />} topBar={<PortalTopBar />}>
+        <SubPortalShell
+          sidebar={<Sidebar />}
+          topBar={<PortalTopBar />}
+          allowedRoles={["admin", "director", "trainer"]}
+        >
           {props.children}
         </SubPortalShell>
       </QueryProvider>

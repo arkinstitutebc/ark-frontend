@@ -45,4 +45,15 @@ export {
 } from "./notifications"
 export { queryClient } from "./query-client"
 export { QueryProvider } from "./query-provider"
+export {
+  hasPortalAccess,
+  isUserRole,
+  type PortalKey,
+  portalAccess,
+  portalAccessLabels,
+  roleAccessSummary,
+  roleLabels,
+  type UserRole,
+  userRoles,
+} from "./rbac"
 export { validateForm } from "./validate"

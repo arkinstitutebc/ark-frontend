@@ -1,5 +1,8 @@
 import {
   type AdminRole,
+  portalAccessLabels,
+  roleAccessSummary,
+  roleLabels,
   type UserWithTempPassword,
   useActivateUser,
   useAdminUser,
@@ -20,7 +23,7 @@ import {
   Select,
   toast,
 } from "@ark/ui"
-import { createEffect, createMemo, createSignal, Show } from "solid-js"
+import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
 import { z } from "zod"
 import { Footer, Navbar } from "@/components"
@@ -268,6 +271,7 @@ export default function AdminUserDetailPage() {
                                 You cannot change your own role.
                               </p>
                             </Show>
+                            <RoleAccessPreview role={role()} />
                           </div>
 
                           <div class="flex justify-end">
@@ -388,6 +392,26 @@ export default function AdminUserDetailPage() {
         pending={reset.isPending}
         onConfirm={handleReset}
       />
+    </div>
+  )
+}
+
+function RoleAccessPreview(props: { role: AdminRole }) {
+  return (
+    <div class="mt-3 rounded-xl border border-border bg-surface-muted px-4 py-3">
+      <p class="text-xs font-semibold uppercase tracking-wide text-muted">
+        {roleLabels[props.role]} access
+      </p>
+      <p class="mt-1 text-sm text-foreground">{roleAccessSummary[props.role]}</p>
+      <div class="mt-3 flex flex-wrap gap-1.5">
+        <For each={portalAccessLabels(props.role)}>
+          {label => (
+            <span class="rounded-full bg-surface px-2.5 py-1 text-xs font-medium text-muted border border-border">
+              {label}
+            </span>
+          )}
+        </For>
+      </div>
     </div>
   )
 }

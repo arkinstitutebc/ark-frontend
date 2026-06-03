@@ -1,14 +1,14 @@
+import { hasPortalAccess, type PortalKey, type UserRole } from "@ark/api-client"
 import { Icons } from "@ark/ui"
 import { type Component, For, Show } from "solid-js"
-import type { UserRole } from "./portal-cards"
 
 interface ResourceItem {
+  key: PortalKey
   href: string
   label: string
   action: string
   badge: string
   icon: Component<{ class?: string }>
-  roles?: UserRole[]
 }
 
 interface ResourceDockProps {
@@ -17,22 +17,23 @@ interface ResourceDockProps {
 
 const resources: ResourceItem[] = [
   {
+    key: "adminUsers",
     href: "/admin/users",
     label: "User Management",
     action: "Manage users",
     badge: "Admin",
     icon: Icons.users,
-    roles: ["admin"],
   },
   {
+    key: "adminPosts",
     href: "/admin/posts",
     label: "Blog Posts",
     action: "Manage posts",
     badge: "Site",
     icon: Icons.fileText,
-    roles: ["admin"],
   },
   {
+    key: "learning",
     href: "/learn",
     label: "Learning Hub",
     action: "Open guides",
@@ -42,8 +43,7 @@ const resources: ResourceItem[] = [
 ]
 
 export function ResourceDock(props: ResourceDockProps) {
-  const visibleResources = () =>
-    resources.filter(item => !item.roles || item.roles.includes(props.userRole))
+  const visibleResources = () => resources.filter(item => hasPortalAccess(props.userRole, item.key))
 
   return (
     <>

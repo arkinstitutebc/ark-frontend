@@ -1,10 +1,11 @@
 import { createMutation, createQuery, useQueryClient } from "@tanstack/solid-query"
 import { API_URL, api } from "./api"
+import type { UserRole } from "./rbac"
 
 export interface CurrentUser {
   id: string
   email: string
-  role: string
+  role: UserRole
   firstName: string
   lastName: string
   mustChangePassword?: boolean
