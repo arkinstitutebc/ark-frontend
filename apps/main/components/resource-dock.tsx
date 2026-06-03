@@ -48,27 +48,25 @@ export function ResourceDock(props: ResourceDockProps) {
   return (
     <>
       <aside
-        class="pointer-events-none fixed right-0 top-1/2 z-30 hidden -translate-y-1/2 md:block"
+        class="fixed right-4 top-1/2 z-30 hidden -translate-y-1/2 md:block"
         aria-label="Resources"
       >
-        <div class="flex w-64 flex-col items-end gap-2">
+        <div class="flex flex-col gap-1.5 rounded-2xl border border-border bg-surface p-1.5">
           <For each={visibleResources()}>
             {item => (
               <a
                 href={item.href}
-                class="pointer-events-auto group relative flex h-12 w-12 items-center justify-end gap-3 overflow-hidden rounded-l-2xl border border-r-0 border-border bg-surface px-2.5 text-primary transition-all duration-200 ease-out [clip-path:polygon(14px_0,100%_0,100%_100%,0_100%)] hover:w-64 hover:border-primary/35 hover:bg-primary/10 focus-visible:w-64 focus-visible:border-primary/35 focus-visible:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:translate-x-0.5"
+                class="group relative flex h-10 w-10 items-center justify-center rounded-xl text-primary transition-colors hover:bg-primary/10 focus-visible:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-95"
                 aria-label={item.label}
               >
-                <span class="min-w-0 flex-1 translate-x-2 pl-3 text-left opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100">
-                  <span class="block truncate text-[10px] font-medium uppercase tracking-[0.14em] text-muted">
+                <item.icon class="h-5 w-5" />
+                <span class="pointer-events-none absolute right-full top-1/2 mr-3 hidden min-w-40 -translate-y-1/2 rounded-xl border border-border bg-surface px-3 py-2 text-left group-hover:block group-focus-visible:block">
+                  <span class="block text-[10px] font-medium uppercase tracking-[0.14em] text-muted">
                     {item.badge}
                   </span>
-                  <span class="block truncate text-sm font-medium text-foreground">
+                  <span class="mt-0.5 block whitespace-nowrap text-sm font-medium text-foreground">
                     {item.label}
                   </span>
-                </span>
-                <span class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10 transition-colors group-hover:bg-primary group-hover:text-white group-focus-visible:bg-primary group-focus-visible:text-white">
-                  <item.icon class="h-5 w-5" />
                 </span>
               </a>
             )}
