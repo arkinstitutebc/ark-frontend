@@ -51,7 +51,10 @@ jobs:
           chmod 600 ~/.ssh/id_ed25519
       - name: pull, path-filter build, restart
         run: |
-          ssh -o StrictHostKeyChecking=accept-new -o UserKnownHostsFile=/dev/null \
+          ssh -o StrictHostKeyChecking=accept-new \
+            -o UserKnownHostsFile=/dev/null \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=20 \
             ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} bash <<'EOF'
             set -euo pipefail
             cd /opt/ark-portals/repo

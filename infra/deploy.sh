@@ -124,6 +124,15 @@ echo "------------------------------------------------------------"
 echo "[$(date -u '+%H:%M:%S')] building ${#APPS[@]} app(s) with concurrency=$CONCURRENCY"
 echo "------------------------------------------------------------"
 
+heartbeat() {
+  while true; do
+    sleep 30
+    echo "[$(date -u '+%H:%M:%S')] build heartbeat: waiting for portal builds..."
+  done
+}
+heartbeat &
+HEARTBEAT_PID=$!
+
 # Cap concurrency using `wait -n` (bash 4.3+).
 running=0
 fail=0
@@ -139,6 +148,8 @@ while (( running > 0 )); do
   if ! wait -n; then fail=1; fi
   running=$(( running - 1 ))
 done
+kill "$HEARTBEAT_PID" 2>/dev/null || true
+wait "$HEARTBEAT_PID" 2>/dev/null || true
 
 if (( fail )); then
   echo ""
