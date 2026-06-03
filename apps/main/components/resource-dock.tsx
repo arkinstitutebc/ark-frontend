@@ -56,11 +56,11 @@ export function ResourceDock(props: ResourceDockProps) {
             {item => (
               <a
                 href={item.href}
-                class="group relative flex h-10 w-10 items-center justify-center rounded-xl text-primary transition-colors hover:bg-primary/10 focus-visible:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-95"
+                class="group relative flex h-10 w-10 items-center justify-center rounded-xl text-primary transition-all duration-200 ease-out hover:-translate-x-0.5 hover:scale-105 hover:bg-primary/10 focus-visible:-translate-x-0.5 focus-visible:scale-105 focus-visible:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 active:scale-95"
                 aria-label={item.label}
               >
-                <item.icon class="h-5 w-5" />
-                <span class="pointer-events-none absolute right-full top-1/2 mr-3 hidden min-w-40 -translate-y-1/2 rounded-xl border border-border bg-surface px-3 py-2 text-left group-hover:block group-focus-visible:block">
+                <item.icon class="h-5 w-5 transition-transform duration-200 ease-out group-hover:scale-110 group-focus-visible:scale-110" />
+                <span class="pointer-events-none absolute right-full top-1/2 mr-3 min-w-40 -translate-y-1/2 translate-x-2 scale-95 rounded-xl border border-border bg-surface px-3 py-2 text-left opacity-0 transition-all duration-200 ease-out group-hover:translate-x-0 group-hover:scale-100 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:scale-100 group-focus-visible:opacity-100">
                   <span class="block text-[10px] font-medium uppercase tracking-[0.14em] text-muted">
                     {item.badge}
                   </span>
