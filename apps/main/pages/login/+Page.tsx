@@ -5,16 +5,25 @@ const collageImages = [
   {
     src: "/login/portal-collage-1.jpg",
     alt: "Ark Institute students outside the campus building",
+    width: 1200,
+    height: 660,
+    priority: "high",
   },
   {
     src: "/login/portal-collage-2.jpg",
     alt: "Ark Institute training group in front of the main building",
+    width: 1200,
+    height: 715,
+    priority: "auto",
   },
   {
     src: "/login/portal-collage-3.jpg",
     alt: "Ark Institute team group photo",
+    width: 1200,
+    height: 610,
+    priority: "auto",
   },
-]
+] as const
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
@@ -135,6 +144,7 @@ export default function LoginPage() {
               class="object-contain"
               loading="eager"
               decoding="async"
+              fetchpriority="high"
             />
             <div>
               <p class="text-lg font-bold text-foreground">Ark Institute</p>
@@ -151,6 +161,7 @@ export default function LoginPage() {
               class="object-contain"
               loading="eager"
               decoding="async"
+              fetchpriority="high"
             />
             <div>
               <h1 class="text-3xl font-bold tracking-tight text-foreground">Ark Institute</h1>
@@ -252,9 +263,12 @@ function BrandCollage(props: { ready: boolean }) {
               <img
                 src={image.src}
                 alt={image.alt}
+                width={image.width}
+                height={image.height}
                 class="h-full w-full object-cover"
                 loading="eager"
                 decoding="async"
+                fetchpriority={image.priority}
               />
               <div class="absolute inset-0 bg-primary/45 mix-blend-multiply" />
               <div class="absolute inset-0 bg-gradient-to-r from-primary/75 via-primary/25 to-accent/35" />
@@ -283,6 +297,7 @@ function BrandCollage(props: { ready: boolean }) {
               class="object-contain"
               loading="eager"
               decoding="async"
+              fetchpriority="high"
             />
             <div>
               <p class="text-2xl font-bold tracking-tight">Ark Institute ERP</p>
