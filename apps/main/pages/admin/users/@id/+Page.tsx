@@ -88,6 +88,18 @@ export default function AdminUserDetailPage() {
 
   const isSelf = () => userQuery.data?.id === id()
   const isAdmin = () => userQuery.data?.role === "admin"
+  const pendingPassword = () => target.data?.mustChangePassword === true
+  const changedFields = createMemo(() => {
+    const u = target.data
+    if (!u) return []
+    const changes: string[] = []
+    if (firstName().trim() !== u.firstName) changes.push("first name")
+    if (lastName().trim() !== u.lastName) changes.push("last name")
+    if (!isSelf() && role() !== u.role) changes.push("role")
+    if (position().trim() !== (u.position ?? "")) changes.push("position")
+    if (department().trim() !== (u.department ?? "")) changes.push("department")
+    return changes
+  })
 
   async function saveChanges(e: Event) {
     e.preventDefault()
@@ -169,7 +181,7 @@ export default function AdminUserDetailPage() {
         />
 
         <main class="flex-1 px-6 sm:px-8 lg:px-12 py-8 sm:py-10">
-          <div class="max-w-3xl mx-auto mt-4">
+          <div class="max-w-6xl mx-auto mt-4">
             <div class="mb-4">
               <BackLink href="/admin/users">Back to users</BackLink>
             </div>
@@ -198,7 +210,7 @@ export default function AdminUserDetailPage() {
                   // while keeping the canonical Solid pattern.
                   const u = user()
                   return (
-                    <div class="space-y-6">
+                    <div class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_22rem]">
                       <div class="bg-surface rounded-2xl shadow-sm border border-border overflow-hidden">
                         <div class="px-6 py-5 border-b border-border flex items-start justify-between gap-4">
                           <div>
@@ -219,6 +231,11 @@ export default function AdminUserDetailPage() {
                         </div>
 
                         <form onSubmit={saveChanges} class="px-6 py-6 space-y-5">
+                          <Show when={changedFields().length > 0}>
+                            <div class="rounded-xl border border-primary/15 bg-primary/5 px-4 py-3 text-sm text-primary">
+                              Unsaved changes: {changedFields().join(", ")}.
+                            </div>
+                          </Show>
                           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                             <Input
                               label="First name"
@@ -279,6 +296,7 @@ export default function AdminUserDetailPage() {
                               type="submit"
                               variant="primary"
                               size="sm"
+                              disabled={changedFields().length === 0}
                               loading={update.isPending}
                               loadingLabel="Saving…"
                             >
@@ -288,68 +306,122 @@ export default function AdminUserDetailPage() {
                         </form>
                       </div>
 
-                      <div class="bg-surface rounded-2xl shadow-sm border border-border overflow-hidden">
-                        <div class="px-6 py-5 border-b border-border">
-                          <h2 class="text-base font-semibold text-foreground">Account actions</h2>
+                      <aside class="space-y-4">
+                        <div class="rounded-2xl border border-border bg-surface p-5 shadow-sm">
+                          <h2 class="text-sm font-semibold text-foreground">Account summary</h2>
+                          <div class="mt-4 space-y-3 text-sm">
+                            <SummaryLine label="Status">
+                              <span
+                                class={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
+                                  u.isActive
+                                    ? "bg-green-50 text-green-700"
+                                    : "bg-surface-muted text-muted"
+                                }`}
+                              >
+                                {u.isActive ? "Active" : "Inactive"}
+                              </span>
+                            </SummaryLine>
+                            <SummaryLine label="Password">
+                              <span
+                                class={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${
+                                  pendingPassword()
+                                    ? "bg-amber-50 text-amber-700"
+                                    : "bg-green-50 text-green-700"
+                                }`}
+                              >
+                                {pendingPassword() ? "Temporary" : "Set"}
+                              </span>
+                            </SummaryLine>
+                            <SummaryLine label="Role">{roleLabels[u.role]}</SummaryLine>
+                            <SummaryLine label="Position">{u.position || "Not set"}</SummaryLine>
+                            <SummaryLine label="Department">
+                              {u.department || "Not set"}
+                            </SummaryLine>
+                          </div>
                         </div>
-                        <div class="px-6 py-5 space-y-3">
-                          <button
-                            type="button"
-                            onClick={() => setConfirmAction("reset")}
-                            disabled={reset.isPending}
-                            class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-border hover:border-primary hover:bg-primary/5 text-left transition-colors disabled:opacity-50"
-                          >
-                            <span>
-                              <span class="block text-sm font-medium text-foreground">
-                                Reset password
-                              </span>
-                              <span class="block text-xs text-muted mt-0.5">
-                                Generate a new temporary password. The user will be forced to change
-                                it on next login.
-                              </span>
-                            </span>
-                            <Icons.lock class="w-5 h-5 text-muted" />
-                          </button>
 
-                          {u.isActive ? (
-                            <button
-                              type="button"
-                              onClick={() => setConfirmAction("deactivate")}
-                              disabled={isSelf() || deactivate.isPending}
-                              class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-border hover:border-red-500 hover:bg-red-50 text-left transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <span>
-                                <span class="block text-sm font-medium text-foreground">
-                                  Deactivate user
+                        <div class="rounded-2xl border border-border bg-surface p-5 shadow-sm">
+                          <h2 class="text-sm font-semibold text-foreground">Effective access</h2>
+                          <p class="mt-2 text-sm text-muted">{roleAccessSummary[role()]}</p>
+                          <div class="mt-3 flex flex-wrap gap-1.5">
+                            <For each={portalAccessLabels(role())}>
+                              {label => (
+                                <span class="rounded-full border border-border bg-surface-muted px-2.5 py-1 text-xs font-medium text-muted">
+                                  {label}
                                 </span>
-                                <span class="block text-xs text-muted mt-0.5">
-                                  {isSelf()
-                                    ? "You cannot deactivate yourself."
-                                    : "Block this user from logging in. Their data is preserved."}
-                                </span>
-                              </span>
-                              <Icons.xCircle class="w-5 h-5 text-muted" />
-                            </button>
-                          ) : (
-                            <button
-                              type="button"
-                              onClick={handleActivate}
-                              disabled={activate.isPending}
-                              class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-border hover:border-green-500 hover:bg-green-50 text-left transition-colors disabled:opacity-50"
-                            >
-                              <span>
-                                <span class="block text-sm font-medium text-foreground">
-                                  Reactivate user
-                                </span>
-                                <span class="block text-xs text-muted mt-0.5">
-                                  Restore login access for this user.
-                                </span>
-                              </span>
-                              <Icons.checkCircle class="w-5 h-5 text-muted" />
-                            </button>
-                          )}
+                              )}
+                            </For>
+                          </div>
                         </div>
-                      </div>
+
+                        <div class="bg-surface rounded-2xl shadow-sm border border-border overflow-hidden">
+                          <div class="px-5 py-4 border-b border-border">
+                            <h2 class="text-base font-semibold text-foreground">Account actions</h2>
+                          </div>
+                          <div class="px-5 py-5 space-y-3">
+                            <button
+                              type="button"
+                              onClick={() => setConfirmAction("reset")}
+                              disabled={reset.isPending}
+                              class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-border hover:border-primary hover:bg-primary/5 text-left transition-colors disabled:opacity-50"
+                            >
+                              <span>
+                                <span class="block text-sm font-medium text-foreground">
+                                  Reset password
+                                </span>
+                                <span class="block text-xs text-muted mt-0.5">
+                                  Generate a new temporary password.
+                                </span>
+                              </span>
+                              <Icons.lock class="w-5 h-5 text-muted" />
+                            </button>
+
+                            <Show when={pendingPassword()}>
+                              <div class="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                                This user must set a permanent password on next login.
+                              </div>
+                            </Show>
+
+                            {u.isActive ? (
+                              <button
+                                type="button"
+                                onClick={() => setConfirmAction("deactivate")}
+                                disabled={isSelf() || deactivate.isPending}
+                                class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-border hover:border-red-500 hover:bg-red-50 text-left transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <span>
+                                  <span class="block text-sm font-medium text-foreground">
+                                    Deactivate user
+                                  </span>
+                                  <span class="block text-xs text-muted mt-0.5">
+                                    {isSelf()
+                                      ? "You cannot deactivate yourself."
+                                      : "Block this user from logging in. Their data is preserved."}
+                                  </span>
+                                </span>
+                                <Icons.xCircle class="w-5 h-5 text-muted" />
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={handleActivate}
+                                disabled={activate.isPending}
+                                class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-lg border border-border hover:border-green-500 hover:bg-green-50 text-left transition-colors disabled:opacity-50"
+                              >
+                                <span>
+                                  <span class="block text-sm font-medium text-foreground">
+                                    Reactivate user
+                                  </span>
+                                  <span class="block text-xs text-muted mt-0.5">
+                                    Restore login access for this user.
+                                  </span>
+                                </span>
+                                <Icons.checkCircle class="w-5 h-5 text-muted" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </aside>
                     </div>
                   )
                 }}
@@ -412,6 +484,15 @@ function RoleAccessPreview(props: { role: AdminRole }) {
           )}
         </For>
       </div>
+    </div>
+  )
+}
+
+function SummaryLine(props: { label: string; children: import("solid-js").JSX.Element }) {
+  return (
+    <div class="flex items-center justify-between gap-3">
+      <span class="text-muted">{props.label}</span>
+      <span class="text-right font-medium text-foreground">{props.children}</span>
     </div>
   )
 }
