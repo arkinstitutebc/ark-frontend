@@ -4,7 +4,7 @@ import { waitForReady } from "../helpers"
 import { API_URL } from "../test-config"
 
 /**
- * Notifications (M6) — fan-out from inviteUser, badge count, mark-all-read.
+ * Notifications (M6) — bell inbox behavior.
  *
  * ⚠ MUTATES USER DATA. Creates a throwaway user per run and deactivates it
  * in afterEach. Run only against a local backend with a test DB.
@@ -55,7 +55,7 @@ test.describe("Notifications fan-out + bell", () => {
     invited = null
   })
 
-  test("inviteUser → new user sees badge=1 + 'Welcome to Ark Institute'", async ({ page }) => {
+  test("inviteUser does not show a persistent welcome notification", async ({ page }) => {
     // Step 1: log in as matt admin and invite a new user
     await loginAsAdmin(page)
     const stamp = Date.now()
@@ -88,17 +88,17 @@ test.describe("Notifications fan-out + bell", () => {
     await page.goto("/")
     await waitForReady(page)
 
-    // Step 3: Bell badge shows "1"
-    const bell = page.getByRole("button", { name: /notifications.*1.*unread/i })
+    // Step 3: Bell badge stays clear; the password profile gate is enough guidance.
+    const bell = page.getByRole("button", { name: /notifications.*0.*unread/i })
     await expect(bell).toBeVisible({ timeout: 10_000 })
 
-    // Step 4: Click bell → "Welcome to Ark Institute" appears
+    // Step 4: Click bell → no sticky welcome notification appears.
     await bell.click()
-    await expect(page.getByText(/welcome to ark institute/i)).toBeVisible()
+    await expect(page.getByText(/no notifications yet/i)).toBeVisible()
+    await expect(page.getByText(/welcome to ark institute/i)).toHaveCount(0)
   })
 
-  test("Mark all read clears the badge", async ({ page }) => {
-    // Same setup as above
+  test("Mark all read is disabled when inbox is empty", async ({ page }) => {
     await loginAsAdmin(page)
     const stamp = Date.now()
     const inviteRes = await page.request.post(`${API_URL}/api/admin/users`, {
@@ -125,17 +125,12 @@ test.describe("Notifications fan-out + bell", () => {
     await page.goto("/")
     await waitForReady(page)
 
-    const bell = page.getByRole("button", { name: /notifications.*\d+.*unread/i })
+    const bell = page.getByRole("button", { name: /notifications.*0.*unread/i })
     await bell.click()
 
-    await page.getByRole("button", { name: /mark all read/i }).click()
+    await expect(page.getByRole("button", { name: /mark all read/i })).toBeDisabled()
+    await expect(page.getByText(/no notifications yet/i)).toBeVisible()
 
-    // After marking all read, the bell badge should be 0 (no longer matches /1+ unread/).
-    await expect(page.getByRole("button", { name: /notifications.*0.*unread/i })).toBeVisible({
-      timeout: 5_000,
-    })
-
-    // Verify via API too
     const list = await page.request.get(`${API_URL}/api/notifications`)
     const json = await list.json()
     expect(json.unreadCount).toBe(0)
