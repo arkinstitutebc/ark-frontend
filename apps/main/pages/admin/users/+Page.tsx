@@ -71,6 +71,19 @@ const emptyInvite: InviteFormState = {
   department: "",
 }
 
+const roleFilterOptions = [
+  { label: "All roles", value: "all" },
+  { label: "Admins", value: "admin" },
+  { label: "Directors", value: "director" },
+  { label: "Trainers", value: "trainer" },
+] as const
+
+type RoleFilter = (typeof roleFilterOptions)[number]["value"]
+
+function previewRoleForFilter(filter: RoleFilter): AdminRole {
+  return filter === "all" ? "trainer" : filter
+}
+
 export default function AdminUsersPage() {
   const userQuery = useCurrentUser()
   const usersQuery = useAdminUsers(() => true)
@@ -80,6 +93,8 @@ export default function AdminUsersPage() {
   const [form, setForm] = createSignal<InviteFormState>({ ...emptyInvite })
   const [errors, setErrors] = createSignal<Record<string, string>>({})
   const [tempCredentials, setTempCredentials] = createSignal<UserWithTempPassword | null>(null)
+  const [search, setSearch] = createSignal("")
+  const [roleFilter, setRoleFilter] = createSignal<RoleFilter>("all")
 
   // Auth gate: must be admin.
   createEffect(() => {
@@ -95,8 +110,26 @@ export default function AdminUsersPage() {
 
   const isAdmin = () => userQuery.data?.role === "admin"
 
-  const sortedUsers = createMemo<AdminUser[]>(() => {
+  const userStats = createMemo(() => {
     const list = usersQuery.data ?? []
+    return {
+      total: list.length,
+      active: list.filter(user => user.isActive).length,
+      pendingPassword: list.filter(user => user.mustChangePassword).length,
+      trainers: list.filter(user => user.role === "trainer").length,
+    }
+  })
+
+  const sortedUsers = createMemo<AdminUser[]>(() => {
+    const term = search().trim().toLowerCase()
+    const role = roleFilter()
+    const list = (usersQuery.data ?? []).filter(user => {
+      const matchesRole = role === "all" || user.role === role
+      const haystack = `${user.firstName} ${user.lastName} ${user.email} ${user.position ?? ""} ${
+        user.department ?? ""
+      }`.toLowerCase()
+      return matchesRole && (!term || haystack.includes(term))
+    })
     return [...list].sort((a, b) => {
       if (a.isActive !== b.isActive) return a.isActive ? -1 : 1
       return a.firstName.localeCompare(b.firstName)
@@ -162,6 +195,47 @@ export default function AdminUsersPage() {
               </Button>
             </div>
 
+            <div class="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+              <SummaryTile label="Total users" value={userStats().total} />
+              <SummaryTile label="Active" value={userStats().active} tone="success" />
+              <SummaryTile
+                label="Pending password"
+                value={userStats().pendingPassword}
+                tone={userStats().pendingPassword > 0 ? "warning" : "neutral"}
+              />
+              <SummaryTile label="Trainers" value={userStats().trainers} />
+            </div>
+
+            <div class="mb-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
+              <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+                <div class="grid gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]">
+                  <Input
+                    label="Search users"
+                    value={search()}
+                    onInput={e => setSearch(e.currentTarget.value)}
+                    leftIcon={Icons.search}
+                    placeholder="Name, email, position, department"
+                  />
+                  <div>
+                    <label
+                      for="role-filter"
+                      class="mb-1.5 block text-sm font-medium text-foreground"
+                    >
+                      Role
+                    </label>
+                    <Select<RoleFilter>
+                      id="role-filter"
+                      ariaLabel="Filter by role"
+                      options={[...roleFilterOptions]}
+                      value={roleFilter()}
+                      onChange={setRoleFilter}
+                    />
+                  </div>
+                </div>
+              </div>
+              <RoleAccessPreview role={previewRoleForFilter(roleFilter())} compact />
+            </div>
+
             <div class="bg-surface rounded-2xl shadow-sm border border-border overflow-hidden">
               <Show when={!usersQuery.isPending} fallback={<TableSkeleton rows={6} cols={5} />}>
                 <Show
@@ -172,6 +246,7 @@ export default function AdminUsersPage() {
                         <Th>Name</Th>
                         <Th>Email</Th>
                         <Th>Role</Th>
+                        <Th>Access</Th>
                         <Th>Status</Th>
                         <Th align="right">Actions</Th>
                       </THead>
@@ -193,6 +268,9 @@ export default function AdminUsersPage() {
                                 <RolePill role={user.role} showAdminLabel />
                               </td>
                               <td class="px-5 py-3">
+                                <AccessChips role={user.role} />
+                              </td>
+                              <td class="px-5 py-3">
                                 <StatusBadge status={user.isActive ? "Active" : "Inactive"} />
                               </td>
                               <td class="px-5 py-3 text-right">
@@ -209,11 +287,29 @@ export default function AdminUsersPage() {
                         </For>
                         <Show when={sortedUsers().length === 0}>
                           <TableStateRow
-                            colSpan={5}
+                            colSpan={6}
                             icon={Icons.users}
-                            heading="No users yet"
-                            description="Create the first portal account to start assigning roles."
-                            action={{ label: "Create user", onClick: openInvite }}
+                            heading={
+                              usersQuery.data?.length
+                                ? "No users match your filters"
+                                : "No users yet"
+                            }
+                            description={
+                              usersQuery.data?.length
+                                ? "Clear the search or change the role filter."
+                                : "Create the first portal account to start assigning roles."
+                            }
+                            action={
+                              usersQuery.data?.length
+                                ? {
+                                    label: "Clear filters",
+                                    onClick: () => {
+                                      setSearch("")
+                                      setRoleFilter("all")
+                                    },
+                                  }
+                                : { label: "Create user", onClick: openInvite }
+                            }
                           />
                         </Show>
                       </tbody>
@@ -223,7 +319,7 @@ export default function AdminUsersPage() {
                   <DataTable>
                     <tbody>
                       <TableStateRow
-                        colSpan={5}
+                        colSpan={6}
                         icon={Icons.alert}
                         heading="Could not load users"
                         description="Refresh the page or try again in a moment."
@@ -320,9 +416,33 @@ export default function AdminUsersPage() {
   )
 }
 
-function RoleAccessPreview(props: { role: AdminRole }) {
+function SummaryTile(props: {
+  label: string
+  value: number
+  tone?: "neutral" | "success" | "warning"
+}) {
+  const toneClass = () => {
+    if (props.tone === "success") return "text-green-700 bg-green-50 border-green-100"
+    if (props.tone === "warning") return "text-amber-700 bg-amber-50 border-amber-100"
+    return "text-primary bg-primary/5 border-primary/10"
+  }
   return (
-    <div class="mt-3 rounded-xl border border-border bg-surface-muted px-4 py-3">
+    <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+      <p class="text-xs font-semibold uppercase tracking-wide text-muted">{props.label}</p>
+      <div class={`mt-3 inline-flex rounded-xl border px-3 py-1.5 ${toneClass()}`}>
+        <span class="text-2xl font-semibold tabular-nums">{props.value}</span>
+      </div>
+    </div>
+  )
+}
+
+function RoleAccessPreview(props: { role: AdminRole; compact?: boolean }) {
+  return (
+    <div
+      class={`rounded-xl border border-border bg-surface-muted px-4 py-3 ${
+        props.compact ? "" : "mt-3"
+      }`}
+    >
       <p class="text-xs font-semibold uppercase tracking-wide text-muted">
         {roleLabels[props.role]} access
       </p>
@@ -336,6 +456,28 @@ function RoleAccessPreview(props: { role: AdminRole }) {
           )}
         </For>
       </div>
+    </div>
+  )
+}
+
+function AccessChips(props: { role: AdminRole }) {
+  const labels = () => portalAccessLabels(props.role)
+  const visible = () => labels().slice(0, 3)
+  const hiddenCount = () => Math.max(0, labels().length - visible().length)
+  return (
+    <div class="flex flex-wrap gap-1.5">
+      <For each={visible()}>
+        {label => (
+          <span class="rounded-full border border-border bg-surface-muted px-2 py-0.5 text-[11px] font-medium text-muted">
+            {label}
+          </span>
+        )}
+      </For>
+      <Show when={hiddenCount() > 0}>
+        <span class="rounded-full border border-border bg-surface-muted px-2 py-0.5 text-[11px] font-medium text-muted">
+          +{hiddenCount()}
+        </span>
+      </Show>
     </div>
   )
 }
