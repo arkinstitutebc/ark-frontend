@@ -1,4 +1,4 @@
-import { createSignal } from "solid-js"
+import { createSignal, For, onCleanup, onMount } from "solid-js"
 import { Button, Input, UI } from "@/components/ui"
 
 const collageImages = [
@@ -28,6 +28,18 @@ export default function LoginPage() {
   const [loading, setLoading] = createSignal(false)
   const [error, setError] = createSignal<string | null>(null)
   const [fieldErrors, setFieldErrors] = createSignal<{ email?: string; password?: string }>({})
+  const [brandAssetsReady, setBrandAssetsReady] = createSignal(false)
+  let cancelled = false
+
+  onMount(() => {
+    void preloadBrandAssets().finally(() => {
+      if (!cancelled) setBrandAssetsReady(true)
+    })
+  })
+
+  onCleanup(() => {
+    cancelled = true
+  })
 
   const emailError = (value: string) => {
     if (!value) return "Enter your email address first."
@@ -110,7 +122,7 @@ export default function LoginPage() {
 
   return (
     <main class="min-h-screen bg-background text-foreground lg:grid lg:grid-cols-[minmax(0,1.08fr)_minmax(420px,0.92fr)]">
-      <BrandCollage />
+      <BrandCollage ready={brandAssetsReady()} />
 
       <section class="flex min-h-[calc(100vh-18rem)] items-center justify-center px-6 py-10 sm:px-10 lg:min-h-screen lg:px-14">
         <div class="w-full max-w-[420px]">
@@ -121,6 +133,8 @@ export default function LoginPage() {
               width="56"
               height="56"
               class="object-contain"
+              loading="eager"
+              decoding="async"
             />
             <div>
               <p class="text-lg font-bold text-foreground">Ark Institute</p>
@@ -135,6 +149,8 @@ export default function LoginPage() {
               width="64"
               height="64"
               class="object-contain"
+              loading="eager"
+              decoding="async"
             />
             <div>
               <h1 class="text-3xl font-bold tracking-tight text-foreground">Ark Institute</h1>
@@ -222,26 +238,41 @@ export default function LoginPage() {
   )
 }
 
-function BrandCollage() {
+function BrandCollage(props: { ready: boolean }) {
   return (
     <section class="relative min-h-[18rem] overflow-hidden bg-primary lg:min-h-screen">
-      <div class="absolute inset-0 grid grid-rows-3">
-        {collageImages.map(image => (
-          <div class="relative overflow-hidden border-b border-white/10 last:border-b-0">
-            <img
-              src={image.src}
-              alt={image.alt}
-              class="h-full w-full object-cover"
-              loading="eager"
-            />
-            <div class="absolute inset-0 bg-primary/45 mix-blend-multiply" />
-            <div class="absolute inset-0 bg-gradient-to-r from-primary/75 via-primary/25 to-accent/35" />
-          </div>
-        ))}
+      <div
+        class={`absolute inset-0 grid grid-rows-3 transition-opacity duration-300 ${
+          props.ready ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        <For each={collageImages}>
+          {image => (
+            <div class="relative overflow-hidden border-b border-white/10 last:border-b-0">
+              <img
+                src={image.src}
+                alt={image.alt}
+                class="h-full w-full object-cover"
+                loading="eager"
+                decoding="async"
+              />
+              <div class="absolute inset-0 bg-primary/45 mix-blend-multiply" />
+              <div class="absolute inset-0 bg-gradient-to-r from-primary/75 via-primary/25 to-accent/35" />
+            </div>
+          )}
+        </For>
       </div>
 
-      <div class="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/10 to-transparent" />
-      <div class="absolute inset-x-0 bottom-0 p-8 sm:p-10 lg:p-12">
+      <div
+        class={`absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/10 to-transparent transition-opacity duration-300 ${
+          props.ready ? "opacity-100" : "opacity-0"
+        }`}
+      />
+      <div
+        class={`absolute inset-x-0 bottom-0 p-8 transition-opacity duration-300 sm:p-10 lg:p-12 ${
+          props.ready ? "opacity-100" : "opacity-0"
+        }`}
+      >
         <div class="max-w-xl text-white">
           <div class="flex items-center gap-4">
             <img
@@ -250,6 +281,8 @@ function BrandCollage() {
               width="54"
               height="54"
               class="object-contain"
+              loading="eager"
+              decoding="async"
             />
             <div>
               <p class="text-2xl font-bold tracking-tight">Ark Institute ERP</p>
@@ -259,5 +292,27 @@ function BrandCollage() {
         </div>
       </div>
     </section>
+  )
+}
+
+function preloadBrandAssets() {
+  const sources = ["/logo/ark-transpa.png", ...collageImages.map(image => image.src)]
+  return Promise.all(
+    sources.map(
+      src =>
+        new Promise<void>(resolve => {
+          const image = new Image()
+          image.onload = () => {
+            const decode = image.decode?.()
+            if (!decode) {
+              resolve()
+              return
+            }
+            void decode.catch(() => undefined).finally(resolve)
+          }
+          image.onerror = () => resolve()
+          image.src = src
+        })
+    )
   )
 }

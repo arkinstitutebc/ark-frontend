@@ -1,9 +1,10 @@
-import { useCurrentUser } from "@ark/api-client"
+import { hasPortalAccess, type PortalKey, useCurrentUser } from "@ark/api-client"
 import { BackLink, Icons, PageLoading, PortalIcons } from "@ark/ui"
-import { For, Show } from "solid-js"
+import { createMemo, For, Show } from "solid-js"
 import { Footer, Navbar } from "@/components"
 
 interface LearningCard {
+  key: PortalKey
   title: string
   blurb: string
   icon: keyof typeof PortalIcons
@@ -14,6 +15,7 @@ interface LearningCard {
 
 const cards: LearningCard[] = [
   {
+    key: "training",
     title: "Training",
     blurb: "Batches, students, venues, TESDA records.",
     icon: "batches",
@@ -21,6 +23,7 @@ const cards: LearningCard[] = [
     group: "Operations",
   },
   {
+    key: "procurement",
     title: "Procurement",
     blurb: "Purchase Requests, Purchase Orders, approvals.",
     icon: "procurement",
@@ -28,6 +31,7 @@ const cards: LearningCard[] = [
     group: "Operations",
   },
   {
+    key: "inventory",
     title: "Inventory",
     blurb: "Stock, receiving deliveries, movement log.",
     icon: "inventory",
@@ -35,6 +39,7 @@ const cards: LearningCard[] = [
     group: "Operations",
   },
   {
+    key: "finance",
     title: "Finance",
     blurb: "Banks, transfers, disbursements, P&L report.",
     icon: "finance",
@@ -42,6 +47,7 @@ const cards: LearningCard[] = [
     group: "Finance",
   },
   {
+    key: "billing",
     title: "Billing",
     blurb: "TESDA student receivables and statements.",
     icon: "billing",
@@ -49,6 +55,7 @@ const cards: LearningCard[] = [
     group: "Finance",
   },
   {
+    key: "hr",
     title: "HR & Payroll",
     blurb: "Trainers, attendance, payroll periods.",
     icon: "hr",
@@ -58,7 +65,6 @@ const cards: LearningCard[] = [
 ]
 
 const groups = ["Operations", "Finance"] as const
-const flow = ["Training", "Procurement", "Inventory", "Billing", "Finance", "HR"]
 
 export default function LearnHubPage() {
   const userQuery = useCurrentUser()
@@ -67,6 +73,15 @@ export default function LearnHubPage() {
     if (!u) return "—"
     return [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email
   }
+  const visibleCards = createMemo(() => {
+    const role = userQuery.data?.role
+    if (!role) return []
+    return cards.filter(card => hasPortalAccess(role, card.key))
+  })
+  const visibleGroups = createMemo(() =>
+    groups.filter(group => visibleCards().some(card => card.group === group))
+  )
+  const flow = createMemo(() => visibleCards().map(card => card.title))
 
   return (
     <div class="min-h-screen bg-surface-muted flex flex-col">
@@ -93,21 +108,21 @@ export default function LearnHubPage() {
                   </p>
                   <h1 class="text-2xl sm:text-3xl font-semibold text-foreground">Learning Hub</h1>
                   <p class="text-sm text-muted mt-2 max-w-2xl leading-relaxed">
-                    The full how-to manual for every Ark Institute portal. Start with the module you
-                    use daily, or follow the operating flow from batch setup to reporting.
+                    How-to manuals for the Ark Institute portals available to your account. Start
+                    with the module you use daily, or follow the operating flow.
                   </p>
                 </div>
 
                 <div class="rounded-xl border border-border bg-surface-muted p-4">
                   <p class="text-xs font-semibold uppercase tracking-wider text-muted">ERP flow</p>
                   <ol class="mt-2 flex flex-wrap items-center gap-2 text-xs font-medium text-foreground">
-                    <For each={flow}>
+                    <For each={flow()}>
                       {(step, index) => (
                         <li class="flex items-center gap-2">
                           <span class="rounded-full bg-primary/10 px-2 py-1 text-primary">
                             {step}
                           </span>
-                          <Show when={index() < flow.length - 1}>
+                          <Show when={index() < flow().length - 1}>
                             <Icons.arrowRight class="h-3.5 w-3.5 text-muted" />
                           </Show>
                         </li>
@@ -119,7 +134,7 @@ export default function LearnHubPage() {
             </div>
 
             <div class="space-y-8">
-              <For each={groups}>
+              <For each={visibleGroups()}>
                 {group => (
                   <section>
                     <div class="mb-3 flex items-center justify-between">
@@ -127,12 +142,12 @@ export default function LearnHubPage() {
                         {group}
                       </h2>
                       <span class="text-xs text-muted">
-                        {cards.filter(card => card.group === group).length} manuals
+                        {visibleCards().filter(card => card.group === group).length} manuals
                       </span>
                     </div>
 
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                      <For each={cards.filter(card => card.group === group)}>
+                      <For each={visibleCards().filter(card => card.group === group)}>
                         {card => {
                           const Icon = PortalIcons[card.icon]
                           return (
