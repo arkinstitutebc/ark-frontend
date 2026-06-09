@@ -21,12 +21,15 @@ export type TrainingCategory =
 export interface Batch {
   id: string
   batchCode: string
+  batchNo?: string | null
+  rqm?: string | null
   senator: string
   trainingName: string
   trainingLevel: TrainingLevel
   trainingCategory: TrainingCategory
   startDate: string
   endDate: string
+  weeklySchedule?: string | null
   venue: string
   instructor: string
   studentsEnrolled: number

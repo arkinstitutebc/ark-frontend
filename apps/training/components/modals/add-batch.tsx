@@ -19,9 +19,12 @@ export function AddBatchModal(props: AddBatchModalProps) {
   const [showManageVenues, setShowManageVenues] = createSignal(false)
 
   const [trainingName, setTrainingName] = createSignal("")
+  const [batchNo, setBatchNo] = createSignal("")
+  const [rqm, setRqm] = createSignal("")
   const [senator, setSenator] = createSignal("")
   const [startDate, setStartDate] = createSignal("")
   const [endDate, setEndDate] = createSignal("")
+  const [weeklySchedule, setWeeklySchedule] = createSignal("")
   const [venue, setVenue] = createSignal("")
   const [instructorId, setInstructorId] = createSignal("")
   const [instructorOther, setInstructorOther] = createSignal("")
@@ -51,9 +54,12 @@ export function AddBatchModal(props: AddBatchModalProps) {
     e.preventDefault()
     const data = {
       trainingName: trainingName(),
+      batchNo: batchNo().trim(),
+      rqm: rqm().trim(),
       senator: senator(),
       startDate: startDate(),
       endDate: endDate(),
+      weeklySchedule: weeklySchedule().trim(),
       venue: venue(),
       instructor: resolvedInstructor(),
     }
@@ -67,6 +73,9 @@ export function AddBatchModal(props: AddBatchModalProps) {
 
     const payload = { ...result.data }
     if (!payload.endDate) payload.endDate = undefined as unknown as string
+    if (!payload.batchNo) payload.batchNo = undefined as unknown as string
+    if (!payload.rqm) payload.rqm = undefined as unknown as string
+    if (!payload.weeklySchedule) payload.weeklySchedule = undefined as unknown as string
 
     mutation.mutate(payload, {
       onSuccess: () => {
@@ -78,9 +87,12 @@ export function AddBatchModal(props: AddBatchModalProps) {
 
   const resetForm = () => {
     setTrainingName("")
+    setBatchNo("")
+    setRqm("")
     setSenator("")
     setStartDate("")
     setEndDate("")
+    setWeeklySchedule("")
     setVenue("")
     setInstructorId("")
     setInstructorOther("")
@@ -118,6 +130,57 @@ export function AddBatchModal(props: AddBatchModalProps) {
           <Show when={errors().trainingName}>
             <p class={errorClass}>{errors().trainingName}</p>
           </Show>
+        </div>
+
+        <div class="grid gap-3 md:grid-cols-3">
+          <label class="block">
+            <span class="text-sm font-medium text-foreground mb-1 flex items-center justify-between">
+              <span>Batch No.</span>
+              <span class="text-xs text-muted font-normal">Optional</span>
+            </span>
+            <input
+              type="text"
+              value={batchNo()}
+              onInput={e => setBatchNo(e.target.value)}
+              placeholder="e.g., 2026-001"
+              class={inputClass("batchNo")}
+            />
+            <Show when={errors().batchNo}>
+              <p class={errorClass}>{errors().batchNo}</p>
+            </Show>
+          </label>
+          <label class="block">
+            <span class="text-sm font-medium text-foreground mb-1 flex items-center justify-between">
+              <span>RQM</span>
+              <span class="text-xs text-muted font-normal">Optional</span>
+            </span>
+            <input
+              type="text"
+              value={rqm()}
+              onInput={e => setRqm(e.target.value)}
+              placeholder="e.g., RQM-001"
+              class={inputClass("rqm")}
+            />
+            <Show when={errors().rqm}>
+              <p class={errorClass}>{errors().rqm}</p>
+            </Show>
+          </label>
+          <label class="block">
+            <span class="text-sm font-medium text-foreground mb-1 flex items-center justify-between">
+              <span>Weekly Schedule</span>
+              <span class="text-xs text-muted font-normal">Optional</span>
+            </span>
+            <input
+              type="text"
+              value={weeklySchedule()}
+              onInput={e => setWeeklySchedule(e.target.value)}
+              placeholder="e.g., Thursday to Saturday"
+              class={inputClass("weeklySchedule")}
+            />
+            <Show when={errors().weeklySchedule}>
+              <p class={errorClass}>{errors().weeklySchedule}</p>
+            </Show>
+          </label>
         </div>
 
         <label class="block">

@@ -85,11 +85,16 @@ export default function BatchDetailPage() {
                 </button>
               </div>
 
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <div class="grid grid-cols-2 gap-4 mb-8 md:grid-cols-3 xl:grid-cols-5">
                 <InfoCard
                   label="Schedule"
                   valueClass="text-foreground font-medium"
                   value={`${formatDatePH(b().startDate)} – ${formatDatePH(b().endDate)}`}
+                />
+                <InfoCard
+                  label="Weekly"
+                  valueClass="text-foreground font-medium"
+                  value={b().weeklySchedule || "Not set"}
                 />
                 <InfoCard
                   label="Students"
@@ -113,6 +118,14 @@ export default function BatchDetailPage() {
                   <h2 class="text-sm font-semibold text-foreground">Details</h2>
                 </div>
                 <div class="divide-y divide-border">
+                  <div class="flex py-4 px-6">
+                    <span class="w-32 text-sm text-muted">Batch No.</span>
+                    <span class="text-sm text-foreground">{b().batchNo || "Not set"}</span>
+                  </div>
+                  <div class="flex py-4 px-6">
+                    <span class="w-32 text-sm text-muted">RQM</span>
+                    <span class="text-sm text-foreground">{b().rqm || "Not set"}</span>
+                  </div>
                   <div class="flex py-4 px-6">
                     <span class="w-32 text-sm text-muted">Sponsor</span>
                     <span class="text-sm text-foreground">{b().senator}</span>

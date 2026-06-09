@@ -27,9 +27,12 @@ export function EditBatchModal(props: EditBatchModalProps) {
 
   const [trainingName, setTrainingName] = createSignal(props.batch.trainingName)
   const [trainingLevel, setTrainingLevel] = createSignal(props.batch.trainingLevel)
+  const [batchNo, setBatchNo] = createSignal(props.batch.batchNo ?? "")
+  const [rqm, setRqm] = createSignal(props.batch.rqm ?? "")
   const [senator, setSenator] = createSignal(props.batch.senator)
   const [startDate, setStartDate] = createSignal(props.batch.startDate)
   const [endDate, setEndDate] = createSignal(props.batch.endDate)
+  const [weeklySchedule, setWeeklySchedule] = createSignal(props.batch.weeklySchedule ?? "")
   const [venue, setVenue] = createSignal(props.batch.venue)
   const [instructorOther, setInstructorOther] = createSignal("")
   const [instructorChoice, setInstructorChoice] = createSignal<string>(OTHER_INSTRUCTOR)
@@ -77,9 +80,12 @@ export function EditBatchModal(props: EditBatchModalProps) {
     const data = {
       trainingName: trainingName(),
       trainingLevel: trainingLevel(),
+      batchNo: batchNo().trim(),
+      rqm: rqm().trim(),
       senator: senator(),
       startDate: startDate(),
       endDate: endDate(),
+      weeklySchedule: weeklySchedule().trim(),
       venue: venue(),
       instructor: resolvedInstructor(),
       status: status(),
@@ -92,18 +98,23 @@ export function EditBatchModal(props: EditBatchModalProps) {
     }
     setErrors({})
 
-    mutation.mutate(
-      { id: props.batch.id, ...(result.data as Partial<Batch>) },
-      { onSuccess: () => props.onClose() }
-    )
+    const payload = { ...(result.data as Partial<Batch>) }
+    if (!payload.batchNo) payload.batchNo = null
+    if (!payload.rqm) payload.rqm = null
+    if (!payload.weeklySchedule) payload.weeklySchedule = null
+
+    mutation.mutate({ id: props.batch.id, ...payload }, { onSuccess: () => props.onClose() })
   }
 
   const handleClose = () => {
     setTrainingName(props.batch.trainingName)
     setTrainingLevel(props.batch.trainingLevel)
+    setBatchNo(props.batch.batchNo ?? "")
+    setRqm(props.batch.rqm ?? "")
     setSenator(props.batch.senator)
     setStartDate(props.batch.startDate)
     setEndDate(props.batch.endDate)
+    setWeeklySchedule(props.batch.weeklySchedule ?? "")
     setVenue(props.batch.venue)
     setStatus(props.batch.status)
     setErrors({})
@@ -165,6 +176,57 @@ export function EditBatchModal(props: EditBatchModalProps) {
               <p class={errorClass}>{errors().status}</p>
             </Show>
           </div>
+        </div>
+
+        <div class="grid gap-3 md:grid-cols-3">
+          <label class="block">
+            <span class="text-sm font-medium text-foreground mb-1 flex items-center justify-between">
+              <span>Batch No.</span>
+              <span class="text-xs text-muted font-normal">Optional</span>
+            </span>
+            <input
+              type="text"
+              value={batchNo()}
+              onInput={e => setBatchNo(e.target.value)}
+              placeholder="e.g., 2026-001"
+              class={inputClass("batchNo")}
+            />
+            <Show when={errors().batchNo}>
+              <p class={errorClass}>{errors().batchNo}</p>
+            </Show>
+          </label>
+          <label class="block">
+            <span class="text-sm font-medium text-foreground mb-1 flex items-center justify-between">
+              <span>RQM</span>
+              <span class="text-xs text-muted font-normal">Optional</span>
+            </span>
+            <input
+              type="text"
+              value={rqm()}
+              onInput={e => setRqm(e.target.value)}
+              placeholder="e.g., RQM-001"
+              class={inputClass("rqm")}
+            />
+            <Show when={errors().rqm}>
+              <p class={errorClass}>{errors().rqm}</p>
+            </Show>
+          </label>
+          <label class="block">
+            <span class="text-sm font-medium text-foreground mb-1 flex items-center justify-between">
+              <span>Weekly Schedule</span>
+              <span class="text-xs text-muted font-normal">Optional</span>
+            </span>
+            <input
+              type="text"
+              value={weeklySchedule()}
+              onInput={e => setWeeklySchedule(e.target.value)}
+              placeholder="e.g., Thursday to Saturday"
+              class={inputClass("weeklySchedule")}
+            />
+            <Show when={errors().weeklySchedule}>
+              <p class={errorClass}>{errors().weeklySchedule}</p>
+            </Show>
+          </label>
         </div>
 
         <label class="block">

@@ -13,6 +13,16 @@ import type { Batch } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { AddBatchModal } from "@/components/modals"
 
+function batchReference(batch: Batch) {
+  return [
+    batch.trainingLevel,
+    batch.batchNo ? `No. ${batch.batchNo}` : null,
+    batch.rqm ? `RQM ${batch.rqm}` : null,
+  ]
+    .filter(Boolean)
+    .join(" / ")
+}
+
 export default function BatchesPage() {
   const [showAddModal, setShowAddModal] = createSignal(false)
   const query = useBatches()
@@ -100,7 +110,7 @@ export default function BatchesPage() {
                       >
                         <td class="py-4 px-6">
                           <span class="text-sm font-medium text-foreground">{batch.batchCode}</span>
-                          <p class="mt-1 text-xs text-muted">{batch.trainingLevel}</p>
+                          <p class="mt-1 text-xs text-muted">{batchReference(batch)}</p>
                         </td>
                         <td class="py-4 px-6">
                           <div>
@@ -109,9 +119,14 @@ export default function BatchesPage() {
                           </div>
                         </td>
                         <td class="py-4 px-6">
-                          <div class="flex items-center gap-1.5 text-sm text-muted">
-                            <Icons.calendar class="w-3.5 h-3.5 text-muted" />
-                            {formatDatePH(batch.startDate)} - {formatDatePH(batch.endDate)}
+                          <div>
+                            <div class="flex items-center gap-1.5 text-sm text-muted">
+                              <Icons.calendar class="w-3.5 h-3.5 text-muted" />
+                              {formatDatePH(batch.startDate)} - {formatDatePH(batch.endDate)}
+                            </div>
+                            <Show when={batch.weeklySchedule}>
+                              <p class="mt-1 text-xs text-muted">{batch.weeklySchedule}</p>
+                            </Show>
                           </div>
                         </td>
                         <td class="py-4 px-6 text-sm text-muted">{batch.venue}</td>
