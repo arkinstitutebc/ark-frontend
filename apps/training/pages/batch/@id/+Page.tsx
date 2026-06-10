@@ -85,7 +85,7 @@ export default function BatchDetailPage() {
                 </button>
               </div>
 
-              <div class="grid grid-cols-2 gap-4 mb-8 md:grid-cols-3 xl:grid-cols-5">
+              <div class="grid grid-cols-2 gap-4 mb-8 md:grid-cols-4">
                 <InfoCard
                   label="Schedule"
                   valueClass="text-foreground font-medium"
@@ -105,11 +105,6 @@ export default function BatchDetailPage() {
                   label="Budget"
                   valueClass="text-foreground font-medium"
                   value={formatPeso(b().budget)}
-                />
-                <InfoCard
-                  label="Level"
-                  valueClass="text-foreground font-medium"
-                  value={b().trainingLevel}
                 />
               </div>
 

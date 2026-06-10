@@ -112,7 +112,7 @@ export function SettingsFormGrid(props: { children: JSX.Element; columns?: "two"
 
 export function SettingsStickyFooter(props: { children: JSX.Element }) {
   return (
-    <div class="sticky bottom-0 -mx-6 -mb-5 bg-surface px-6 pb-5 pt-3 border-t border-border">
+    <div class="sticky bottom-0 -mx-6 -mb-5 bg-surface px-6 py-3 border-t border-border">
       {props.children}
     </div>
   )

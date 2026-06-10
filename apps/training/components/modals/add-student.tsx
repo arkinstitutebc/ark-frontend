@@ -287,7 +287,7 @@ export function AddStudentModal(props: AddStudentModalProps) {
               Tip: paste a list like <code class="text-foreground">Juan, Dela Cruz</code> per line,
               or first/last separated by tab from a spreadsheet.
             </p>
-            <div class="border border-border rounded-lg overflow-hidden">
+            <div class="overflow-hidden rounded-lg border border-border">
               <table class="w-full text-sm">
                 <thead class="bg-surface-muted">
                   <tr>
@@ -333,14 +333,17 @@ export function AddStudentModal(props: AddStudentModalProps) {
                   </Index>
                 </tbody>
               </table>
+              <div class="border-t border-border bg-surface-muted/30 px-3 py-2">
+                <button
+                  type="button"
+                  onClick={addRow}
+                  class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-primary transition-colors hover:bg-primary/5 hover:text-primary/80"
+                >
+                  <Icons.plus class="h-3.5 w-3.5" />
+                  Add row
+                </button>
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={addRow}
-              class="mt-2 text-xs font-medium text-primary hover:text-primary/80 transition-colors"
-            >
-              + Add row
-            </button>
           </div>
 
           <ModalFooter

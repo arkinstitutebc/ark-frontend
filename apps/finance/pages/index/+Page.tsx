@@ -21,6 +21,13 @@ function formatDate(dateStr: string) {
   })
 }
 
+function localDateString(date = new Date()) {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+  return `${year}-${month}-${day}`
+}
+
 function getTxnColor(type: string) {
   switch (type) {
     case "income":
@@ -45,7 +52,11 @@ function getTxnLabel(type: string) {
 export default function Page() {
   const revenueBalance = useBankBalance(() => "revenue-vault")
   const opsBalance = useBankBalance(() => "operational-hub")
-  const transactionsQuery = useTransactions(() => ({ limit: 120 }))
+  const transactionsQuery = useTransactions(() => ({
+    startDate: "1900-01-01",
+    endDate: localDateString(),
+    limit: 120,
+  }))
   const [chartMode, setChartMode] = createSignal<"daily" | "category">("daily")
   const [pointLabelMode, setPointLabelMode] = createSignal<"dots" | "amounts">("dots")
 

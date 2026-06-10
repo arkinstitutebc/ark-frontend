@@ -6,11 +6,13 @@ import {
   Modal,
   ModalFooter,
   Select,
+  toast,
 } from "@ark/ui"
 import { useBatches, useUpdateStudent } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
 import { updateStudentSchema } from "@data/schemas"
 import type { Student } from "@data/types"
+import { uploadStudentFile } from "@data/uploads"
 import { validateForm } from "@data/validate"
 import { useQueryClient } from "@tanstack/solid-query"
 import { createMemo, createSignal, Show } from "solid-js"
@@ -54,6 +56,7 @@ export function EditStudentModal(props: EditStudentModalProps) {
   const [psaCertificateUrl, setPsaCertificateUrl] = createSignal<string | null>(
     props.student.psaCertificateUrl ?? null
   )
+  const [uploadingPhoto, setUploadingPhoto] = createSignal(false)
 
   const batchOptions = createMemo(() =>
     (batchesQuery.data ?? []).map(b => ({
@@ -133,6 +136,20 @@ export function EditStudentModal(props: EditStudentModalProps) {
     )
   }
 
+  async function handleHeaderPhotoUpload(file: File | undefined) {
+    if (!file) return
+    setUploadingPhoto(true)
+    try {
+      const result = await uploadStudentFile("photo", file)
+      setPhotoUrl(result.secure_url)
+      toast.success("Student photo uploaded")
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Upload failed")
+    } finally {
+      setUploadingPhoto(false)
+    }
+  }
+
   const inputClass = (field?: string) => formInputClass({ error: !!(field && errors()[field]) })
   const errorClass = formErrorClass
   const labelClass = formLabelClass
@@ -141,11 +158,26 @@ export function EditStudentModal(props: EditStudentModalProps) {
     <Modal open={props.open} onClose={handleClose} title="Edit student profile" size="xl">
       <form onSubmit={handleSubmit} class="space-y-5" noValidate>
         <div class="flex flex-col gap-4 rounded-xl border border-border bg-surface-muted/40 p-4 sm:flex-row sm:items-center">
-          <div class="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-border bg-surface">
+          <label class="group relative flex h-20 w-20 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-2xl border border-border bg-surface transition-colors hover:border-primary/40">
             <Show when={photoUrl()} fallback={<Icons.user class="h-10 w-10 text-muted" />}>
               {url => <img src={url()} alt="" class="h-full w-full object-cover" />}
             </Show>
-          </div>
+            <span class="absolute inset-0 flex items-center justify-center bg-black/45 text-[11px] font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
+              {uploadingPhoto() ? "Uploading..." : "Change"}
+            </span>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              disabled={uploadingPhoto()}
+              onChange={e => {
+                const target = e.currentTarget
+                handleHeaderPhotoUpload(target.files?.[0]).finally(() => {
+                  target.value = ""
+                })
+              }}
+              class="hidden"
+            />
+          </label>
           <div class="min-w-0 flex-1">
             <p class="font-mono text-xs text-muted">{props.student.studentId || "No ID yet"}</p>
             <h3 class="mt-1 truncate text-xl font-semibold text-foreground">

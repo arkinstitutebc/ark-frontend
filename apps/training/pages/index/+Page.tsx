@@ -4,6 +4,7 @@ import {
   Icons,
   PageContainer,
   PageHeader,
+  PageLoading,
   StatusBadge,
   THead,
   Th,
@@ -11,6 +12,7 @@ import {
 import { useBatches } from "@data/hooks"
 import type { Batch } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
+import { navigate } from "vike/client/router"
 import { AddBatchModal } from "@/components/modals"
 
 function rqmLabel(value: string) {
@@ -29,6 +31,7 @@ function batchMeta(batch: Batch) {
 
 export default function BatchesPage() {
   const [showAddModal, setShowAddModal] = createSignal(false)
+  const [openingBatchId, setOpeningBatchId] = createSignal<string | null>(null)
   const query = useBatches()
   const batches = createMemo(() => query.data ?? [])
   const activeBatches = createMemo(
@@ -39,9 +42,19 @@ export default function BatchesPage() {
   const totalStudents = createMemo(() =>
     batches().reduce((sum, batch) => sum + batch.studentsEnrolled, 0)
   )
+  const openBatch = (batchId: string) => {
+    setOpeningBatchId(batchId)
+    void navigate(`/batch/${batchId}`).catch(() => setOpeningBatchId(null))
+  }
 
   return (
     <PageContainer>
+      <Show when={openingBatchId()}>
+        <div class="fixed inset-0 z-50 flex items-center justify-center bg-surface/85 backdrop-blur-sm">
+          <PageLoading label="Opening batch..." />
+        </div>
+      </Show>
+
       <PageHeader
         title="Batches"
         subtitle="Program delivery, class schedules, venues, trainers, and rosters."
@@ -118,7 +131,7 @@ export default function BatchesPage() {
                     {(batch: Batch) => (
                       <tr
                         class="border-t border-border hover:bg-primary/5 transition-colors cursor-pointer"
-                        onClick={() => (window.location.href = `/batch/${batch.id}`)}
+                        onClick={() => openBatch(batch.id)}
                       >
                         <td class="py-4 px-5 align-middle">
                           <div class="min-w-0">
