@@ -1,7 +1,8 @@
 import { Button } from "../forms/button"
 
+export const modalFooterShellClass = "-mx-6 -mb-5 mt-5"
 export const modalFooterClass =
-  "sticky bottom-0 z-20 -mx-6 -mb-5 mt-5 flex justify-end gap-3 border-t border-border bg-surface px-6 py-2 shadow-[0_-8px_16px_rgba(15,23,42,0.06)]"
+  "sticky bottom-0 z-20 flex justify-end gap-3 border-t border-border bg-surface px-6 py-2 shadow-[0_-8px_16px_rgba(15,23,42,0.06)]"
 
 interface ModalFooterProps {
   onCancel: () => void
@@ -41,40 +42,42 @@ export function ModalFooter(props: ModalFooterProps) {
     props.submitLoadingLabel ?? (props.danger ? "Deleting..." : "Saving...")
 
   return (
-    <div class={modalFooterClass}>
-      <Button
-        type="button"
-        variant="ghost"
-        size="sm"
-        onClick={props.onCancel}
-        disabled={props.submitting && !props.allowCancelWhileSubmitting}
-      >
-        {props.cancelLabel ?? "Cancel"}
-      </Button>
-      {props.submitInForm ? (
-        <Button
-          type="submit"
-          variant={props.danger ? "accent" : "primary"}
-          size="sm"
-          loading={props.submitting}
-          loadingLabel={submitLoadingText()}
-          disabled={props.disabled}
-        >
-          {submitText()}
-        </Button>
-      ) : props.onSubmit ? (
+    <div class={modalFooterShellClass}>
+      <div class={modalFooterClass}>
         <Button
           type="button"
-          variant={props.danger ? "accent" : "primary"}
+          variant="ghost"
           size="sm"
-          onClick={props.onSubmit}
-          loading={props.submitting}
-          loadingLabel={submitLoadingText()}
-          disabled={props.disabled}
+          onClick={props.onCancel}
+          disabled={props.submitting && !props.allowCancelWhileSubmitting}
         >
-          {submitText()}
+          {props.cancelLabel ?? "Cancel"}
         </Button>
-      ) : null}
+        {props.submitInForm ? (
+          <Button
+            type="submit"
+            variant={props.danger ? "accent" : "primary"}
+            size="sm"
+            loading={props.submitting}
+            loadingLabel={submitLoadingText()}
+            disabled={props.disabled}
+          >
+            {submitText()}
+          </Button>
+        ) : props.onSubmit ? (
+          <Button
+            type="button"
+            variant={props.danger ? "accent" : "primary"}
+            size="sm"
+            onClick={props.onSubmit}
+            loading={props.submitting}
+            loadingLabel={submitLoadingText()}
+            disabled={props.disabled}
+          >
+            {submitText()}
+          </Button>
+        ) : null}
+      </div>
     </div>
   )
 }

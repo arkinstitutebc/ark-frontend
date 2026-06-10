@@ -7,6 +7,7 @@ import {
   Modal,
   ModalFooter,
   modalFooterClass,
+  modalFooterShellClass,
   Select,
 } from "@ark/ui"
 import { glDefault } from "@data/gl-defaults"
@@ -355,39 +356,41 @@ function DisbursementView(props: {
         </Show>
       </div>
 
-      <div class={modalFooterClass}>
-        <a
-          href={`${API_URL}/api/finance/disbursements/${props.current.id}/voucher`}
-          target="_blank"
-          rel="noreferrer"
-          class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground border border-border hover:bg-surface-muted rounded-lg transition-colors"
-        >
-          <Icons.fileText class="h-4 w-4" />
-          Voucher
-        </a>
-        <button
-          type="button"
-          onClick={props.onClose}
-          class="px-4 py-2 text-sm font-medium text-foreground hover:bg-surface-muted rounded-lg transition-colors"
-        >
-          Close
-        </button>
-        <Show when={props.canMutate}>
+      <div class={modalFooterShellClass}>
+        <div class={modalFooterClass}>
+          <a
+            href={`${API_URL}/api/finance/disbursements/${props.current.id}/voucher`}
+            target="_blank"
+            rel="noreferrer"
+            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground border border-border hover:bg-surface-muted rounded-lg transition-colors"
+          >
+            <Icons.fileText class="h-4 w-4" />
+            Voucher
+          </a>
           <button
             type="button"
-            onClick={props.onEdit}
-            class="px-4 py-2 text-sm font-medium text-foreground border border-border hover:bg-surface-muted rounded-lg transition-colors"
+            onClick={props.onClose}
+            class="px-4 py-2 text-sm font-medium text-foreground hover:bg-surface-muted rounded-lg transition-colors"
           >
-            Edit
+            Close
           </button>
-          <button
-            type="button"
-            onClick={props.onDelete}
-            class="px-4 py-2 text-sm font-medium text-white bg-accent hover:bg-accent/90 rounded-lg transition-colors"
-          >
-            Delete
-          </button>
-        </Show>
+          <Show when={props.canMutate}>
+            <button
+              type="button"
+              onClick={props.onEdit}
+              class="px-4 py-2 text-sm font-medium text-foreground border border-border hover:bg-surface-muted rounded-lg transition-colors"
+            >
+              Edit
+            </button>
+            <button
+              type="button"
+              onClick={props.onDelete}
+              class="px-4 py-2 text-sm font-medium text-white bg-accent hover:bg-accent/90 rounded-lg transition-colors"
+            >
+              Delete
+            </button>
+          </Show>
+        </div>
       </div>
     </div>
   )
