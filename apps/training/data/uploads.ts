@@ -17,6 +17,8 @@ export async function uploadStudentFile(
   form.append("timestamp", String(sig.timestamp))
   form.append("signature", sig.signature)
   form.append("folder", sig.folder)
+  if (sig.allowedFormats) form.append("allowed_formats", sig.allowedFormats)
+  if (sig.maxFileSize) form.append("max_file_size", String(sig.maxFileSize))
 
   const res = await fetch(
     `https://api.cloudinary.com/v1_1/${sig.cloudName}/${isRaw ? "raw" : "image"}/upload`,

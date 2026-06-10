@@ -1,7 +1,7 @@
 import { Button } from "../forms/button"
 
 export const modalFooterClass =
-  "sticky bottom-0 z-20 -mx-6 -mb-5 flex justify-end gap-3 border-t border-border bg-surface px-6 py-3 shadow-[0_-8px_16px_rgba(15,23,42,0.06)]"
+  "sticky bottom-0 z-20 -mx-6 -mb-5 mt-5 flex justify-end gap-3 border-t border-border bg-surface px-6 py-2 shadow-[0_-8px_16px_rgba(15,23,42,0.06)]"
 
 interface ModalFooterProps {
   onCancel: () => void
