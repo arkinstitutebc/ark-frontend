@@ -21,6 +21,7 @@ export const GENDERS: Student["gender"][] = ["Male", "Female"]
 export const EDUCATION_LEVELS = [
   "Elementary Graduate",
   "High School Graduate",
+  "Senior High Graduate",
   "College Undergraduate",
   "College Graduate",
   "Vocational Course",

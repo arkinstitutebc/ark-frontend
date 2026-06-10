@@ -37,7 +37,7 @@ export function ModalFooter(props: ModalFooterProps) {
     props.submitLoadingLabel ?? (props.danger ? "Deleting..." : "Saving...")
 
   return (
-    <div class="sticky bottom-0 z-10 -mx-6 -mb-5 flex justify-end gap-3 border-t border-border bg-surface px-6 py-3">
+    <div class="sticky bottom-0 z-10 -mx-6 -mb-5 flex justify-end gap-3 border-t border-border bg-surface px-6 py-2">
       <Button
         type="button"
         variant="ghost"
