@@ -6,6 +6,7 @@ import {
   Input,
   Modal,
   ModalFooter,
+  modalFooterClass,
   Select,
 } from "@ark/ui"
 import { glDefault } from "@data/gl-defaults"
@@ -354,7 +355,7 @@ function DisbursementView(props: {
         </Show>
       </div>
 
-      <div class="sticky bottom-0 z-10 -mx-6 -mb-5 flex justify-end gap-3 border-t border-border bg-surface px-6 py-2">
+      <div class={modalFooterClass}>
         <a
           href={`${API_URL}/api/finance/disbursements/${props.current.id}/voucher`}
           target="_blank"

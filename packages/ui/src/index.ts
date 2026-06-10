@@ -61,7 +61,7 @@ export { ConfirmDialog, type ConfirmDialogProps } from "./feedback/confirm-dialo
 export { CrossPortalLoadingOverlay } from "./feedback/cross-portal-loading-overlay"
 export { EmptyState, type EmptyStateProps } from "./feedback/empty-state"
 export { Modal } from "./feedback/modal"
-export { ModalFooter } from "./feedback/modal-footer"
+export { ModalFooter, modalFooterClass } from "./feedback/modal-footer"
 export { PageLoading } from "./feedback/page-loading"
 export { QueryBoundary } from "./feedback/query-boundary"
 export { TableSkeleton } from "./feedback/table-skeleton"

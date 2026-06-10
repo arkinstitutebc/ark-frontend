@@ -138,7 +138,7 @@ export function Modal(props: ModalProps) {
             aria-modal="true"
             aria-labelledby={titleId}
             tabIndex={-1}
-            class={`bg-surface relative w-full max-h-[90vh] flex animate-fade-in flex-col rounded-xl shadow-xl outline-none ${sizeClass()}`}
+            class={`bg-surface relative flex max-h-[90vh] w-full animate-fade-in flex-col overflow-hidden rounded-xl shadow-xl outline-none ${sizeClass()}`}
           >
             {/* Header */}
             <div class="flex items-center justify-between px-6 py-4 border-b border-border flex-shrink-0">

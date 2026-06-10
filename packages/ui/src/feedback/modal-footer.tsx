@@ -1,5 +1,8 @@
 import { Button } from "../forms/button"
 
+export const modalFooterClass =
+  "sticky bottom-0 z-20 -mx-6 -mb-5 flex justify-end gap-3 border-t border-border bg-surface px-6 py-3 shadow-[0_-8px_16px_rgba(15,23,42,0.06)]"
+
 interface ModalFooterProps {
   onCancel: () => void
   /** When provided, renders a Submit button. Omit for view-only modals. */
@@ -19,8 +22,9 @@ interface ModalFooterProps {
 
 /**
  * Standardized Cancel + Submit row at the bottom of every modal.
- * It is sticky inside the modal's scroll area so actions stay reachable while
- * long forms/details scroll behind it.
+ * It is sticky inside the modal scroll area so actions stay reachable while
+ * long forms/details scroll. Keep the styling centralized with
+ * `modalFooterClass`; custom action rows should reuse that class.
  * Replaces the same `flex justify-end gap-3 pt-4 border-t border-border`
  * block that existed in 6+ training modals (and was about to spread further).
  *
@@ -37,7 +41,7 @@ export function ModalFooter(props: ModalFooterProps) {
     props.submitLoadingLabel ?? (props.danger ? "Deleting..." : "Saving...")
 
   return (
-    <div class="sticky bottom-0 z-10 -mx-6 -mb-5 flex justify-end gap-3 border-t border-border bg-surface px-6 py-2">
+    <div class={modalFooterClass}>
       <Button
         type="button"
         variant="ghost"
