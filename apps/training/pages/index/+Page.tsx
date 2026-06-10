@@ -10,17 +10,23 @@ import {
 } from "@ark/ui"
 import { useBatches } from "@data/hooks"
 import type { Batch } from "@data/types"
-import { createMemo, createSignal, For, Show } from "solid-js"
+import { createMemo, createSignal, For, type JSX, Show } from "solid-js"
 import { AddBatchModal } from "@/components/modals"
 
-function batchReference(batch: Batch) {
-  return [
-    batch.trainingLevel,
-    batch.batchNo ? `No. ${batch.batchNo}` : null,
-    batch.rqm ? `RQM ${batch.rqm}` : null,
-  ]
-    .filter(Boolean)
-    .join(" / ")
+function rqmLabel(value: string) {
+  const trimmed = value.trim()
+  return /^rqm\b/i.test(trimmed) ? trimmed : `RQM ${trimmed}`
+}
+
+function MetaPill(props: { children: JSX.Element; title?: string }) {
+  return (
+    <span
+      title={props.title}
+      class="inline-flex max-w-full items-center rounded-md border border-border bg-surface-muted px-2 py-0.5 text-[11px] font-medium leading-5 text-muted"
+    >
+      <span class="truncate">{props.children}</span>
+    </span>
+  )
 }
 
 export default function BatchesPage() {
@@ -92,7 +98,15 @@ export default function BatchesPage() {
         >
           <div class="bg-surface rounded-xl border border-border overflow-hidden">
             <div class="max-h-[640px] overflow-auto">
-              <table class="w-full min-w-[820px]">
+              <table class="w-full min-w-[1120px] table-fixed">
+                <colgroup>
+                  <col class="w-[270px]" />
+                  <col class="w-[285px]" />
+                  <col class="w-[235px]" />
+                  <col class="w-[135px]" />
+                  <col class="w-[110px]" />
+                  <col class="w-[135px]" />
+                </colgroup>
                 <THead>
                   <Th>Batch</Th>
                   <Th>Training</Th>
@@ -108,35 +122,70 @@ export default function BatchesPage() {
                         class="border-t border-border hover:bg-primary/5 transition-colors cursor-pointer"
                         onClick={() => (window.location.href = `/batch/${batch.id}`)}
                       >
-                        <td class="py-4 px-6">
-                          <span class="text-sm font-medium text-foreground">{batch.batchCode}</span>
-                          <p class="mt-1 text-xs text-muted">{batchReference(batch)}</p>
-                        </td>
-                        <td class="py-4 px-6">
-                          <div>
-                            <p class="text-sm text-foreground">{batch.trainingName}</p>
-                            <p class="text-xs text-muted">{batch.senator}</p>
+                        <td class="py-4 px-6 align-top">
+                          <div class="min-w-0 space-y-2">
+                            <span class="block truncate font-mono text-sm font-semibold text-foreground">
+                              {batch.batchCode}
+                            </span>
+                            <div class="flex max-w-full flex-wrap gap-1.5">
+                              <Show when={batch.trainingLevel}>
+                                <MetaPill>{batch.trainingLevel}</MetaPill>
+                              </Show>
+                              <Show when={batch.batchNo}>
+                                {batchNo => (
+                                  <MetaPill title={batchNo()}>
+                                    <span class="text-muted/80">Batch no.</span>
+                                    <span class="ml-1 text-muted">{batchNo()}</span>
+                                  </MetaPill>
+                                )}
+                              </Show>
+                              <Show when={batch.rqm}>
+                                {rqm => (
+                                  <MetaPill title={rqm()}>
+                                    <span>{rqmLabel(rqm())}</span>
+                                  </MetaPill>
+                                )}
+                              </Show>
+                            </div>
                           </div>
                         </td>
-                        <td class="py-4 px-6">
-                          <div>
-                            <div class="flex items-center gap-1.5 text-sm text-muted">
-                              <Icons.calendar class="w-3.5 h-3.5 text-muted" />
-                              {formatDatePH(batch.startDate)} - {formatDatePH(batch.endDate)}
+                        <td class="py-4 px-6 align-top">
+                          <div class="min-w-0">
+                            <p class="text-sm font-medium leading-5 text-foreground">
+                              {batch.trainingName}
+                            </p>
+                            <p class="mt-1 line-clamp-2 text-xs leading-5 text-muted">
+                              {batch.senator}
+                            </p>
+                          </div>
+                        </td>
+                        <td class="py-4 px-6 align-top">
+                          <div class="min-w-0 space-y-1.5">
+                            <div class="flex items-start gap-1.5 text-sm leading-5 text-muted">
+                              <Icons.calendar class="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-muted" />
+                              <span>
+                                {formatDatePH(batch.startDate)} - {formatDatePH(batch.endDate)}
+                              </span>
                             </div>
                             <Show when={batch.weeklySchedule}>
-                              <p class="mt-1 text-xs text-muted">{batch.weeklySchedule}</p>
+                              <p class="text-xs font-medium leading-5 text-muted">
+                                {batch.weeklySchedule}
+                              </p>
                             </Show>
                           </div>
                         </td>
-                        <td class="py-4 px-6 text-sm text-muted">{batch.venue}</td>
-                        <td class="py-4 px-6">
-                          <div class="flex items-center gap-1.5 text-sm text-muted">
-                            <Icons.users class="w-3.5 h-3.5 text-muted" />
+                        <td class="py-4 px-6 align-top text-sm text-muted">
+                          <span class="inline-flex max-w-full whitespace-nowrap rounded-md bg-surface-muted px-2 py-1">
+                            {batch.venue}
+                          </span>
+                        </td>
+                        <td class="py-4 px-6 align-top">
+                          <div class="flex items-center gap-1.5 whitespace-nowrap text-sm text-muted">
+                            <Icons.users class="h-3.5 w-3.5 text-muted" />
                             {batch.studentsEnrolled}
                           </div>
                         </td>
-                        <td class="py-4 px-6">
+                        <td class="py-4 px-6 align-top whitespace-nowrap [&>span]:whitespace-nowrap">
                           <StatusBadge status={batch.status} />
                         </td>
                       </tr>
