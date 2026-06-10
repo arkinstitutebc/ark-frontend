@@ -8,13 +8,14 @@ interface ModalProps {
   onClose: () => void
   title: string
   children: JSX.Element
-  size?: "md" | "lg" | "xl"
+  size?: "md" | "lg" | "xl" | "2xl"
 }
 
 const SIZE_CLASS: Record<NonNullable<ModalProps["size"]>, string> = {
   md: "max-w-md",
   lg: "max-w-2xl",
-  xl: "max-w-4xl",
+  xl: "max-w-5xl",
+  "2xl": "max-w-6xl",
 }
 
 const FOCUSABLE_SELECTOR = [

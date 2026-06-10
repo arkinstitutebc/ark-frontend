@@ -10,23 +10,21 @@ import {
 } from "@ark/ui"
 import { useBatches } from "@data/hooks"
 import type { Batch } from "@data/types"
-import { createMemo, createSignal, For, type JSX, Show } from "solid-js"
+import { createMemo, createSignal, For, Show } from "solid-js"
 import { AddBatchModal } from "@/components/modals"
 
 function rqmLabel(value: string) {
   const trimmed = value.trim()
-  return /^rqm\b/i.test(trimmed) ? trimmed : `RQM ${trimmed}`
+  return /^rqm\b/i.test(trimmed) ? trimmed.replace(/^rqm\s*/i, "") : trimmed
 }
 
-function MetaPill(props: { children: JSX.Element; title?: string }) {
-  return (
-    <span
-      title={props.title}
-      class="inline-flex max-w-full items-center rounded-md border border-border bg-surface-muted px-2 py-0.5 text-[11px] font-medium leading-5 text-muted"
-    >
-      <span class="truncate">{props.children}</span>
-    </span>
-  )
+function batchMeta(batch: Batch) {
+  return [
+    batch.batchNo ? batch.batchNo.trim() : null,
+    batch.rqm ? `RQM ${rqmLabel(batch.rqm)}` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ")
 }
 
 export default function BatchesPage() {
@@ -98,14 +96,14 @@ export default function BatchesPage() {
         >
           <div class="bg-surface rounded-xl border border-border overflow-hidden">
             <div class="max-h-[640px] overflow-auto">
-              <table class="w-full min-w-[1120px] table-fixed">
+              <table class="w-full min-w-[1240px] table-fixed">
                 <colgroup>
+                  <col class="w-[320px]" />
+                  <col class="w-[330px]" />
                   <col class="w-[270px]" />
-                  <col class="w-[285px]" />
-                  <col class="w-[235px]" />
-                  <col class="w-[135px]" />
-                  <col class="w-[110px]" />
-                  <col class="w-[135px]" />
+                  <col class="w-[120px]" />
+                  <col class="w-[90px]" />
+                  <col class="w-[160px]" />
                 </colgroup>
                 <THead>
                   <Th>Batch</Th>
@@ -122,34 +120,24 @@ export default function BatchesPage() {
                         class="border-t border-border hover:bg-primary/5 transition-colors cursor-pointer"
                         onClick={() => (window.location.href = `/batch/${batch.id}`)}
                       >
-                        <td class="py-4 px-6 align-top">
-                          <div class="min-w-0 space-y-2">
+                        <td class="py-4 px-5 align-middle">
+                          <div class="min-w-0">
                             <span class="block truncate font-mono text-sm font-semibold text-foreground">
                               {batch.batchCode}
                             </span>
-                            <div class="flex max-w-full flex-wrap gap-1.5">
-                              <Show when={batch.trainingLevel}>
-                                <MetaPill>{batch.trainingLevel}</MetaPill>
-                              </Show>
-                              <Show when={batch.batchNo}>
-                                {batchNo => (
-                                  <MetaPill title={batchNo()}>
-                                    <span class="text-muted/80">Batch no.</span>
-                                    <span class="ml-1 text-muted">{batchNo()}</span>
-                                  </MetaPill>
-                                )}
-                              </Show>
-                              <Show when={batch.rqm}>
-                                {rqm => (
-                                  <MetaPill title={rqm()}>
-                                    <span>{rqmLabel(rqm())}</span>
-                                  </MetaPill>
-                                )}
-                              </Show>
-                            </div>
+                            <Show when={batchMeta(batch)}>
+                              {meta => (
+                                <p
+                                  class="mt-1 truncate text-xs font-medium text-muted"
+                                  title={meta()}
+                                >
+                                  {meta()}
+                                </p>
+                              )}
+                            </Show>
                           </div>
                         </td>
-                        <td class="py-4 px-6 align-top">
+                        <td class="py-4 px-5 align-middle">
                           <div class="min-w-0">
                             <p class="text-sm font-medium leading-5 text-foreground">
                               {batch.trainingName}
@@ -159,7 +147,7 @@ export default function BatchesPage() {
                             </p>
                           </div>
                         </td>
-                        <td class="py-4 px-6 align-top">
+                        <td class="py-4 px-5 align-middle">
                           <div class="min-w-0 space-y-1.5">
                             <div class="flex items-start gap-1.5 text-sm leading-5 text-muted">
                               <Icons.calendar class="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-muted" />
@@ -174,18 +162,18 @@ export default function BatchesPage() {
                             </Show>
                           </div>
                         </td>
-                        <td class="py-4 px-6 align-top text-sm text-muted">
-                          <span class="inline-flex max-w-full whitespace-nowrap rounded-md bg-surface-muted px-2 py-1">
+                        <td class="py-4 px-5 align-middle text-sm text-muted">
+                          <span class="block truncate" title={batch.venue}>
                             {batch.venue}
                           </span>
                         </td>
-                        <td class="py-4 px-6 align-top">
+                        <td class="py-4 px-5 align-middle">
                           <div class="flex items-center gap-1.5 whitespace-nowrap text-sm text-muted">
                             <Icons.users class="h-3.5 w-3.5 text-muted" />
                             {batch.studentsEnrolled}
                           </div>
                         </td>
-                        <td class="py-4 px-6 align-top whitespace-nowrap [&>span]:whitespace-nowrap">
+                        <td class="py-4 px-5 align-middle whitespace-nowrap [&>span]:whitespace-nowrap">
                           <StatusBadge status={batch.status} />
                         </td>
                       </tr>

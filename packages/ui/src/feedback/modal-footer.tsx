@@ -19,6 +19,8 @@ interface ModalFooterProps {
 
 /**
  * Standardized Cancel + Submit row at the bottom of every modal.
+ * It is sticky inside the modal's scroll area so actions stay reachable while
+ * long forms/details scroll behind it.
  * Replaces the same `flex justify-end gap-3 pt-4 border-t border-border`
  * block that existed in 6+ training modals (and was about to spread further).
  *
@@ -35,7 +37,7 @@ export function ModalFooter(props: ModalFooterProps) {
     props.submitLoadingLabel ?? (props.danger ? "Deleting..." : "Saving...")
 
   return (
-    <div class="flex justify-end gap-3 pt-4 border-t border-border">
+    <div class="sticky bottom-0 z-10 -mx-6 -mb-5 flex justify-end gap-3 border-t border-border bg-surface px-6 pb-5 pt-3">
       <Button
         type="button"
         variant="ghost"
