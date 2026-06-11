@@ -1,15 +1,19 @@
 export {
   type AdminRole,
   type AdminUser,
+  type EmailAlertSettings,
   type InviteUserInput,
+  type UpdateEmailAlertSettingsInput,
   type UpdateUserInput,
   type UserWithTempPassword,
   useActivateUser,
   useAdminUser,
   useAdminUsers,
   useDeactivateUser,
+  useEmailAlertSettings,
   useInviteUser,
   useResetUserPassword,
+  useUpdateEmailAlertSettings,
   useUpdateUser,
 } from "./admin"
 export { API_URL, api } from "./api"

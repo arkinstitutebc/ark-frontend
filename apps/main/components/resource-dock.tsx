@@ -33,6 +33,14 @@ const resources: ResourceItem[] = [
     icon: Icons.fileText,
   },
   {
+    key: "adminSettings",
+    href: "/admin/settings",
+    label: "Settings",
+    action: "Edit alerts",
+    badge: "Admin",
+    icon: Icons.settings,
+  },
+  {
     key: "learning",
     href: "/learn",
     label: "Learning Hub",

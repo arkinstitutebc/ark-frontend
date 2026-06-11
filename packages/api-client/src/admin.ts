@@ -40,6 +40,15 @@ export interface UserWithTempPassword {
   tempPassword: string
 }
 
+export interface EmailAlertSettings {
+  requestRecipients: string[]
+  smtpConfigured: boolean
+}
+
+export interface UpdateEmailAlertSettingsInput {
+  requestRecipients: string[]
+}
+
 export function useAdminUsers(includeInactive: () => boolean = () => true) {
   return createQuery(() => ({
     queryKey: ["admin", "users", { includeInactive: includeInactive() }],
@@ -107,5 +116,25 @@ export function useResetUserPassword() {
         method: "POST",
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "users"] }),
+  }))
+}
+
+export function useEmailAlertSettings() {
+  return createQuery(() => ({
+    queryKey: ["admin", "settings", "email-alerts"],
+    queryFn: () => api<EmailAlertSettings>("/api/admin/settings/email-alerts"),
+    staleTime: 30 * 1000,
+  }))
+}
+
+export function useUpdateEmailAlertSettings() {
+  const qc = useQueryClient()
+  return createMutation(() => ({
+    mutationFn: (data: UpdateEmailAlertSettingsInput) =>
+      api<EmailAlertSettings>("/api/admin/settings/email-alerts", {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "settings", "email-alerts"] }),
   }))
 }

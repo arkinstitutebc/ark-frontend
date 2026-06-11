@@ -12,6 +12,7 @@ export type PortalKey =
   | "learning"
   | "adminUsers"
   | "adminPosts"
+  | "adminSettings"
 
 export const roleLabels: Record<UserRole, string> = {
   admin: "Admin",
@@ -35,6 +36,7 @@ export const portalAccess = {
   learning: ["admin", "director", "trainer"],
   adminUsers: ["admin"],
   adminPosts: ["admin"],
+  adminSettings: ["admin"],
 } as const satisfies Record<PortalKey, readonly UserRole[]>
 
 export function isUserRole(role: string | undefined | null): role is UserRole {
@@ -56,6 +58,7 @@ export function portalAccessLabels(role: UserRole): string[] {
     learning: "Learning Hub",
     adminUsers: "User Management",
     adminPosts: "Blog Posts",
+    adminSettings: "Settings",
   }
   return Object.entries(portalAccess)
     .filter(([, roles]) => (roles as readonly UserRole[]).includes(role))
