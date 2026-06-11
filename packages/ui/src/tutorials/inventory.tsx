@@ -22,7 +22,7 @@ export const inventoryTutorial: {
   checklist: [
     "Use the PO from Procurement, not a manual supplier note.",
     "Count actual delivered quantities before saving.",
-    "Use Stock Take for full shelf reconciliation and Adjust for a single correction.",
+    "Use Stock Take for full shelf reconciliation and Adjust for one item correction.",
   ],
   actions: [
     { label: "Open Stock", href: "/" },
@@ -37,7 +37,7 @@ export const inventoryTutorial: {
         <p>
           Inventory tracks <b>stock items</b> (training materials, supplies) and records every{" "}
           <b>movement</b> in or out. Items show their on-hand quantity, reorder level, and a derived
-          stock-status (<b>in-stock</b>, <b>low-stock</b>, <b>out-of-stock</b>).
+          stock status so users can quickly see what needs replenishment.
         </p>
       ),
     },
@@ -84,7 +84,9 @@ export const inventoryTutorial: {
               adjustment movements automatically.
             </li>
           </ol>
-          <p>The whole submission runs in one transaction — if anything fails, nothing is saved.</p>
+          <p>
+            The whole submission is saved together. If anything fails, nothing is partly updated.
+          </p>
         </>
       ),
     },
@@ -115,7 +117,7 @@ export const inventoryTutorial: {
       body: (
         <ul class="list-disc pl-5 space-y-1.5">
           <li>
-            The status enum auto-updates from on-hand vs. reorder level — don't set it manually.
+            Stock status comes from on-hand quantity and reorder level; update counts, not labels.
           </li>
           <li>If receiving fails, the PO and stock do not change. Retry after fixing the issue.</li>
           <li>Movements are immutable. Made a typo? Create a new "adjustment" row to correct.</li>

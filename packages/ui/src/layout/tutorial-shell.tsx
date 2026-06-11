@@ -33,27 +33,29 @@ export interface TutorialShellProps {
  */
 export function TutorialShell(props: TutorialShellProps) {
   return (
-    <div class="max-w-6xl mx-auto">
-      <header class="mb-6 rounded-2xl border border-border bg-surface p-5 sm:p-6 shadow-sm">
-        <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <div class="mx-auto max-w-7xl">
+      <header class="mb-6 border-b border-border pb-6">
+        <div class="flex flex-col gap-5 lg:flex-row lg:items-start lg:justify-between">
           <div class="min-w-0">
-            <p class="mb-2 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-primary/5 px-3 py-1 text-xs font-semibold text-primary">
+            <p class="mb-3 inline-flex items-center gap-2 rounded-lg border border-primary/15 bg-primary/5 px-3 py-1.5 text-xs font-semibold text-primary">
               <Icons.helpCircle class="h-3.5 w-3.5" />
-              How-to manual
+              How To
             </p>
-            <h1 class="text-2xl sm:text-3xl font-semibold text-foreground">{props.title}</h1>
+            <h1 class="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              {props.title}
+            </h1>
             <Show when={props.subtitle}>
-              <p class="mt-2 max-w-3xl text-sm text-muted leading-relaxed">{props.subtitle}</p>
+              <p class="mt-2 max-w-3xl text-sm leading-relaxed text-muted">{props.subtitle}</p>
             </Show>
           </div>
 
           <Show when={props.actions?.length}>
-            <div class="flex flex-wrap gap-2 lg:justify-end">
+            <div class="flex flex-wrap gap-2 lg:max-w-md lg:justify-end">
               <For each={props.actions}>
                 {action => (
                   <a
                     href={action.href}
-                    class="inline-flex items-center gap-2 rounded-lg border border-border bg-surface-muted px-3 py-2 text-sm font-medium text-foreground transition hover:border-primary/30 hover:text-primary"
+                    class="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 text-sm font-medium text-foreground transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
                   >
                     <span>{action.label}</span>
                     <Icons.arrowRight class="h-4 w-4" />
@@ -64,60 +66,24 @@ export function TutorialShell(props: TutorialShellProps) {
           </Show>
         </div>
 
-        <Show when={props.subtitle}>
-          <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div class="rounded-xl border border-border bg-surface-muted p-4">
-              <p class="text-xs font-semibold uppercase tracking-wider text-muted">Sections</p>
-              <p class="mt-1 text-2xl font-semibold text-foreground">{props.sections.length}</p>
-            </div>
-            <Show when={props.workflow?.length}>
-              <div class="rounded-xl border border-border bg-surface-muted p-4 sm:col-span-2">
-                <p class="text-xs font-semibold uppercase tracking-wider text-muted">Workflow</p>
-                <ol class="mt-2 flex flex-wrap items-center gap-2 text-xs font-medium text-foreground">
-                  <For each={props.workflow}>
-                    {(step, index) => (
-                      <li class="flex items-center gap-2">
-                        <span class="rounded-full bg-primary/10 px-2 py-1 text-primary">
-                          {index() + 1}. {step}
-                        </span>
-                        <Show when={index() < (props.workflow?.length ?? 0) - 1}>
-                          <Icons.arrowRight class="h-3.5 w-3.5 text-muted" />
-                        </Show>
-                      </li>
-                    )}
-                  </For>
-                </ol>
-              </div>
-            </Show>
-          </div>
-        </Show>
-      </header>
-
-      <div class="mb-8 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1.4fr)_minmax(280px,0.6fr)]">
-        <Show when={props.intro}>
-          <div class="rounded-xl border border-primary/10 bg-primary/5 p-5 text-sm text-foreground/80 leading-relaxed">
-            {props.intro}
-          </div>
-        </Show>
-
-        <Show when={props.checklist?.length}>
-          <div class="rounded-xl border border-border bg-surface p-5 shadow-sm">
-            <p class="mb-3 text-xs font-semibold uppercase tracking-wider text-muted">
-              Before you start
-            </p>
-            <ul class="space-y-2">
-              <For each={props.checklist}>
-                {item => (
-                  <li class="flex gap-2 text-sm text-foreground/80">
-                    <Icons.checkCircle class="mt-0.5 h-4 w-4 shrink-0 text-primary" />
-                    <span>{item}</span>
+        <Show when={props.workflow?.length}>
+          <div class="mt-6 rounded-lg border border-border bg-surface p-4">
+            <p class="text-xs font-semibold uppercase tracking-wide text-muted">Typical Flow</p>
+            <ol class="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-5">
+              <For each={props.workflow}>
+                {(step, index) => (
+                  <li class="flex items-center gap-2 rounded-lg bg-surface-muted px-3 py-2 text-sm font-medium text-foreground">
+                    <span class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary text-xs font-bold text-white">
+                      {index() + 1}
+                    </span>
+                    <span>{step}</span>
                   </li>
                 )}
               </For>
-            </ul>
+            </ol>
           </div>
         </Show>
-      </div>
+      </header>
 
       <div class="mb-6 overflow-x-auto rounded-xl border border-border bg-surface p-2 lg:hidden">
         <div class="flex gap-2">
@@ -134,21 +100,47 @@ export function TutorialShell(props: TutorialShellProps) {
         </div>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-8">
-        <div class="space-y-5">
+      <div class="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+        <div class="space-y-4">
+          <Show when={props.intro || props.checklist?.length}>
+            <section class="rounded-lg border border-border bg-surface p-5 shadow-sm">
+              <Show when={props.intro}>
+                <div class="text-sm leading-relaxed text-foreground/80">{props.intro}</div>
+              </Show>
+
+              <Show when={props.checklist?.length}>
+                <div class={props.intro ? "mt-5 border-t border-border pt-4" : ""}>
+                  <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
+                    Before You Start
+                  </p>
+                  <ul class="grid gap-2 sm:grid-cols-2">
+                    <For each={props.checklist}>
+                      {item => (
+                        <li class="flex gap-2 text-sm leading-relaxed text-foreground/80">
+                          <Icons.checkCircle class="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                          <span>{item}</span>
+                        </li>
+                      )}
+                    </For>
+                  </ul>
+                </div>
+              </Show>
+            </section>
+          </Show>
+
           <For each={props.sections}>
             {(section, index) => (
               <section
                 id={section.id}
-                class="scroll-mt-20 rounded-xl border border-border bg-surface p-5 shadow-sm"
+                class="scroll-mt-20 rounded-lg border border-border bg-surface p-5 shadow-sm"
               >
-                <div class="mb-3 flex items-start gap-3">
-                  <span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm font-semibold text-primary">
+                <div class="mb-4 flex items-start gap-3">
+                  <span class="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-sm font-bold text-primary">
                     {index() + 1}
                   </span>
-                  <h2 class="pt-1 text-lg font-semibold text-foreground">{section.title}</h2>
+                  <h2 class="pt-0.5 text-lg font-semibold text-foreground">{section.title}</h2>
                 </div>
-                <div class="pl-0 sm:pl-11 text-sm text-foreground/80 leading-relaxed space-y-3">
+                <div class="text-sm leading-relaxed text-foreground/80 sm:pl-10 [&_ol]:space-y-1.5 [&_ul]:space-y-1.5">
                   {section.body}
                 </div>
               </section>
@@ -157,9 +149,9 @@ export function TutorialShell(props: TutorialShellProps) {
         </div>
 
         <aside class="hidden lg:block">
-          <div class="sticky top-6 p-4 rounded-xl border border-border bg-surface shadow-sm">
-            <p class="text-xs font-semibold text-muted uppercase tracking-wider mb-3">
-              On this page
+          <div class="sticky top-6 rounded-lg border border-border bg-surface p-4 shadow-sm">
+            <p class="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
+              On This Page
             </p>
             <ul class="space-y-1">
               <For each={props.sections}>
@@ -169,8 +161,8 @@ export function TutorialShell(props: TutorialShellProps) {
                       href={`#${section.id}`}
                       class="flex items-center gap-2 rounded-lg px-2 py-1.5 text-xs text-muted transition-colors hover:bg-primary/5 hover:text-primary"
                     >
-                      <span class="font-semibold text-primary/70">{index() + 1}</span>
-                      <span>{section.title}</span>
+                      <span class="w-5 shrink-0 font-semibold text-primary/70">{index() + 1}</span>
+                      <span class="line-clamp-2">{section.title}</span>
                     </a>
                   </li>
                 )}

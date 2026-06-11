@@ -14,8 +14,8 @@ export const hrTutorial: {
   subtitle: "Trainers, attendance, and payroll periods.",
   intro: (
     <p>
-      HR keeps trainer records and turns approved attendance into payroll. Processing payroll posts
-      the payroll expense into Finance, so rates and attendance need to be reviewed first.
+      HR keeps trainer records, attendance, and payroll periods organized. Review rates and hours
+      before processing because payroll records become the reference for accounting and filing.
     </p>
   ),
   workflow: ["Maintain trainers", "Log attendance", "Create period", "Review entries", "Process"],
@@ -36,8 +36,8 @@ export const hrTutorial: {
       body: (
         <p>
           HR is for managing <b>trainers</b> (their profiles, pay rate, status) and running{" "}
-          <b>payroll periods</b>. Trainer attendance gets logged elsewhere; this portal turns those
-          hours into pay.
+          <b>payroll periods</b>. Attendance and payroll stay together so admin can trace how each
+          payout was computed.
         </p>
       ),
     },
@@ -67,7 +67,7 @@ export const hrTutorial: {
             </li>
             <li>
               Review the entries, adjust if needed, then click <b>Process</b>. The PDF payroll
-              report becomes downloadable and one payroll expense is posted to Finance.
+              report becomes downloadable for review and filing.
             </li>
           </ol>
           <p>

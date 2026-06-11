@@ -11,21 +11,24 @@ export const procurementTutorial: {
   sections: TutorialSection[]
 } = {
   title: "How to use the Procurement portal",
-  subtitle: "Purchase Requests, Purchase Orders, approvals, and delivery tracking.",
+  subtitle: "Purchase requests, petty cash, purchase orders, approvals, and receiving handoff.",
   intro: (
     <p>
-      Procurement is built around a simple flow: <b>request → approve → order → receive</b>.
-      Everything else (categories, attachments, PDFs) supports those four moments.
+      Procurement covers two operating flows: formal purchasing through <b>PR → PO → receiving</b>,
+      and small immediate cash needs through <b>Petty Cash</b>. Both keep approvals, attachments,
+      and printable records in the system.
     </p>
   ),
-  workflow: ["Draft PR", "Coordinator review", "Management approval", "Create PO", "Receive stock"],
+  workflow: ["Request", "Review", "Approve", "Release or order", "Receive or liquidate"],
   checklist: [
-    "The request is tied to the correct batch and budget.",
+    "The request is tied to the correct batch when it is for a training class.",
     "Items, unit prices, and totals match the supplier quote or working canvass.",
     "Purpose, date needed, attachments, and category are complete before approval.",
+    "Petty cash requests include payment details when Digital Transfer is selected.",
   ],
   actions: [
     { label: "Open Requests", href: "/pr" },
+    { label: "Open Petty Cash", href: "/petty-cash" },
     { label: "Open Approvals", href: "/approvals" },
     { label: "Open Orders", href: "/orders" },
   ],
@@ -41,8 +44,8 @@ export const procurementTutorial: {
             to be approved before it becomes a PO.
           </p>
           <p>
-            Use this portal to draft requests, attach quotes, send them up for approval, create the
-            matching order, and track delivery status.
+            Use this portal to draft purchase requests, manage petty cash requests, attach support
+            files, send work for approval, create the matching order, and track delivery status.
           </p>
         </>
       ),
@@ -55,7 +58,7 @@ export const procurementTutorial: {
           <li>
             Go to <b>Requests</b> and click <b>+ New Request</b>.
           </li>
-          <li>Pick the batch the items are for. The budget remaining shows on the right.</li>
+          <li>Pick the batch when the items are for a specific class.</li>
           <li>
             Pick a category. Don't have one? Hit <b>Manage categories</b> to add one.
           </li>
@@ -65,6 +68,47 @@ export const procurementTutorial: {
             Submit. The request goes to the Director's <b>Approvals</b> queue.
           </li>
         </ol>
+      ),
+    },
+    {
+      id: "petty-cash",
+      title: "Request petty cash",
+      body: (
+        <>
+          <p>
+            Use <b>Petty Cash</b> for small operating expenses that need quick release and later
+            liquidation. Trainers can request; admins review, release, and close the record.
+          </p>
+          <ol class="list-decimal pl-5 space-y-1.5">
+            <li>
+              Go to <b>Petty Cash</b> → <b>New Request</b>.
+            </li>
+            <li>Enter the purpose, amount, request date, and release method.</li>
+            <li>
+              If using <b>Digital Transfer</b>, add the mobile number or GCash/transfer details.
+            </li>
+            <li>Attach support files if available, then submit for review.</li>
+          </ol>
+        </>
+      ),
+    },
+    {
+      id: "petty-cash-liquidation",
+      title: "Liquidate petty cash",
+      body: (
+        <>
+          <p>
+            After cash is released, upload receipts and the liquidation form from the petty cash
+            detail page. The system compares the released amount against the actual amount used and
+            shows whether there is excess or shortage.
+          </p>
+          <ol class="list-decimal pl-5 space-y-1.5">
+            <li>Open the released petty cash request.</li>
+            <li>Enter the actual amount used and remarks.</li>
+            <li>Upload receipts and the liquidation form.</li>
+            <li>Submit. Admin can review, record returns when needed, and close the request.</li>
+          </ol>
+        </>
       ),
     },
     {
@@ -134,7 +178,8 @@ export const procurementTutorial: {
         <p>
           Both PR and PO detail modals have a <b>View PDF</b> button. It opens a clean
           letterhead-style PDF in a new tab — preview first, then save or print from the browser.
-          The PDF includes the items table, signatures, and a "Page N of M" footer.
+          The PDF includes the items table and signature areas. Blank forms are also available from
+          the main portal <b>Forms</b> page.
         </p>
       ),
     },

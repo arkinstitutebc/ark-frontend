@@ -14,8 +14,8 @@ export const billingTutorial: {
   subtitle: "TESDA student receivables, payments, and statements.",
   intro: (
     <p>
-      Billing converts completed training obligations into receivables and records collections.
-      Payment entries also feed Finance as income transactions linked back to the receivable.
+      Billing tracks what students or batches owe, records payments, and produces clean statements
+      that can be sent or filed.
     </p>
   ),
   workflow: ["Create receivable", "Collect payment", "Review balance", "Download statement"],
@@ -60,8 +60,7 @@ export const billingTutorial: {
         <p>
           Open the receivable and click <b>Record Payment</b>. Enter amount, payment method (cash,
           bank transfer, GCash, etc.), reference number, and date. The balance decreases
-          automatically and Finance receives an income transaction linked to the AR. Multiple
-          partial payments are fine.
+          automatically. Multiple partial payments are fine.
         </p>
       ),
     },
@@ -85,7 +84,7 @@ export const billingTutorial: {
             Filter by <b>Outstanding</b> to focus on unpaid balances.
           </li>
           <li>
-            Payments are immutable. Refunds → record a new negative payment with a clear note.
+            For corrections or refunds, add a clear note so the payment history is easy to audit.
           </li>
           <li>
             Statement PDFs reflect the moment they were generated; regenerate after each payment.

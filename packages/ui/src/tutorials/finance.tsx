@@ -11,19 +11,18 @@ export const financeTutorial: {
   sections: TutorialSection[]
 } = {
   title: "How to use the Finance portal",
-  subtitle:
-    "Banks, transfers, disbursements, reimbursements, P&L, Income Statement, GL Accounts, Assets.",
+  subtitle: "Banks, transfers, disbursements, reimbursements, assets, settings, and reports.",
   intro: (
     <p>
-      Finance is the school's ledger plus reporting layer. Every transaction is double-entry and
-      immutable; corrections happen via reversing entries.
+      Finance is the school's cash, classification, and reporting workspace. Keep day-to-day entries
+      clean here so the P&L, Income Statement, and audit trail stay reliable.
     </p>
   ),
-  workflow: ["Classify", "Record", "Review banks", "Report", "Reconcile"],
+  workflow: ["Classify", "Record", "Review", "Report", "Adjust settings"],
   checklist: [
     "Pick the correct bank before recording cash movement.",
-    "Use the 4 accounting axes consistently so Income Statement segments stay correct.",
-    "Use reversals or correcting entries for mistakes; do not overwrite historical transactions.",
+    "Use the suggested account code and profit center unless the transaction needs a different treatment.",
+    "Review date, amount, category, and supporting notes before saving.",
   ],
   actions: [
     { label: "Open Banks", href: "/banks" },
@@ -39,8 +38,8 @@ export const financeTutorial: {
           Finance tracks <b>banks</b>, <b>transfers</b> between accounts, <b>disbursements</b> (cash
           out), <b>reimbursements</b> (staff out-of-pocket claims), and produces two reports: the
           monthly <b>P&L Report</b> (batch-segmented) and the period <b>Income Statement</b>{" "}
-          (profit-center-segmented). The <b>GL Accounts</b> catalog drives the classification on
-          every expense; the <b>Asset Register</b> tracks depreciable items.
+          (profit-center-segmented). <b>Settings</b> keeps account codes, funds/programs, offerings,
+          and auto-coding rules aligned with reporting.
         </p>
       ),
     },
@@ -65,29 +64,26 @@ export const financeTutorial: {
     },
     {
       id: "disbursement",
-      title: "Record a disbursement (with 4-axis classification)",
+      title: "Record a disbursement",
       body: (
         <>
           <p>
-            A disbursement is money going out from the Operational Hub bank. The form auto-prefills
-            the 4 accounting axes when you pick a category — you can override.
+            A disbursement is money going out from a bank account. The form groups categories by
+            operating purpose and fills suggested accounting defaults so you only adjust exceptions.
           </p>
           <ol class="list-decimal pl-5 space-y-1.5">
             <li>
               Go to <b>Disbursements</b> → <b>+ New Disbursement</b>.
             </li>
             <li>
-              Pick the <b>category</b> (grouped by Cost of Services / Admin / Fixed Asset / Other).
-              Defaults fill in.
+              Pick the category. Categories are grouped so fixed assets, admin expenses, direct
+              costs, and other expenses are easier to scan.
             </li>
             <li>
-              Adjust <b>Expense Category</b>, <b>Profit Center</b>, <b>Accounting Treatment</b>,{" "}
-              <b>Cost Type</b> if the spend doesn't match the default.
+              Review the suggested account code, profit center, accounting treatment, and cost type.
             </li>
-            <li>Enter amount, description, optional reference (PR / RR code).</li>
-            <li>
-              Save — the bank balance decreases and the row lands on both reports correctly tagged.
-            </li>
+            <li>Enter amount, date, description, store/company, and optional reference.</li>
+            <li>Save. The bank balance decreases and reports use the selected classification.</li>
           </ol>
         </>
       ),
@@ -153,14 +149,14 @@ export const financeTutorial: {
       ),
     },
     {
-      id: "gl-accounts",
-      title: "GL Accounts catalog (admin / director)",
+      id: "settings",
+      title: "Finance Settings",
       body: (
         <p>
-          The chart of accounts that powers the disbursement category picker. 20 accounts seeded
-          from the paper Accounting Treatment matrix. Add / rename / deactivate from{" "}
-          <b>GL Accounts</b>. Code is immutable after creation (historical disbursements link to
-          it).
+          <b>Settings</b> is where admins maintain account codes, funds/programs, training
+          offerings, and auto-coding rules. Keep labels human-readable because these values appear
+          in disbursement forms and reports. Deactivate old options instead of deleting records that
+          are already used.
         </p>
       ),
     },
@@ -195,12 +191,10 @@ export const financeTutorial: {
       title: "Tips",
       body: (
         <ul class="list-disc pl-5 space-y-1.5">
+          <li>Use clear descriptions and references so audit review does not depend on memory.</li>
           <li>
-            Transactions are immutable. Mistakes are corrected via a reversing entry, never an edit.
-          </li>
-          <li>
-            <b>Two-Bank</b> page is the day-to-day cash-flow view. Income Statement / P&L are the
-            accounting view.
+            <b>Banks & Transfers</b> is the day-to-day cash-flow view. Income Statement / P&L are
+            the accounting view.
           </li>
           <li>
             Reimbursement approval auto-creates a classified expense — so the income statement
