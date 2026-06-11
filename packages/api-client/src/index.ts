@@ -3,6 +3,7 @@ export {
   type AdminUser,
   type EmailAlertSettings,
   type InviteUserInput,
+  type PasswordResetRequest,
   type UpdateEmailAlertSettingsInput,
   type UpdateUserInput,
   type UserWithTempPassword,
@@ -12,7 +13,9 @@ export {
   useDeactivateUser,
   useEmailAlertSettings,
   useInviteUser,
+  usePasswordResetRequests,
   useResetUserPassword,
+  useResolvePasswordResetRequest,
   useUpdateEmailAlertSettings,
   useUpdateUser,
 } from "./admin"
@@ -20,6 +23,7 @@ export { API_URL, api } from "./api"
 export {
   type CurrentUser,
   performLogout,
+  requestPasswordReset,
   type UpdateMeInput,
   useChangePassword,
   useCurrentUser,

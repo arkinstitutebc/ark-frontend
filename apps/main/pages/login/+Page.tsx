@@ -1,3 +1,4 @@
+import { requestPasswordReset } from "@ark/api-client"
 import { createSignal, For, onCleanup, onMount } from "solid-js"
 import { Button, Input, UI } from "@/components/ui"
 
@@ -36,6 +37,10 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = createSignal(false)
   const [loading, setLoading] = createSignal(false)
   const [error, setError] = createSignal<string | null>(null)
+  const [resetOpen, setResetOpen] = createSignal(false)
+  const [resetLoading, setResetLoading] = createSignal(false)
+  const [resetMessage, setResetMessage] = createSignal<string | null>(null)
+  const [resetError, setResetError] = createSignal<string | null>(null)
   const [fieldErrors, setFieldErrors] = createSignal<{ email?: string; password?: string }>({})
   const [brandAssetsReady, setBrandAssetsReady] = createSignal(false)
   let cancelled = false
@@ -129,6 +134,29 @@ export default function LoginPage() {
     }
   }
 
+  const handlePasswordReset = async () => {
+    const trimmedEmail = email().trim()
+    const emailMessage = emailError(trimmedEmail)
+    setResetMessage(null)
+    setResetError(null)
+
+    if (emailMessage) {
+      setFieldErrors(prev => ({ ...prev, email: emailMessage }))
+      emailInput?.focus()
+      return
+    }
+
+    setResetLoading(true)
+    try {
+      const result = await requestPasswordReset(trimmedEmail)
+      setResetMessage(result.message)
+    } catch (err) {
+      setResetError(err instanceof Error ? err.message : "Could not submit reset request")
+    } finally {
+      setResetLoading(false)
+    }
+  }
+
   return (
     <main class="min-h-screen bg-background text-foreground lg:grid lg:grid-cols-[minmax(0,1.08fr)_minmax(420px,0.92fr)]">
       <BrandCollage ready={brandAssetsReady()} />
@@ -217,6 +245,49 @@ export default function LoginPage() {
                 autocomplete="current-password"
                 error={fieldErrors().password}
               />
+
+              <div class="-mt-2 flex justify-end">
+                <button
+                  type="button"
+                  class="text-sm font-medium text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/25"
+                  onClick={() => {
+                    setResetOpen(!resetOpen())
+                    setResetMessage(null)
+                    setResetError(null)
+                  }}
+                >
+                  Forgot password?
+                </button>
+              </div>
+
+              {resetOpen() && (
+                <div class="rounded-lg border border-border bg-surface-muted/60 p-4">
+                  <p class="text-sm font-medium text-foreground">Request password reset</p>
+                  <p class="mt-1 text-sm text-muted">
+                    Enter your account email above. An administrator will review the request.
+                  </p>
+                  {resetMessage() && (
+                    <p class="mt-3 rounded-md bg-green-50 px-3 py-2 text-sm text-green-700">
+                      {resetMessage()}
+                    </p>
+                  )}
+                  {resetError() && (
+                    <p class="mt-3 rounded-md bg-red-50 px-3 py-2 text-sm text-red-700">
+                      {resetError()}
+                    </p>
+                  )}
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    class="mt-3 w-full border border-primary/20 !bg-surface !text-primary hover:!bg-primary/10"
+                    loading={resetLoading()}
+                    loadingLabel="Submitting..."
+                    onClick={handlePasswordReset}
+                  >
+                    Submit reset request
+                  </Button>
+                </div>
+              )}
 
               {error() && (
                 <div class="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3">

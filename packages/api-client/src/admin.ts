@@ -40,6 +40,17 @@ export interface UserWithTempPassword {
   tempPassword: string
 }
 
+export interface PasswordResetRequest {
+  id: string
+  email: string
+  status: string
+  handledByUserId?: string | null
+  handledAt?: string | null
+  notes?: string | null
+  requestedAt: string
+  updatedAt: string
+}
+
 export interface EmailAlertSettings {
   requestRecipients: string[]
   smtpConfigured: boolean
@@ -116,6 +127,26 @@ export function useResetUserPassword() {
         method: "POST",
       }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "users"] }),
+  }))
+}
+
+export function usePasswordResetRequests() {
+  return createQuery(() => ({
+    queryKey: ["admin", "password-reset-requests"],
+    queryFn: () => api<PasswordResetRequest[]>("/api/admin/password-reset-requests"),
+    staleTime: 30 * 1000,
+  }))
+}
+
+export function useResolvePasswordResetRequest() {
+  const qc = useQueryClient()
+  return createMutation(() => ({
+    mutationFn: (vars: { id: string; status: "completed" | "dismissed"; notes?: string }) =>
+      api<PasswordResetRequest>(`/api/admin/password-reset-requests/${vars.id}/resolve`, {
+        method: "POST",
+        body: JSON.stringify({ status: vars.status, notes: vars.notes }),
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "password-reset-requests"] }),
   }))
 }
 

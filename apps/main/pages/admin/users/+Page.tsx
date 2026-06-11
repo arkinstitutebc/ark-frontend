@@ -1,6 +1,7 @@
 import {
   type AdminRole,
   type AdminUser,
+  type PasswordResetRequest,
   portalAccessLabels,
   roleAccessSummary,
   roleLabels,
@@ -8,6 +9,8 @@ import {
   useAdminUsers,
   useCurrentUser,
   useInviteUser,
+  usePasswordResetRequests,
+  useResolvePasswordResetRequest,
   validateForm,
 } from "@ark/api-client"
 import {
@@ -87,7 +90,9 @@ function previewRoleForFilter(filter: RoleFilter): AdminRole {
 export default function AdminUsersPage() {
   const userQuery = useCurrentUser()
   const usersQuery = useAdminUsers(() => true)
+  const resetRequestsQuery = usePasswordResetRequests()
   const invite = useInviteUser()
+  const resolveResetRequest = useResolvePasswordResetRequest()
 
   const [inviteOpen, setInviteOpen] = createSignal(false)
   const [form, setForm] = createSignal<InviteFormState>({ ...emptyInvite })
@@ -120,6 +125,10 @@ export default function AdminUsersPage() {
     }
   })
 
+  const pendingResetRequests = createMemo(() =>
+    (resetRequestsQuery.data ?? []).filter(request => request.status === "pending")
+  )
+
   const sortedUsers = createMemo<AdminUser[]>(() => {
     const term = search().trim().toLowerCase()
     const role = roleFilter()
@@ -139,6 +148,12 @@ export default function AdminUsersPage() {
   function resetForm() {
     setForm({ ...emptyInvite })
     setErrors({})
+  }
+
+  function userForResetRequest(request: PasswordResetRequest) {
+    return (usersQuery.data ?? []).find(
+      user => user.email.toLowerCase() === request.email.toLowerCase()
+    )
   }
 
   function openInvite() {
@@ -205,6 +220,94 @@ export default function AdminUsersPage() {
               />
               <SummaryTile label="Trainers" value={userStats().trainers} />
             </div>
+
+            <Show when={pendingResetRequests().length > 0}>
+              <section class="mb-5 overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
+                <div class="border-b border-border px-5 py-4">
+                  <div class="flex items-center gap-3">
+                    <span class="flex h-9 w-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
+                      <Icons.lock class="h-4 w-4" />
+                    </span>
+                    <div>
+                      <h2 class="text-base font-semibold text-foreground">
+                        Password reset requests
+                      </h2>
+                      <p class="text-sm text-muted">
+                        Reset the matching user password, then mark the request done.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="divide-y divide-border">
+                  <For each={pendingResetRequests()}>
+                    {request => {
+                      const user = () => userForResetRequest(request)
+                      return (
+                        <div class="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                          <div class="min-w-0">
+                            <p class="truncate text-sm font-semibold text-foreground">
+                              {request.email}
+                            </p>
+                            <p class="text-xs text-muted">
+                              Requested {new Date(request.requestedAt).toLocaleString("en-PH")}
+                            </p>
+                          </div>
+                          <div class="flex flex-wrap items-center gap-2">
+                            <Show
+                              when={user()}
+                              fallback={
+                                <span class="rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
+                                  No matching user
+                                </span>
+                              }
+                            >
+                              {matched => (
+                                <a
+                                  href={`/admin/users/${matched().id}`}
+                                  class="inline-flex items-center justify-center rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-surface-muted"
+                                >
+                                  Open user
+                                </a>
+                              )}
+                            </Show>
+                            <Button
+                              type="button"
+                              variant="secondary"
+                              size="sm"
+                              disabled={resolveResetRequest.isPending}
+                              onClick={() =>
+                                resolveResetRequest.mutate({
+                                  id: request.id,
+                                  status: "completed",
+                                  notes: "Handled from User Management",
+                                })
+                              }
+                            >
+                              Mark done
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="sm"
+                              disabled={resolveResetRequest.isPending}
+                              onClick={() =>
+                                resolveResetRequest.mutate({
+                                  id: request.id,
+                                  status: "dismissed",
+                                  notes: "Dismissed from User Management",
+                                })
+                              }
+                            >
+                              Dismiss
+                            </Button>
+                          </div>
+                        </div>
+                      )
+                    }}
+                  </For>
+                </div>
+              </section>
+            </Show>
 
             <div class="mb-5 grid gap-4 lg:grid-cols-[minmax(0,1fr)_22rem]">
               <div class="rounded-2xl border border-border bg-surface p-4 shadow-sm">

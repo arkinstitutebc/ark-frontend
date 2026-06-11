@@ -74,6 +74,13 @@ export function useChangePassword() {
   }))
 }
 
+export async function requestPasswordReset(email: string) {
+  return api<{ message: string }>("/api/auth/password-reset", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  })
+}
+
 export function useUpdateMe() {
   const qc = useQueryClient()
   return createMutation(() => ({
