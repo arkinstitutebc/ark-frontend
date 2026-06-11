@@ -18,6 +18,12 @@ export const queryKeys = {
     detail: (id: string) => ["disbursements", id] as const,
     audit: (id: string) => ["disbursements", id, "audit"] as const,
   },
+  checkVouchers: {
+    all: ["check-vouchers"] as const,
+    filtered: (filters?: { page?: number; limit?: number; search?: string; status?: string }) =>
+      ["check-vouchers", filters] as const,
+    detail: (id: string) => ["check-vouchers", id] as const,
+  },
   pnl: {
     byMonth: (month: string) => ["pnl", month] as const,
   },

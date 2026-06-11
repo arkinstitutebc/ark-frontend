@@ -73,6 +73,35 @@ export interface TransactionAuditEvent {
   createdAt: string
 }
 
+export type CheckVoucherStatus = "draft" | "prepared" | "approved" | "paid" | "void"
+
+export interface CheckVoucherLine {
+  account: string
+  description?: string
+  amount: number
+}
+
+export interface CheckVoucher {
+  id: string
+  voucherNo: string
+  voucherDate: string
+  payee: string
+  address?: string | null
+  bankName: string
+  checkNo?: string | null
+  particular: string
+  debitLines: CheckVoucherLine[]
+  creditLines: CheckVoucherLine[]
+  totalAmount: number
+  status: CheckVoucherStatus
+  preparedBy?: string | null
+  approvedBy?: string | null
+  receivedBy?: string | null
+  createdBy?: string | null
+  createdAt: string
+  updatedAt: string
+}
+
 export type ArStatus = "created" | "billed" | "paid" | "overdue"
 
 export interface AccountReceivable {
