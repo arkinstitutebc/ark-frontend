@@ -412,6 +412,19 @@ export default function PettyCashDetailPage() {
                         <span class="text-sm text-muted">Purpose</span>
                         <span class="text-sm text-foreground">{request.purpose}</span>
                       </div>
+                      <Show when={request.releaseContactNumber || request.releaseAccountName}>
+                        <div class="grid gap-2 px-4 py-4 sm:grid-cols-[180px_1fr] sm:px-5">
+                          <span class="text-sm text-muted">Transfer Details</span>
+                          <span class="space-y-1 text-sm text-foreground">
+                            <Show when={request.releaseContactNumber}>
+                              <span class="block">{request.releaseContactNumber}</span>
+                            </Show>
+                            <Show when={request.releaseAccountName}>
+                              <span class="block text-muted">{request.releaseAccountName}</span>
+                            </Show>
+                          </span>
+                        </div>
+                      </Show>
                       <Show when={request.urgency}>
                         <div class="grid gap-2 px-4 py-4 sm:grid-cols-[180px_1fr] sm:px-5">
                           <span class="text-sm text-muted">Urgency</span>

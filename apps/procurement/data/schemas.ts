@@ -20,11 +20,25 @@ export const createPoSchema = z.object({
   supplier: z.string().min(1, "Supplier is required"),
 })
 
-export const createPettyCashRequestSchema = z.object({
-  purpose: z.string().min(1, "Purpose is required"),
-  amountRequested: z.number().positive("Amount must be greater than zero"),
-  releaseMethod: z.enum(["digital_transfer", "physical_cash"]),
-})
+export const createPettyCashRequestSchema = z
+  .object({
+    purpose: z.string().min(1, "Purpose is required"),
+    amountRequested: z.number().positive("Amount must be greater than zero"),
+    releaseMethod: z.enum(["digital_transfer", "physical_cash"]),
+    releaseContactNumber: z.string().max(40).optional(),
+    releaseAccountName: z.string().max(120).optional(),
+    attachmentCount: z.number().int().min(0).optional(),
+  })
+  .refine(
+    data =>
+      data.releaseMethod !== "digital_transfer" ||
+      !!data.releaseContactNumber?.trim() ||
+      (data.attachmentCount ?? 0) > 0,
+    {
+      path: ["releaseContactNumber"],
+      message: "Add a mobile number or upload your GCash QR.",
+    }
+  )
 
 export const pettyCashFundSchema = z.object({
   name: z.string().min(1, "Fund name is required"),

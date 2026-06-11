@@ -13,7 +13,7 @@ import { useCreatePettyCashRequest, useCurrentUser } from "@data/hooks"
 import { createPettyCashRequestSchema } from "@data/schemas"
 import type { PettyCashAttachmentInput, PettyCashReleaseMethod } from "@data/types"
 import { validateForm } from "@data/validate"
-import { createMemo, createSignal } from "solid-js"
+import { createMemo, createSignal, Show } from "solid-js"
 import { navigate } from "vike/client/router"
 import {
   pettyCashReleaseMethodLabels,
@@ -27,6 +27,8 @@ export default function NewPettyCashRequestPage() {
   const [purpose, setPurpose] = createSignal("")
   const [amountRequested, setAmountRequested] = createSignal("")
   const [releaseMethod, setReleaseMethod] = createSignal<PettyCashReleaseMethod>("digital_transfer")
+  const [releaseContactNumber, setReleaseContactNumber] = createSignal("")
+  const [releaseAccountName, setReleaseAccountName] = createSignal("")
   const [attachments, setAttachments] = createSignal<PettyCashAttachmentInput[]>([])
 
   const amountPreview = createMemo(() => Number(amountRequested() || 0))
@@ -37,6 +39,9 @@ export default function NewPettyCashRequestPage() {
       purpose: purpose(),
       amountRequested: Number(amountRequested()),
       releaseMethod: releaseMethod(),
+      releaseContactNumber: releaseContactNumber().trim() || undefined,
+      releaseAccountName: releaseAccountName().trim() || undefined,
+      attachmentCount: attachments().length,
     }
     const result = validateForm(createPettyCashRequestSchema, data)
     if (!result.success) {
@@ -50,6 +55,14 @@ export default function NewPettyCashRequestPage() {
         purpose: purpose().trim(),
         amountRequested: amountPreview().toFixed(2),
         releaseMethod: releaseMethod(),
+        releaseContactNumber:
+          releaseMethod() === "digital_transfer"
+            ? releaseContactNumber().trim() || undefined
+            : undefined,
+        releaseAccountName:
+          releaseMethod() === "digital_transfer"
+            ? releaseAccountName().trim() || undefined
+            : undefined,
         attachments: attachments().length ? attachments() : undefined,
       },
       {
@@ -100,6 +113,31 @@ export default function NewPettyCashRequestPage() {
                   ariaLabel="Mode of release"
                 />
               </div>
+              <Show when={releaseMethod() === "digital_transfer"}>
+                <Field label="Mobile / GCash Number" error={errors().releaseContactNumber}>
+                  <input
+                    id="pc-release-contact"
+                    type="tel"
+                    value={releaseContactNumber()}
+                    onInput={e => setReleaseContactNumber(e.currentTarget.value)}
+                    placeholder="09XX XXX XXXX"
+                    class={fieldInputClass(errors().releaseContactNumber)}
+                  />
+                  <p class="mt-1 text-xs text-muted">
+                    Enter the number for transfer, or upload a GCash QR below.
+                  </p>
+                </Field>
+                <Field label="Account Name">
+                  <input
+                    id="pc-release-account"
+                    type="text"
+                    value={releaseAccountName()}
+                    onInput={e => setReleaseAccountName(e.currentTarget.value)}
+                    placeholder="Optional"
+                    class={fieldInputClass()}
+                  />
+                </Field>
+              </Show>
               <div class="md:col-span-2">
                 <Field label="Purpose / Description" error={errors().purpose}>
                   <textarea
@@ -146,6 +184,12 @@ export default function NewPettyCashRequestPage() {
                 {pettyCashReleaseMethodLabels[releaseMethod()]}
               </dd>
             </div>
+            <Show when={releaseMethod() === "digital_transfer" && releaseContactNumber().trim()}>
+              <div class="flex justify-between gap-4">
+                <dt class="text-muted">Transfer to</dt>
+                <dd class="text-right text-foreground">{releaseContactNumber().trim()}</dd>
+              </div>
+            </Show>
             <div class="flex justify-between gap-4 border-t border-border pt-3">
               <dt class="font-medium text-foreground">Amount</dt>
               <dd class="text-right text-lg font-semibold text-foreground">

@@ -147,6 +147,8 @@ export interface PettyCashRequest {
   amountApproved?: number | string | null
   urgency?: string | null
   releaseMethod: PettyCashReleaseMethod
+  releaseContactNumber?: string | null
+  releaseAccountName?: string | null
   status: PettyCashStatus
   approvedByEmail?: string | null
   approvedAt?: string | null

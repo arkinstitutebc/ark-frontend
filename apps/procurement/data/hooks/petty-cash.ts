@@ -33,6 +33,8 @@ export interface CreatePettyCashRequestInput {
   purpose: string
   amountRequested: string
   releaseMethod: PettyCashReleaseMethod
+  releaseContactNumber?: string
+  releaseAccountName?: string
   attachments?: PettyCashAttachmentInput[]
 }
 
