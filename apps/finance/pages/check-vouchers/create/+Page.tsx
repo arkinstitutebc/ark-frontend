@@ -1,5 +1,5 @@
 import type { CheckVoucherLine } from "@ark/data-types"
-import { BackLink, Button, formatPeso, Icons, Input, PageContainer } from "@ark/ui"
+import { BackLink, Button, DateInput, formatPeso, Icons, Input } from "@ark/ui"
 import { useCreateCheckVoucher } from "@data/hooks"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
@@ -119,123 +119,186 @@ export default function CreateCheckVoucherPage() {
   }
 
   return (
-    <PageContainer>
-      <BackLink
-        variant="icon"
-        label="Back to check vouchers"
-        onClick={() => navigate("/check-vouchers")}
-      />
-
-      <form onSubmit={submit} class="mx-auto max-w-6xl space-y-6">
-        <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <div class="px-6 py-8 sm:px-8 lg:px-12">
+      <div class="mx-auto max-w-6xl">
+        <div class="mb-8 flex items-center gap-3">
+          <BackLink variant="icon" label="Back to check vouchers" href="/check-vouchers" />
           <div>
             <h1 class="text-2xl font-semibold text-foreground">New Check Voucher</h1>
             <p class="mt-1 text-sm text-muted">Create a printable voucher with balanced entries.</p>
           </div>
-          <div class="rounded-lg border border-border bg-surface px-4 py-3 text-right">
-            <p class="text-xs font-semibold uppercase tracking-wide text-muted">Grand total</p>
-            <p class="mt-1 text-2xl font-semibold text-foreground">{formatPeso(debitTotal())}</p>
-          </div>
         </div>
 
-        <Show when={Object.keys(errors()).length > 0}>
-          <div class="rounded-lg border border-danger/20 bg-danger/5 px-4 py-3 text-sm text-danger">
-            {Object.values(errors())[0]}
-          </div>
-        </Show>
+        <form onSubmit={submit}>
+          <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div class="space-y-6 lg:col-span-2">
+              <section class="space-y-4 rounded-lg border border-border bg-surface p-6">
+                <Show when={Object.keys(errors()).length > 0}>
+                  <div class="rounded-lg border border-danger/20 bg-danger/5 px-4 py-3 text-sm text-danger">
+                    {Object.values(errors())[0]}
+                  </div>
+                </Show>
+                <div>
+                  <h2 class="text-lg font-semibold text-foreground">Voucher Details</h2>
+                  <p class="mt-1 text-xs text-muted">
+                    This creates the printable check voucher record only.
+                  </p>
+                </div>
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <DateInput
+                    label="Date"
+                    value={voucherDate()}
+                    onValueChange={setVoucherDate}
+                    showTodayButton
+                  />
+                  <Input
+                    label="Payee"
+                    value={payee()}
+                    onInput={e => setPayee(e.currentTarget.value)}
+                    placeholder="e.g. CITI Hardware"
+                  />
+                </div>
+                <Input
+                  label="Particular"
+                  value={particular()}
+                  onInput={e => setParticular(e.currentTarget.value)}
+                  placeholder="e.g. Range hood"
+                />
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Input
+                    label="Bank Name"
+                    value={bankName()}
+                    onInput={e => setBankName(e.currentTarget.value)}
+                  />
+                  <Input
+                    label="Check No."
+                    value={checkNo()}
+                    onInput={e => setCheckNo(e.currentTarget.value)}
+                    hint="Optional"
+                  />
+                </div>
+                <Input
+                  label="Address"
+                  value={address()}
+                  onInput={e => setAddress(e.currentTarget.value)}
+                  hint="Optional"
+                />
+              </section>
 
-        <section class="rounded-lg border border-border bg-surface p-5">
-          <h2 class="text-sm font-semibold text-foreground">Voucher Details</h2>
-          <div class="mt-4 grid gap-4 md:grid-cols-2">
-            <Input
-              label="Date"
-              type="date"
-              value={voucherDate()}
-              onInput={e => setVoucherDate(e.currentTarget.value)}
-            />
-            <Input label="Payee" value={payee()} onInput={e => setPayee(e.currentTarget.value)} />
-            <Input
-              label="Address"
-              value={address()}
-              onInput={e => setAddress(e.currentTarget.value)}
-            />
-            <Input
-              label="Bank Name"
-              value={bankName()}
-              onInput={e => setBankName(e.currentTarget.value)}
-            />
-            <Input
-              label="Check No."
-              value={checkNo()}
-              onInput={e => setCheckNo(e.currentTarget.value)}
-            />
-            <Input
-              label="Particular"
-              value={particular()}
-              onInput={e => setParticular(e.currentTarget.value)}
-            />
-          </div>
-        </section>
+              <VoucherLines
+                title="Debit"
+                lines={debitLines()}
+                onAdd={() => addLine("debit")}
+                onRemove={index => removeLine("debit", index)}
+                onChange={(index, field, value) => updateLine("debit", index, field, value)}
+              />
 
-        <VoucherLines
-          title="Debit"
-          lines={debitLines()}
-          onAdd={() => addLine("debit")}
-          onRemove={index => removeLine("debit", index)}
-          onChange={(index, field, value) => updateLine("debit", index, field, value)}
-        />
+              <VoucherLines
+                title="Credit"
+                lines={creditLines()}
+                onAdd={() => addLine("credit")}
+                onRemove={index => removeLine("credit", index)}
+                onChange={(index, field, value) => updateLine("credit", index, field, value)}
+              />
 
-        <VoucherLines
-          title="Credit"
-          lines={creditLines()}
-          onAdd={() => addLine("credit")}
-          onRemove={index => removeLine("credit", index)}
-          onChange={(index, field, value) => updateLine("credit", index, field, value)}
-        />
-
-        <section class="rounded-lg border border-border bg-surface p-5">
-          <h2 class="text-sm font-semibold text-foreground">Signatories</h2>
-          <div class="mt-4 grid gap-4 md:grid-cols-3">
-            <Input
-              label="Prepared by"
-              value={preparedBy()}
-              onInput={e => setPreparedBy(e.currentTarget.value)}
-            />
-            <Input
-              label="Approved by"
-              value={approvedBy()}
-              onInput={e => setApprovedBy(e.currentTarget.value)}
-            />
-            <Input
-              label="Received by"
-              value={receivedBy()}
-              onInput={e => setReceivedBy(e.currentTarget.value)}
-            />
-          </div>
-        </section>
-
-        <div class="sticky bottom-0 -mx-4 border-t border-border bg-background/95 px-4 py-4 backdrop-blur">
-          <div class="mx-auto flex max-w-6xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div class="text-sm">
-              <span class="font-medium text-foreground">Debit {formatPeso(debitTotal())}</span>
-              <span class="mx-2 text-muted">/</span>
-              <span class="font-medium text-foreground">Credit {formatPeso(creditTotal())}</span>
-              <Show when={!totalsMatch()}>
-                <span class="ml-3 text-danger">Totals do not match</span>
-              </Show>
+              <section class="space-y-4 rounded-lg border border-border bg-surface p-6">
+                <div>
+                  <h2 class="text-lg font-semibold text-foreground">Signatories</h2>
+                  <p class="mt-1 text-xs text-muted">Shown at the bottom of the printed voucher.</p>
+                </div>
+                <div class="grid gap-4 md:grid-cols-3">
+                  <Input
+                    label="Prepared by"
+                    value={preparedBy()}
+                    onInput={e => setPreparedBy(e.currentTarget.value)}
+                  />
+                  <Input
+                    label="Approved by"
+                    value={approvedBy()}
+                    onInput={e => setApprovedBy(e.currentTarget.value)}
+                  />
+                  <Input
+                    label="Received by"
+                    value={receivedBy()}
+                    onInput={e => setReceivedBy(e.currentTarget.value)}
+                    hint="Optional"
+                  />
+                </div>
+              </section>
             </div>
-            <div class="flex justify-end gap-3">
-              <Button type="button" variant="ghost" onClick={() => navigate("/check-vouchers")}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={!canSubmit()} loading={createVoucher.isPending}>
-                Save Voucher
-              </Button>
+
+            <div class="lg:col-span-1">
+              <aside class="sticky top-24 rounded-lg border border-border bg-surface p-6">
+                <h2 class="mb-4 text-lg font-semibold text-foreground">Summary</h2>
+                <div class="space-y-3 text-sm">
+                  <div class="flex justify-between gap-3">
+                    <span class="text-muted">Payee</span>
+                    <span class="text-right font-medium">{payee().trim() || "-"}</span>
+                  </div>
+                  <div class="flex justify-between gap-3">
+                    <span class="text-muted">Bank</span>
+                    <span class="text-right font-medium">{bankName().trim() || "-"}</span>
+                  </div>
+                  <div class="flex justify-between gap-3">
+                    <span class="text-muted">Check No.</span>
+                    <span class="text-right font-medium">{checkNo().trim() || "-"}</span>
+                  </div>
+                  <div class="border-t border-border pt-3">
+                    <div class="flex justify-between">
+                      <span class="text-muted">Debit</span>
+                      <span class="font-medium tabular-nums">{formatPeso(debitTotal())}</span>
+                    </div>
+                    <div class="mt-2 flex justify-between">
+                      <span class="text-muted">Credit</span>
+                      <span class="font-medium tabular-nums">{formatPeso(creditTotal())}</span>
+                    </div>
+                  </div>
+                  <div class="border-t border-border pt-3">
+                    <div class="flex justify-between">
+                      <span class="font-medium">Grand Total</span>
+                      <span class="text-xl font-semibold tabular-nums text-foreground">
+                        {formatPeso(debitTotal())}
+                      </span>
+                    </div>
+                    <Show when={!totalsMatch()}>
+                      <p class="mt-2 text-xs text-danger">Debit and credit totals must match.</p>
+                    </Show>
+                  </div>
+                </div>
+
+                <Show when={createVoucher.isError}>
+                  <div class="mt-4 rounded-lg bg-red-50 p-3">
+                    <p class="text-xs text-red-700">{createVoucher.error?.message}</p>
+                  </div>
+                </Show>
+
+                <div class="mt-6 space-y-3">
+                  <Button
+                    type="submit"
+                    disabled={!canSubmit()}
+                    size="sm"
+                    class="w-full"
+                    loading={createVoucher.isPending}
+                    loadingLabel="Saving..."
+                  >
+                    Save Voucher
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    class="w-full"
+                    onClick={() => navigate("/check-vouchers")}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </aside>
             </div>
           </div>
-        </div>
-      </form>
-    </PageContainer>
+        </form>
+      </div>
+    </div>
   )
 }
 
@@ -247,9 +310,9 @@ function VoucherLines(props: {
   onChange: (index: number, field: keyof LineDraft, value: string) => void
 }) {
   return (
-    <section class="rounded-lg border border-border bg-surface p-5">
+    <section class="rounded-lg border border-border bg-surface p-6">
       <div class="flex items-center justify-between gap-3">
-        <h2 class="text-sm font-semibold text-foreground">{props.title} Lines</h2>
+        <h2 class="text-lg font-semibold text-foreground">{props.title} Lines</h2>
         <Button type="button" variant="ghost" size="sm" onClick={props.onAdd}>
           <Icons.plus class="h-4 w-4" />
           Add line
@@ -258,7 +321,7 @@ function VoucherLines(props: {
       <div class="mt-4 space-y-3">
         <For each={props.lines}>
           {(line, index) => (
-            <div class="grid gap-3 md:grid-cols-[1fr_1fr_160px_44px]">
+            <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_150px_44px]">
               <Input
                 label={index() === 0 ? "Account" : undefined}
                 value={line.account}
