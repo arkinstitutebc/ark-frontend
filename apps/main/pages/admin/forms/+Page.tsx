@@ -1,6 +1,6 @@
 import { API_URL, useCurrentUser } from "@ark/api-client"
 import { BackLink, Button, Icons, PageLoading } from "@ark/ui"
-import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
+import { createEffect, createMemo, createSignal, For, onCleanup, Show } from "solid-js"
 import { Footer, Navbar } from "@/components"
 
 type FormMode = "Blank form" | "Generated template" | "Report template"
@@ -128,6 +128,10 @@ function formPdfUrl(key: string, download = false) {
 export default function AdminFormsPage() {
   const userQuery = useCurrentUser()
   const [selectedKey, setSelectedKey] = createSignal(forms[0].key)
+  const [previewUrl, setPreviewUrl] = createSignal<string | null>(null)
+  const [previewLoading, setPreviewLoading] = createSignal(true)
+  const [previewError, setPreviewError] = createSignal<string | null>(null)
+  const [downloadLoading, setDownloadLoading] = createSignal(false)
 
   createEffect(() => {
     if (typeof window === "undefined") return
@@ -142,8 +146,59 @@ export default function AdminFormsPage() {
 
   const isAdmin = () => userQuery.data?.role === "admin"
   const selected = createMemo(() => forms.find(form => form.key === selectedKey()) ?? forms[0])
-  const previewUrl = createMemo(() => formPdfUrl(selected().key))
-  const downloadUrl = createMemo(() => formPdfUrl(selected().key, true))
+
+  createEffect(() => {
+    if (typeof window === "undefined" || !isAdmin()) return
+
+    const controller = new AbortController()
+    let objectUrl: string | null = null
+    const key = selectedKey()
+    setPreviewLoading(true)
+    setPreviewError(null)
+    setPreviewUrl(null)
+
+    fetch(formPdfUrl(key), { credentials: "include", signal: controller.signal })
+      .then(response => {
+        if (!response.ok) throw new Error(`Could not load PDF (${response.status})`)
+        return response.blob()
+      })
+      .then(blob => {
+        objectUrl = URL.createObjectURL(blob)
+        setPreviewUrl(objectUrl)
+      })
+      .catch(error => {
+        if (controller.signal.aborted) return
+        setPreviewError(error instanceof Error ? error.message : "Could not load PDF preview")
+      })
+      .finally(() => {
+        if (!controller.signal.aborted) setPreviewLoading(false)
+      })
+
+    onCleanup(() => {
+      controller.abort()
+      if (objectUrl) URL.revokeObjectURL(objectUrl)
+    })
+  })
+
+  const downloadSelected = async () => {
+    setDownloadLoading(true)
+    try {
+      const response = await fetch(formPdfUrl(selected().key, true), { credentials: "include" })
+      if (!response.ok) throw new Error(`Could not download PDF (${response.status})`)
+      const blobUrl = URL.createObjectURL(await response.blob())
+      const link = document.createElement("a")
+      link.href = blobUrl
+      link.download = `${selected().key}.pdf`
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      URL.revokeObjectURL(blobUrl)
+    } catch (error) {
+      setPreviewError(error instanceof Error ? error.message : "Could not download PDF")
+    } finally {
+      setDownloadLoading(false)
+    }
+  }
 
   return (
     <div class="flex min-h-screen flex-col bg-surface-muted">
@@ -161,19 +216,11 @@ export default function AdminFormsPage() {
               <div class="mb-2">
                 <BackLink href="/">Dashboard</BackLink>
               </div>
-              <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-                <div>
-                  <h1 class="text-2xl font-bold text-foreground">Forms</h1>
-                  <p class="mt-1 text-sm text-muted">
-                    Preview and download blank Ark ERP forms for manual use.
-                  </p>
-                </div>
-                <a href={downloadUrl()} download={`${selected().key}.pdf`}>
-                  <Button type="button" size="sm" class="w-full sm:w-auto">
-                    <Icons.download class="h-4 w-4" />
-                    Download Blank PDF
-                  </Button>
-                </a>
+              <div>
+                <h1 class="text-2xl font-bold text-foreground">Forms</h1>
+                <p class="mt-1 text-sm text-muted">
+                  Preview and download blank Ark ERP forms for manual use.
+                </p>
               </div>
             </div>
 
@@ -243,21 +290,53 @@ export default function AdminFormsPage() {
                     <h2 class="mt-2 text-xl font-bold text-foreground">{selected().title}</h2>
                     <p class="mt-1 text-sm text-muted">{selected().detail}</p>
                   </div>
-                  <a href={downloadUrl()} download={`${selected().key}.pdf`}>
-                    <Button type="button" variant="secondary" size="sm" class="w-full sm:w-auto">
-                      <Icons.download class="h-4 w-4" />
-                      Download
-                    </Button>
-                  </a>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    class="w-full sm:w-auto"
+                    loading={downloadLoading()}
+                    loadingLabel="Downloading..."
+                    onClick={downloadSelected}
+                  >
+                    <Icons.download class="h-4 w-4" />
+                    Download
+                  </Button>
                 </div>
 
                 <div class="bg-[#eef1f5] p-3 sm:p-5">
                   <div class="overflow-hidden rounded-lg border border-border bg-surface shadow-sm">
-                    <iframe
-                      title={`${selected().title} PDF preview`}
-                      src={previewUrl()}
-                      class="h-[76vh] min-h-[620px] w-full bg-surface"
-                    />
+                    <Show
+                      when={!previewLoading()}
+                      fallback={
+                        <div class="flex h-[76vh] min-h-[620px] items-center justify-center text-sm text-muted">
+                          Loading PDF preview...
+                        </div>
+                      }
+                    >
+                      <Show
+                        when={previewUrl() && !previewError()}
+                        fallback={
+                          <div class="flex h-[76vh] min-h-[620px] flex-col items-center justify-center gap-3 px-6 text-center">
+                            <Icons.alert class="h-8 w-8 text-muted" />
+                            <p class="text-sm font-medium text-foreground">
+                              PDF preview unavailable
+                            </p>
+                            <p class="max-w-md text-sm text-muted">{previewError()}</p>
+                            <Button type="button" size="sm" onClick={downloadSelected}>
+                              <Icons.download class="h-4 w-4" />
+                              Download instead
+                            </Button>
+                          </div>
+                        }
+                      >
+                        <iframe
+                          title={`${selected().title} PDF preview`}
+                          src={previewUrl() ?? undefined}
+                          class="h-[76vh] min-h-[620px] w-full bg-surface"
+                        />
+                      </Show>
+                    </Show>
                   </div>
                 </div>
               </section>
