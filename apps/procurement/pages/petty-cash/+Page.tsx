@@ -295,56 +295,103 @@ export default function PettyCashPage() {
                 </div>
               }
             >
-              <DataTable>
-                <THead>
-                  <Th>Request</Th>
-                  <Th>Requester</Th>
-                  <Th>Purpose</Th>
-                  <Th align="right">Amount</Th>
-                  <Th>Release</Th>
-                  <Th>Status</Th>
-                  <Th align="right">Actions</Th>
-                </THead>
-                <tbody>
-                  <For each={requests()}>
-                    {(request: PettyCashRequest) => (
-                      <tr
-                        onClick={() => navigate(`/petty-cash/${request.id}`)}
-                        class="cursor-pointer border-t border-border transition-colors hover:bg-surface-muted"
-                      >
-                        <td class="px-6 py-4">
+              <div class="divide-y divide-border md:hidden">
+                <For each={requests()}>
+                  {(request: PettyCashRequest) => (
+                    <button
+                      type="button"
+                      onClick={() => navigate(`/petty-cash/${request.id}`)}
+                      class="block w-full px-4 py-4 text-left transition-colors hover:bg-surface-muted focus-visible:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                    >
+                      <div class="flex items-start justify-between gap-3">
+                        <div class="min-w-0">
                           <p class="font-mono text-sm font-semibold text-foreground">
                             {request.requestNumber}
                           </p>
-                          <p class="text-xs text-muted">{formatDatePH(request.requestDate)}</p>
-                        </td>
-                        <td class="px-6 py-4">
-                          <p class="text-sm text-foreground">{request.requestedByName}</p>
-                          <p class="text-xs text-muted">{request.department}</p>
-                        </td>
-                        <td class="max-w-[360px] px-6 py-4">
-                          <p class="truncate text-sm text-foreground">{request.purpose}</p>
-                          <Show when={request.urgency}>
-                            <p class="text-xs text-muted">{request.urgency}</p>
-                          </Show>
-                        </td>
-                        <td class="px-6 py-4 text-right text-sm font-medium text-foreground">
-                          {formatPeso(Number(request.amountApproved ?? request.amountRequested))}
-                        </td>
-                        <td class="px-6 py-4 text-sm text-muted">
-                          {pettyCashReleaseMethodLabels[request.releaseMethod]}
-                        </td>
-                        <td class="px-6 py-4">
-                          <StatusBadge status={request.status} />
-                        </td>
-                        <td class="px-6 py-4 text-right">
-                          <span class="text-sm font-medium text-primary">Open</span>
-                        </td>
-                      </tr>
-                    )}
-                  </For>
-                </tbody>
-              </DataTable>
+                          <p class="mt-0.5 text-xs text-muted">
+                            {formatDatePH(request.requestDate)}
+                          </p>
+                        </div>
+                        <StatusBadge status={request.status} />
+                      </div>
+                      <p class="mt-3 line-clamp-2 text-sm text-foreground">{request.purpose}</p>
+                      <div class="mt-3 grid grid-cols-2 gap-3 text-xs">
+                        <div>
+                          <p class="text-muted">Requester</p>
+                          <p class="mt-0.5 truncate font-medium text-foreground">
+                            {request.requestedByName || request.requestedByEmail}
+                          </p>
+                        </div>
+                        <div class="text-right">
+                          <p class="text-muted">Amount</p>
+                          <p class="mt-0.5 font-semibold text-foreground">
+                            {formatPeso(Number(request.amountApproved ?? request.amountRequested))}
+                          </p>
+                        </div>
+                        <div class="col-span-2">
+                          <p class="text-muted">Release</p>
+                          <p class="mt-0.5 font-medium text-foreground">
+                            {pettyCashReleaseMethodLabels[request.releaseMethod]}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  )}
+                </For>
+              </div>
+
+              <div class="hidden md:block">
+                <DataTable>
+                  <THead>
+                    <Th>Request</Th>
+                    <Th>Requester</Th>
+                    <Th>Purpose</Th>
+                    <Th align="right">Amount</Th>
+                    <Th>Release</Th>
+                    <Th>Status</Th>
+                    <Th align="right">Actions</Th>
+                  </THead>
+                  <tbody>
+                    <For each={requests()}>
+                      {(request: PettyCashRequest) => (
+                        <tr
+                          onClick={() => navigate(`/petty-cash/${request.id}`)}
+                          class="cursor-pointer border-t border-border transition-colors hover:bg-surface-muted"
+                        >
+                          <td class="px-6 py-4">
+                            <p class="font-mono text-sm font-semibold text-foreground">
+                              {request.requestNumber}
+                            </p>
+                            <p class="text-xs text-muted">{formatDatePH(request.requestDate)}</p>
+                          </td>
+                          <td class="px-6 py-4">
+                            <p class="text-sm text-foreground">{request.requestedByName}</p>
+                            <p class="text-xs text-muted">{request.department}</p>
+                          </td>
+                          <td class="max-w-[360px] px-6 py-4">
+                            <p class="truncate text-sm text-foreground">{request.purpose}</p>
+                            <Show when={request.urgency}>
+                              <p class="text-xs text-muted">{request.urgency}</p>
+                            </Show>
+                          </td>
+                          <td class="px-6 py-4 text-right text-sm font-medium text-foreground">
+                            {formatPeso(Number(request.amountApproved ?? request.amountRequested))}
+                          </td>
+                          <td class="px-6 py-4 text-sm text-muted">
+                            {pettyCashReleaseMethodLabels[request.releaseMethod]}
+                          </td>
+                          <td class="px-6 py-4">
+                            <StatusBadge status={request.status} />
+                          </td>
+                          <td class="px-6 py-4 text-right">
+                            <span class="text-sm font-medium text-primary">Open</span>
+                          </td>
+                        </tr>
+                      )}
+                    </For>
+                  </tbody>
+                </DataTable>
+              </div>
             </Show>
             <Show when={data.total > data.limit}>
               <div class="flex items-center justify-between border-t border-border px-5 py-3">

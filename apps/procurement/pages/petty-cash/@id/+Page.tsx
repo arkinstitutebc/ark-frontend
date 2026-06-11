@@ -53,7 +53,7 @@ function AdminActionPanel(props: { request: PettyCashRequest }) {
 
   return (
     <aside class="space-y-4">
-      <section class="rounded-lg border border-border bg-surface p-5">
+      <section class="rounded-lg border border-border bg-surface p-4 sm:p-5">
         <h2 class="text-base font-semibold text-foreground">Admin Actions</h2>
         <Show when={props.request.status === "pending"}>
           <div class="mt-4 space-y-3">
@@ -235,7 +235,7 @@ function LiquidationPanel(props: { request: PettyCashRequest }) {
   }
 
   return (
-    <section class="rounded-lg border border-border bg-surface p-5">
+    <section class="rounded-lg border border-border bg-surface p-4 sm:p-5">
       <h2 class="text-base font-semibold text-foreground">Submit Liquidation</h2>
       <form onSubmit={handleSubmit} class="mt-4 space-y-4">
         <div>
@@ -343,7 +343,7 @@ export default function PettyCashDetailPage() {
                 }
               />
 
-              <div class="mb-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
+              <div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <InfoCard label="Requested" value={formatPeso(Number(request.amountRequested))} />
                 <InfoCard label="Approved" value={formatPeso(pettyCashAmount(request))} />
                 <InfoCard label="Request Date" value={formatDatePH(request.requestDate)} />
@@ -356,32 +356,32 @@ export default function PettyCashDetailPage() {
               <div class="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
                 <div class="space-y-6">
                   <section class="rounded-lg border border-border bg-surface">
-                    <div class="border-b border-border px-5 py-4">
+                    <div class="border-b border-border px-4 py-4 sm:px-5">
                       <h2 class="text-base font-semibold text-foreground">Request Details</h2>
                     </div>
                     <div class="divide-y divide-border">
-                      <div class="grid gap-2 px-5 py-4 sm:grid-cols-[180px_1fr]">
+                      <div class="grid gap-2 px-4 py-4 sm:grid-cols-[180px_1fr] sm:px-5">
                         <span class="text-sm text-muted">Requested By</span>
                         <span class="text-sm text-foreground">
                           {request.requestedByName || request.requestedByEmail}
                         </span>
                       </div>
-                      <div class="grid gap-2 px-5 py-4 sm:grid-cols-[180px_1fr]">
+                      <div class="grid gap-2 px-4 py-4 sm:grid-cols-[180px_1fr] sm:px-5">
                         <span class="text-sm text-muted">Department</span>
                         <span class="text-sm text-foreground">{request.department}</span>
                       </div>
-                      <div class="grid gap-2 px-5 py-4 sm:grid-cols-[180px_1fr]">
+                      <div class="grid gap-2 px-4 py-4 sm:grid-cols-[180px_1fr] sm:px-5">
                         <span class="text-sm text-muted">Purpose</span>
                         <span class="text-sm text-foreground">{request.purpose}</span>
                       </div>
                       <Show when={request.urgency}>
-                        <div class="grid gap-2 px-5 py-4 sm:grid-cols-[180px_1fr]">
+                        <div class="grid gap-2 px-4 py-4 sm:grid-cols-[180px_1fr] sm:px-5">
                           <span class="text-sm text-muted">Urgency</span>
                           <span class="text-sm text-foreground">{request.urgency}</span>
                         </div>
                       </Show>
                       <Show when={request.notes}>
-                        <div class="grid gap-2 px-5 py-4 sm:grid-cols-[180px_1fr]">
+                        <div class="grid gap-2 px-4 py-4 sm:grid-cols-[180px_1fr] sm:px-5">
                           <span class="text-sm text-muted">Notes</span>
                           <span class="text-sm text-foreground">{request.notes}</span>
                         </div>
@@ -392,10 +392,10 @@ export default function PettyCashDetailPage() {
                   <Show when={request.liquidation}>
                     {liquidation => (
                       <section class="rounded-lg border border-border bg-surface">
-                        <div class="border-b border-border px-5 py-4">
+                        <div class="border-b border-border px-4 py-4 sm:px-5">
                           <h2 class="text-base font-semibold text-foreground">Liquidation</h2>
                         </div>
-                        <div class="grid gap-4 p-5 sm:grid-cols-3">
+                        <div class="grid gap-4 p-4 sm:grid-cols-3 sm:p-5">
                           <InfoCard
                             label="Actual Used"
                             value={formatPeso(Number(liquidation().actualAmountUsed))}
@@ -429,7 +429,7 @@ export default function PettyCashDetailPage() {
                     <LiquidationPanel request={request} />
                   </Show>
                   <Show when={isAdmin() && request.status === "released"}>
-                    <div class="rounded-lg border border-border bg-surface p-5">
+                    <div class="rounded-lg border border-border bg-surface p-4 sm:p-5">
                       <p class="text-sm font-medium text-foreground">Waiting for liquidation</p>
                       <p class="mt-1 text-sm text-muted">
                         The requester can upload receipts and the liquidation form from their

@@ -60,14 +60,14 @@ export default function NewPettyCashRequestPage() {
 
   return (
     <PageContainer>
-      <div class="mb-8 flex items-center gap-3">
+      <div class="mb-6 flex items-start gap-3 sm:mb-8 sm:items-center">
         <BackLink
           variant="icon"
           label="Back to Petty Cash"
           onClick={() => navigate("/petty-cash")}
         />
-        <div>
-          <h1 class="text-2xl font-semibold text-foreground">New Petty Cash Request</h1>
+        <div class="min-w-0">
+          <h1 class="text-xl font-semibold text-foreground sm:text-2xl">New Petty Cash Request</h1>
           <p class="mt-1 text-sm text-muted">
             Request a small cash release for immediate operating needs.
           </p>
@@ -76,9 +76,9 @@ export default function NewPettyCashRequestPage() {
 
       <form onSubmit={handleSubmit} class="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
         <div class="space-y-6">
-          <section class="rounded-lg border border-border bg-surface p-6">
-            <h2 class="text-lg font-semibold text-foreground">Request Details</h2>
-            <div class="mt-5 grid gap-4 md:grid-cols-2">
+          <section class="rounded-lg border border-border bg-surface p-4 sm:p-6">
+            <h2 class="text-base font-semibold text-foreground sm:text-lg">Request Details</h2>
+            <div class="mt-4 grid gap-4 md:grid-cols-2 sm:mt-5">
               <Field label="Amount Requested" error={errors().amountRequested}>
                 <input
                   id="pc-amount"
@@ -115,8 +115,8 @@ export default function NewPettyCashRequestPage() {
             </div>
           </section>
 
-          <section class="rounded-lg border border-border bg-surface p-6">
-            <h2 class="text-lg font-semibold text-foreground">Supporting Documents</h2>
+          <section class="rounded-lg border border-border bg-surface p-4 sm:p-6">
+            <h2 class="text-base font-semibold text-foreground sm:text-lg">Supporting Documents</h2>
             <p class="mt-1 text-sm text-muted">
               Attach quotes, screenshots, or receipts if available.
             </p>
@@ -130,7 +130,7 @@ export default function NewPettyCashRequestPage() {
           </section>
         </div>
 
-        <aside class="h-fit rounded-lg border border-border bg-surface p-6">
+        <aside class="h-fit rounded-lg border border-border bg-surface p-4 sm:p-6 lg:sticky lg:top-24">
           <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
             <Icons.wallet class="h-6 w-6" />
           </div>
