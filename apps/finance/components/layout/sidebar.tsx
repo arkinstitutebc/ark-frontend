@@ -1,5 +1,6 @@
 import { type NavItem, Sidebar as SharedSidebar } from "@ark/ui"
 import {
+  FileCheck2,
   FileText,
   HandCoins,
   HelpCircle,
@@ -26,6 +27,13 @@ const navItems: NavItem[] = [
     label: "Disbursements",
     href: "/disbursements",
     icon: Receipt,
+    section: "Operations",
+  },
+  {
+    id: "check-vouchers",
+    label: "Check Vouchers",
+    href: "/check-vouchers",
+    icon: FileCheck2,
     section: "Operations",
   },
   {

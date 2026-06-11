@@ -2,7 +2,6 @@ import {
   DateInput,
   formatDatePH,
   formatPeso,
-  Icons,
   Input,
   Modal,
   ModalFooter,
@@ -32,8 +31,6 @@ import {
   formatDateTimePH,
 } from "./disbursement-labels"
 import { DisbursementValidationSummary } from "./disbursement-validation-summary"
-
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:4000"
 
 interface DisbursementDetailsModalProps {
   txn: Transaction | null
@@ -358,15 +355,6 @@ function DisbursementView(props: {
 
       <div class={modalFooterShellClass}>
         <div class={modalFooterClass}>
-          <a
-            href={`${API_URL}/api/finance/disbursements/${props.current.id}/voucher`}
-            target="_blank"
-            rel="noreferrer"
-            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground border border-border hover:bg-surface-muted rounded-lg transition-colors"
-          >
-            <Icons.fileText class="h-4 w-4" />
-            Voucher
-          </a>
           <button
             type="button"
             onClick={props.onClose}
