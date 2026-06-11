@@ -3,6 +3,7 @@ import {
   AttachmentUploader,
   BackLink,
   Button,
+  ConfirmDialog,
   formatDatePH,
   formatPeso,
   InfoCard,
@@ -13,6 +14,7 @@ import {
 import {
   useApprovePettyCash,
   useClosePettyCash,
+  useDeletePettyCash,
   usePettyCashRequest,
   useRejectPettyCash,
   useReleasePettyCash,
@@ -42,6 +44,7 @@ function AdminActionPanel(props: { request: PettyCashRequest }) {
   const reject = useRejectPettyCash()
   const release = useReleasePettyCash()
   const close = useClosePettyCash()
+  const deleteRequest = useDeletePettyCash()
   const [approvedAmount, setApprovedAmount] = createSignal(String(props.request.amountRequested))
   const [approvalNotes, setApprovalNotes] = createSignal("")
   const [rejectionReason, setRejectionReason] = createSignal("")
@@ -50,6 +53,8 @@ function AdminActionPanel(props: { request: PettyCashRequest }) {
   )
   const [releaseDate, setReleaseDate] = createSignal(new Date().toISOString().slice(0, 10))
   const [closeNotes, setCloseNotes] = createSignal("")
+  const [deleteOpen, setDeleteOpen] = createSignal(false)
+  const canDelete = () => ["pending", "approved", "rejected"].includes(props.request.status)
 
   return (
     <aside class="space-y-4">
@@ -199,7 +204,40 @@ function AdminActionPanel(props: { request: PettyCashRequest }) {
         <Show when={!["pending", "approved", "liquidated"].includes(props.request.status)}>
           <p class="mt-4 text-sm text-muted">No admin action is available for this status.</p>
         </Show>
+
+        <Show when={canDelete()}>
+          <div class="mt-5 border-t border-border pt-4">
+            <p class="text-sm font-medium text-foreground">Delete request</p>
+            <p class="mt-1 text-sm text-muted">
+              Only unreleased requests can be deleted. Released cash must stay in the record.
+            </p>
+            <Button
+              type="button"
+              variant="accent"
+              size="sm"
+              class="mt-3 w-full"
+              onClick={() => setDeleteOpen(true)}
+            >
+              Delete Request
+            </Button>
+          </div>
+        </Show>
       </section>
+
+      <ConfirmDialog
+        open={deleteOpen()}
+        onClose={() => setDeleteOpen(false)}
+        title="Delete petty cash request?"
+        description={`This will remove ${props.request.requestNumber}. It is only allowed because the request has not been released.`}
+        danger
+        pending={deleteRequest.isPending}
+        confirmLabel="Delete request"
+        onConfirm={() =>
+          deleteRequest.mutate(props.request.id, {
+            onSuccess: () => navigate("/petty-cash"),
+          })
+        }
+      />
     </aside>
   )
 }

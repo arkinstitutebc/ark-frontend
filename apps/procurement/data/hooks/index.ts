@@ -10,6 +10,7 @@ export {
   useApprovePettyCash,
   useClosePettyCash,
   useCreatePettyCashRequest,
+  useDeletePettyCash,
   usePettyCashRequest,
   usePettyCashRequests,
   usePettyCashSummary,

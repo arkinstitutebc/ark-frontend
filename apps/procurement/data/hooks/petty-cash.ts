@@ -210,3 +210,18 @@ export function useClosePettyCash() {
     onError: (err: Error) => toast.error(err.message),
   }))
 }
+
+export function useDeletePettyCash() {
+  const qc = useQueryClient()
+  return createMutation(() => ({
+    mutationFn: (id: string) =>
+      api<void>(`/api/procurement/petty-cash/${id}`, {
+        method: "DELETE",
+      }),
+    onSuccess: (_data, id) => {
+      invalidatePettyCash(qc, id)
+      toast.success("Petty cash request deleted")
+    },
+    onError: (err: Error) => toast.error(err.message),
+  }))
+}
