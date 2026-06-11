@@ -6,11 +6,13 @@ import {
   ConfirmDialog,
   formatDatePH,
   formatPeso,
+  Icons,
   InfoCard,
   PageContainer,
   PageHeader,
   Select,
 } from "@ark/ui"
+import { API_URL } from "@data/api"
 import {
   useApprovePettyCash,
   useClosePettyCash,
@@ -370,14 +372,25 @@ export default function PettyCashDetailPage() {
                 subtitle={request.purpose}
                 badge={<StatusBadge status={request.status} />}
                 action={
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => navigate("/petty-cash/new")}
-                  >
-                    New Request
-                  </Button>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <a
+                      href={`${API_URL}/api/procurement/petty-cash/${request.id}/voucher`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-primary bg-surface px-4 py-2 text-sm font-semibold text-primary transition-all hover:bg-primary hover:text-white"
+                    >
+                      <Icons.fileText class="h-4 w-4" />
+                      Open Voucher
+                    </a>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => navigate("/petty-cash/new")}
+                    >
+                      New Request
+                    </Button>
+                  </div>
                 }
               />
 
