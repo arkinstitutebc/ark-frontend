@@ -21,6 +21,11 @@ const POSITIVE: StatusTone = {
   text: "text-green-700 dark:text-green-300",
   dot: "bg-green-400",
 }
+const COMPLETED: StatusTone = {
+  bg: "bg-primary/10 dark:bg-primary/20",
+  text: "text-primary dark:text-blue-200",
+  dot: "bg-primary",
+}
 const PROGRESS: StatusTone = {
   bg: "bg-blue-50 dark:bg-blue-900/30",
   text: "text-blue-700 dark:text-blue-300",
@@ -43,8 +48,8 @@ const TONE_BY_STATUS: Record<string, StatusTone> = {
   "Not Started": NEUTRAL,
   "In Progress": PROGRESS,
   "On Hold": PENDING,
-  Completed: POSITIVE,
-  "Batch Completed": POSITIVE,
+  Completed: COMPLETED,
+  "Batch Completed": COMPLETED,
 
   // students
   Enrolled: PROGRESS,
@@ -87,7 +92,7 @@ const TONE_BY_STATUS: Record<string, StatusTone> = {
   // finance / payroll / transactions
   processed: PROGRESS,
   failed: NEGATIVE,
-  completed: POSITIVE,
+  completed: COMPLETED,
   income: POSITIVE,
   expense: NEGATIVE,
   transfer: PROGRESS,

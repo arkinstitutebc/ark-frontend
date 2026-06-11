@@ -125,10 +125,16 @@ function formPdfUrl(key: string, download = false) {
   return `${API_URL}/api/admin/forms/${key}/pdf${download ? "?download=1" : ""}`
 }
 
+type LoadedPdf = {
+  key: string
+  blob: Blob
+  url: string
+}
+
 export default function AdminFormsPage() {
   const userQuery = useCurrentUser()
   const [selectedKey, setSelectedKey] = createSignal(forms[0].key)
-  const [previewUrl, setPreviewUrl] = createSignal<string | null>(null)
+  const [loadedPdf, setLoadedPdf] = createSignal<LoadedPdf | null>(null)
   const [previewLoading, setPreviewLoading] = createSignal(true)
   const [previewError, setPreviewError] = createSignal<string | null>(null)
   const [downloadLoading, setDownloadLoading] = createSignal(false)
@@ -155,7 +161,7 @@ export default function AdminFormsPage() {
     const key = selectedKey()
     setPreviewLoading(true)
     setPreviewError(null)
-    setPreviewUrl(null)
+    setLoadedPdf(null)
 
     fetch(formPdfUrl(key), { credentials: "include", signal: controller.signal })
       .then(response => {
@@ -164,7 +170,7 @@ export default function AdminFormsPage() {
       })
       .then(blob => {
         objectUrl = URL.createObjectURL(blob)
-        setPreviewUrl(objectUrl)
+        setLoadedPdf({ key, blob, url: objectUrl })
       })
       .catch(error => {
         if (controller.signal.aborted) return
@@ -181,14 +187,21 @@ export default function AdminFormsPage() {
   })
 
   const downloadSelected = async () => {
+    const key = selected().key
     setDownloadLoading(true)
     try {
-      const response = await fetch(formPdfUrl(selected().key, true), { credentials: "include" })
-      if (!response.ok) throw new Error(`Could not download PDF (${response.status})`)
-      const blobUrl = URL.createObjectURL(await response.blob())
+      const cached = loadedPdf()
+      const blob =
+        cached?.key === key
+          ? cached.blob
+          : await fetch(formPdfUrl(key), { credentials: "include" }).then(response => {
+              if (!response.ok) throw new Error(`Could not download PDF (${response.status})`)
+              return response.blob()
+            })
+      const blobUrl = URL.createObjectURL(blob)
       const link = document.createElement("a")
       link.href = blobUrl
-      link.download = `${selected().key}.pdf`
+      link.download = `${key}.pdf`
       document.body.appendChild(link)
       link.click()
       link.remove()
@@ -315,7 +328,7 @@ export default function AdminFormsPage() {
                       }
                     >
                       <Show
-                        when={previewUrl() && !previewError()}
+                        when={loadedPdf()?.url && !previewError()}
                         fallback={
                           <div class="flex h-[76vh] min-h-[620px] flex-col items-center justify-center gap-3 px-6 text-center">
                             <Icons.alert class="h-8 w-8 text-muted" />
@@ -332,7 +345,7 @@ export default function AdminFormsPage() {
                       >
                         <iframe
                           title={`${selected().title} PDF preview`}
-                          src={previewUrl() ?? undefined}
+                          src={loadedPdf()?.url ?? undefined}
                           class="h-[76vh] min-h-[620px] w-full bg-surface"
                         />
                       </Show>
