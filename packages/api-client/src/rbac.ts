@@ -12,6 +12,7 @@ export type PortalKey =
   | "learning"
   | "adminUsers"
   | "adminPosts"
+  | "adminForms"
   | "adminSettings"
 
 export const roleLabels: Record<UserRole, string> = {
@@ -36,6 +37,7 @@ export const portalAccess = {
   learning: ["admin", "director", "trainer"],
   adminUsers: ["admin"],
   adminPosts: ["admin"],
+  adminForms: ["admin"],
   adminSettings: ["admin"],
 } as const satisfies Record<PortalKey, readonly UserRole[]>
 
@@ -58,6 +60,7 @@ export function portalAccessLabels(role: UserRole): string[] {
     learning: "Learning Hub",
     adminUsers: "User Management",
     adminPosts: "Blog Posts",
+    adminForms: "Forms",
     adminSettings: "Email Alerts",
   }
   return Object.entries(portalAccess)

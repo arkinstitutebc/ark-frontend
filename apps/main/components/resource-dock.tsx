@@ -33,6 +33,14 @@ const resources: ResourceItem[] = [
     icon: Icons.fileText,
   },
   {
+    key: "adminForms",
+    href: "/admin/forms",
+    label: "Forms",
+    action: "Open forms",
+    badge: "Admin",
+    icon: Icons.folder,
+  },
+  {
     key: "adminSettings",
     href: "/admin/settings",
     label: "Email Alerts",
