@@ -77,11 +77,11 @@ function FundSetupModal(props: {
   }
 
   return (
-    <Modal open={props.open} onClose={props.onClose} title="Petty Cash Fund Setup" size="lg">
+    <Modal open={props.open} onClose={props.onClose} title="Petty Cash Setup" size="lg">
       <form onSubmit={handleSubmit} class="space-y-5">
         <div class="rounded-lg border border-border bg-surface-muted px-4 py-3">
           <p class="text-sm font-medium text-foreground">
-            Set the active petty cash fund. The balance is computed from releases and liquidations.
+            Set the cash amount available for petty cash requests.
           </p>
         </div>
         <div>
@@ -103,7 +103,7 @@ function FundSetupModal(props: {
         <div class="grid gap-4 md:grid-cols-2">
           <div>
             <label for="pc-initial" class="mb-1 block text-sm font-medium text-foreground">
-              Initial Fund
+              Starting Cash
             </label>
             <input
               id="pc-initial"
@@ -122,7 +122,7 @@ function FundSetupModal(props: {
           </div>
           <div>
             <label for="pc-adjustment" class="mb-1 block text-sm font-medium text-foreground">
-              Adjustment / Returned Carryover
+              Extra Cash Added
             </label>
             <input
               id="pc-adjustment"
@@ -209,11 +209,11 @@ export default function PettyCashPage() {
         action={
           <div class="flex flex-wrap items-center gap-2">
             <Show when={isAdmin()}>
-              <Button type="button" variant="secondary" onClick={() => setFundOpen(true)}>
-                Fund Setup
+              <Button type="button" variant="secondary" size="sm" onClick={() => setFundOpen(true)}>
+                Cash Setup
               </Button>
             </Show>
-            <Button type="button" onClick={() => navigate("/petty-cash/new")}>
+            <Button type="button" size="sm" onClick={() => navigate("/petty-cash/new")}>
               <Icons.plus class="h-4 w-4" />
               New Request
             </Button>
@@ -245,13 +245,10 @@ export default function PettyCashPage() {
             value={summaryQuery.data ? formatPeso(summaryQuery.data.totalReleased) : "-"}
           />
           <StatCard
-            label="Total Liquidated"
+            label="Total Spent"
             value={summaryQuery.data ? formatPeso(summaryQuery.data.totalLiquidated) : "-"}
           />
-          <StatCard
-            label="Pending Liquidations"
-            value={summaryQuery.data?.pendingLiquidations ?? "-"}
-          />
+          <StatCard label="Receipts Needed" value={summaryQuery.data?.pendingLiquidations ?? "-"} />
         </div>
       </Show>
 
@@ -269,17 +266,15 @@ export default function PettyCashPage() {
         <div class="flex gap-2 overflow-x-auto">
           <For each={filters}>
             {item => (
-              <button
+              <Button
                 type="button"
+                size="sm"
+                variant={filter() === item.value ? "primary" : "secondary"}
                 onClick={() => setFilter(item.value)}
-                class={`whitespace-nowrap rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                  filter() === item.value
-                    ? "bg-primary text-white"
-                    : "border border-border bg-surface text-foreground hover:bg-surface-muted"
-                }`}
+                class="whitespace-nowrap"
               >
                 {item.label}
-              </button>
+              </Button>
             )}
           </For>
         </div>
@@ -357,22 +352,24 @@ export default function PettyCashPage() {
                   Page {page()} of {pageCount()} · {data.total} requests
                 </p>
                 <div class="flex items-center gap-2">
-                  <button
+                  <Button
                     type="button"
+                    size="sm"
+                    variant="secondary"
                     disabled={page() <= 1 || requestsQuery.isFetching}
                     onClick={() => setPage(p => Math.max(1, p - 1))}
-                    class="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-surface-muted disabled:opacity-50"
                   >
                     Previous
-                  </button>
-                  <button
+                  </Button>
+                  <Button
                     type="button"
+                    size="sm"
+                    variant="secondary"
                     disabled={page() >= pageCount() || requestsQuery.isFetching}
                     onClick={() => setPage(p => Math.min(pageCount(), p + 1))}
-                    class="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-surface-muted disabled:opacity-50"
                   >
                     Next
-                  </button>
+                  </Button>
                 </div>
               </div>
             </Show>

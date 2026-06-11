@@ -86,6 +86,7 @@ function AdminActionPanel(props: { request: PettyCashRequest }) {
             <div class="flex gap-2">
               <Button
                 type="button"
+                size="sm"
                 class="flex-1"
                 loading={approve.isPending}
                 loadingLabel="Approving..."
@@ -114,6 +115,7 @@ function AdminActionPanel(props: { request: PettyCashRequest }) {
               <Button
                 type="button"
                 variant="secondary"
+                size="sm"
                 class="mt-2 w-full"
                 loading={reject.isPending}
                 loadingLabel="Rejecting..."
@@ -153,6 +155,7 @@ function AdminActionPanel(props: { request: PettyCashRequest }) {
             </div>
             <Button
               type="button"
+              size="sm"
               class="w-full"
               loading={release.isPending}
               loadingLabel="Releasing..."
@@ -180,6 +183,7 @@ function AdminActionPanel(props: { request: PettyCashRequest }) {
             />
             <Button
               type="button"
+              size="sm"
               class="w-full"
               loading={close.isPending}
               loadingLabel="Closing..."
@@ -293,6 +297,7 @@ function LiquidationPanel(props: { request: PettyCashRequest }) {
         </div>
         <Button
           type="submit"
+          size="sm"
           class="w-full"
           loading={submit.isPending}
           loadingLabel="Submitting..."
@@ -330,6 +335,7 @@ export default function PettyCashDetailPage() {
                   <Button
                     type="button"
                     variant="secondary"
+                    size="sm"
                     onClick={() => navigate("/petty-cash/new")}
                   >
                     New Request

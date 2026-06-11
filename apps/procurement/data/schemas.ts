@@ -21,8 +21,6 @@ export const createPoSchema = z.object({
 })
 
 export const createPettyCashRequestSchema = z.object({
-  requestDate: z.string().min(1, "Request date is required"),
-  department: z.string().min(1, "Department is required"),
   purpose: z.string().min(1, "Purpose is required"),
   amountRequested: z.number().positive("Amount must be greater than zero"),
   releaseMethod: z.enum(["digital_transfer", "physical_cash"]),

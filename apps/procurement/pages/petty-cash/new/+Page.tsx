@@ -13,43 +13,27 @@ import { useCreatePettyCashRequest, useCurrentUser } from "@data/hooks"
 import { createPettyCashRequestSchema } from "@data/schemas"
 import type { PettyCashAttachmentInput, PettyCashReleaseMethod } from "@data/types"
 import { validateForm } from "@data/validate"
-import { createEffect, createMemo, createSignal } from "solid-js"
+import { createMemo, createSignal } from "solid-js"
 import { navigate } from "vike/client/router"
 import {
   pettyCashReleaseMethodLabels,
   pettyCashReleaseMethodOptions,
 } from "@/components/petty-cash"
 
-function today() {
-  return new Date().toISOString().slice(0, 10)
-}
-
 export default function NewPettyCashRequestPage() {
   const userQuery = useCurrentUser()
   const createRequest = useCreatePettyCashRequest()
   const [errors, setErrors] = createSignal<Record<string, string>>({})
-  const [requestDate, setRequestDate] = createSignal(today())
-  const [department, setDepartment] = createSignal(userQuery.data?.department ?? "")
   const [purpose, setPurpose] = createSignal("")
   const [amountRequested, setAmountRequested] = createSignal("")
-  const [urgency, setUrgency] = createSignal("")
   const [releaseMethod, setReleaseMethod] = createSignal<PettyCashReleaseMethod>("digital_transfer")
-  const [notes, setNotes] = createSignal("")
   const [attachments, setAttachments] = createSignal<PettyCashAttachmentInput[]>([])
 
   const amountPreview = createMemo(() => Number(amountRequested() || 0))
 
-  createEffect(() => {
-    if (!department().trim() && userQuery.data?.department) {
-      setDepartment(userQuery.data.department)
-    }
-  })
-
   const handleSubmit = (event: Event) => {
     event.preventDefault()
     const data = {
-      requestDate: requestDate(),
-      department: department(),
       purpose: purpose(),
       amountRequested: Number(amountRequested()),
       releaseMethod: releaseMethod(),
@@ -63,13 +47,9 @@ export default function NewPettyCashRequestPage() {
 
     createRequest.mutate(
       {
-        requestDate: requestDate(),
-        department: department().trim(),
         purpose: purpose().trim(),
         amountRequested: amountPreview().toFixed(2),
         releaseMethod: releaseMethod(),
-        urgency: urgency().trim() || undefined,
-        notes: notes().trim() || undefined,
         attachments: attachments().length ? attachments() : undefined,
       },
       {
@@ -99,24 +79,6 @@ export default function NewPettyCashRequestPage() {
           <section class="rounded-lg border border-border bg-surface p-6">
             <h2 class="text-lg font-semibold text-foreground">Request Details</h2>
             <div class="mt-5 grid gap-4 md:grid-cols-2">
-              <Field label="Request Date" error={errors().requestDate}>
-                <input
-                  id="pc-request-date"
-                  type="date"
-                  value={requestDate()}
-                  onInput={e => setRequestDate(e.currentTarget.value)}
-                  class={fieldInputClass(errors().requestDate)}
-                />
-              </Field>
-              <Field label="Department" error={errors().department}>
-                <input
-                  id="pc-department"
-                  value={department()}
-                  onInput={e => setDepartment(e.currentTarget.value)}
-                  placeholder="Training, Procurement, Admin..."
-                  class={fieldInputClass(errors().department)}
-                />
-              </Field>
               <Field label="Amount Requested" error={errors().amountRequested}>
                 <input
                   id="pc-amount"
@@ -150,24 +112,6 @@ export default function NewPettyCashRequestPage() {
                   />
                 </Field>
               </div>
-              <Field label="Urgency" hint="Optional">
-                <input
-                  id="pc-urgency"
-                  value={urgency()}
-                  onInput={e => setUrgency(e.currentTarget.value)}
-                  placeholder="Normal, urgent, same day..."
-                  class={fieldInputClass()}
-                />
-              </Field>
-              <Field label="Notes" hint="Optional">
-                <input
-                  id="pc-notes"
-                  value={notes()}
-                  onInput={e => setNotes(e.currentTarget.value)}
-                  placeholder="Extra context for admin"
-                  class={fieldInputClass()}
-                />
-              </Field>
             </div>
           </section>
 
@@ -209,7 +153,7 @@ export default function NewPettyCashRequestPage() {
               </dd>
             </div>
           </dl>
-          <Button type="submit" class="mt-6 w-full" disabled={createRequest.isPending}>
+          <Button type="submit" size="sm" class="mt-6 w-full" disabled={createRequest.isPending}>
             <Icons.plus class="h-4 w-4" />
             {createRequest.isPending ? "Submitting..." : "Submit Request"}
           </Button>

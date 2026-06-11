@@ -29,13 +29,10 @@ export interface PettyCashListResponse {
 }
 
 export interface CreatePettyCashRequestInput {
-  requestDate: string
-  department: string
+  requestDate?: string
   purpose: string
   amountRequested: string
-  urgency?: string
   releaseMethod: PettyCashReleaseMethod
-  notes?: string
   attachments?: PettyCashAttachmentInput[]
 }
 
