@@ -19,3 +19,21 @@ export const createPoSchema = z.object({
   prId: z.string().min(1, "Purchase request is required"),
   supplier: z.string().min(1, "Supplier is required"),
 })
+
+export const createPettyCashRequestSchema = z.object({
+  requestDate: z.string().min(1, "Request date is required"),
+  department: z.string().min(1, "Department is required"),
+  purpose: z.string().min(1, "Purpose is required"),
+  amountRequested: z.number().positive("Amount must be greater than zero"),
+  releaseMethod: z.enum(["digital_transfer", "physical_cash"]),
+})
+
+export const pettyCashFundSchema = z.object({
+  name: z.string().min(1, "Fund name is required"),
+  initialAmount: z.number().min(0, "Initial amount cannot be negative"),
+  adjustmentAmount: z.number().min(0, "Adjustment amount cannot be negative"),
+})
+
+export const pettyCashLiquidationSchema = z.object({
+  actualAmountUsed: z.number().min(0, "Actual amount used cannot be negative"),
+})

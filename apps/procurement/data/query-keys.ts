@@ -26,4 +26,11 @@ export const queryKeys = {
     all: ["procurement-categories"] as const,
     detail: (id: string) => ["procurement-categories", id] as const,
   },
+  pettyCash: {
+    all: ["petty-cash"] as const,
+    filtered: (filters?: { status?: string; page?: number; limit?: number; search?: string }) =>
+      ["petty-cash", filters] as const,
+    detail: (id: string) => ["petty-cash", id] as const,
+    summary: ["petty-cash", "summary"] as const,
+  },
 } as const

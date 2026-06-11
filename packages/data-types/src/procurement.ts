@@ -89,3 +89,100 @@ export interface PurchaseOrder {
   actualDelivery?: string
   notes?: string
 }
+
+export type PettyCashStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "released"
+  | "liquidated"
+  | "closed"
+
+export type PettyCashReleaseMethod = "digital_transfer" | "physical_cash"
+
+export type PettyCashAttachmentType = "supporting_document" | "receipt" | "liquidation_form"
+
+export interface PettyCashAttachmentInput {
+  name: string
+  url: string
+  type?: string
+  size?: number
+}
+
+export interface PettyCashAttachment {
+  id: string
+  requestId: string
+  liquidationId?: string | null
+  type: PettyCashAttachmentType
+  fileName: string
+  fileUrl: string
+  fileType?: string | null
+  fileSize?: number | null
+  uploadedByEmail?: string | null
+  createdAt: string
+}
+
+export interface PettyCashLiquidation {
+  id: string
+  requestId: string
+  actualAmountUsed: number | string
+  returnAmount: number | string
+  shortageAmount: number | string
+  remarks?: string | null
+  liquidatedByEmail?: string | null
+  liquidatedAt: string
+}
+
+export interface PettyCashRequest {
+  id: string
+  requestNumber: string
+  fundId?: string | null
+  requestDate: string
+  requestedByUserId?: string | null
+  requestedByEmail: string
+  requestedByName?: string | null
+  department: string
+  purpose: string
+  amountRequested: number | string
+  amountApproved?: number | string | null
+  urgency?: string | null
+  releaseMethod: PettyCashReleaseMethod
+  status: PettyCashStatus
+  approvedByEmail?: string | null
+  approvedAt?: string | null
+  rejectedByEmail?: string | null
+  rejectedAt?: string | null
+  rejectionReason?: string | null
+  releasedByEmail?: string | null
+  releasedAt?: string | null
+  closedByEmail?: string | null
+  closedAt?: string | null
+  notes?: string | null
+  createdAt: string
+  updatedAt: string
+  liquidation?: PettyCashLiquidation | null
+  attachments?: PettyCashAttachment[]
+}
+
+export interface PettyCashFund {
+  id: string
+  name: string
+  initialAmount: number | string
+  adjustmentAmount: number | string
+  notes?: string | null
+  active: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export interface PettyCashSummary {
+  fund?: PettyCashFund | null
+  totalFund: number
+  totalReleased: number
+  totalLiquidated: number
+  totalReturned: number
+  remainingBalance: number
+  pendingLiquidations: number
+  totalRequestsThisMonth: number
+  recentTransactions: PettyCashRequest[]
+}

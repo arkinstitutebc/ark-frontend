@@ -1,10 +1,11 @@
 import { useCurrentUser } from "@ark/api-client"
 import { type NavItem, Sidebar as SharedSidebar } from "@ark/ui"
-import { CheckCircle, HelpCircle, ShoppingBag, ShoppingCart } from "lucide-solid"
+import { CheckCircle, HelpCircle, ShoppingBag, ShoppingCart, WalletCards } from "lucide-solid"
 import { createMemo } from "solid-js"
 
 const navItems: NavItem[] = [
   { id: "requests", label: "Requests", href: "/", icon: ShoppingCart },
+  { id: "petty-cash", label: "Petty Cash", href: "/petty-cash", icon: WalletCards },
   { id: "orders", label: "Orders", href: "/orders", icon: ShoppingBag },
   { id: "approvals", label: "Approvals", href: "/approvals", icon: CheckCircle },
   { id: "tutorials", label: "How To", href: "/tutorials", icon: HelpCircle },

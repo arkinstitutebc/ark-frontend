@@ -10,7 +10,7 @@ API, type, and design-system packages. **Current**: v1.2.1
 apps/                          one Vike SSR app per ERP portal
 ├── main/                      → portal.arkinstitutebc.com       login, SSO hub, /learn manuals
 ├── training/                  → training.arkinstitutebc.com     batches, students, attendance
-├── procurement/               → procurement.arkinstitutebc.com  PR approval, PO workflow
+├── procurement/               → procurement.arkinstitutebc.com  PR approval, PO workflow, petty cash
 ├── inventory/                 → inventory.arkinstitutebc.com    receiving, stock take, movements
 ├── finance/                   → finance.arkinstitutebc.com      disbursements, GL, RR, assets
 ├── billing/                   → billing.arkinstitutebc.com      TESDA billing, receivables
