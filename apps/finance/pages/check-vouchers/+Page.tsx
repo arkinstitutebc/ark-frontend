@@ -28,6 +28,18 @@ function bankLabel(bank?: { name: string; bankName: string }) {
   return bank.bankName || bank.name
 }
 
+function VoucherTh(props: {
+  children: import("solid-js").JSX.Element
+  align?: "left" | "right" | "center"
+  class?: string
+}) {
+  return (
+    <Th align={props.align} class={`${props.class ?? ""} sticky top-0 z-10 bg-surface-muted`}>
+      {props.children}
+    </Th>
+  )
+}
+
 export default function CheckVouchersPage() {
   const [search, setSearch] = createSignal("")
   const [page, setPage] = createSignal(1)
@@ -128,65 +140,64 @@ export default function CheckVouchersPage() {
               >
                 <DataTable class="max-h-[600px] overflow-auto">
                   <THead>
-                    <Th class="min-w-[150px] sticky top-0 z-10 bg-surface-muted">Voucher</Th>
-                    <Th class="min-w-[120px] sticky top-0 z-10 bg-surface-muted">Date</Th>
-                    <Th class="min-w-[190px] sticky top-0 z-10 bg-surface-muted">Payee</Th>
-                    <Th class="min-w-[280px] sticky top-0 z-10 bg-surface-muted">Particular</Th>
-                    <Th class="min-w-[220px] sticky top-0 z-10 bg-surface-muted">Debit</Th>
-                    <Th class="min-w-[190px] sticky top-0 z-10 bg-surface-muted">Credit</Th>
-                    <Th class="min-w-[140px] sticky top-0 z-10 bg-surface-muted">Reference</Th>
-                    <Th align="right" class="min-w-[140px] sticky top-0 z-10 bg-surface-muted">
+                    <VoucherTh class="min-w-[150px]">Voucher</VoucherTh>
+                    <VoucherTh class="min-w-[120px]">Date</VoucherTh>
+                    <VoucherTh class="min-w-[190px]">Payee</VoucherTh>
+                    <VoucherTh class="min-w-[280px]">Particular</VoucherTh>
+                    <VoucherTh class="min-w-[220px]">Debit</VoucherTh>
+                    <VoucherTh class="min-w-[190px]">Credit</VoucherTh>
+                    <VoucherTh class="min-w-[140px]">Reference</VoucherTh>
+                    <VoucherTh align="right" class="min-w-[140px]">
                       Amount
-                    </Th>
-                    <Th align="right" class="min-w-[120px] sticky top-0 z-10 bg-surface-muted">
+                    </VoucherTh>
+                    <VoucherTh align="right" class="min-w-[120px]">
                       PDF
-                    </Th>
+                    </VoucherTh>
                   </THead>
                   <tbody>
                     <For each={rows()}>
-                      {txn => {
-                        const credit = createMemo(() => bankLabel(banksById().get(txn.bankId)))
-                        return (
-                          <Tr>
-                            <td class="px-6 py-3 text-sm font-semibold text-foreground whitespace-nowrap">
-                              {voucherNo(txn)}
-                            </td>
-                            <td class="px-6 py-3 text-sm text-muted whitespace-nowrap">
-                              {formatDatePH(txn.transactionDate ?? txn.createdAt)}
-                            </td>
-                            <td class="px-6 py-3 text-sm text-foreground">{txn.payee ?? "-"}</td>
-                            <td class="px-6 py-3 text-sm text-foreground">
-                              <span class="block max-w-[320px] truncate" title={txn.description}>
-                                {txn.description}
-                              </span>
-                            </td>
-                            <td class="px-6 py-3 text-sm text-foreground">
-                              <span class="block font-medium">{categoryLabel(txn.category)}</span>
-                              <span class="text-xs text-muted">
-                                {txn.profitCenter ?? "Unassigned"}
-                              </span>
-                            </td>
-                            <td class="px-6 py-3 text-sm text-foreground">{credit()}</td>
-                            <td class="px-6 py-3 text-sm text-muted whitespace-nowrap">
-                              {txn.referenceId ?? "-"}
-                            </td>
-                            <td class="px-6 py-3 text-right text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">
-                              {formatPeso(Math.abs(Number(txn.amount)))}
-                            </td>
-                            <td class="px-6 py-3 text-right">
-                              <a
-                                href={`${API_URL}/api/finance/check-vouchers/${txn.id}/pdf`}
-                                target="_blank"
-                                rel="noreferrer"
-                                class="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
-                              >
-                                <Icons.fileText class="h-4 w-4" />
-                                Open
-                              </a>
-                            </td>
-                          </Tr>
-                        )
-                      }}
+                      {txn => (
+                        <Tr>
+                          <td class="px-6 py-3 text-sm font-semibold text-foreground whitespace-nowrap">
+                            {voucherNo(txn)}
+                          </td>
+                          <td class="px-6 py-3 text-sm text-muted whitespace-nowrap">
+                            {formatDatePH(txn.transactionDate ?? txn.createdAt)}
+                          </td>
+                          <td class="px-6 py-3 text-sm text-foreground">{txn.payee ?? "-"}</td>
+                          <td class="px-6 py-3 text-sm text-foreground">
+                            <span class="block max-w-[320px] truncate" title={txn.description}>
+                              {txn.description}
+                            </span>
+                          </td>
+                          <td class="px-6 py-3 text-sm text-foreground">
+                            <span class="block font-medium">{categoryLabel(txn.category)}</span>
+                            <span class="text-xs text-muted">
+                              {txn.profitCenter ?? "Unassigned"}
+                            </span>
+                          </td>
+                          <td class="px-6 py-3 text-sm text-foreground">
+                            {bankLabel(banksById().get(txn.bankId))}
+                          </td>
+                          <td class="px-6 py-3 text-sm text-muted whitespace-nowrap">
+                            {txn.referenceId ?? "-"}
+                          </td>
+                          <td class="px-6 py-3 text-right text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">
+                            {formatPeso(Math.abs(Number(txn.amount)))}
+                          </td>
+                          <td class="px-6 py-3 text-right">
+                            <a
+                              href={`${API_URL}/api/finance/check-vouchers/${txn.id}/pdf`}
+                              target="_blank"
+                              rel="noreferrer"
+                              class="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
+                            >
+                              <Icons.fileText class="h-4 w-4" />
+                              Open
+                            </a>
+                          </td>
+                        </Tr>
+                      )}
                     </For>
                   </tbody>
                 </DataTable>
