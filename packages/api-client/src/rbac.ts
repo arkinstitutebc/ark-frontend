@@ -58,7 +58,7 @@ export function portalAccessLabels(role: UserRole): string[] {
     learning: "Learning Hub",
     adminUsers: "User Management",
     adminPosts: "Blog Posts",
-    adminSettings: "Settings",
+    adminSettings: "Email Alerts",
   }
   return Object.entries(portalAccess)
     .filter(([, roles]) => (roles as readonly UserRole[]).includes(role))

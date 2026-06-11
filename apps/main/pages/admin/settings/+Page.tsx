@@ -18,6 +18,7 @@ export default function AdminSettingsPage() {
   const [emailInput, setEmailInput] = createSignal("")
   const [emailError, setEmailError] = createSignal("")
   const [dirty, setDirty] = createSignal(false)
+  const [savedMessage, setSavedMessage] = createSignal("")
 
   createEffect(() => {
     if (typeof window === "undefined") return
@@ -38,10 +39,33 @@ export default function AdminSettingsPage() {
 
   const isAdmin = () => userQuery.data?.role === "admin"
   const sortedRecipients = createMemo(() => [...recipients()].sort((a, b) => a.localeCompare(b)))
+  const pendingEmail = createMemo(() => normalizeEmail(emailInput()))
+  const canAddPendingEmail = createMemo(
+    () =>
+      !!pendingEmail() &&
+      emailPattern.test(pendingEmail()) &&
+      !recipients().includes(pendingEmail())
+  )
   const hasChanges = createMemo(() => {
     const saved = [...(settingsQuery.data?.requestRecipients ?? [])].sort()
     const current = sortedRecipients()
     return saved.length !== current.length || saved.some((email, index) => email !== current[index])
+  })
+  const hasUnsavedChanges = createMemo(() => hasChanges() || canAddPendingEmail())
+  const statusTone = createMemo(() => {
+    if (hasUnsavedChanges()) return "bg-blue-50 text-primary"
+    if (savedMessage() || settingsQuery.data?.smtpConfigured) return "bg-green-50 text-green-700"
+    return "bg-amber-50 text-amber-700"
+  })
+  const statusDot = createMemo(() => {
+    if (hasUnsavedChanges()) return "bg-primary"
+    if (savedMessage() || settingsQuery.data?.smtpConfigured) return "bg-green-500"
+    return "bg-amber-500"
+  })
+  const statusText = createMemo(() => {
+    if (hasUnsavedChanges()) return "Unsaved changes"
+    if (savedMessage()) return savedMessage()
+    return settingsQuery.data?.smtpConfigured ? "SMTP ready" : "SMTP not configured"
   })
 
   function addRecipient() {
@@ -59,11 +83,13 @@ export default function AdminSettingsPage() {
     setEmailInput("")
     setEmailError("")
     setDirty(true)
+    setSavedMessage("")
   }
 
   function removeRecipient(email: string) {
     setRecipients(recipients().filter(item => item !== email))
     setDirty(true)
+    setSavedMessage("")
   }
 
   function onEmailKeyDown(e: KeyboardEvent) {
@@ -74,8 +100,23 @@ export default function AdminSettingsPage() {
 
   async function saveSettings() {
     try {
-      await updateSettings.mutateAsync({ requestRecipients: sortedRecipients() })
+      let nextRecipients = sortedRecipients()
+      if (emailInput().trim()) {
+        const email = pendingEmail()
+        if (!emailPattern.test(email)) {
+          setEmailError("Enter a valid email address")
+          return
+        }
+        nextRecipients = [...new Set([...nextRecipients, email])].sort((a, b) => a.localeCompare(b))
+      }
+      const saved = await updateSettings.mutateAsync({ requestRecipients: nextRecipients })
+      setRecipients(saved.requestRecipients)
+      setEmailInput("")
+      setEmailError("")
       setDirty(false)
+      setSavedMessage(
+        `Saved ${saved.requestRecipients.length} recipient${saved.requestRecipients.length === 1 ? "" : "s"}`
+      )
       toast.success("Email alert settings saved")
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Could not save settings")
@@ -98,9 +139,9 @@ export default function AdminSettingsPage() {
               <div class="mb-2">
                 <BackLink href="/">Dashboard</BackLink>
               </div>
-              <h1 class="text-2xl font-bold text-foreground">Settings</h1>
+              <h1 class="text-2xl font-bold text-foreground">Email Alerts</h1>
               <p class="mt-0.5 text-sm text-muted">
-                Portal-wide controls for request alerts and system behavior.
+                Choose who gets notified when staff submit operational requests.
               </p>
             </div>
 
@@ -121,18 +162,10 @@ export default function AdminSettingsPage() {
                     </div>
                   </div>
                   <span
-                    class={`inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
-                      settingsQuery.data?.smtpConfigured
-                        ? "bg-green-50 text-green-700"
-                        : "bg-amber-50 text-amber-700"
-                    }`}
+                    class={`inline-flex w-fit items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${statusTone()}`}
                   >
-                    <span
-                      class={`h-1.5 w-1.5 rounded-full ${
-                        settingsQuery.data?.smtpConfigured ? "bg-green-500" : "bg-amber-500"
-                      }`}
-                    />
-                    {settingsQuery.data?.smtpConfigured ? "SMTP ready" : "SMTP not configured"}
+                    <span class={`h-1.5 w-1.5 rounded-full ${statusDot()}`} />
+                    {statusText()}
                   </span>
                 </div>
               </div>
@@ -176,6 +209,7 @@ export default function AdminSettingsPage() {
                     leftIcon={Icons.mail}
                     placeholder="name@example.com"
                     error={emailError()}
+                    hint="Press Enter or Save changes to include this email."
                   />
                   <Button
                     type="button"
@@ -191,12 +225,15 @@ export default function AdminSettingsPage() {
 
               <div class="flex flex-col gap-3 border-t border-border bg-surface px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                 <p class="text-xs text-muted">
-                  SMTP username and password stay on the server, not in portal settings.
+                  {hasChanges() || canAddPendingEmail()
+                    ? "Changes are not active until you save."
+                    : savedMessage() ||
+                      "SMTP username and password stay on the server, not in portal settings."}
                 </p>
                 <Button
                   type="button"
                   size="sm"
-                  disabled={!hasChanges()}
+                  disabled={!hasChanges() && !canAddPendingEmail()}
                   loading={updateSettings.isPending}
                   loadingLabel="Saving"
                   onClick={saveSettings}

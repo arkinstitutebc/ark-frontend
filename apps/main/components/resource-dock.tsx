@@ -35,10 +35,10 @@ const resources: ResourceItem[] = [
   {
     key: "adminSettings",
     href: "/admin/settings",
-    label: "Settings",
+    label: "Email Alerts",
     action: "Edit alerts",
     badge: "Admin",
-    icon: Icons.settings,
+    icon: Icons.mail,
   },
   {
     key: "learning",
