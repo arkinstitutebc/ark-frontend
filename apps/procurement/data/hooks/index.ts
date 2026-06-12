@@ -5,7 +5,7 @@ export {
   useDeleteCategory,
   useUpdateCategory,
 } from "./categories"
-export { useCreatePo, useOrder, useOrders, useUpdatePo } from "./orders"
+export { useCreatePo, useOrder, useOrders, usePaginatedOrders, useUpdatePo } from "./orders"
 export {
   useApprovePettyCash,
   useClosePettyCash,

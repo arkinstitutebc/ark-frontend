@@ -1,8 +1,8 @@
 import { PageHeader, Select, THead, Th, type ToneKind, tonePillClass } from "@ark/ui"
 import { formatMovementQuantity, movementQuantityClass } from "@data/format"
-import { useMovements } from "@data/hooks"
+import { type MovementListResponse, usePaginatedMovements } from "@data/hooks"
 import type { StockMovement } from "@data/types"
-import { createMemo, createSignal, For } from "solid-js"
+import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { Icons, QueryBoundary } from "@/components/ui"
 
 function formatDate(dateStr: string) {
@@ -24,28 +24,44 @@ const TYPE_TONE: Record<string, ToneKind> = {
 const TYPE_LABELS: Record<string, string> = { in: "IN", out: "OUT", adjustment: "ADJ" }
 
 export default function MovementsPage() {
-  const query = useMovements()
   const [searchQuery, setSearchQuery] = createSignal("")
   const [typeFilter, setTypeFilter] = createSignal<"all" | "in" | "out" | "adjustment">("all")
+  const [page, setPage] = createSignal(1)
+  const PAGE_SIZE = 20
 
-  const filteredMovements = createMemo(() => {
-    const data = query.data || []
-    return data.filter(m => {
-      const matchesSearch =
-        !searchQuery() || m.itemName?.toLowerCase().includes(searchQuery().toLowerCase())
-      const matchesType = typeFilter() === "all" || m.type === typeFilter()
-      return matchesSearch && matchesType
-    })
+  const query = usePaginatedMovements(() => {
+    const selectedType = typeFilter()
+    return {
+      page: page(),
+      limit: PAGE_SIZE,
+      type: selectedType === "all" ? undefined : selectedType,
+      search: searchQuery().trim() || undefined,
+    }
   })
+  const rows = createMemo(() => query.data?.items ?? [])
+  const totalPages = createMemo(() =>
+    query.data ? Math.max(1, Math.ceil(query.data.total / query.data.limit)) : 1
+  )
 
   const stats = createMemo(() => {
-    const data = query.data || []
+    const byType = query.data?.summary.byType ?? {}
     return {
-      total: data.length,
-      totalIn: data.filter(m => m.type === "in").length,
-      totalOut: data.filter(m => m.type === "out").length,
-      totalAdj: data.filter(m => m.type === "adjustment").length,
+      total: Object.values(byType).reduce((sum, count) => sum + (count ?? 0), 0),
+      totalIn: byType.in ?? 0,
+      totalOut: byType.out ?? 0,
+      totalAdj: byType.adjustment ?? 0,
     }
+  })
+
+  createEffect(() => {
+    searchQuery()
+    typeFilter()
+    setPage(1)
+  })
+
+  createEffect(() => {
+    const lastPage = totalPages()
+    if (page() > lastPage) setPage(lastPage)
   })
 
   return (
@@ -72,7 +88,7 @@ export default function MovementsPage() {
       </div>
 
       <QueryBoundary query={query}>
-        {(_movements: StockMovement[]) => (
+        {(_data: MovementListResponse) => (
           <div class="bg-surface rounded-lg border border-border overflow-hidden">
             <div class="px-6 py-4 border-b border-border">
               <div class="flex items-center justify-between">
@@ -113,7 +129,7 @@ export default function MovementsPage() {
                 <Th size="dense">User</Th>
               </THead>
               <tbody class="divide-y divide-border">
-                <For each={filteredMovements()}>
+                <For each={rows()}>
                   {(m: StockMovement) => (
                     <tr class="hover:bg-surface-muted transition-colors">
                       <td class="px-6 py-4 text-sm text-foreground">{formatDate(m.createdAt)}</td>
@@ -143,11 +159,36 @@ export default function MovementsPage() {
                 </For>
               </tbody>
             </table>
-            {filteredMovements().length === 0 && (
+            {rows().length === 0 && (
               <div class="px-6 py-12 text-center">
                 <p class="text-sm text-muted">No movements found</p>
               </div>
             )}
+            <Show when={query.data && query.data.total > query.data.limit}>
+              <div class="flex items-center justify-between border-t border-border px-6 py-4 text-sm text-muted">
+                <span>
+                  Page {page()} of {totalPages()} · {query.data?.total ?? 0} movements
+                </span>
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={page() <= 1 || query.isFetching}
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    class="rounded-lg border border-border px-3 py-1.5 font-medium text-foreground disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    disabled={page() >= totalPages() || query.isFetching}
+                    onClick={() => setPage(p => Math.min(totalPages(), p + 1))}
+                    class="rounded-lg border border-border px-3 py-1.5 font-medium text-foreground disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            </Show>
           </div>
         )}
       </QueryBoundary>

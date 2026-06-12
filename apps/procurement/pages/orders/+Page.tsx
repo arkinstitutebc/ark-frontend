@@ -1,8 +1,8 @@
 import { formatDatePH, PageContainer, PageHeader, StatCard, THead, Th } from "@ark/ui"
-import { useOrders } from "@data/hooks"
+import { usePaginatedOrders } from "@data/hooks"
 import type { PurchaseOrderListItem } from "@data/hooks/orders"
 import type { PoStatus } from "@data/types"
-import { createMemo, createSignal, For, Show } from "solid-js"
+import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
 function getEmptyStateMessage(filter: PoStatus | "all") {
@@ -21,9 +21,16 @@ function getEmptyStateMessage(filter: PoStatus | "all") {
 }
 
 export default function OrdersPage() {
-  const query = useOrders()
   const [filter, setFilter] = createSignal<PoStatus | "all">("all")
   const [search, setSearch] = createSignal("")
+  const [page, setPage] = createSignal(1)
+  const PAGE_SIZE = 20
+  const query = usePaginatedOrders(() => ({
+    page: page(),
+    limit: PAGE_SIZE,
+    status: filter() === "all" ? undefined : filter(),
+    search: search().trim() || undefined,
+  }))
   const filters = [
     { value: "all" as const, label: "All" },
     { value: "draft" as const, label: "Draft" },
@@ -32,28 +39,31 @@ export default function OrdersPage() {
     { value: "received" as const, label: "Received" },
   ]
 
-  const filteredOrders = createMemo(() => {
-    const data = query.data || []
-    return data.filter(po => {
-      const matchStatus = filter() === "all" || po.status === filter()
-      const matchSearch =
-        !search() ||
-        po.poCode?.toLowerCase().includes(search().toLowerCase()) ||
-        po.batchName?.toLowerCase().includes(search().toLowerCase()) ||
-        po.supplier?.toLowerCase().includes(search().toLowerCase())
-      return matchStatus && matchSearch
-    })
-  })
+  const rows = createMemo(() => query.data?.items ?? [])
+  const totalPages = createMemo(() =>
+    query.data ? Math.max(1, Math.ceil(query.data.total / query.data.limit)) : 1
+  )
 
   const stats = createMemo(() => {
-    const data = query.data || []
+    const counts = query.data?.summary.byStatus ?? {}
     return {
-      total: data.length,
-      draft: data.filter(po => po.status === "draft").length,
-      sent: data.filter(po => po.status === "sent").length,
-      partial: data.filter(po => po.status === "partial").length,
-      received: data.filter(po => po.status === "received").length,
+      total: Object.values(counts).reduce((sum, count) => sum + (count ?? 0), 0),
+      draft: counts.draft ?? 0,
+      sent: counts.sent ?? 0,
+      partial: counts.partial ?? 0,
+      received: counts.received ?? 0,
     }
+  })
+
+  createEffect(() => {
+    filter()
+    search()
+    setPage(1)
+  })
+
+  createEffect(() => {
+    const lastPage = totalPages()
+    if (page() > lastPage) setPage(lastPage)
   })
 
   return (
@@ -109,10 +119,10 @@ export default function OrdersPage() {
 
       {/* Table */}
       <QueryBoundary query={query}>
-        {(_data: PurchaseOrderListItem[]) => (
+        {data => (
           <div class="bg-surface rounded-lg border border-border overflow-hidden">
             <Show
-              when={filteredOrders().length > 0}
+              when={rows().length > 0}
               fallback={
                 <div class="py-16 text-center">
                   <Icons.shoppingBag class="w-12 h-12 mx-auto mb-3 text-muted" />
@@ -135,7 +145,7 @@ export default function OrdersPage() {
                     <Th align="right">Actions</Th>
                   </THead>
                   <tbody>
-                    <For each={filteredOrders()}>
+                    <For each={rows()}>
                       {(po: PurchaseOrderListItem) => (
                         <tr class="border-t border-border">
                           <td class="py-4 px-6">
@@ -175,6 +185,31 @@ export default function OrdersPage() {
                     </For>
                   </tbody>
                 </table>
+              </div>
+            </Show>
+            <Show when={data.total > data.limit}>
+              <div class="flex items-center justify-between border-t border-border px-6 py-4 text-sm text-muted">
+                <span>
+                  Page {page()} of {totalPages()} · {data.total} orders
+                </span>
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={page() <= 1 || query.isFetching}
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    class="rounded-lg border border-border px-3 py-1.5 font-medium text-foreground disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    disabled={page() >= totalPages() || query.isFetching}
+                    onClick={() => setPage(p => Math.min(totalPages(), p + 1))}
+                    class="rounded-lg border border-border px-3 py-1.5 font-medium text-foreground disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
             </Show>
           </div>

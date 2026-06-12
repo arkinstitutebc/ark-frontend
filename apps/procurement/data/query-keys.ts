@@ -14,6 +14,8 @@ export const queryKeys = {
   orders: {
     all: ["orders"] as const,
     byStatus: (status?: string) => ["orders", { status }] as const,
+    filtered: (filters?: { status?: string; page?: number; limit?: number; search?: string }) =>
+      ["orders", filters] as const,
     detail: (id: string) => ["orders", id] as const,
   },
   batches: {

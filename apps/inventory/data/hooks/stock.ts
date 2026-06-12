@@ -1,11 +1,24 @@
 import { createCrudHooks, toast } from "@ark/ui"
-import { createMutation, useQueryClient } from "@tanstack/solid-query"
+import { createMutation, createQuery, useQueryClient } from "@tanstack/solid-query"
 import { api } from "../api"
 import { queryKeys } from "../query-keys"
 import type { StockItem, StockMovement } from "../types"
 
 interface StockListQuery {
   batchId?: string
+  page?: number
+  limit?: number
+  search?: string
+}
+
+export interface StockListResponse {
+  items: StockItem[]
+  total: number
+  page: number
+  limit: number
+  summary: {
+    byStatus: Partial<Record<StockItem["status"], number>>
+  }
 }
 
 const crud = createCrudHooks<
@@ -27,6 +40,22 @@ const crud = createCrudHooks<
 
 export const useStock = crud.useList
 export const useStockItem = crud.useOne
+
+export function usePaginatedStock(query?: () => StockListQuery | undefined) {
+  return createQuery(() => {
+    const q = query?.() ?? { page: 1, limit: 20 }
+    const params = new URLSearchParams()
+    if (q.batchId) params.set("batchId", q.batchId)
+    if (q.page) params.set("page", String(q.page))
+    if (q.limit) params.set("limit", String(q.limit))
+    if (q.search) params.set("search", q.search)
+    const qs = params.toString()
+    return {
+      queryKey: queryKeys.stock.filtered(q),
+      queryFn: () => api<StockListResponse>(`/api/inventory/stock${qs ? `?${qs}` : ""}`),
+    }
+  })
+}
 
 // Bespoke: special adjust endpoint, multi-invalidation
 interface AdjustStockInput {

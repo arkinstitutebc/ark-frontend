@@ -60,6 +60,7 @@ export {
   useApproveRr,
   useCreateRr,
   useFinanceVerifyRr,
+  usePaginatedReimbursements,
   useReimbursement,
   useReimbursements,
   useRejectRr,

@@ -1,5 +1,5 @@
 import { createCrudHooks, toast } from "@ark/ui"
-import { createMutation, useQueryClient } from "@tanstack/solid-query"
+import { createMutation, createQuery, useQueryClient } from "@tanstack/solid-query"
 import { api } from "../api"
 import { queryKeys } from "../query-keys"
 import type { PoStatus, PrItem, PurchaseOrder } from "../types"
@@ -39,6 +39,20 @@ interface UpdatePoInput {
 
 interface OrdersListQuery {
   status?: string
+  page?: number
+  limit?: number
+  search?: string
+}
+
+export interface OrdersListResponse {
+  items: PurchaseOrderListItem[]
+  total: number
+  page: number
+  limit: number
+  summary: {
+    totalAmount: number
+    byStatus: Partial<Record<PoStatus, number>>
+  }
 }
 
 const crud = createCrudHooks<
@@ -63,6 +77,22 @@ const crud = createCrudHooks<
 export const useOrders = crud.useList
 export const useOrder = crud.useOne
 export const useUpdatePo = crud.useUpdate
+
+export function usePaginatedOrders(query?: () => OrdersListQuery | undefined) {
+  return createQuery(() => {
+    const q = query?.() ?? { page: 1, limit: 20 }
+    const params = new URLSearchParams()
+    if (q.status) params.set("status", q.status)
+    if (q.page) params.set("page", String(q.page))
+    if (q.limit) params.set("limit", String(q.limit))
+    if (q.search) params.set("search", q.search)
+    const qs = params.toString()
+    return {
+      queryKey: queryKeys.orders.filtered(q),
+      queryFn: () => api<OrdersListResponse>(`/api/procurement/orders${qs ? `?${qs}` : ""}`),
+    }
+  })
+}
 
 // Bespoke create — also invalidates requests since creating a PO marks PR as "ordered"
 export function useCreatePo() {

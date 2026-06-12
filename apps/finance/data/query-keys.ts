@@ -37,6 +37,14 @@ export const queryKeys = {
   reimbursements: {
     all: ["reimbursements"] as const,
     byStatus: (status?: string) => ["reimbursements", { status }] as const,
+    filtered: (filters?: {
+      status?: string
+      page?: number
+      limit?: number
+      search?: string
+      sortKey?: string
+      sortDir?: string
+    }) => ["reimbursements", filters] as const,
     detail: (id: string) => ["reimbursements", id] as const,
   },
   assets: {

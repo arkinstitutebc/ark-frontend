@@ -1,33 +1,43 @@
 import type { Reimbursement } from "@ark/data-types"
 import { Button, PageContainer, PageHeader, QueryBoundary, StatCard, TableSkeleton } from "@ark/ui"
-import { useReimbursements } from "@data/hooks"
-import { createMemo, createSignal, For, Show } from "solid-js"
+import { usePaginatedReimbursements } from "@data/hooks"
+import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
 import {
   type ReimbursementSortDir,
   type ReimbursementSortKey,
   reimbursementQueueFilters,
-  reimbursementStats,
-  sortReimbursements,
 } from "@/components/finance/reimbursement-list-helpers"
 import { ReimbursementTable } from "@/components/finance/reimbursement-table"
 
 export default function RrApprovalsPage() {
-  const query = useReimbursements()
   const [filter, setFilter] =
     createSignal<(typeof reimbursementQueueFilters)[number]["value"]>("pending")
   const [sortKey, setSortKey] = createSignal<ReimbursementSortKey>("filed")
   const [sortDir, setSortDir] = createSignal<ReimbursementSortDir>("desc")
+  const [page, setPage] = createSignal(1)
+  const PAGE_SIZE = 20
 
-  const all = createMemo(() => (query.data ?? []) as Reimbursement[])
-  const stats = createMemo(() => reimbursementStats(all()))
-  const rows = createMemo(() =>
-    sortReimbursements(
-      all().filter(rr => rr.status === filter()),
-      sortKey(),
-      sortDir()
-    )
+  const query = usePaginatedReimbursements(() => ({
+    page: page(),
+    limit: PAGE_SIZE,
+    status: filter(),
+    sortKey: sortKey(),
+    sortDir: sortDir(),
+  }))
+  const rows = createMemo(() => (query.data?.items ?? []) as Reimbursement[])
+  const totalPages = createMemo(() =>
+    query.data ? Math.max(1, Math.ceil(query.data.total / query.data.limit)) : 1
   )
+  const stats = createMemo(() => {
+    const byStatus = query.data?.summary.byStatus ?? {}
+    return {
+      pending: byStatus.pending ?? 0,
+      verified: byStatus.verified ?? 0,
+      approved: byStatus.approved ?? 0,
+      rejected: byStatus.rejected ?? 0,
+    }
+  })
   const setSort = (key: ReimbursementSortKey) => {
     if (sortKey() === key) {
       setSortDir(sortDir() === "asc" ? "desc" : "asc")
@@ -36,6 +46,18 @@ export default function RrApprovalsPage() {
     setSortKey(key)
     setSortDir(key === "amount" ? "desc" : "asc")
   }
+
+  createEffect(() => {
+    filter()
+    sortKey()
+    sortDir()
+    setPage(1)
+  })
+
+  createEffect(() => {
+    const lastPage = totalPages()
+    if (page() > lastPage) setPage(lastPage)
+  })
 
   return (
     <PageContainer>
@@ -56,7 +78,9 @@ export default function RrApprovalsPage() {
           <div class="flex items-center justify-between gap-3">
             <h2 class="text-sm font-semibold text-foreground">Approval Queue</h2>
             <p class="text-xs text-muted">
-              {query.isSuccess ? `${rows().length} claims` : "Loading claims"}
+              {query.isSuccess
+                ? `${rows().length} of ${query.data?.total ?? 0} claims`
+                : "Loading claims"}
             </p>
           </div>
           <div class="flex flex-wrap gap-2">
@@ -101,6 +125,31 @@ export default function RrApprovalsPage() {
             </Show>
           )}
         </QueryBoundary>
+        <Show when={query.data && query.data.total > query.data.limit}>
+          <div class="flex items-center justify-between border-t border-border px-6 py-4 text-sm text-muted">
+            <span>
+              Page {page()} of {totalPages()} · {query.data?.total ?? 0} claims
+            </span>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                disabled={page() <= 1 || query.isFetching}
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                class="rounded-lg border border-border px-3 py-1.5 font-medium text-foreground disabled:opacity-50"
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                disabled={page() >= totalPages() || query.isFetching}
+                onClick={() => setPage(p => Math.min(totalPages(), p + 1))}
+                class="rounded-lg border border-border px-3 py-1.5 font-medium text-foreground disabled:opacity-50"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </Show>
       </div>
     </PageContainer>
   )

@@ -1,39 +1,46 @@
 import { useCurrentUser } from "@ark/api-client"
 import { categoryToneClass, PageHeader, StatCard, THead, Th } from "@ark/ui"
-import { useAdjustStock, useMovements, useStock } from "@data/hooks"
+import {
+  type StockListResponse,
+  useAdjustStock,
+  usePaginatedMovements,
+  usePaginatedStock,
+} from "@data/hooks"
 import type { StockItem } from "@data/types"
-import { createMemo, createSignal, For, Show } from "solid-js"
+import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { AdjustStockModal } from "@/components/adjust-stock-modal"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 import { ViewItemModal } from "@/components/view-item-modal"
 
 export default function Page() {
-  const stockQuery = useStock()
-  const movementsQuery = useMovements()
   const adjustMutation = useAdjustStock()
   const userQuery = useCurrentUser()
+  const [page, setPage] = createSignal(1)
+  const PAGE_SIZE = 20
 
   const [adjustModalOpen, setAdjustModalOpen] = createSignal(false)
   const [viewModalOpen, setViewModalOpen] = createSignal(false)
   const [selectedItem, setSelectedItem] = createSignal<StockItem | null>(null)
   const [searchQuery, setSearchQuery] = createSignal("")
 
-  const filteredStock = createMemo(() => {
-    const items = stockQuery.data || []
-    const q = searchQuery().toLowerCase().trim()
-    if (!q) return items
-    return items.filter(
-      item => item.name.toLowerCase().includes(q) || item.batchCode?.toLowerCase().includes(q)
-    )
-  })
+  const stockQuery = usePaginatedStock(() => ({
+    page: page(),
+    limit: PAGE_SIZE,
+    search: searchQuery().trim() || undefined,
+  }))
+  const movementsQuery = usePaginatedMovements(() => ({ page: 1, limit: 1 }))
+  const rows = createMemo(() => stockQuery.data?.items ?? [])
+  const totalPages = createMemo(() =>
+    stockQuery.data ? Math.max(1, Math.ceil(stockQuery.data.total / stockQuery.data.limit)) : 1
+  )
 
   const stats = createMemo(() => {
-    const items = stockQuery.data || []
+    const byStatus = stockQuery.data?.summary.byStatus ?? {}
     return {
-      total: items.length,
-      lowStock: items.filter(i => i.status === "low-stock").length,
-      outOfStock: items.filter(i => i.status === "out-of-stock").length,
-      totalMovements: movementsQuery.data?.length ?? 0,
+      total: stockQuery.data?.total ?? 0,
+      lowStock: byStatus["low-stock"] ?? 0,
+      outOfStock: byStatus["out-of-stock"] ?? 0,
+      totalMovements: movementsQuery.data?.total ?? 0,
     }
   })
   const canWriteStock = () =>
@@ -59,6 +66,16 @@ export default function Page() {
       }
     )
   }
+
+  createEffect(() => {
+    searchQuery()
+    setPage(1)
+  })
+
+  createEffect(() => {
+    const lastPage = totalPages()
+    if (page() > lastPage) setPage(lastPage)
+  })
 
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
@@ -105,7 +122,7 @@ export default function Page() {
       </div>
 
       <QueryBoundary query={stockQuery}>
-        {(_items: StockItem[]) => (
+        {(_data: StockListResponse) => (
           <div class="bg-surface rounded-lg border border-border overflow-hidden">
             <div class="px-6 py-4 border-b border-border">
               <div class="flex items-center justify-between">
@@ -133,7 +150,7 @@ export default function Page() {
                 </Th>
               </THead>
               <tbody class="divide-y divide-border">
-                <For each={filteredStock()}>
+                <For each={rows()}>
                   {(item: StockItem) => (
                     <tr class="hover:bg-surface-muted transition-colors">
                       <td class="px-6 py-4">
@@ -182,6 +199,31 @@ export default function Page() {
                 </For>
               </tbody>
             </table>
+            <Show when={stockQuery.data && stockQuery.data.total > stockQuery.data.limit}>
+              <div class="flex items-center justify-between border-t border-border px-6 py-4 text-sm text-muted">
+                <span>
+                  Page {page()} of {totalPages()} · {stockQuery.data?.total ?? 0} items
+                </span>
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={page() <= 1 || stockQuery.isFetching}
+                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                    class="rounded-lg border border-border px-3 py-1.5 font-medium text-foreground disabled:opacity-50"
+                  >
+                    Previous
+                  </button>
+                  <button
+                    type="button"
+                    disabled={page() >= totalPages() || stockQuery.isFetching}
+                    onClick={() => setPage(p => Math.min(totalPages(), p + 1))}
+                    class="rounded-lg border border-border px-3 py-1.5 font-medium text-foreground disabled:opacity-50"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+            </Show>
           </div>
         )}
       </QueryBoundary>

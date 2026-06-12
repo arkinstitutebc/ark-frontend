@@ -8,7 +8,7 @@ import type {
   RrSupportingDocs,
 } from "@ark/data-types"
 import { createCrudHooks, toast } from "@ark/ui"
-import { createMutation, useQueryClient } from "@tanstack/solid-query"
+import { createMutation, createQuery, useQueryClient } from "@tanstack/solid-query"
 import { api } from "../api"
 import { queryKeys } from "../query-keys"
 
@@ -40,6 +40,22 @@ export type UpdateRrInput = Partial<CreateRrInput>
 
 interface ListQuery {
   status?: string
+  page?: number
+  limit?: number
+  search?: string
+  sortKey?: string
+  sortDir?: string
+}
+
+export interface ReimbursementsListResponse {
+  items: Reimbursement[]
+  total: number
+  page: number
+  limit: number
+  summary: {
+    totalAmount: number
+    byStatus: Partial<Record<Reimbursement["status"], number>>
+  }
 }
 
 const crud = createCrudHooks<Reimbursement, Reimbursement, CreateRrInput, UpdateRrInput, ListQuery>(
@@ -60,6 +76,24 @@ export const useReimbursements = crud.useList
 export const useReimbursement = crud.useOne
 export const useCreateRr = crud.useCreate
 export const useUpdateRr = crud.useUpdate
+
+export function usePaginatedReimbursements(query?: () => ListQuery | undefined) {
+  return createQuery(() => {
+    const q = query?.() ?? { page: 1, limit: 20 }
+    const params = new URLSearchParams()
+    if (q.status) params.set("status", q.status)
+    if (q.page) params.set("page", String(q.page))
+    if (q.limit) params.set("limit", String(q.limit))
+    if (q.search) params.set("search", q.search)
+    if (q.sortKey) params.set("sortKey", q.sortKey)
+    if (q.sortDir) params.set("sortDir", q.sortDir)
+    const qs = params.toString()
+    return {
+      queryKey: queryKeys.reimbursements.filtered(q),
+      queryFn: () => api<ReimbursementsListResponse>(`/api/reimbursements${qs ? `?${qs}` : ""}`),
+    }
+  })
+}
 
 function bespoke<TBody>(path: (id: string) => string, successMsg: string) {
   return () => {
