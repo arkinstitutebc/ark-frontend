@@ -34,6 +34,7 @@ export {
   type CreateCheckVoucherInput,
   useCheckVouchers,
   useCreateCheckVoucher,
+  useVoidCheckVoucher,
 } from "./check-vouchers"
 export {
   useCreateDisbursement,

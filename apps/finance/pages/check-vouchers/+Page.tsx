@@ -1,5 +1,6 @@
 import {
   Button,
+  ConfirmDialog,
   DataTable,
   formatDatePH,
   formatPeso,
@@ -14,8 +15,8 @@ import {
   Tr,
 } from "@ark/ui"
 import { API_URL } from "@data/api"
-import { useCheckVouchers } from "@data/hooks"
-import type { CheckVoucherStatus } from "@data/types"
+import { useCheckVouchers, useVoidCheckVoucher } from "@data/hooks"
+import type { CheckVoucher, CheckVoucherStatus } from "@data/types"
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
 
@@ -46,6 +47,8 @@ export default function CheckVouchersPage() {
   const [search, setSearch] = createSignal("")
   const [status, setStatus] = createSignal<CheckVoucherStatus | "all">("all")
   const [page, setPage] = createSignal(1)
+  const [voucherToVoid, setVoucherToVoid] = createSignal<CheckVoucher | null>(null)
+  const voidVoucher = useVoidCheckVoucher()
 
   const query = useCheckVouchers(() => ({
     page: page(),
@@ -60,6 +63,13 @@ export default function CheckVouchersPage() {
     Math.min((page() - 1) * PAGE_SIZE + (query.data?.items.length ?? 0), query.data?.total ?? 0)
   )
   const hasFilter = createMemo(() => search().trim().length > 0 || status() !== "all")
+  const confirmVoid = () => {
+    const voucher = voucherToVoid()
+    if (!voucher) return
+    voidVoucher.mutate(voucher.id, {
+      onSuccess: () => setVoucherToVoid(null),
+    })
+  }
 
   createEffect(() => {
     search()
@@ -86,11 +96,7 @@ export default function CheckVouchersPage() {
 
       <div class="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard label="Total Vouchers" numeric value={query.data?.total ?? "-"} />
-        <StatCard
-          label="Pending"
-          numeric
-          value={query.data?.items.filter(v => v.status !== "paid").length ?? "-"}
-        />
+        <StatCard label="Pending" numeric value={query.data?.pendingCount ?? "-"} />
         <StatCard label="Total Amount" numeric value={formatPeso(query.data?.totalAmount ?? 0)} />
       </div>
 
@@ -155,6 +161,9 @@ export default function CheckVouchersPage() {
                   <VoucherTh align="right" class="min-w-[120px]">
                     PDF
                   </VoucherTh>
+                  <VoucherTh align="right" class="min-w-[120px]">
+                    Actions
+                  </VoucherTh>
                 </THead>
                 <tbody>
                   <For each={data.items}>
@@ -193,6 +202,20 @@ export default function CheckVouchersPage() {
                             Open
                           </a>
                         </td>
+                        <td class="px-6 py-3 text-right">
+                          <Show
+                            when={voucher.status !== "void"}
+                            fallback={<span class="text-xs text-muted">-</span>}
+                          >
+                            <button
+                              type="button"
+                              class="text-sm font-medium text-muted transition-colors hover:text-danger"
+                              onClick={() => setVoucherToVoid(voucher)}
+                            >
+                              Void
+                            </button>
+                          </Show>
+                        </td>
                       </Tr>
                     )}
                   </For>
@@ -229,6 +252,17 @@ export default function CheckVouchersPage() {
           )}
         </QueryBoundary>
       </section>
+
+      <ConfirmDialog
+        open={!!voucherToVoid()}
+        onClose={() => setVoucherToVoid(null)}
+        title="Void check voucher?"
+        description={`This keeps ${voucherToVoid()?.voucherNo ?? "the voucher"} in the register but marks it as void.`}
+        confirmLabel="Void"
+        danger
+        pending={voidVoucher.isPending}
+        onConfirm={confirmVoid}
+      />
     </div>
   )
 }

@@ -10,6 +10,7 @@ interface LineDraft {
   amount: string
 }
 
+const MAX_VOUCHER_LINES = 6
 const today = () => new Date().toISOString().slice(0, 10)
 const blankLine = (): LineDraft => ({ account: "", description: "", amount: "" })
 
@@ -30,6 +31,16 @@ function toLines(lines: LineDraft[]): CheckVoucherLine[] {
 
 function lineTotal(lines: LineDraft[]) {
   return toLines(lines).reduce((total, line) => total + line.amount, 0)
+}
+
+function hasLineContent(line: LineDraft) {
+  return line.account.trim() || line.description.trim() || line.amount.trim()
+}
+
+function hasIncompleteLine(lines: LineDraft[]) {
+  return lines.some(
+    line => hasLineContent(line) && (!line.account.trim() || parseAmount(line.amount) <= 0)
+  )
 }
 
 export default function CreateCheckVoucherPage() {
@@ -54,6 +65,9 @@ export default function CreateCheckVoucherPage() {
   const totalsMatch = createMemo(
     () => Math.round(debitTotal() * 100) === Math.round(creditTotal() * 100)
   )
+  const linesComplete = createMemo(
+    () => !hasIncompleteLine(debitLines()) && !hasIncompleteLine(creditLines())
+  )
   const canSubmit = createMemo(
     () =>
       voucherDate().trim() &&
@@ -61,6 +75,7 @@ export default function CreateCheckVoucherPage() {
       bankName().trim() &&
       particular().trim() &&
       debitTotal() > 0 &&
+      linesComplete() &&
       totalsMatch() &&
       !createVoucher.isPending
   )
@@ -77,7 +92,7 @@ export default function CreateCheckVoucherPage() {
 
   const addLine = (kind: "debit" | "credit") => {
     const setter = kind === "debit" ? setDebitLines : setCreditLines
-    setter(lines => [...lines, blankLine()])
+    setter(lines => (lines.length >= MAX_VOUCHER_LINES ? lines : [...lines, blankLine()]))
   }
 
   const removeLine = (kind: "debit" | "credit", index: number) => {
@@ -92,6 +107,8 @@ export default function CreateCheckVoucherPage() {
     if (!bankName().trim()) next.bankName = "Bank name is required"
     if (!particular().trim()) next.particular = "Particular is required"
     if (debitTotal() <= 0) next.lines = "Add at least one debit line"
+    if (hasIncompleteLine(debitLines())) next.debitLines = "Complete or clear every debit line"
+    if (hasIncompleteLine(creditLines())) next.creditLines = "Complete or clear every credit line"
     if (!totalsMatch()) next.balance = "Debit and credit totals must match"
     setErrors(next)
     return Object.keys(next).length === 0
@@ -313,11 +330,22 @@ function VoucherLines(props: {
     <section class="rounded-lg border border-border bg-surface p-6">
       <div class="flex items-center justify-between gap-3">
         <h2 class="text-lg font-semibold text-foreground">{props.title} Lines</h2>
-        <Button type="button" variant="ghost" size="sm" onClick={props.onAdd}>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          disabled={props.lines.length >= MAX_VOUCHER_LINES}
+          onClick={props.onAdd}
+        >
           <Icons.plus class="h-4 w-4" />
           Add line
         </Button>
       </div>
+      <Show when={props.lines.length >= MAX_VOUCHER_LINES}>
+        <p class="mt-2 text-xs text-muted">
+          Maximum {MAX_VOUCHER_LINES} lines for one-page printing.
+        </p>
+      </Show>
       <div class="mt-4 space-y-3">
         <For each={props.lines}>
           {(line, index) => (

@@ -29,6 +29,7 @@ export interface CheckVoucherListFilters {
 export interface CheckVoucherListResponse {
   items: CheckVoucher[]
   total: number
+  pendingCount: number
   totalAmount: number
   page: number
   limit: number
@@ -61,6 +62,22 @@ export function useCreateCheckVoucher() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.checkVouchers.all })
       toast.success("Check voucher created")
+    },
+    onError: (err: Error) => toast.error(err.message),
+  }))
+}
+
+export function useVoidCheckVoucher() {
+  const qc = useQueryClient()
+  return createMutation(() => ({
+    mutationFn: (id: string) =>
+      api<CheckVoucher>(`/api/finance/check-vouchers/${id}/void`, {
+        method: "POST",
+      }),
+    onSuccess: voucher => {
+      qc.invalidateQueries({ queryKey: queryKeys.checkVouchers.all })
+      qc.invalidateQueries({ queryKey: queryKeys.checkVouchers.detail(voucher.id) })
+      toast.success("Check voucher voided")
     },
     onError: (err: Error) => toast.error(err.message),
   }))
