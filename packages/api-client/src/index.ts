@@ -51,6 +51,13 @@ export {
   useMarkRead,
   useNotifications,
 } from "./notifications"
+export {
+  getPublicTrainingBatch,
+  type PublicStudentEnrollmentInput,
+  type PublicStudentEnrollmentResult,
+  type PublicTrainingBatch,
+  submitPublicStudentEnrollment,
+} from "./public-training"
 export { queryClient } from "./query-client"
 export { QueryProvider } from "./query-provider"
 export {
