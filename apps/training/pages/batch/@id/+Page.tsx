@@ -105,7 +105,7 @@ export default function BatchDetailPage() {
                 <InfoCard
                   label="Budget"
                   valueClass="text-foreground font-medium"
-                  value={formatPeso(b().budget)}
+                  value={Number(b().budget) > 0 ? formatPeso(b().budget) : "Not set"}
                 />
               </div>
 

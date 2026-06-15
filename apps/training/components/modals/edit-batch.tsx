@@ -18,6 +18,11 @@ interface EditBatchModalProps {
   batch: Batch
 }
 
+function budgetInputValue(value: Batch["budget"]) {
+  const numeric = Number(value ?? 0)
+  return numeric > 0 ? String(numeric) : ""
+}
+
 export function EditBatchModal(props: EditBatchModalProps) {
   const mutation = useUpdateBatch()
   const venuesQuery = useVenues()
@@ -33,6 +38,7 @@ export function EditBatchModal(props: EditBatchModalProps) {
   const [startDate, setStartDate] = createSignal(props.batch.startDate)
   const [endDate, setEndDate] = createSignal(props.batch.endDate)
   const [weeklySchedule, setWeeklySchedule] = createSignal(props.batch.weeklySchedule ?? "")
+  const [budget, setBudget] = createSignal(budgetInputValue(props.batch.budget))
   const [venue, setVenue] = createSignal(props.batch.venue)
   const [instructorOther, setInstructorOther] = createSignal("")
   const [instructorChoice, setInstructorChoice] = createSignal<string>(OTHER_INSTRUCTOR)
@@ -86,6 +92,7 @@ export function EditBatchModal(props: EditBatchModalProps) {
       startDate: startDate(),
       endDate: endDate(),
       weeklySchedule: weeklySchedule().trim(),
+      budget: budget().trim(),
       venue: venue(),
       instructor: resolvedInstructor(),
       status: status(),
@@ -102,6 +109,7 @@ export function EditBatchModal(props: EditBatchModalProps) {
     if (!payload.batchNo) payload.batchNo = null
     if (!payload.rqm) payload.rqm = null
     if (!payload.weeklySchedule) payload.weeklySchedule = null
+    payload.budget = budget().trim() ? (Number(budget()) as unknown as number) : 0
 
     mutation.mutate({ id: props.batch.id, ...payload }, { onSuccess: () => props.onClose() })
   }
@@ -115,6 +123,7 @@ export function EditBatchModal(props: EditBatchModalProps) {
     setStartDate(props.batch.startDate)
     setEndDate(props.batch.endDate)
     setWeeklySchedule(props.batch.weeklySchedule ?? "")
+    setBudget(budgetInputValue(props.batch.budget))
     setVenue(props.batch.venue)
     setStatus(props.batch.status)
     setErrors({})
@@ -229,19 +238,39 @@ export function EditBatchModal(props: EditBatchModalProps) {
           </label>
         </div>
 
-        <label class="block">
-          <span class={labelClass}>Sponsor</span>
-          <input
-            type="text"
-            value={senator() ?? ""}
-            onInput={e => setSenator(e.target.value)}
-            placeholder="e.g., Sen. Alan Cayetano or Juan Dela Cruz"
-            class={inputClass("senator")}
-          />
-          <Show when={errors().senator}>
-            <p class={errorClass}>{errors().senator}</p>
-          </Show>
-        </label>
+        <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px]">
+          <label class="block">
+            <span class={labelClass}>Sponsor</span>
+            <input
+              type="text"
+              value={senator() ?? ""}
+              onInput={e => setSenator(e.target.value)}
+              placeholder="e.g., Sen. Alan Cayetano or Juan Dela Cruz"
+              class={inputClass("senator")}
+            />
+            <Show when={errors().senator}>
+              <p class={errorClass}>{errors().senator}</p>
+            </Show>
+          </label>
+          <label class="block">
+            <span class="text-sm font-medium text-foreground mb-1 flex items-center justify-between">
+              <span>Budget</span>
+              <span class="text-xs text-muted font-normal">Optional</span>
+            </span>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={budget()}
+              onInput={e => setBudget(e.target.value)}
+              placeholder="0.00"
+              class={inputClass("budget")}
+            />
+            <Show when={errors().budget}>
+              <p class={errorClass}>{errors().budget}</p>
+            </Show>
+          </label>
+        </div>
 
         <div class="grid grid-cols-2 gap-3">
           <label class="block">

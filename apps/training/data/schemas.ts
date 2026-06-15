@@ -1,5 +1,15 @@
 import { z } from "zod"
 
+const optionalBudgetSchema = z
+  .union([z.string(), z.number()])
+  .optional()
+  .refine(value => value === undefined || value === "" || Number.isFinite(Number(value)), {
+    message: "Budget must be a number",
+  })
+  .refine(value => value === undefined || value === "" || Number(value) >= 0, {
+    message: "Budget must be 0 or more",
+  })
+
 export const createBatchSchema = z.object({
   trainingName: z.string().min(1, "Training type is required"),
   batchNo: z.string().max(50, "Batch no. is too long").optional().or(z.literal("")),
@@ -10,6 +20,7 @@ export const createBatchSchema = z.object({
   weeklySchedule: z.string().max(100, "Weekly schedule is too long").optional().or(z.literal("")),
   venue: z.string().min(1, "Venue is required"),
   instructor: z.string().min(1, "Instructor is required"),
+  budget: optionalBudgetSchema,
 })
 
 export const updateBatchSchema = createBatchSchema.extend({

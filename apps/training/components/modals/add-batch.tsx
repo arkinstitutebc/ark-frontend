@@ -1,6 +1,7 @@
 import { formErrorClass, formInputClass, formLabelClass, Modal, ModalFooter, Select } from "@ark/ui"
 import { useCreateBatch, useInstructors, useVenues } from "@data/hooks"
 import { createBatchSchema } from "@data/schemas"
+import type { Batch } from "@data/types"
 import { validateForm } from "@data/validate"
 import { createMemo, createSignal, Show } from "solid-js"
 import { OTHER_INSTRUCTOR, trainingTypeOptions } from "@/components/forms/options"
@@ -25,6 +26,7 @@ export function AddBatchModal(props: AddBatchModalProps) {
   const [startDate, setStartDate] = createSignal("")
   const [endDate, setEndDate] = createSignal("")
   const [weeklySchedule, setWeeklySchedule] = createSignal("")
+  const [budget, setBudget] = createSignal("")
   const [venue, setVenue] = createSignal("")
   const [instructorId, setInstructorId] = createSignal("")
   const [instructorOther, setInstructorOther] = createSignal("")
@@ -60,6 +62,7 @@ export function AddBatchModal(props: AddBatchModalProps) {
       startDate: startDate(),
       endDate: endDate(),
       weeklySchedule: weeklySchedule().trim(),
+      budget: budget().trim(),
       venue: venue(),
       instructor: resolvedInstructor(),
     }
@@ -71,7 +74,10 @@ export function AddBatchModal(props: AddBatchModalProps) {
     }
     setErrors({})
 
-    const payload = { ...result.data }
+    const payload: Partial<Batch> = {
+      ...result.data,
+      budget: result.data.budget ? Number(result.data.budget) : undefined,
+    }
     if (!payload.endDate) payload.endDate = undefined as unknown as string
     if (!payload.batchNo) payload.batchNo = undefined as unknown as string
     if (!payload.rqm) payload.rqm = undefined as unknown as string
@@ -93,6 +99,7 @@ export function AddBatchModal(props: AddBatchModalProps) {
     setStartDate("")
     setEndDate("")
     setWeeklySchedule("")
+    setBudget("")
     setVenue("")
     setInstructorId("")
     setInstructorOther("")
@@ -183,19 +190,39 @@ export function AddBatchModal(props: AddBatchModalProps) {
           </label>
         </div>
 
-        <label class="block">
-          <span class={labelClass}>Sponsor</span>
-          <input
-            type="text"
-            value={senator()}
-            onInput={e => setSenator(e.target.value)}
-            placeholder="e.g., Sen. Alan Cayetano or Juan Dela Cruz"
-            class={inputClass("senator")}
-          />
-          <Show when={errors().senator}>
-            <p class={errorClass}>{errors().senator}</p>
-          </Show>
-        </label>
+        <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_220px]">
+          <label class="block">
+            <span class={labelClass}>Sponsor</span>
+            <input
+              type="text"
+              value={senator()}
+              onInput={e => setSenator(e.target.value)}
+              placeholder="e.g., Sen. Alan Cayetano or Juan Dela Cruz"
+              class={inputClass("senator")}
+            />
+            <Show when={errors().senator}>
+              <p class={errorClass}>{errors().senator}</p>
+            </Show>
+          </label>
+          <label class="block">
+            <span class="text-sm font-medium text-foreground mb-1 flex items-center justify-between">
+              <span>Budget</span>
+              <span class="text-xs text-muted font-normal">Optional</span>
+            </span>
+            <input
+              type="number"
+              min="0"
+              step="0.01"
+              value={budget()}
+              onInput={e => setBudget(e.target.value)}
+              placeholder="0.00"
+              class={inputClass("budget")}
+            />
+            <Show when={errors().budget}>
+              <p class={errorClass}>{errors().budget}</p>
+            </Show>
+          </label>
+        </div>
 
         <div class="grid grid-cols-2 gap-3">
           <label class="block">
