@@ -10,3 +10,4 @@ export {
   QueryBoundary,
   StatusBadge,
 } from "@ark/ui"
+export { StudentAvatar } from "./student-avatar"

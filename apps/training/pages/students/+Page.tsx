@@ -2,6 +2,7 @@ import { Button, Icons, PageContainer, PageHeader, Select, StatusBadge, THead, T
 import { useBatches, useStudent, useStudents } from "@data/hooks"
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { AddStudentModal, ConfirmDeleteStudentModal, EditStudentModal } from "@/components/modals"
+import { StudentAvatar } from "@/components/ui"
 
 export default function StudentsPage() {
   const [filterBatch, setFilterBatch] = createSignal<string>("all")
@@ -185,16 +186,7 @@ export default function StudentsPage() {
                         </td>
                         <td class="py-4 px-6 text-sm text-foreground">
                           <div class="flex items-center gap-3">
-                            <div class="flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg border border-border bg-surface-muted">
-                              <Show
-                                when={student.photoUrl}
-                                fallback={<Icons.user class="h-4 w-4 text-muted" />}
-                              >
-                                {url => (
-                                  <img src={url()} alt="" class="h-full w-full object-cover" />
-                                )}
-                              </Show>
-                            </div>
+                            <StudentAvatar student={student} />
                             <div>
                               <p class="font-medium text-foreground">
                                 {student.firstName} {student.lastName}

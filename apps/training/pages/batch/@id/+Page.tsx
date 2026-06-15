@@ -18,6 +18,7 @@ import {
   EditBatchModal,
   EditStudentModal,
 } from "@/components/modals"
+import { StudentAvatar } from "@/components/ui"
 
 export default function BatchDetailPage() {
   const pageContext = usePageContext()
@@ -210,7 +211,19 @@ export default function BatchDetailPage() {
                                     {student.studentId}
                                   </td>
                                   <td class="py-4 px-6 text-sm text-foreground">
-                                    {student.firstName} {student.lastName}
+                                    <div class="flex items-center gap-3">
+                                      <StudentAvatar student={student} size="sm" />
+                                      <div class="min-w-0">
+                                        <p class="truncate font-medium text-foreground">
+                                          {student.firstName} {student.lastName}
+                                        </p>
+                                        <p class="truncate text-xs text-muted">
+                                          {student.email ||
+                                            student.contactNumber ||
+                                            "No contact yet"}
+                                        </p>
+                                      </div>
+                                    </div>
                                   </td>
                                   <td class="py-4 px-6">
                                     <span
