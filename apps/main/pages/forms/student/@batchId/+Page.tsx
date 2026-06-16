@@ -2,6 +2,7 @@ import {
   getPublicTrainingBatch,
   type PublicStudentEnrollmentInput,
   submitPublicStudentEnrollment,
+  uploadPublicStudentFile,
 } from "@ark/api-client"
 import { Button, Icons, Input, PageLoading, Select, Textarea, toast } from "@ark/ui"
 import { createMutation, createQuery } from "@tanstack/solid-query"
@@ -39,6 +40,8 @@ const enrollmentSchema = z.object({
   email: z.string().trim().email("Enter a valid email.").optional().or(z.literal("")),
   educationalAttainment: z.string().trim().min(1, "Education is required."),
   employmentStatus: z.string().trim().min(1, "Employment status is required."),
+  photoUrl: z.string().trim().url().optional().or(z.literal("")),
+  psaCertificateUrl: z.string().trim().url().optional().or(z.literal("")),
 })
 
 type EnrollmentField = keyof PublicStudentEnrollmentInput
@@ -66,6 +69,8 @@ function cleanPayload(data: z.infer<typeof enrollmentSchema>): PublicStudentEnro
     email: data.email?.trim() || undefined,
     educationalAttainment: data.educationalAttainment,
     employmentStatus: data.employmentStatus,
+    photoUrl: data.photoUrl?.trim() || undefined,
+    psaCertificateUrl: data.psaCertificateUrl?.trim() || undefined,
   }
 }
 
@@ -83,6 +88,10 @@ export default function PublicStudentEnrollmentPage() {
   const [email, setEmail] = createSignal("")
   const [educationalAttainment, setEducationalAttainment] = createSignal("")
   const [employmentStatus, setEmploymentStatus] = createSignal("")
+  const [photoUrl, setPhotoUrl] = createSignal("")
+  const [psaCertificateUrl, setPsaCertificateUrl] = createSignal("")
+  const [uploadingPhoto, setUploadingPhoto] = createSignal(false)
+  const [uploadingCertificate, setUploadingCertificate] = createSignal(false)
   const [errors, setErrors] = createSignal<Partial<Record<EnrollmentField, string>>>({})
   const [submittedStudentId, setSubmittedStudentId] = createSignal<string | null>(null)
 
@@ -128,6 +137,8 @@ export default function PublicStudentEnrollmentPage() {
       email: email(),
       educationalAttainment: educationalAttainment(),
       employmentStatus: employmentStatus(),
+      photoUrl: photoUrl(),
+      psaCertificateUrl: psaCertificateUrl(),
     }
 
     const result = enrollmentSchema.safeParse(data)
@@ -142,20 +153,25 @@ export default function PublicStudentEnrollmentPage() {
     }
 
     setErrors({})
+    if (uploadingPhoto() || uploadingCertificate()) {
+      toast.error("Please wait for uploads to finish")
+      return
+    }
+
     mutation.mutate(cleanPayload(result.data))
   }
 
   return (
     <main class="min-h-screen bg-surface-muted text-foreground">
-      <div class="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-4 py-5 sm:px-6 lg:px-8">
-        <header class="mb-5 rounded-2xl border border-border bg-surface px-5 py-5 sm:px-7">
-          <div class="flex items-center gap-4">
+      <div class="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-3 py-3 sm:px-6 sm:py-5 lg:px-8">
+        <header class="mb-4 rounded-2xl border border-border bg-surface px-4 py-4 sm:mb-5 sm:px-7 sm:py-5">
+          <div class="flex items-center gap-3 sm:gap-4">
             <img
               src="/logo/ark-transpa.png"
               alt="Ark Institute logo"
               width="64"
               height="64"
-              class="h-14 w-14 object-contain sm:h-16 sm:w-16"
+              class="h-12 w-12 object-contain sm:h-16 sm:w-16"
               loading="eager"
               fetchpriority="high"
             />
@@ -163,7 +179,7 @@ export default function PublicStudentEnrollmentPage() {
               <p class="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
                 Ark Institute
               </p>
-              <h1 class="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              <h1 class="mt-1 text-xl font-bold tracking-tight text-foreground sm:text-3xl">
                 Student Enrollment Form
               </h1>
               <p class="mt-1 text-sm text-muted">
@@ -322,12 +338,44 @@ export default function PublicStudentEnrollmentPage() {
               </div>
             </FormBlock>
 
-            <footer class="sticky bottom-0 -mx-4 border-t border-border bg-surface/95 px-4 py-4 shadow-[0_-8px_24px_rgba(15,23,42,0.06)] backdrop-blur sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+            <FormBlock
+              title="Student Documents"
+              description="Upload clear files if available. These match the documents kept in the student profile."
+            >
+              <div class="grid gap-4 md:grid-cols-2">
+                <PublicUploadCard
+                  label="2x2 Photo"
+                  description="JPG, PNG, or WebP up to 5MB."
+                  kind="photo"
+                  accept="image/jpeg,image/png,image/webp"
+                  value={photoUrl()}
+                  onChange={setPhotoUrl}
+                  onUploadingChange={setUploadingPhoto}
+                />
+                <PublicUploadCard
+                  label="Birth Certificate / PSA"
+                  description="PDF, JPG, PNG, or WebP up to 10MB."
+                  kind="certificate"
+                  accept="application/pdf,image/jpeg,image/png,image/webp"
+                  value={psaCertificateUrl()}
+                  onChange={setPsaCertificateUrl}
+                  onUploadingChange={setUploadingCertificate}
+                />
+              </div>
+            </FormBlock>
+
+            <footer class="sticky bottom-0 -mx-3 border-t border-border bg-surface/95 px-3 py-3 shadow-[0_-8px_24px_rgba(15,23,42,0.06)] backdrop-blur sm:-mx-6 sm:px-6 sm:py-4 lg:-mx-8 lg:px-8">
               <div class="mx-auto flex max-w-5xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <p class="text-xs text-muted">
                   By submitting, you confirm that the information is complete and accurate.
                 </p>
-                <Button type="submit" loading={mutation.isPending} loadingLabel="Submitting...">
+                <Button
+                  type="submit"
+                  loading={mutation.isPending}
+                  loadingLabel="Submitting..."
+                  disabled={uploadingPhoto() || uploadingCertificate()}
+                  class="w-full sm:w-auto"
+                >
                   Submit Enrollment
                 </Button>
               </div>
@@ -371,5 +419,86 @@ function FormBlock(props: { title: string; description: string; children: JSX.El
       </div>
       <div class="space-y-5 px-5 py-5 sm:px-7">{props.children}</div>
     </section>
+  )
+}
+
+function PublicUploadCard(props: {
+  label: string
+  description: string
+  kind: "photo" | "certificate"
+  accept: string
+  value: string
+  onChange: (url: string) => void
+  onUploadingChange: (uploading: boolean) => void
+}) {
+  const [uploading, setUploading] = createSignal(false)
+
+  const handleFile = async (file: File | undefined) => {
+    if (!file) return
+    setUploading(true)
+    props.onUploadingChange(true)
+    try {
+      const result = await uploadPublicStudentFile(props.kind, file)
+      props.onChange(result.secure_url)
+      toast.success(`${props.label} uploaded`)
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Upload failed")
+    } finally {
+      setUploading(false)
+      props.onUploadingChange(false)
+    }
+  }
+
+  return (
+    <div class="rounded-xl border border-border bg-surface-muted/30 p-4">
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div class="min-w-0">
+          <p class="text-sm font-semibold text-foreground">{props.label}</p>
+          <p class="mt-1 text-xs leading-relaxed text-muted">{props.description}</p>
+        </div>
+        <label class="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-surface-muted">
+          <Icons.upload class="h-4 w-4 text-muted" />
+          {uploading() ? "Uploading..." : props.value ? "Replace" : "Upload"}
+          <input
+            type="file"
+            accept={props.accept}
+            disabled={uploading()}
+            onChange={event => {
+              const target = event.currentTarget
+              handleFile(target.files?.[0]).finally(() => {
+                target.value = ""
+              })
+            }}
+            class="hidden"
+          />
+        </label>
+      </div>
+
+      <Show
+        when={props.value}
+        fallback={<p class="mt-3 text-xs text-muted">No file uploaded yet.</p>}
+      >
+        {url => (
+          <div class="mt-3 flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2">
+            <Icons.fileText class="h-4 w-4 shrink-0 text-muted" />
+            <a
+              href={url()}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="min-w-0 flex-1 truncate text-sm font-medium text-foreground hover:text-primary"
+            >
+              View uploaded file
+            </a>
+            <button
+              type="button"
+              onClick={() => props.onChange("")}
+              class="text-xs font-semibold text-muted transition-colors hover:text-red-600"
+            >
+              Remove
+            </button>
+          </div>
+        )}
+      </Show>
+    </div>
   )
 }

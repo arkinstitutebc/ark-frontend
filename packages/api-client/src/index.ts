@@ -57,6 +57,7 @@ export {
   type PublicStudentEnrollmentResult,
   type PublicTrainingBatch,
   submitPublicStudentEnrollment,
+  uploadPublicStudentFile,
 } from "./public-training"
 export { queryClient } from "./query-client"
 export { QueryProvider } from "./query-provider"
