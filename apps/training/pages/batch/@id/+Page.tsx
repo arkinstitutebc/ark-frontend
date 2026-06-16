@@ -8,6 +8,7 @@ import {
   statusToneClass,
   THead,
   Th,
+  toast,
 } from "@ark/ui"
 import { useBatch, useBatchStudents, useStudent } from "@data/hooks"
 import { createMemo, createSignal, For, Show } from "solid-js"
@@ -32,6 +33,21 @@ export default function BatchDetailPage() {
   const studentsQuery = useBatchStudents(id)
   const editingStudentQuery = useStudent(() => editingStudentId() || "")
   const deletingStudentQuery = useStudent(() => deletingStudentId() || "")
+
+  const publicEnrollmentUrl = () => {
+    const origin =
+      typeof window === "undefined" ? "https://portal.arkinstitutebc.com" : window.location.origin
+    return `${origin}/forms/student/${id()}`
+  }
+
+  const copyPublicEnrollmentLink = async () => {
+    try {
+      await navigator.clipboard.writeText(publicEnrollmentUrl())
+      toast.success("Enrollment link copied")
+    } catch {
+      toast.error("Could not copy link")
+    }
+  }
 
   return (
     <PageContainer>
@@ -138,17 +154,27 @@ export default function BatchDetailPage() {
               </div>
 
               <div>
-                <div class="flex items-center justify-between mb-4">
+                <div class="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
                   <h2 class="text-sm font-semibold text-foreground">
                     Students ({studentsQuery.data?.length ?? 0})
                   </h2>
-                  <button
-                    type="button"
-                    onClick={() => setShowAddStudentModal(true)}
-                    class="px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/5 rounded-lg transition-colors"
-                  >
-                    + Add Student
-                  </button>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={copyPublicEnrollmentLink}
+                      class="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
+                    >
+                      <Icons.fileText class="h-4 w-4" />
+                      Copy form link
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddStudentModal(true)}
+                      class="px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                    >
+                      + Add Student
+                    </button>
+                  </div>
                 </div>
 
                 <AddStudentModal
@@ -182,9 +208,10 @@ export default function BatchDetailPage() {
                 >
                   <div class="bg-surface rounded-xl border border-border overflow-hidden">
                     <div class="max-h-[560px] overflow-auto">
-                      <table class="w-full min-w-[640px]">
+                      <table class="w-full min-w-[720px]">
                         <THead>
                           <Th>Student ID</Th>
+                          <Th>Photo</Th>
                           <Th>Name</Th>
                           <Th>Status</Th>
                           <Th align="right">Actions</Th>
@@ -194,7 +221,7 @@ export default function BatchDetailPage() {
                             when={(studentsQuery.data?.length ?? 0) > 0}
                             fallback={
                               <tr>
-                                <td colSpan={4} class="py-12 text-center text-muted text-sm">
+                                <td colSpan={5} class="py-12 text-center text-muted text-sm">
                                   No students enrolled yet.
                                 </td>
                               </tr>
@@ -210,19 +237,17 @@ export default function BatchDetailPage() {
                                   <td class="py-4 px-6 text-sm text-foreground font-mono">
                                     {student.studentId}
                                   </td>
+                                  <td class="py-4 px-6">
+                                    <StudentAvatar student={student} size="sm" />
+                                  </td>
                                   <td class="py-4 px-6 text-sm text-foreground">
-                                    <div class="flex items-center gap-3">
-                                      <StudentAvatar student={student} size="sm" />
-                                      <div class="min-w-0">
-                                        <p class="truncate font-medium text-foreground">
-                                          {student.firstName} {student.lastName}
-                                        </p>
-                                        <p class="truncate text-xs text-muted">
-                                          {student.email ||
-                                            student.contactNumber ||
-                                            "No contact yet"}
-                                        </p>
-                                      </div>
+                                    <div class="min-w-0">
+                                      <p class="truncate font-medium text-foreground">
+                                        {student.firstName} {student.lastName}
+                                      </p>
+                                      <p class="truncate text-xs text-muted">
+                                        {student.email || student.contactNumber || "No contact yet"}
+                                      </p>
                                     </div>
                                   </td>
                                   <td class="py-4 px-6">
