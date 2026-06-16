@@ -122,6 +122,15 @@ export default function BatchDetailPage() {
                     <Icons.fileText class="h-4 w-4" />
                     Copy form link
                   </Button>
+                  <a
+                    href={publicEnrollmentUrl()}
+                    target="_blank"
+                    rel="noreferrer"
+                    class="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground transition-all hover:bg-surface-muted"
+                  >
+                    <Icons.externalLink class="h-4 w-4" />
+                    Open form
+                  </a>
                   <Button
                     type="button"
                     variant="ghost"
@@ -268,26 +277,30 @@ function ViewModeToggle(props: {
       <button
         type="button"
         onClick={() => props.onChange("list")}
-        class={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+        class={`rounded-md p-2 transition-colors ${
           props.value === "list"
             ? "bg-surface text-foreground shadow-sm"
             : "text-muted hover:text-foreground"
         }`}
         aria-pressed={props.value === "list"}
+        aria-label="List view"
+        title="List view"
       >
-        List
+        <Icons.list class="h-4 w-4" />
       </button>
       <button
         type="button"
         onClick={() => props.onChange("blocks")}
-        class={`rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
+        class={`rounded-md p-2 transition-colors ${
           props.value === "blocks"
             ? "bg-surface text-foreground shadow-sm"
             : "text-muted hover:text-foreground"
         }`}
         aria-pressed={props.value === "blocks"}
+        aria-label="Block view"
+        title="Block view"
       >
-        Blocks
+        <Icons.layoutGrid class="h-4 w-4" />
       </button>
     </div>
   )

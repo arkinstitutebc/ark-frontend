@@ -74,6 +74,15 @@ function cleanPayload(data: z.infer<typeof enrollmentSchema>): PublicStudentEnro
   }
 }
 
+function trainingTitle(batch?: { trainingName: string; trainingLevel?: string | null }) {
+  if (!batch) return ""
+  const level = batch.trainingLevel?.trim()
+  if (!level || batch.trainingName.toLowerCase().includes(level.toLowerCase())) {
+    return batch.trainingName
+  }
+  return `${batch.trainingName} ${level}`
+}
+
 export default function PublicStudentEnrollmentPage() {
   const pageContext = usePageContext()
   const batchId = createMemo(() => pageContext.routeParams.batchId as string)
@@ -183,13 +192,13 @@ export default function PublicStudentEnrollmentPage() {
           </div>
         </header>
 
-        <Show when={batchQuery.isPending}>
+        <Show when={batchQuery.isPending && !batch()}>
           <div class="rounded-2xl border border-border bg-surface p-10">
             <PageLoading label="Loading form..." />
           </div>
         </Show>
 
-        <Show when={batchQuery.isError}>
+        <Show when={batchQuery.isError && !batch()}>
           <section class="rounded-2xl border border-red-200 bg-surface p-6 text-center">
             <Icons.alert class="mx-auto h-10 w-10 text-red-600" />
             <h2 class="mt-3 text-lg font-semibold">Form link is not available</h2>
@@ -208,8 +217,7 @@ export default function PublicStudentEnrollmentPage() {
                   Training Batch
                 </p>
                 <h2 class="mt-1 text-lg font-semibold leading-snug text-foreground sm:text-xl">
-                  {batch()?.trainingName}
-                  <Show when={batch()?.trainingLevel}> {batch()?.trainingLevel}</Show>
+                  {trainingTitle(batch())}
                 </h2>
               </div>
               <dl class="grid gap-px bg-border text-sm sm:grid-cols-3">
