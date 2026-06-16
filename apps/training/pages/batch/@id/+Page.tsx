@@ -4,7 +4,6 @@ import {
   formatDatePH,
   formatPeso,
   Icons,
-  InfoCard,
   PageContainer,
   statusToneClass,
   THead,
@@ -100,99 +99,78 @@ export default function BatchDetailPage() {
         >
           {b => (
             <>
-              <div class="mb-8 flex flex-col gap-4 rounded-xl border border-border bg-surface p-5 sm:flex-row sm:items-start sm:justify-between">
-                <div>
-                  <div class="flex items-center gap-3 mb-2">
-                    <h1 class="text-2xl font-semibold text-foreground">{b().batchCode}</h1>
-                    <span
-                      class={`inline-flex px-2.5 py-1 text-xs font-medium rounded-full ${statusToneClass(b().status)}`}
-                    >
-                      {b().status}
-                    </span>
+              <section class="mb-6 overflow-hidden rounded-xl border border-border bg-surface">
+                <div class="flex flex-col gap-4 p-5 lg:flex-row lg:items-start lg:justify-between">
+                  <div class="min-w-0">
+                    <div class="mb-2 flex flex-wrap items-center gap-3">
+                      <h1 class="truncate text-2xl font-semibold text-foreground">
+                        {b().batchCode}
+                      </h1>
+                      <span
+                        class={`inline-flex rounded-full px-2.5 py-1 text-xs font-medium ${statusToneClass(b().status)}`}
+                      >
+                        {b().status}
+                      </span>
+                    </div>
+                    <p class="text-muted">{b().trainingName}</p>
                   </div>
-                  <p class="text-muted">{b().trainingName}</p>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      size="sm"
+                      onClick={copyPublicEnrollmentLink}
+                    >
+                      <Icons.fileText class="h-4 w-4" />
+                      Copy form link
+                    </Button>
+                    <a
+                      href={publicEnrollmentUrl()}
+                      target="_blank"
+                      rel="noreferrer"
+                      class="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground transition-all hover:bg-surface-muted"
+                    >
+                      <Icons.externalLink class="h-4 w-4" />
+                      Open form
+                    </a>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      class="border border-border bg-surface text-foreground hover:bg-surface-muted"
+                      onClick={() => setShowEditModal(true)}
+                    >
+                      Edit Batch
+                    </Button>
+                  </div>
                 </div>
-                <div class="flex flex-wrap items-center gap-2">
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={copyPublicEnrollmentLink}
-                  >
-                    <Icons.fileText class="h-4 w-4" />
-                    Copy form link
-                  </Button>
-                  <a
-                    href={publicEnrollmentUrl()}
-                    target="_blank"
-                    rel="noreferrer"
-                    class="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground transition-all hover:bg-surface-muted"
-                  >
-                    <Icons.externalLink class="h-4 w-4" />
-                    Open form
-                  </a>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    class="border border-border bg-surface text-foreground hover:bg-surface-muted"
-                    onClick={() => setShowEditModal(true)}
-                  >
-                    Edit Batch
-                  </Button>
+
+                <div class="grid gap-px border-t border-border bg-border sm:grid-cols-2 xl:grid-cols-4">
+                  <SummaryMetric
+                    label="Schedule"
+                    value={`${formatDatePH(b().startDate)} – ${formatDatePH(b().endDate)}`}
+                  />
+                  <SummaryMetric label="Weekly" value={b().weeklySchedule || "Not set"} />
+                  <SummaryMetric label="Students" value={b().studentsEnrolled} />
+                  <SummaryMetric
+                    label="Budget"
+                    value={Number(b().budget) > 0 ? formatPeso(b().budget) : "Not set"}
+                  />
                 </div>
-              </div>
+              </section>
 
-              <div class="grid grid-cols-2 gap-4 mb-8 md:grid-cols-4">
-                <InfoCard
-                  label="Schedule"
-                  valueClass="text-foreground font-medium"
-                  value={`${formatDatePH(b().startDate)} – ${formatDatePH(b().endDate)}`}
-                />
-                <InfoCard
-                  label="Weekly"
-                  valueClass="text-foreground font-medium"
-                  value={b().weeklySchedule || "Not set"}
-                />
-                <InfoCard
-                  label="Students"
-                  valueClass="text-foreground font-medium"
-                  value={b().studentsEnrolled}
-                />
-                <InfoCard
-                  label="Budget"
-                  valueClass="text-foreground font-medium"
-                  value={Number(b().budget) > 0 ? formatPeso(b().budget) : "Not set"}
-                />
-              </div>
-
-              <div class="bg-surface rounded-xl border border-border mb-8">
-                <div class="px-4 py-3 border-b border-border">
+              <section class="mb-6 overflow-hidden rounded-xl border border-border bg-surface">
+                <div class="border-b border-border px-5 py-3">
                   <h2 class="text-sm font-semibold text-foreground">Details</h2>
                 </div>
-                <div class="divide-y divide-border">
-                  <div class="flex py-4 px-6">
-                    <span class="w-32 text-sm text-muted">Batch No.</span>
-                    <span class="text-sm text-foreground">{b().batchNo || "Not set"}</span>
-                  </div>
-                  <div class="flex py-4 px-6">
-                    <span class="w-32 text-sm text-muted">RQM</span>
-                    <span class="text-sm text-foreground">{b().rqm || "Not set"}</span>
-                  </div>
-                  <div class="flex py-4 px-6">
-                    <span class="w-32 text-sm text-muted">Sponsor</span>
-                    <span class="text-sm text-foreground">{b().senator}</span>
-                  </div>
-                  <div class="flex py-4 px-6">
-                    <span class="w-32 text-sm text-muted">Venue</span>
-                    <span class="text-sm text-foreground">{b().venue}</span>
-                  </div>
-                  <div class="flex py-4 px-6">
-                    <span class="w-32 text-sm text-muted">Instructor</span>
-                    <span class="text-sm text-foreground">{b().instructor}</span>
-                  </div>
+                <div class="grid gap-px bg-border md:grid-cols-2 xl:grid-cols-3">
+                  <DetailItem label="Batch No." value={b().batchNo} />
+                  <DetailItem label="RQM" value={b().rqm} />
+                  <DetailItem label="Sponsor" value={b().senator} />
+                  <DetailItem label="Venue" value={b().venue} />
+                  <DetailItem label="Instructor" value={b().instructor} />
                 </div>
-              </div>
+              </section>
 
               <div>
                 <div class="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
@@ -265,6 +243,24 @@ export default function BatchDetailPage() {
         </Show>
       </Show>
     </PageContainer>
+  )
+}
+
+function SummaryMetric(props: { label: string; value: string | number }) {
+  return (
+    <div class="min-w-0 bg-surface px-5 py-4">
+      <p class="text-xs font-semibold uppercase tracking-wide text-muted">{props.label}</p>
+      <p class="mt-1 truncate text-base font-semibold text-foreground">{props.value}</p>
+    </div>
+  )
+}
+
+function DetailItem(props: { label: string; value?: string | number | null }) {
+  return (
+    <div class="min-w-0 bg-surface px-5 py-4">
+      <p class="text-xs font-semibold uppercase tracking-wide text-muted">{props.label}</p>
+      <p class="mt-1 truncate text-sm font-medium text-foreground">{props.value || "Not set"}</p>
+    </div>
   )
 }
 
