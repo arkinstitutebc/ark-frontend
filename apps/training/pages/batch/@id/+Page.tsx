@@ -6,13 +6,10 @@ import {
   Icons,
   PageContainer,
   statusToneClass,
-  THead,
-  Th,
   toast,
 } from "@ark/ui"
 import { useBatch, useBatchStudents, useStudent } from "@data/hooks"
-import type { Student } from "@data/types"
-import { createMemo, createSignal, For, Show } from "solid-js"
+import { createMemo, createSignal, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
 import {
   AddStudentModal,
@@ -20,13 +17,16 @@ import {
   EditBatchModal,
   EditStudentModal,
 } from "@/components/modals"
-import { StudentAvatar } from "@/components/ui"
+import {
+  StudentBlockGrid,
+  StudentListView,
+  type StudentViewMode,
+  ViewModeToggle,
+} from "@/components/students"
 
 const PUBLIC_FORMS_URL =
   import.meta.env.VITE_PUBLIC_FORMS_URL?.replace(/\/$/, "") || "https://forms.arkinstitutebc.com"
 const STUDENT_VIEW_MODE_KEY = "training.batch.students.viewMode"
-
-type StudentViewMode = "list" | "blocks"
 
 function getInitialStudentViewMode(): StudentViewMode {
   if (typeof window === "undefined") return "list"
@@ -208,10 +208,11 @@ export default function BatchDetailPage() {
                     <Show
                       when={studentViewMode() === "blocks"}
                       fallback={
-                        <StudentTable
+                        <StudentListView
                           students={studentsQuery.data ?? []}
                           onEdit={setEditingStudentId}
                           onDelete={setDeletingStudentId}
+                          emptyMessage="No students enrolled yet."
                         />
                       }
                     >
@@ -219,6 +220,7 @@ export default function BatchDetailPage() {
                         students={studentsQuery.data ?? []}
                         onEdit={setEditingStudentId}
                         onDelete={setDeletingStudentId}
+                        emptyMessage="No students enrolled yet."
                       />
                     </Show>
                   </div>
@@ -272,178 +274,5 @@ function FormLinkActions(props: { href: string; onCopy: () => void }) {
         <Icons.copy class="h-4 w-4" />
       </button>
     </div>
-  )
-}
-
-function ViewModeToggle(props: {
-  value: StudentViewMode
-  onChange: (mode: StudentViewMode) => void
-}) {
-  return (
-    <div class="inline-flex rounded-lg border border-border bg-surface-muted p-0.5">
-      <button
-        type="button"
-        onClick={() => props.onChange("list")}
-        class={`rounded-md p-2 transition-colors ${
-          props.value === "list"
-            ? "bg-surface text-foreground shadow-sm"
-            : "text-muted hover:text-foreground"
-        }`}
-        aria-pressed={props.value === "list"}
-        aria-label="List view"
-        title="List view"
-      >
-        <Icons.list class="h-4 w-4" />
-      </button>
-      <button
-        type="button"
-        onClick={() => props.onChange("blocks")}
-        class={`rounded-md p-2 transition-colors ${
-          props.value === "blocks"
-            ? "bg-surface text-foreground shadow-sm"
-            : "text-muted hover:text-foreground"
-        }`}
-        aria-pressed={props.value === "blocks"}
-        aria-label="Block view"
-        title="Block view"
-      >
-        <Icons.layoutGrid class="h-4 w-4" />
-      </button>
-    </div>
-  )
-}
-
-function StudentTable(props: {
-  students: Student[]
-  onEdit: (studentId: string) => void
-  onDelete: (studentId: string) => void
-}) {
-  return (
-    <div class="max-h-[560px] overflow-auto">
-      <table class="w-full min-w-[720px]">
-        <THead>
-          <Th>Student ID</Th>
-          <Th>Photo</Th>
-          <Th>Name</Th>
-          <Th>Status</Th>
-          <Th align="right">Actions</Th>
-        </THead>
-        <tbody>
-          <Show
-            when={props.students.length > 0}
-            fallback={
-              <tr>
-                <td colSpan={5} class="py-12 text-center text-muted text-sm">
-                  No students enrolled yet.
-                </td>
-              </tr>
-            }
-          >
-            <For each={props.students}>
-              {student => (
-                <tr
-                  class="border-t border-border hover:bg-primary/5 transition-colors cursor-pointer"
-                  onClick={() => props.onEdit(student.id)}
-                  title="Click to edit"
-                >
-                  <td class="py-4 px-6 text-sm text-foreground font-mono">{student.studentId}</td>
-                  <td class="py-4 px-6">
-                    <StudentAvatar student={student} size="sm" />
-                  </td>
-                  <td class="py-4 px-6 text-sm text-foreground">
-                    <div class="min-w-0">
-                      <p class="truncate font-medium text-foreground">
-                        {student.firstName} {student.lastName}
-                      </p>
-                      <p class="truncate text-xs text-muted">
-                        {student.email || student.contactNumber || "No contact yet"}
-                      </p>
-                    </div>
-                  </td>
-                  <td class="py-4 px-6">
-                    <span
-                      class={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${statusToneClass(student.status)}`}
-                    >
-                      {student.status}
-                    </span>
-                  </td>
-                  <td class="py-4 px-6 text-right">
-                    <button
-                      type="button"
-                      onClick={e => {
-                        e.stopPropagation()
-                        props.onDelete(student.id)
-                      }}
-                      class="text-muted hover:text-red-500 transition-colors p-1"
-                      title="Delete student"
-                    >
-                      <Icons.trash class="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
-              )}
-            </For>
-          </Show>
-        </tbody>
-      </table>
-    </div>
-  )
-}
-
-function StudentBlockGrid(props: {
-  students: Student[]
-  onEdit: (studentId: string) => void
-  onDelete: (studentId: string) => void
-}) {
-  return (
-    <Show
-      when={props.students.length > 0}
-      fallback={<div class="py-12 text-center text-muted text-sm">No students enrolled yet.</div>}
-    >
-      <div class="max-h-[620px] overflow-auto p-4">
-        <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5">
-          <For each={props.students}>
-            {student => (
-              <div class="group relative min-w-0">
-                <button
-                  type="button"
-                  onClick={() => props.onEdit(student.id)}
-                  class="w-full min-w-0 rounded-xl border border-border bg-surface p-3 text-left transition-colors hover:border-primary/30 hover:bg-primary/5"
-                >
-                  <div class="flex flex-col items-center text-center">
-                    <StudentAvatar student={student} size="lg" />
-                    <p class="mt-3 w-full truncate text-sm font-semibold text-foreground">
-                      {student.firstName} {student.lastName}
-                    </p>
-                    <p class="mt-1 w-full truncate font-mono text-[11px] text-muted">
-                      {student.studentId}
-                    </p>
-                    <p class="mt-1 w-full truncate text-xs text-muted">
-                      {student.contactNumber || student.email || "No contact yet"}
-                    </p>
-                    <span
-                      class={`mt-3 inline-flex px-2 py-1 text-xs font-medium rounded-full ${statusToneClass(student.status)}`}
-                    >
-                      {student.status}
-                    </span>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={event => {
-                    event.stopPropagation()
-                    props.onDelete(student.id)
-                  }}
-                  class="absolute right-2 top-2 rounded-md p-1 text-muted opacity-100 transition-colors hover:bg-red-50 hover:text-red-600 sm:opacity-0 sm:group-hover:opacity-100"
-                  title="Delete student"
-                >
-                  <Icons.trash class="h-4 w-4" />
-                </button>
-              </div>
-            )}
-          </For>
-        </div>
-      </div>
-    </Show>
   )
 }
