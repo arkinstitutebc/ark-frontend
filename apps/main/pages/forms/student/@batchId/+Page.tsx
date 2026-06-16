@@ -116,12 +116,6 @@ export default function PublicStudentEnrollmentPage() {
   }))
 
   const batch = () => batchQuery.data
-  const slotsText = () => {
-    const b = batch()
-    if (!b) return ""
-    return `${b.studentsEnrolled}/${b.studentsCapacity} enrolled`
-  }
-
   const inputError = (field: EnrollmentField) => errors()[field]
 
   const handleSubmit = (event: Event) => {
@@ -164,25 +158,25 @@ export default function PublicStudentEnrollmentPage() {
   return (
     <main class="min-h-screen bg-surface-muted text-foreground">
       <div class="mx-auto flex min-h-screen w-full max-w-5xl flex-col px-3 py-3 sm:px-6 sm:py-5 lg:px-8">
-        <header class="mb-4 rounded-2xl border border-border bg-surface px-4 py-4 sm:mb-5 sm:px-7 sm:py-5">
+        <header class="mb-3 rounded-xl border border-border bg-surface px-4 py-4 sm:mb-5 sm:rounded-2xl sm:px-7 sm:py-5">
           <div class="flex items-center gap-3 sm:gap-4">
             <img
               src="/logo/ark-transpa.png"
               alt="Ark Institute logo"
               width="64"
               height="64"
-              class="h-12 w-12 object-contain sm:h-16 sm:w-16"
+              class="h-10 w-10 object-contain sm:h-16 sm:w-16"
               loading="eager"
               fetchpriority="high"
             />
             <div>
-              <p class="text-xs font-semibold uppercase tracking-[0.18em] text-primary">
+              <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-primary sm:text-xs">
                 Ark Institute
               </p>
-              <h1 class="mt-1 text-xl font-bold tracking-tight text-foreground sm:text-3xl">
+              <h1 class="mt-1 text-lg font-bold tracking-tight text-foreground sm:text-3xl">
                 Student Enrollment Form
               </h1>
-              <p class="mt-1 text-sm text-muted">
+              <p class="mt-1 text-xs leading-relaxed text-muted sm:text-sm">
                 Complete this form using accurate student information.
               </p>
             </div>
@@ -208,24 +202,23 @@ export default function PublicStudentEnrollmentPage() {
 
         <Show when={batch() && !submittedStudentId()}>
           <form onSubmit={handleSubmit} class="space-y-5" noValidate>
-            <section class="rounded-2xl border border-border bg-surface">
-              <div class="border-b border-border px-5 py-4 sm:px-7">
-                <p class="text-xs font-semibold uppercase tracking-[0.16em] text-muted">
+            <section class="rounded-xl border border-border bg-surface sm:rounded-2xl">
+              <div class="border-b border-border px-4 py-4 sm:px-7">
+                <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted sm:text-xs">
                   Training Batch
                 </p>
-                <h2 class="mt-1 text-xl font-semibold text-foreground">
+                <h2 class="mt-1 text-lg font-semibold leading-snug text-foreground sm:text-xl">
                   {batch()?.trainingName}
                   <Show when={batch()?.trainingLevel}> {batch()?.trainingLevel}</Show>
                 </h2>
               </div>
-              <dl class="grid gap-px bg-border text-sm sm:grid-cols-2 lg:grid-cols-4">
+              <dl class="grid gap-px bg-border text-sm sm:grid-cols-3">
                 <InfoItem label="Batch" value={batch()?.batchCode ?? "—"} />
                 <InfoItem label="Schedule" value={batch()?.weeklySchedule || "Not set"} />
                 <InfoItem
                   label="Dates"
                   value={`${formatDate(batch()?.startDate)} - ${formatDate(batch()?.endDate)}`}
                 />
-                <InfoItem label="Available Slots" value={slotsText()} />
               </dl>
             </section>
 
@@ -403,21 +396,23 @@ export default function PublicStudentEnrollmentPage() {
 
 function InfoItem(props: { label: string; value: string }) {
   return (
-    <div class="bg-surface px-5 py-4">
-      <dt class="text-xs font-semibold uppercase tracking-wide text-muted">{props.label}</dt>
-      <dd class="mt-1 text-sm font-semibold text-foreground">{props.value}</dd>
+    <div class="bg-surface px-4 py-3 sm:px-5 sm:py-4">
+      <dt class="text-[11px] font-semibold uppercase tracking-wide text-muted sm:text-xs">
+        {props.label}
+      </dt>
+      <dd class="mt-1 text-sm font-semibold leading-snug text-foreground">{props.value}</dd>
     </div>
   )
 }
 
 function FormBlock(props: { title: string; description: string; children: JSX.Element }) {
   return (
-    <section class="rounded-2xl border border-border bg-surface">
-      <div class="border-b border-border px-5 py-4 sm:px-7">
-        <h2 class="text-lg font-semibold text-foreground">{props.title}</h2>
-        <p class="mt-1 text-sm text-muted">{props.description}</p>
+    <section class="rounded-xl border border-border bg-surface sm:rounded-2xl">
+      <div class="border-b border-border px-4 py-3 sm:px-7 sm:py-4">
+        <h2 class="text-base font-semibold text-foreground sm:text-lg">{props.title}</h2>
+        <p class="mt-1 text-xs leading-relaxed text-muted sm:text-sm">{props.description}</p>
       </div>
-      <div class="space-y-5 px-5 py-5 sm:px-7">{props.children}</div>
+      <div class="space-y-4 px-4 py-4 sm:space-y-5 sm:px-7 sm:py-5">{props.children}</div>
     </section>
   )
 }
