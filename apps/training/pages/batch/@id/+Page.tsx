@@ -115,24 +115,10 @@ export default function BatchDetailPage() {
                     <p class="text-muted">{b().trainingName}</p>
                   </div>
                   <div class="flex flex-wrap items-center gap-2">
-                    <Button
-                      type="button"
-                      variant="secondary"
-                      size="sm"
-                      onClick={copyPublicEnrollmentLink}
-                    >
-                      <Icons.fileText class="h-4 w-4" />
-                      Copy form link
-                    </Button>
-                    <a
+                    <FormLinkActions
                       href={publicEnrollmentUrl()}
-                      target="_blank"
-                      rel="noreferrer"
-                      class="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-surface px-4 py-2 text-sm font-semibold text-foreground transition-all hover:bg-surface-muted"
-                    >
-                      <Icons.externalLink class="h-4 w-4" />
-                      Open form
-                    </a>
+                      onCopy={copyPublicEnrollmentLink}
+                    />
                     <Button
                       type="button"
                       variant="ghost"
@@ -163,7 +149,7 @@ export default function BatchDetailPage() {
                 <div class="border-b border-border px-5 py-3">
                   <h2 class="text-sm font-semibold text-foreground">Details</h2>
                 </div>
-                <div class="grid gap-px bg-border md:grid-cols-2 xl:grid-cols-3">
+                <div class="grid gap-3 bg-surface p-4 md:grid-cols-2 xl:grid-cols-3">
                   <DetailItem label="Batch No." value={b().batchNo} />
                   <DetailItem label="RQM" value={b().rqm} />
                   <DetailItem label="Sponsor" value={b().senator} />
@@ -257,9 +243,34 @@ function SummaryMetric(props: { label: string; value: string | number }) {
 
 function DetailItem(props: { label: string; value?: string | number | null }) {
   return (
-    <div class="min-w-0 bg-surface px-5 py-4">
+    <div class="min-w-0 rounded-lg border border-border bg-surface px-4 py-3">
       <p class="text-xs font-semibold uppercase tracking-wide text-muted">{props.label}</p>
       <p class="mt-1 truncate text-sm font-medium text-foreground">{props.value || "Not set"}</p>
+    </div>
+  )
+}
+
+function FormLinkActions(props: { href: string; onCopy: () => void }) {
+  return (
+    <div class="inline-flex overflow-hidden rounded-lg border border-border bg-surface">
+      <a
+        href={props.href}
+        target="_blank"
+        rel="noreferrer"
+        class="inline-flex h-10 items-center justify-center gap-2 border-r border-border px-3 text-sm font-semibold text-foreground transition-colors hover:bg-surface-muted"
+      >
+        <Icons.externalLink class="h-4 w-4" />
+        <span>Open form</span>
+      </a>
+      <button
+        type="button"
+        onClick={props.onCopy}
+        aria-label="Copy enrollment form link"
+        title="Copy enrollment form link"
+        class="inline-flex h-10 w-10 items-center justify-center text-muted transition-colors hover:bg-surface-muted hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-inset"
+      >
+        <Icons.copy class="h-4 w-4" />
+      </button>
     </div>
   )
 }
