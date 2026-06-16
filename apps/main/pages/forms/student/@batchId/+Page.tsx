@@ -83,6 +83,10 @@ function trainingTitle(batch?: { trainingName: string; trainingLevel?: string | 
   return `${batch.trainingName} ${level}`
 }
 
+function requiredLabel(label: string) {
+  return `${label} *`
+}
+
 export default function PublicStudentEnrollmentPage() {
   const pageContext = usePageContext()
   const batchId = createMemo(() => pageContext.routeParams.batchId as string)
@@ -211,6 +215,11 @@ export default function PublicStudentEnrollmentPage() {
 
         <Show when={batch() && !submittedStudentId()}>
           <form onSubmit={handleSubmit} class="space-y-5" noValidate>
+            <div class="rounded-xl border border-primary/15 bg-primary/5 px-4 py-3 text-xs text-muted sm:text-sm">
+              <span class="font-semibold text-foreground">Required fields are marked with *</span>.
+              Documents are optional and can be submitted later if they are not ready.
+            </div>
+
             <section class="rounded-xl border border-border bg-surface sm:rounded-2xl">
               <div class="border-b border-border px-4 py-4 sm:px-7">
                 <p class="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted sm:text-xs">
@@ -236,37 +245,44 @@ export default function PublicStudentEnrollmentPage() {
             >
               <div class="grid gap-4 sm:grid-cols-3">
                 <Input
-                  label="First Name"
+                  label={requiredLabel("First Name")}
                   value={firstName()}
                   onInput={e => setFirstName(e.currentTarget.value)}
                   error={inputError("firstName")}
+                  placeholder="Juan"
                   autocomplete="given-name"
+                  required
                 />
                 <Input
                   label="Middle Name"
                   value={middleName()}
                   onInput={e => setMiddleName(e.currentTarget.value)}
+                  hint="Optional"
+                  placeholder="Santos"
                   autocomplete="additional-name"
                 />
                 <Input
-                  label="Last Name"
+                  label={requiredLabel("Last Name")}
                   value={lastName()}
                   onInput={e => setLastName(e.currentTarget.value)}
                   error={inputError("lastName")}
+                  placeholder="Dela Cruz"
                   autocomplete="family-name"
+                  required
                 />
               </div>
 
               <div class="grid gap-4 sm:grid-cols-2">
                 <Input
-                  label="Date of Birth"
+                  label={requiredLabel("Date of Birth")}
                   type="date"
                   value={dateOfBirth()}
                   onInput={e => setDateOfBirth(e.currentTarget.value)}
                   error={inputError("dateOfBirth")}
+                  required
                 />
                 <div class="flex flex-col gap-2">
-                  <span class="text-sm font-medium text-foreground">Gender</span>
+                  <RequiredFieldLabel>Gender</RequiredFieldLabel>
                   <Select
                     options={[...genderOptions]}
                     value={gender()}
@@ -285,12 +301,14 @@ export default function PublicStudentEnrollmentPage() {
             >
               <div class="grid gap-4 sm:grid-cols-2">
                 <Input
-                  label="Contact Number"
+                  label={requiredLabel("Contact Number")}
                   value={contactNumber()}
                   onInput={e => setContactNumber(e.currentTarget.value)}
                   error={inputError("contactNumber")}
+                  placeholder="09XXXXXXXXX"
                   inputmode="tel"
                   autocomplete="tel"
+                  required
                 />
                 <Input
                   label="Email Address"
@@ -299,23 +317,26 @@ export default function PublicStudentEnrollmentPage() {
                   onInput={e => setEmail(e.currentTarget.value)}
                   error={inputError("email")}
                   hint="Optional"
+                  placeholder="student@example.com"
                   inputmode="email"
                   autocomplete="email"
                 />
               </div>
 
               <Textarea
-                label="Complete Address"
+                label={requiredLabel("Complete Address")}
                 value={address()}
                 onInput={e => setAddress(e.currentTarget.value)}
                 error={inputError("address")}
                 rows={3}
+                placeholder="House no., street, barangay, city/municipality, province"
                 autocomplete="street-address"
+                required
               />
 
               <div class="grid gap-4 sm:grid-cols-2">
                 <div class="flex flex-col gap-2">
-                  <span class="text-sm font-medium text-foreground">Education</span>
+                  <RequiredFieldLabel>Education</RequiredFieldLabel>
                   <Select
                     options={educationOptions}
                     value={educationalAttainment() || undefined}
@@ -326,7 +347,7 @@ export default function PublicStudentEnrollmentPage() {
                   />
                 </div>
                 <div class="flex flex-col gap-2">
-                  <span class="text-sm font-medium text-foreground">Employment</span>
+                  <RequiredFieldLabel>Employment</RequiredFieldLabel>
                   <Select
                     options={employmentOptions}
                     value={employmentStatus() || undefined}
@@ -341,7 +362,7 @@ export default function PublicStudentEnrollmentPage() {
 
             <FormBlock
               title="Student Documents"
-              description="Upload clear files if available. These match the documents kept in the student profile."
+              description="Optional for now. Upload clear files if available; staff can attach them later from the student profile."
             >
               <div class="grid gap-4 md:grid-cols-2">
                 <PublicUploadCard
@@ -422,6 +443,14 @@ function FormBlock(props: { title: string; description: string; children: JSX.El
       </div>
       <div class="space-y-4 px-4 py-4 sm:space-y-5 sm:px-7 sm:py-5">{props.children}</div>
     </section>
+  )
+}
+
+function RequiredFieldLabel(props: { children: JSX.Element }) {
+  return (
+    <span class="text-sm font-medium text-foreground">
+      {props.children} <span class="text-primary">*</span>
+    </span>
   )
 }
 
