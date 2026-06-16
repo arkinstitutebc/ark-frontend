@@ -8,6 +8,10 @@ portal.arkinstitutebc.com {
     reverse_proxy localhost:3001
 }
 
+forms.arkinstitutebc.com {
+    reverse_proxy localhost:3001
+}
+
 training.arkinstitutebc.com {
     reverse_proxy localhost:3002
 }

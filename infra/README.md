@@ -9,7 +9,7 @@ The portals are bare `bun dist/server/index.mjs` processes managed by systemd, w
 ```
 infra/
 ├── systemd/                  one unit per portal app
-│   ├── ark-portal-main.service        → :3001  portal.arkinstitutebc.com
+│   ├── ark-portal-main.service        → :3001  portal.arkinstitutebc.com, forms.arkinstitutebc.com
 │   ├── ark-portal-training.service    → :3002  training.arkinstitutebc.com
 │   ├── ark-portal-procurement.service → :3003  procurement.arkinstitutebc.com
 │   ├── ark-portal-inventory.service   → :3004  inventory.arkinstitutebc.com
@@ -17,7 +17,7 @@ infra/
 │   ├── ark-portal-billing.service     → :3006  billing.arkinstitutebc.com
 │   └── ark-portal-hr.service          → :3007  hr.arkinstitutebc.com
 ├── caddy/
-│   └── Caddyfile.portals     7 reverse_proxy blocks, appended to /etc/caddy/Caddyfile
+│   └── Caddyfile.portals     reverse_proxy blocks, appended to /etc/caddy/Caddyfile
 └── README.md                 (this file)
 ```
 
@@ -58,7 +58,7 @@ ssh ark-api 'systemctl status ark-portal-* | grep -E "Memory|CPU"'
 
 ## Caddy
 
-`/etc/caddy/Caddyfile` on the VPS has 7 reverse-proxy blocks, one per portal subdomain. The blocks live in `infra/caddy/Caddyfile.portals` and are appended to `/etc/caddy/Caddyfile` during install. The pre-existing `api.arkinstitutebc.com` block (managed by `ark-services`) stays at the top of the file untouched.
+`/etc/caddy/Caddyfile` on the VPS has reverse-proxy blocks for the portal subdomains. `forms.arkinstitutebc.com` points to the main portal service because public forms live in the main app. The blocks live in `infra/caddy/Caddyfile.portals` and are appended to `/etc/caddy/Caddyfile` during install. The pre-existing `api.arkinstitutebc.com` block (managed by `ark-services`) stays at the top of the file untouched.
 
 Install / refresh on the VPS:
 
@@ -66,9 +66,18 @@ Install / refresh on the VPS:
 ssh ark-api '
   # take a backup
   sudo cp /etc/caddy/Caddyfile /etc/caddy/Caddyfile.bak.$(date +%Y%m%d)
-  # append the portal blocks (idempotent: only adds if not already present)
+  # append the portal blocks on new installs
   if ! grep -q "portal.arkinstitutebc.com" /etc/caddy/Caddyfile; then
     sudo bash -c "echo >> /etc/caddy/Caddyfile && cat /opt/ark-portals/repo/infra/caddy/Caddyfile.portals >> /etc/caddy/Caddyfile"
+  fi
+  # existing installs may already have the original portal blocks, so add forms explicitly
+  if ! grep -q "forms.arkinstitutebc.com" /etc/caddy/Caddyfile; then
+    sudo bash -c "cat >> /etc/caddy/Caddyfile" <<'"'"'CADDY'"'"'
+
+forms.arkinstitutebc.com {
+    reverse_proxy localhost:3001
+}
+CADDY
   fi
   sudo caddy validate --config /etc/caddy/Caddyfile
   sudo systemctl reload caddy

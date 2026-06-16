@@ -1,5 +1,6 @@
 import {
   BackLink,
+  Button,
   formatDatePH,
   formatPeso,
   Icons,
@@ -21,6 +22,9 @@ import {
 } from "@/components/modals"
 import { StudentAvatar } from "@/components/ui"
 
+const PUBLIC_FORMS_URL =
+  import.meta.env.VITE_PUBLIC_FORMS_URL?.replace(/\/$/, "") || "https://forms.arkinstitutebc.com"
+
 export default function BatchDetailPage() {
   const pageContext = usePageContext()
   const [showAddStudentModal, setShowAddStudentModal] = createSignal(false)
@@ -34,11 +38,7 @@ export default function BatchDetailPage() {
   const editingStudentQuery = useStudent(() => editingStudentId() || "")
   const deletingStudentQuery = useStudent(() => deletingStudentId() || "")
 
-  const publicEnrollmentUrl = () => {
-    const origin =
-      typeof window === "undefined" ? "https://portal.arkinstitutebc.com" : window.location.origin
-    return `${origin}/forms/student/${id()}`
-  }
+  const publicEnrollmentUrl = () => `${PUBLIC_FORMS_URL}/student/${id()}`
 
   const copyPublicEnrollmentLink = async () => {
     try {
@@ -93,13 +93,26 @@ export default function BatchDetailPage() {
                   </div>
                   <p class="text-muted">{b().trainingName}</p>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => setShowEditModal(true)}
-                  class="px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors"
-                >
-                  Edit Batch
-                </button>
+                <div class="flex flex-wrap items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={copyPublicEnrollmentLink}
+                  >
+                    <Icons.fileText class="h-4 w-4" />
+                    Copy form link
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    class="border border-border bg-surface text-foreground hover:bg-surface-muted"
+                    onClick={() => setShowEditModal(true)}
+                  >
+                    Edit Batch
+                  </Button>
+                </div>
               </div>
 
               <div class="grid grid-cols-2 gap-4 mb-8 md:grid-cols-4">
@@ -158,23 +171,13 @@ export default function BatchDetailPage() {
                   <h2 class="text-sm font-semibold text-foreground">
                     Students ({studentsQuery.data?.length ?? 0})
                   </h2>
-                  <div class="flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={copyPublicEnrollmentLink}
-                      class="inline-flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5 text-sm font-medium text-muted transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
-                    >
-                      <Icons.fileText class="h-4 w-4" />
-                      Copy form link
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowAddStudentModal(true)}
-                      class="px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/5 rounded-lg transition-colors"
-                    >
-                      + Add Student
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setShowAddStudentModal(true)}
+                    class="px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/5 rounded-lg transition-colors"
+                  >
+                    + Add Student
+                  </button>
                 </div>
 
                 <AddStudentModal

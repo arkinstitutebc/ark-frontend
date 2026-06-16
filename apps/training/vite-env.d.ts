@@ -9,6 +9,7 @@ interface ImportMetaEnv {
   VITE_FINANCE_PORTAL_URL: string
   VITE_BILLING_PORTAL_URL: string
   VITE_HR_PORTAL_URL: string
+  VITE_PUBLIC_FORMS_URL?: string
 }
 
 interface ImportMeta {
