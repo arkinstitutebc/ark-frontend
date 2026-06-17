@@ -156,10 +156,10 @@ export function EditStudentModal(props: EditStudentModalProps) {
 
   return (
     <Modal open={props.open} onClose={handleClose} title="Edit student profile" size="xl">
-      <form onSubmit={handleSubmit} class="space-y-5" noValidate>
-        <div class="flex flex-col gap-4 rounded-xl border border-border bg-surface-muted/40 p-4 sm:flex-row sm:items-center">
-          <label class="group relative flex h-20 w-20 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-2xl border border-border bg-surface transition-colors hover:border-primary/40">
-            <Show when={photoUrl()} fallback={<Icons.user class="h-10 w-10 text-muted" />}>
+      <form onSubmit={handleSubmit} class="space-y-4" noValidate>
+        <div class="flex flex-col gap-3 rounded-xl border border-border bg-surface-muted/40 p-3 sm:flex-row sm:items-center">
+          <label class="group relative flex h-16 w-16 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-xl border border-border bg-surface transition-colors hover:border-primary/40">
+            <Show when={photoUrl()} fallback={<Icons.user class="h-8 w-8 text-muted" />}>
               {url => <img src={url()} alt="" class="h-full w-full object-cover" />}
             </Show>
             <span class="absolute inset-0 flex items-center justify-center bg-black/45 text-[11px] font-semibold text-white opacity-0 transition-opacity group-hover:opacity-100">
@@ -180,17 +180,17 @@ export function EditStudentModal(props: EditStudentModalProps) {
           </label>
           <div class="min-w-0 flex-1">
             <p class="font-mono text-xs text-muted">{props.student.studentId || "No ID yet"}</p>
-            <h3 class="mt-1 truncate text-xl font-semibold text-foreground">
+            <h3 class="mt-0.5 truncate text-lg font-semibold text-foreground">
               {firstName() || "Student"} {lastName()}
             </h3>
-            <p class="mt-1 text-sm text-muted">
+            <p class="mt-0.5 text-sm text-muted">
               Complete profile details, training assignment, and student documents.
             </p>
           </div>
         </div>
 
-        <div class="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_320px]">
-          <div class="space-y-4">
+        <div class="grid grid-cols-1 gap-3 xl:grid-cols-[minmax(0,1fr)_320px]">
+          <div class="space-y-3">
             <TrainingFormPanel title="Identity">
               <div class="grid grid-cols-1 gap-3 md:grid-cols-3">
                 <label class="block">
@@ -278,20 +278,7 @@ export function EditStudentModal(props: EditStudentModalProps) {
                   />
                 </div>
               </div>
-              <label class="mt-3 block">
-                <span class={labelClass}>Address</span>
-                <input
-                  type="text"
-                  value={address()}
-                  onInput={e => setAddress(e.target.value)}
-                  placeholder="Street, City, Province"
-                  class={inputClass()}
-                />
-              </label>
-            </TrainingFormPanel>
-
-            <TrainingFormPanel title="Education and employment">
-              <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div>
                   <span class={labelClass}>Education</span>
                   <Select
@@ -313,10 +300,20 @@ export function EditStudentModal(props: EditStudentModalProps) {
                   />
                 </div>
               </div>
+              <label class="mt-3 block">
+                <span class={labelClass}>Address</span>
+                <input
+                  type="text"
+                  value={address()}
+                  onInput={e => setAddress(e.target.value)}
+                  placeholder="Street, City, Province"
+                  class={inputClass()}
+                />
+              </label>
             </TrainingFormPanel>
           </div>
 
-          <aside class="space-y-4">
+          <aside class="space-y-3">
             <TrainingFormPanel title="Training">
               <div class="space-y-3">
                 <div>
