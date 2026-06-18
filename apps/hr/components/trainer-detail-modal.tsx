@@ -1,4 +1,4 @@
-import { formatDatePH, formatPeso, Modal, THead, Th } from "@ark/ui"
+import { Button, formatDatePH, formatPeso, Modal, THead, Th } from "@ark/ui"
 import { useAttendance } from "@data/hooks"
 import type { Trainer } from "@data/types"
 import { For, Show } from "solid-js"
@@ -8,6 +8,7 @@ interface TrainerDetailModalProps {
   open: boolean
   onClose: () => void
   trainer: Trainer | null
+  onEdit?: (trainer: Trainer) => void
 }
 
 export function TrainerDetailModal(props: TrainerDetailModalProps) {
@@ -36,6 +37,14 @@ export function TrainerDetailModal(props: TrainerDetailModalProps) {
                 </div>
                 <p class="text-sm text-muted mt-1">{trainer().specialization}</p>
               </div>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => props.onEdit?.(trainer())}
+              >
+                Edit
+              </Button>
             </div>
 
             <div class="grid grid-cols-2 gap-4">
@@ -49,11 +58,17 @@ export function TrainerDetailModal(props: TrainerDetailModalProps) {
               </div>
               <div>
                 <p class="text-xs text-muted mb-1">Hourly Rate</p>
-                <p class="text-sm text-foreground">{formatPeso(Number(trainer().hourlyRate))}</p>
+                <p class="text-sm text-foreground">
+                  {Number(trainer().hourlyRate) > 0
+                    ? formatPeso(Number(trainer().hourlyRate))
+                    : "—"}
+                </p>
               </div>
               <div>
                 <p class="text-xs text-muted mb-1">Hire Date</p>
-                <p class="text-sm text-foreground">{formatDatePH(trainer().hireDate)}</p>
+                <p class="text-sm text-foreground">
+                  {trainer().hireDate ? formatDatePH(trainer().hireDate) : "—"}
+                </p>
               </div>
             </div>
 

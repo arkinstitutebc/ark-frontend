@@ -1,6 +1,6 @@
 import { createCrudHooks } from "@ark/ui"
 import { queryKeys } from "../query-keys"
-import type { Trainer } from "../types"
+import type { Trainer, TrainerStatus } from "../types"
 
 interface TrainerListQuery {
   status?: string
@@ -13,6 +13,7 @@ interface CreateTrainerInput {
   specialization?: string
   hourlyRate?: string
   hireDate?: string
+  status?: TrainerStatus
 }
 
 interface UpdateTrainerInput {
@@ -21,7 +22,8 @@ interface UpdateTrainerInput {
   phone?: string
   specialization?: string
   hourlyRate?: string
-  status?: string
+  hireDate?: string
+  status?: TrainerStatus
 }
 
 const crud = createCrudHooks<

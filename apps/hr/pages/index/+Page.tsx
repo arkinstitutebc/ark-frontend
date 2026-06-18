@@ -1,8 +1,9 @@
-import { formatDatePH, formatPeso, PageHeader, StatCard, THead, Th } from "@ark/ui"
+import { Button, formatDatePH, formatPeso, PageHeader, StatCard, THead, Th } from "@ark/ui"
 import { useTrainers } from "@data/hooks"
 import type { Trainer, TrainerStatus } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { TrainerDetailModal } from "@/components/trainer-detail-modal"
+import { TrainerFormModal } from "@/components/trainer-form-modal"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
 export default function Page() {
@@ -11,6 +12,8 @@ export default function Page() {
   const [search, setSearch] = createSignal("")
   const [selectedTrainer, setSelectedTrainer] = createSignal<Trainer | null>(null)
   const [modalOpen, setModalOpen] = createSignal(false)
+  const [formOpen, setFormOpen] = createSignal(false)
+  const [editingTrainer, setEditingTrainer] = createSignal<Trainer | null>(null)
 
   const filteredTrainers = createMemo(() => {
     const data = query.data || []
@@ -39,9 +42,29 @@ export default function Page() {
     setModalOpen(true)
   }
 
+  const handleNew = () => {
+    setEditingTrainer(null)
+    setFormOpen(true)
+  }
+
+  const handleEdit = (trainer: Trainer) => {
+    setEditingTrainer(trainer)
+    setModalOpen(false)
+    setFormOpen(true)
+  }
+
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
-      <PageHeader title="Trainers" subtitle="Manage trainer profiles and assignments" />
+      <PageHeader
+        title="Trainers"
+        subtitle="Manage trainer profiles and assignments"
+        action={
+          <Button type="button" size="sm" onClick={handleNew}>
+            <Icons.plus class="h-4 w-4" />
+            New Trainer
+          </Button>
+        }
+      />
 
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
         <StatCard label="Total" value={query.isSuccess ? stats().total : "-"} />
@@ -123,7 +146,9 @@ export default function Page() {
                         </td>
                         <td class="py-4 px-6 text-sm text-foreground">{trainer.specialization}</td>
                         <td class="py-4 px-6 text-right text-sm text-foreground">
-                          {formatPeso(Number(trainer.hourlyRate))}
+                          {Number(trainer.hourlyRate) > 0
+                            ? formatPeso(Number(trainer.hourlyRate))
+                            : "—"}
                         </td>
                         <td class="py-4 px-6">
                           <StatusBadge status={trainer.status} />
@@ -145,6 +170,12 @@ export default function Page() {
         open={modalOpen()}
         onClose={() => setModalOpen(false)}
         trainer={selectedTrainer()}
+        onEdit={handleEdit}
+      />
+      <TrainerFormModal
+        open={formOpen()}
+        onClose={() => setFormOpen(false)}
+        trainer={editingTrainer()}
       />
     </div>
   )
