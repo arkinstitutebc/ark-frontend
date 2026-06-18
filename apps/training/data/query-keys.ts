@@ -3,6 +3,7 @@ export const queryKeys = {
     all: ["batches"] as const,
     filtered: (filters?: { status?: string }) => ["batches", filters] as const,
     detail: (id: string) => ["batches", id] as const,
+    audit: (id: string) => ["batches", id, "audit"] as const,
     students: (batchId: string) => ["batches", batchId, "students"] as const,
   },
   students: {

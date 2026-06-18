@@ -349,7 +349,7 @@ export function EditStudentModal(props: EditStudentModalProps) {
             <TrainingFormPanel title="Documents">
               <div class="space-y-3">
                 <StudentUploadField
-                  label="Student photo"
+                  label="2x2 Photo"
                   description="JPG, PNG, or WebP up to 5MB."
                   kind="photo"
                   accept="image/jpeg,image/png,image/webp"
@@ -357,7 +357,7 @@ export function EditStudentModal(props: EditStudentModalProps) {
                   onChange={setPhotoUrl}
                 />
                 <StudentUploadField
-                  label="PSA certificate"
+                  label="Birth Certificate / PSA"
                   description="PDF or image up to 10MB."
                   kind="certificate"
                   accept="image/jpeg,image/png,image/webp,application/pdf"

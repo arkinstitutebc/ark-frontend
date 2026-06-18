@@ -8,8 +8,14 @@ import {
   statusToneClass,
   toast,
 } from "@ark/ui"
-import { useBatch, useBatchStudents, useStudent } from "@data/hooks"
-import { createMemo, createSignal, Show } from "solid-js"
+import {
+  type TrainingAuditEvent,
+  useBatch,
+  useBatchAudit,
+  useBatchStudents,
+  useStudent,
+} from "@data/hooks"
+import { createMemo, createSignal, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
 import {
   AddStudentModal,
@@ -45,6 +51,7 @@ export default function BatchDetailPage() {
 
   const id = createMemo(() => pageContext.routeParams.id as string)
   const batchQuery = useBatch(id)
+  const batchAuditQuery = useBatchAudit(id)
   const studentsQuery = useBatchStudents(id)
   const editingStudentQuery = useStudent(() => editingStudentId() || "")
   const deletingStudentQuery = useStudent(() => deletingStudentId() || "")
@@ -158,6 +165,11 @@ export default function BatchDetailPage() {
                 </div>
               </section>
 
+              <BatchActivitySection
+                events={batchAuditQuery.data?.items ?? []}
+                loading={batchAuditQuery.isFetching}
+              />
+
               <div>
                 <div class="flex flex-col gap-3 mb-4 sm:flex-row sm:items-center sm:justify-between">
                   <h2 class="text-sm font-semibold text-foreground">
@@ -250,6 +262,120 @@ function DetailItem(props: { label: string; value?: string | number | null }) {
       <p class="mt-1 truncate text-sm font-medium text-foreground">{props.value || "Not set"}</p>
     </div>
   )
+}
+
+function BatchActivitySection(props: { events: TrainingAuditEvent[]; loading: boolean }) {
+  return (
+    <section class="mb-6 overflow-hidden rounded-xl border border-border bg-surface">
+      <div class="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
+        <h2 class="text-sm font-semibold text-foreground">Activity</h2>
+        <Show when={props.loading}>
+          <span class="text-xs text-muted">Refreshing...</span>
+        </Show>
+      </div>
+      <Show
+        when={props.events.length > 0}
+        fallback={
+          <p class="px-5 py-4 text-sm text-muted">
+            {props.loading ? "Loading activity..." : "No batch activity yet."}
+          </p>
+        }
+      >
+        <div class="divide-y divide-border">
+          <For each={props.events}>{event => <BatchActivityRow event={event} />}</For>
+        </div>
+      </Show>
+    </section>
+  )
+}
+
+function BatchActivityRow(props: { event: TrainingAuditEvent }) {
+  const summary = createMemo(() => batchAuditSummary(props.event))
+
+  return (
+    <div class="flex gap-3 px-5 py-3">
+      <div class="mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+        <Icons.clock class="h-3.5 w-3.5" />
+      </div>
+      <div class="min-w-0 flex-1">
+        <div class="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+          <p class="text-sm font-medium text-foreground">{summary().title}</p>
+          <time class="text-xs text-muted">{formatAuditTime(props.event.createdAt)}</time>
+        </div>
+        <p class="mt-0.5 text-xs text-muted">
+          {formatActor(props.event.actor)}
+          <Show when={summary().detail}> · {summary().detail}</Show>
+        </p>
+      </div>
+    </div>
+  )
+}
+
+const batchAuditFields = {
+  trainingName: "training",
+  trainingLevel: "level",
+  batchNo: "batch no.",
+  rqm: "RQM",
+  senator: "sponsor",
+  startDate: "start date",
+  endDate: "end date",
+  weeklySchedule: "weekly schedule",
+  venue: "venue",
+  instructor: "instructor",
+  budget: "budget",
+  status: "status",
+} as const
+
+function batchAuditSummary(event: TrainingAuditEvent) {
+  if (event.action === "create") return { title: "Batch created", detail: event.note ?? "" }
+  if (event.action === "delete") return { title: "Batch deleted", detail: event.note ?? "" }
+
+  const before = asRecord(event.before)
+  const after = asRecord(event.after)
+  const changed = Object.entries(batchAuditFields)
+    .filter(
+      ([field]) =>
+        before && after && normalizeAuditValue(before[field]) !== normalizeAuditValue(after[field])
+    )
+    .map(([, label]) => label)
+
+  if (changed.length === 1) return { title: `Updated ${changed[0]}`, detail: event.note ?? "" }
+  if (changed.length > 1) {
+    return {
+      title: `Updated ${changed.length} fields`,
+      detail: changed.slice(0, 4).join(", "),
+    }
+  }
+
+  return { title: "Batch updated", detail: event.note ?? "" }
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, unknown>)
+    : null
+}
+
+function normalizeAuditValue(value: unknown) {
+  if (value === null || value === undefined) return ""
+  return String(value)
+}
+
+function formatActor(actor?: string | null) {
+  if (!actor) return "System"
+  if (actor.includes("@")) return actor.split("@")[0]
+  return actor
+}
+
+function formatAuditTime(value: string) {
+  const date = new Date(value)
+  if (Number.isNaN(date.getTime())) return value
+  return new Intl.DateTimeFormat("en-PH", {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date)
 }
 
 function FormLinkActions(props: { href: string; onCopy: () => void }) {

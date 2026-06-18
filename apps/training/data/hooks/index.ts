@@ -1,3 +1,4 @@
+export { type TrainingAuditEvent, useBatchAudit } from "./audit"
 export { useCurrentUser } from "./auth"
 export { useBatch, useBatches, useBatchStudents, useCreateBatch, useUpdateBatch } from "./batches"
 export { useInstructors } from "./instructors"
