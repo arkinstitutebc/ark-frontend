@@ -82,3 +82,18 @@ export function useVoidCheckVoucher() {
     onError: (err: Error) => toast.error(err.message),
   }))
 }
+
+export function useDeleteCheckVoucher() {
+  const qc = useQueryClient()
+  return createMutation(() => ({
+    mutationFn: (id: string) =>
+      api<void>(`/api/finance/check-vouchers/${id}`, {
+        method: "DELETE",
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.checkVouchers.all })
+      toast.success("Check voucher deleted")
+    },
+    onError: (err: Error) => toast.error(err.message),
+  }))
+}

@@ -34,6 +34,7 @@ export {
   type CreateCheckVoucherInput,
   useCheckVouchers,
   useCreateCheckVoucher,
+  useDeleteCheckVoucher,
   useVoidCheckVoucher,
 } from "./check-vouchers"
 export {

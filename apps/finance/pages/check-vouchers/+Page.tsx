@@ -15,7 +15,7 @@ import {
   Tr,
 } from "@ark/ui"
 import { API_URL } from "@data/api"
-import { useCheckVouchers, useVoidCheckVoucher } from "@data/hooks"
+import { useCheckVouchers, useDeleteCheckVoucher, useVoidCheckVoucher } from "@data/hooks"
 import type { CheckVoucher, CheckVoucherStatus } from "@data/types"
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
@@ -48,7 +48,9 @@ export default function CheckVouchersPage() {
   const [status, setStatus] = createSignal<CheckVoucherStatus | "all">("all")
   const [page, setPage] = createSignal(1)
   const [voucherToVoid, setVoucherToVoid] = createSignal<CheckVoucher | null>(null)
+  const [voucherToDelete, setVoucherToDelete] = createSignal<CheckVoucher | null>(null)
   const voidVoucher = useVoidCheckVoucher()
+  const deleteVoucher = useDeleteCheckVoucher()
 
   const query = useCheckVouchers(() => ({
     page: page(),
@@ -68,6 +70,13 @@ export default function CheckVouchersPage() {
     if (!voucher) return
     voidVoucher.mutate(voucher.id, {
       onSuccess: () => setVoucherToVoid(null),
+    })
+  }
+  const confirmDelete = () => {
+    const voucher = voucherToDelete()
+    if (!voucher) return
+    deleteVoucher.mutate(voucher.id, {
+      onSuccess: () => setVoucherToDelete(null),
     })
   }
 
@@ -203,18 +212,24 @@ export default function CheckVouchersPage() {
                           </a>
                         </td>
                         <td class="px-6 py-3 text-right">
-                          <Show
-                            when={voucher.status !== "void"}
-                            fallback={<span class="text-xs text-muted">-</span>}
-                          >
+                          <div class="flex items-center justify-end gap-3">
+                            <Show when={voucher.status !== "void"}>
+                              <button
+                                type="button"
+                                class="text-sm font-medium text-muted transition-colors hover:text-danger"
+                                onClick={() => setVoucherToVoid(voucher)}
+                              >
+                                Void
+                              </button>
+                            </Show>
                             <button
                               type="button"
-                              class="text-sm font-medium text-muted transition-colors hover:text-danger"
-                              onClick={() => setVoucherToVoid(voucher)}
+                              class="text-sm font-medium text-danger transition-colors hover:text-danger/80"
+                              onClick={() => setVoucherToDelete(voucher)}
                             >
-                              Void
+                              Delete
                             </button>
-                          </Show>
+                          </div>
                         </td>
                       </Tr>
                     )}
@@ -262,6 +277,16 @@ export default function CheckVouchersPage() {
         danger
         pending={voidVoucher.isPending}
         onConfirm={confirmVoid}
+      />
+      <ConfirmDialog
+        open={!!voucherToDelete()}
+        onClose={() => setVoucherToDelete(null)}
+        title="Delete check voucher?"
+        description={`This permanently removes ${voucherToDelete()?.voucherNo ?? "the voucher"} from the register.`}
+        confirmLabel="Delete Voucher"
+        danger
+        pending={deleteVoucher.isPending}
+        onConfirm={confirmDelete}
       />
     </div>
   )
