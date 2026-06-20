@@ -5,6 +5,7 @@ import {
   formatDatePH,
   formatPeso,
   Icons,
+  Modal,
   PageHeader,
   QueryBoundary,
   Select,
@@ -16,7 +17,7 @@ import {
 } from "@ark/ui"
 import { API_URL } from "@data/api"
 import { useCheckVouchers, useDeleteCheckVoucher, useVoidCheckVoucher } from "@data/hooks"
-import type { CheckVoucher, CheckVoucherStatus } from "@data/types"
+import type { CheckVoucher, CheckVoucherLine, CheckVoucherStatus } from "@data/types"
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
 
@@ -43,10 +44,160 @@ function VoucherTh(props: {
   )
 }
 
+function voucherPdfUrl(voucher: CheckVoucher) {
+  return `${API_URL}/api/finance/check-vouchers/${voucher.id}/pdf`
+}
+
+function IconAction(props: {
+  label: string
+  icon: typeof Icons.fileText
+  tone?: "default" | "danger"
+  onClick: (event: MouseEvent) => void
+}) {
+  const Icon = props.icon
+  const toneClass = () =>
+    props.tone === "danger"
+      ? "text-danger hover:border-danger/30 hover:bg-red-50 hover:text-danger dark:hover:bg-red-950/30"
+      : "text-muted hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
+
+  return (
+    <button
+      type="button"
+      title={props.label}
+      aria-label={props.label}
+      onClick={props.onClick}
+      class={`inline-flex h-9 w-9 items-center justify-center rounded-lg border border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 ${toneClass()}`}
+    >
+      <Icon class="h-4 w-4" />
+    </button>
+  )
+}
+
+function DetailItem(props: { label: string; value?: string | number | null; class?: string }) {
+  return (
+    <div class={`rounded-lg border border-border bg-surface-muted px-4 py-3 ${props.class ?? ""}`}>
+      <p class="text-xs font-semibold uppercase tracking-wider text-muted">{props.label}</p>
+      <p class="mt-1 break-words text-sm font-medium text-foreground">{props.value || "-"}</p>
+    </div>
+  )
+}
+
+function VoucherLines(props: { title: string; lines: CheckVoucherLine[] }) {
+  return (
+    <section class="rounded-lg border border-border bg-surface">
+      <div class="border-b border-border px-4 py-3">
+        <h3 class="text-sm font-semibold text-foreground">{props.title}</h3>
+      </div>
+      <div class="divide-y divide-border">
+        <For each={props.lines}>
+          {line => (
+            <div class="grid gap-3 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_120px] sm:items-center">
+              <div>
+                <p class="text-sm font-medium text-foreground">{line.account}</p>
+              </div>
+              <p class="text-sm text-muted">{line.description || "-"}</p>
+              <p class="text-left text-sm font-semibold tabular-nums text-foreground sm:text-right">
+                {formatPeso(line.amount)}
+              </p>
+            </div>
+          )}
+        </For>
+      </div>
+    </section>
+  )
+}
+
+function CheckVoucherDetailsModal(props: {
+  voucher: CheckVoucher | null
+  onClose: () => void
+  onVoid: (voucher: CheckVoucher) => void
+  onDelete: (voucher: CheckVoucher) => void
+}) {
+  return (
+    <Modal
+      open={!!props.voucher}
+      onClose={props.onClose}
+      title={props.voucher?.voucherNo ?? "Check Voucher"}
+      size="xl"
+    >
+      <Show when={props.voucher}>
+        {voucher => (
+          <div class="space-y-5">
+            <div class="flex flex-col gap-4 rounded-lg border border-border bg-surface-muted p-4 sm:flex-row sm:items-start sm:justify-between">
+              <div class="min-w-0">
+                <StatusBadge status={voucher().status} />
+                <h2 class="mt-3 text-xl font-semibold text-foreground">{voucher().payee}</h2>
+                <p class="mt-1 text-sm leading-6 text-muted">{voucher().particular}</p>
+              </div>
+              <div class="shrink-0 text-left sm:text-right">
+                <p class="text-xs font-semibold uppercase tracking-wider text-muted">Total</p>
+                <p class="mt-1 text-2xl font-semibold tabular-nums text-foreground">
+                  {formatPeso(voucher().totalAmount)}
+                </p>
+              </div>
+            </div>
+
+            <div class="grid gap-3 md:grid-cols-3">
+              <DetailItem label="Date" value={formatDatePH(voucher().voucherDate)} />
+              <DetailItem label="Bank" value={voucher().bankName} />
+              <DetailItem label="Check No." value={voucher().checkNo} />
+              <DetailItem label="Address" value={voucher().address} class="md:col-span-2" />
+              <DetailItem label="Created By" value={voucher().createdBy} />
+            </div>
+
+            <div class="grid gap-4 lg:grid-cols-2">
+              <VoucherLines title="Debit Lines" lines={voucher().debitLines} />
+              <VoucherLines title="Credit Lines" lines={voucher().creditLines} />
+            </div>
+
+            <div class="grid gap-3 md:grid-cols-3">
+              <DetailItem label="Prepared By" value={voucher().preparedBy} />
+              <DetailItem label="Approved By" value={voucher().approvedBy} />
+              <DetailItem label="Received By" value={voucher().receivedBy} />
+            </div>
+
+            <div class="flex flex-col-reverse gap-3 border-t border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <button
+                type="button"
+                onClick={() => props.onDelete(voucher())}
+                class="inline-flex items-center justify-center gap-2 rounded-lg border border-danger/30 px-4 py-2 text-sm font-semibold text-danger transition-colors hover:bg-red-50 dark:hover:bg-red-950/30"
+              >
+                <Icons.trash class="h-4 w-4" />
+                Delete Voucher
+              </button>
+              <div class="flex flex-col gap-2 sm:flex-row">
+                <Show when={voucher().status !== "void"}>
+                  <button
+                    type="button"
+                    onClick={() => props.onVoid(voucher())}
+                    class="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-surface-muted"
+                  >
+                    Void
+                  </button>
+                </Show>
+                <a
+                  href={voucherPdfUrl(voucher())}
+                  target="_blank"
+                  rel="noreferrer"
+                  class="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-primary/90"
+                >
+                  <Icons.fileText class="h-4 w-4" />
+                  Open PDF
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
+      </Show>
+    </Modal>
+  )
+}
+
 export default function CheckVouchersPage() {
   const [search, setSearch] = createSignal("")
   const [status, setStatus] = createSignal<CheckVoucherStatus | "all">("all")
   const [page, setPage] = createSignal(1)
+  const [selectedVoucher, setSelectedVoucher] = createSignal<CheckVoucher | null>(null)
   const [voucherToVoid, setVoucherToVoid] = createSignal<CheckVoucher | null>(null)
   const [voucherToDelete, setVoucherToDelete] = createSignal<CheckVoucher | null>(null)
   const voidVoucher = useVoidCheckVoucher()
@@ -69,15 +220,33 @@ export default function CheckVouchersPage() {
     const voucher = voucherToVoid()
     if (!voucher) return
     voidVoucher.mutate(voucher.id, {
-      onSuccess: () => setVoucherToVoid(null),
+      onSuccess: updated => {
+        setVoucherToVoid(null)
+        setSelectedVoucher(current => (current?.id === updated.id ? updated : current))
+      },
     })
   }
   const confirmDelete = () => {
     const voucher = voucherToDelete()
     if (!voucher) return
     deleteVoucher.mutate(voucher.id, {
-      onSuccess: () => setVoucherToDelete(null),
+      onSuccess: () => {
+        setVoucherToDelete(null)
+        setSelectedVoucher(current => (current?.id === voucher.id ? null : current))
+      },
     })
+  }
+  const openPdf = (voucher: CheckVoucher, event: MouseEvent) => {
+    event.stopPropagation()
+    window.open(voucherPdfUrl(voucher), "_blank", "noopener,noreferrer")
+  }
+  const openVoidConfirm = (voucher: CheckVoucher, event?: MouseEvent) => {
+    event?.stopPropagation()
+    setVoucherToVoid(voucher)
+  }
+  const openDeleteConfirm = (voucher: CheckVoucher, event?: MouseEvent) => {
+    event?.stopPropagation()
+    setVoucherToDelete(voucher)
   }
 
   createEffect(() => {
@@ -160,24 +329,20 @@ export default function CheckVouchersPage() {
                   <VoucherTh class="min-w-[150px]">Voucher</VoucherTh>
                   <VoucherTh class="min-w-[120px]">Date</VoucherTh>
                   <VoucherTh class="min-w-[190px]">Payee</VoucherTh>
-                  <VoucherTh class="min-w-[280px]">Particular</VoucherTh>
-                  <VoucherTh class="min-w-[160px]">Bank</VoucherTh>
-                  <VoucherTh class="min-w-[120px]">Check No.</VoucherTh>
+                  <VoucherTh class="min-w-[320px]">Details</VoucherTh>
+                  <VoucherTh class="min-w-[180px]">Payment</VoucherTh>
                   <VoucherTh align="right" class="min-w-[140px]">
                     Amount
                   </VoucherTh>
                   <VoucherTh class="min-w-[120px]">Status</VoucherTh>
-                  <VoucherTh align="right" class="min-w-[120px]">
-                    PDF
-                  </VoucherTh>
-                  <VoucherTh align="right" class="min-w-[120px]">
+                  <VoucherTh align="right" class="min-w-[150px]">
                     Actions
                   </VoucherTh>
                 </THead>
                 <tbody>
                   <For each={data.items}>
                     {voucher => (
-                      <Tr>
+                      <Tr onClick={() => setSelectedVoucher(voucher)}>
                         <td class="px-6 py-3 text-sm font-semibold text-foreground whitespace-nowrap">
                           {voucher.voucherNo}
                         </td>
@@ -189,10 +354,15 @@ export default function CheckVouchersPage() {
                           <span class="block max-w-[320px] truncate" title={voucher.particular}>
                             {voucher.particular}
                           </span>
+                          <span class="mt-0.5 block text-xs text-muted">
+                            {voucher.createdBy
+                              ? `Created by ${voucher.createdBy}`
+                              : "Standalone voucher"}
+                          </span>
                         </td>
-                        <td class="px-6 py-3 text-sm text-muted">{voucher.bankName}</td>
-                        <td class="px-6 py-3 text-sm text-muted whitespace-nowrap">
-                          {voucher.checkNo || "-"}
+                        <td class="px-6 py-3 text-sm text-muted">
+                          <p class="text-sm text-foreground">{voucher.bankName}</p>
+                          <p class="text-xs text-muted">{voucher.checkNo || "No check no."}</p>
                         </td>
                         <td class="px-6 py-3 text-right text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">
                           {formatPeso(voucher.totalAmount)}
@@ -201,34 +371,25 @@ export default function CheckVouchersPage() {
                           <StatusBadge status={voucher.status} />
                         </td>
                         <td class="px-6 py-3 text-right">
-                          <a
-                            href={`${API_URL}/api/finance/check-vouchers/${voucher.id}/pdf`}
-                            target="_blank"
-                            rel="noreferrer"
-                            class="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:border-primary/30 hover:bg-primary/5 hover:text-primary"
-                          >
-                            <Icons.fileText class="h-4 w-4" />
-                            Open
-                          </a>
-                        </td>
-                        <td class="px-6 py-3 text-right">
-                          <div class="flex items-center justify-end gap-3">
+                          <div class="flex items-center justify-end gap-1">
+                            <IconAction
+                              label="Open PDF"
+                              icon={Icons.fileText}
+                              onClick={event => openPdf(voucher, event)}
+                            />
                             <Show when={voucher.status !== "void"}>
-                              <button
-                                type="button"
-                                class="text-sm font-medium text-muted transition-colors hover:text-danger"
-                                onClick={() => setVoucherToVoid(voucher)}
-                              >
-                                Void
-                              </button>
+                              <IconAction
+                                label="Void voucher"
+                                icon={Icons.xCircle}
+                                onClick={event => openVoidConfirm(voucher, event)}
+                              />
                             </Show>
-                            <button
-                              type="button"
-                              class="text-sm font-medium text-danger transition-colors hover:text-danger/80"
-                              onClick={() => setVoucherToDelete(voucher)}
-                            >
-                              Delete
-                            </button>
+                            <IconAction
+                              label="Delete voucher"
+                              icon={Icons.trash}
+                              tone="danger"
+                              onClick={event => openDeleteConfirm(voucher, event)}
+                            />
                           </div>
                         </td>
                       </Tr>
@@ -287,6 +448,18 @@ export default function CheckVouchersPage() {
         danger
         pending={deleteVoucher.isPending}
         onConfirm={confirmDelete}
+      />
+      <CheckVoucherDetailsModal
+        voucher={selectedVoucher()}
+        onClose={() => setSelectedVoucher(null)}
+        onVoid={voucher => {
+          setSelectedVoucher(null)
+          openVoidConfirm(voucher)
+        }}
+        onDelete={voucher => {
+          setSelectedVoucher(null)
+          openDeleteConfirm(voucher)
+        }}
       />
     </div>
   )
