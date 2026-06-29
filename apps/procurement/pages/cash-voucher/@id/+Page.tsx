@@ -229,14 +229,14 @@ function AdminActionPanel(props: { request: PettyCashRequest }) {
       <ConfirmDialog
         open={deleteOpen()}
         onClose={() => setDeleteOpen(false)}
-        title="Delete petty cash request?"
+        title="Delete cash voucher request?"
         description={`This will remove ${props.request.requestNumber}. It is only allowed because the request has not been released.`}
         danger
         pending={deleteRequest.isPending}
         confirmLabel="Delete request"
         onConfirm={() =>
           deleteRequest.mutate(props.request.id, {
-            onSuccess: () => navigate("/petty-cash"),
+            onSuccess: () => navigate("/cash-voucher"),
           })
         }
       />
@@ -359,7 +359,7 @@ export default function PettyCashDetailPage() {
   return (
     <PageContainer>
       <div class="mb-6">
-        <BackLink href="/petty-cash">Back to Petty Cash</BackLink>
+        <BackLink href="/cash-voucher">Back to Cash Voucher</BackLink>
       </div>
 
       <QueryBoundary query={query}>
@@ -374,7 +374,7 @@ export default function PettyCashDetailPage() {
                 action={
                   <div class="flex flex-wrap items-center gap-2">
                     <a
-                      href={`${API_URL}/api/procurement/petty-cash/${request.id}/voucher`}
+                      href={`${API_URL}/api/procurement/cash-voucher/${request.id}/voucher`}
                       target="_blank"
                       rel="noopener noreferrer"
                       class="inline-flex items-center justify-center gap-2 rounded-lg border-2 border-primary bg-surface px-4 py-2 text-sm font-semibold text-primary transition-all hover:bg-primary hover:text-white"
@@ -386,7 +386,7 @@ export default function PettyCashDetailPage() {
                       type="button"
                       variant="secondary"
                       size="sm"
-                      onClick={() => navigate("/petty-cash/new")}
+                      onClick={() => navigate("/cash-voucher/new")}
                     >
                       New Request
                     </Button>

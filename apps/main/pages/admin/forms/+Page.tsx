@@ -16,20 +16,20 @@ type BlankForm = {
 
 const forms: BlankForm[] = [
   {
-    key: "petty-cash-request",
+    key: "cash-voucher-request",
     group: "Procurement",
-    title: "Petty Cash Request",
+    title: "Cash Voucher Request",
     code: "PCR",
     mode: "Blank form",
     detail: "Request for small operating cash releases.",
   },
   {
-    key: "petty-cash-voucher",
+    key: "cash-voucher",
     group: "Procurement",
-    title: "Petty Cash Voucher",
+    title: "Cash Voucher",
     code: "PCV",
     mode: "Generated template",
-    detail: "Voucher for petty cash release and liquidation.",
+    detail: "Voucher for cash release and liquidation.",
   },
   {
     key: "purchase-request",

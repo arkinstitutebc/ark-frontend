@@ -37,7 +37,7 @@ function FundSetupModal(props: {
 }) {
   const saveFund = useUpsertPettyCashFund()
   const [errors, setErrors] = createSignal<Record<string, string>>({})
-  const [name, setName] = createSignal("Petty Cash Fund")
+  const [name, setName] = createSignal("Cash Voucher Fund")
   const [initialAmount, setInitialAmount] = createSignal("")
   const [adjustmentAmount, setAdjustmentAmount] = createSignal("")
   const [notes, setNotes] = createSignal("")
@@ -77,11 +77,11 @@ function FundSetupModal(props: {
   }
 
   return (
-    <Modal open={props.open} onClose={props.onClose} title="Petty Cash Setup" size="lg">
+    <Modal open={props.open} onClose={props.onClose} title="Cash Voucher Setup" size="lg">
       <form onSubmit={handleSubmit} class="space-y-5">
         <div class="rounded-lg border border-border bg-surface-muted px-4 py-3">
           <p class="text-sm font-medium text-foreground">
-            Set the cash amount available for petty cash requests.
+            Set the cash amount available for cash voucher requests.
           </p>
         </div>
         <div>
@@ -204,7 +204,7 @@ export default function PettyCashPage() {
   return (
     <PageContainer>
       <PageHeader
-        title="Petty Cash"
+        title="Cash Voucher"
         subtitle="Track cash requests, releases, liquidation, and receipts."
         action={
           <div class="flex flex-wrap items-center gap-2">
@@ -213,7 +213,7 @@ export default function PettyCashPage() {
                 Cash Setup
               </Button>
             </Show>
-            <Button type="button" size="sm" onClick={() => navigate("/petty-cash/new")}>
+            <Button type="button" size="sm" onClick={() => navigate("/cash-voucher/new")}>
               <Icons.plus class="h-4 w-4" />
               New Request
             </Button>
@@ -288,7 +288,9 @@ export default function PettyCashPage() {
               fallback={
                 <div class="px-6 py-16 text-center">
                   <Icons.wallet class="mx-auto mb-3 h-11 w-11 text-muted" />
-                  <p class="text-sm font-semibold text-foreground">No petty cash requests found</p>
+                  <p class="text-sm font-semibold text-foreground">
+                    No cash voucher requests found
+                  </p>
                   <p class="mt-1 text-sm text-muted">
                     Create a request to start the approval flow.
                   </p>
@@ -300,7 +302,7 @@ export default function PettyCashPage() {
                   {(request: PettyCashRequest) => (
                     <button
                       type="button"
-                      onClick={() => navigate(`/petty-cash/${request.id}`)}
+                      onClick={() => navigate(`/cash-voucher/${request.id}`)}
                       class="block w-full px-4 py-4 text-left transition-colors hover:bg-surface-muted focus-visible:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
                     >
                       <div class="flex items-start justify-between gap-3">
@@ -355,7 +357,7 @@ export default function PettyCashPage() {
                     <For each={requests()}>
                       {(request: PettyCashRequest) => (
                         <tr
-                          onClick={() => navigate(`/petty-cash/${request.id}`)}
+                          onClick={() => navigate(`/cash-voucher/${request.id}`)}
                           class="cursor-pointer border-t border-border transition-colors hover:bg-surface-muted"
                         >
                           <td class="px-6 py-4">

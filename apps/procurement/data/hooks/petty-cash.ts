@@ -62,7 +62,8 @@ export function usePettyCashRequests(query?: () => PettyCashListQuery | undefine
     const qs = params.toString()
     return {
       queryKey: queryKeys.pettyCash.filtered(q),
-      queryFn: () => api<PettyCashListResponse>(`/api/procurement/petty-cash${qs ? `?${qs}` : ""}`),
+      queryFn: () =>
+        api<PettyCashListResponse>(`/api/procurement/cash-voucher${qs ? `?${qs}` : ""}`),
     }
   })
 }
@@ -70,7 +71,7 @@ export function usePettyCashRequests(query?: () => PettyCashListQuery | undefine
 export function usePettyCashRequest(id: () => string) {
   return createQuery(() => ({
     queryKey: queryKeys.pettyCash.detail(id()),
-    queryFn: () => api<PettyCashRequest>(`/api/procurement/petty-cash/${id()}`),
+    queryFn: () => api<PettyCashRequest>(`/api/procurement/cash-voucher/${id()}`),
     enabled: !!id(),
   }))
 }
@@ -78,7 +79,7 @@ export function usePettyCashRequest(id: () => string) {
 export function usePettyCashSummary(enabled?: () => boolean) {
   return createQuery(() => ({
     queryKey: queryKeys.pettyCash.summary,
-    queryFn: () => api<PettyCashSummary>("/api/procurement/petty-cash/summary"),
+    queryFn: () => api<PettyCashSummary>("/api/procurement/cash-voucher/summary"),
     enabled: enabled?.() ?? true,
     retry: false,
   }))
@@ -88,13 +89,13 @@ export function useCreatePettyCashRequest() {
   const qc = useQueryClient()
   return createMutation(() => ({
     mutationFn: (data: CreatePettyCashRequestInput) =>
-      api<PettyCashRequest>("/api/procurement/petty-cash", {
+      api<PettyCashRequest>("/api/procurement/cash-voucher", {
         method: "POST",
         body: JSON.stringify(data),
       }),
     onSuccess: () => {
       invalidatePettyCash(qc)
-      toast.success("Petty cash request submitted")
+      toast.success("Cash voucher request submitted")
     },
     onError: (err: Error) => toast.error(err.message),
   }))
@@ -104,13 +105,13 @@ export function useUpsertPettyCashFund() {
   const qc = useQueryClient()
   return createMutation(() => ({
     mutationFn: (data: UpsertPettyCashFundInput) =>
-      api<PettyCashFund>("/api/procurement/petty-cash/fund", {
+      api<PettyCashFund>("/api/procurement/cash-voucher/fund", {
         method: "PUT",
         body: JSON.stringify(data),
       }),
     onSuccess: () => {
       invalidatePettyCash(qc)
-      toast.success("Petty cash fund saved")
+      toast.success("Cash voucher fund saved")
     },
     onError: (err: Error) => toast.error(err.message),
   }))
@@ -120,13 +121,13 @@ export function useApprovePettyCash() {
   const qc = useQueryClient()
   return createMutation(() => ({
     mutationFn: ({ id, ...data }: { id: string; amountApproved?: string; notes?: string }) =>
-      api<PettyCashRequest>(`/api/procurement/petty-cash/${id}/approve`, {
+      api<PettyCashRequest>(`/api/procurement/cash-voucher/${id}/approve`, {
         method: "POST",
         body: JSON.stringify(data),
       }),
     onSuccess: (_data, variables) => {
       invalidatePettyCash(qc, variables.id)
-      toast.success("Petty cash request approved")
+      toast.success("Cash voucher request approved")
     },
     onError: (err: Error) => toast.error(err.message),
   }))
@@ -136,13 +137,13 @@ export function useRejectPettyCash() {
   const qc = useQueryClient()
   return createMutation(() => ({
     mutationFn: ({ id, ...data }: { id: string; rejectionReason: string }) =>
-      api<PettyCashRequest>(`/api/procurement/petty-cash/${id}/reject`, {
+      api<PettyCashRequest>(`/api/procurement/cash-voucher/${id}/reject`, {
         method: "POST",
         body: JSON.stringify(data),
       }),
     onSuccess: (_data, variables) => {
       invalidatePettyCash(qc, variables.id)
-      toast.success("Petty cash request rejected")
+      toast.success("Cash voucher request rejected")
     },
     onError: (err: Error) => toast.error(err.message),
   }))
@@ -160,13 +161,13 @@ export function useReleasePettyCash() {
       releasedAt?: string
       notes?: string
     }) =>
-      api<PettyCashRequest>(`/api/procurement/petty-cash/${id}/release`, {
+      api<PettyCashRequest>(`/api/procurement/cash-voucher/${id}/release`, {
         method: "POST",
         body: JSON.stringify(data),
       }),
     onSuccess: (_data, variables) => {
       invalidatePettyCash(qc, variables.id)
-      toast.success("Petty cash released")
+      toast.success("Cash voucher released")
     },
     onError: (err: Error) => toast.error(err.message),
   }))
@@ -185,7 +186,7 @@ export function useSubmitPettyCashLiquidation() {
       receipts?: PettyCashAttachmentInput[]
       liquidationForms?: PettyCashAttachmentInput[]
     }) =>
-      api<PettyCashRequest>(`/api/procurement/petty-cash/${id}/liquidation`, {
+      api<PettyCashRequest>(`/api/procurement/cash-voucher/${id}/liquidation`, {
         method: "POST",
         body: JSON.stringify(data),
       }),
@@ -201,13 +202,13 @@ export function useClosePettyCash() {
   const qc = useQueryClient()
   return createMutation(() => ({
     mutationFn: ({ id, ...data }: { id: string; notes?: string }) =>
-      api<PettyCashRequest>(`/api/procurement/petty-cash/${id}/close`, {
+      api<PettyCashRequest>(`/api/procurement/cash-voucher/${id}/close`, {
         method: "POST",
         body: JSON.stringify(data),
       }),
     onSuccess: (_data, variables) => {
       invalidatePettyCash(qc, variables.id)
-      toast.success("Petty cash request closed")
+      toast.success("Cash voucher request closed")
     },
     onError: (err: Error) => toast.error(err.message),
   }))
@@ -217,12 +218,12 @@ export function useDeletePettyCash() {
   const qc = useQueryClient()
   return createMutation(() => ({
     mutationFn: (id: string) =>
-      api<void>(`/api/procurement/petty-cash/${id}`, {
+      api<void>(`/api/procurement/cash-voucher/${id}`, {
         method: "DELETE",
       }),
     onSuccess: (_data, id) => {
       invalidatePettyCash(qc, id)
-      toast.success("Petty cash request deleted")
+      toast.success("Cash voucher request deleted")
     },
     onError: (err: Error) => toast.error(err.message),
   }))

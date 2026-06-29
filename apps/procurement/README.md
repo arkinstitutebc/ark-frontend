@@ -4,7 +4,7 @@
 
 ## Pages
 
-`/` PR list (with category badges), `/pr/:id`, `/pr/create` (4-axis classification + AttachmentUploader), `/pr/:id/edit` (pending-only), `/petty-cash`, `/petty-cash/new`, `/petty-cash/:id`, `/orders`, `/orders/:id`, `/orders/create`, `/approvals` (Coordinator queue + Management queue, separation-of-duties guard), `/tutorials`
+`/` PR list (with category badges), `/pr/:id`, `/pr/create` (4-axis classification + AttachmentUploader), `/pr/:id/edit` (pending-only), `/cash-voucher`, `/cash-voucher/new`, `/cash-voucher/:id`, `/orders`, `/orders/:id`, `/orders/create`, `/approvals` (Coordinator queue + Management queue, separation-of-duties guard), `/tutorials`
 
 ## Dev
 

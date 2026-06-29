@@ -1,5 +1,5 @@
 import type { CheckVoucherLine } from "@ark/data-types"
-import { BackLink, Button, DateInput, formatPeso, Icons, Input } from "@ark/ui"
+import { BackLink, Button, DateInput, formatPeso, formInputClass, Icons, Input } from "@ark/ui"
 import { useCreateCheckVoucher } from "@data/hooks"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
@@ -15,8 +15,18 @@ const today = () => new Date().toISOString().slice(0, 10)
 const blankLine = (): LineDraft => ({ account: "", description: "", amount: "" })
 
 function parseAmount(value: string) {
-  const parsed = Number.parseFloat(value)
+  const trimmed = value.trim()
+  if (!/^\d+(\.\d{1,2})?$/.test(trimmed)) return 0
+  const parsed = Number.parseFloat(trimmed)
   return Number.isFinite(parsed) ? parsed : 0
+}
+
+function sanitizeMoneyInput(value: string) {
+  const cleaned = value.replace(/[^\d.]/g, "")
+  const [whole = "", ...decimalParts] = cleaned.split(".")
+  const decimal = decimalParts.join("").slice(0, 2)
+  const normalizedWhole = whole.replace(/^0+(?=\d)/, "")
+  return decimalParts.length ? `${normalizedWhole || "0"}.${decimal}` : normalizedWhole
 }
 
 function toLines(lines: LineDraft[]): CheckVoucherLine[] {
@@ -87,7 +97,8 @@ export default function CreateCheckVoucherPage() {
     value: string
   ) => {
     const setter = kind === "debit" ? setDebitLines : setCreditLines
-    setter(lines => lines.map((line, i) => (i === index ? { ...line, [field]: value } : line)))
+    const nextValue = field === "amount" ? sanitizeMoneyInput(value) : value
+    setter(lines => lines.map((line, i) => (i === index ? { ...line, [field]: nextValue } : line)))
   }
 
   const addLine = (kind: "debit" | "credit") => {
@@ -147,8 +158,8 @@ export default function CreateCheckVoucherPage() {
         </div>
 
         <form onSubmit={submit}>
-          <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <div class="space-y-6 lg:col-span-2">
+          <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <div class="space-y-6">
               <section class="space-y-4 rounded-lg border border-border bg-surface p-6">
                 <Show when={Object.keys(errors()).length > 0}>
                   <div class="rounded-lg border border-danger/20 bg-danger/5 px-4 py-3 text-sm text-danger">
@@ -244,7 +255,7 @@ export default function CreateCheckVoucherPage() {
               </section>
             </div>
 
-            <div class="lg:col-span-1">
+            <div>
               <aside class="sticky top-24 rounded-lg border border-border bg-surface p-6">
                 <h2 class="mb-4 text-lg font-semibold text-foreground">Summary</h2>
                 <div class="space-y-3 text-sm">
@@ -326,54 +337,87 @@ function VoucherLines(props: {
   onRemove: (index: number) => void
   onChange: (index: number, field: keyof LineDraft, value: string) => void
 }) {
+  const total = () => lineTotal(props.lines)
+  const fieldLabel = (label: string, index: number) =>
+    `${props.title} line ${index + 1} ${label.toLowerCase()}`
+
   return (
-    <section class="rounded-lg border border-border bg-surface p-6">
-      <div class="flex items-center justify-between gap-3">
-        <h2 class="text-lg font-semibold text-foreground">{props.title} Lines</h2>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          disabled={props.lines.length >= MAX_VOUCHER_LINES}
-          onClick={props.onAdd}
-        >
-          <Icons.plus class="h-4 w-4" />
-          Add line
-        </Button>
+    <section class="overflow-hidden rounded-lg border border-border bg-surface">
+      <div class="flex flex-col gap-3 border-b border-border px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h2 class="text-lg font-semibold text-foreground">{props.title} Lines</h2>
+          <p class="mt-1 text-xs text-muted">
+            {props.title === "Debit" ? "Expense or asset accounts." : "Bank or cash account."}
+          </p>
+        </div>
+        <div class="flex items-center gap-3">
+          <p class="text-sm font-semibold tabular-nums text-foreground">{formatPeso(total())}</p>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            disabled={props.lines.length >= MAX_VOUCHER_LINES}
+            onClick={props.onAdd}
+          >
+            <Icons.plus class="h-4 w-4" />
+            Add line
+          </Button>
+        </div>
       </div>
       <Show when={props.lines.length >= MAX_VOUCHER_LINES}>
-        <p class="mt-2 text-xs text-muted">
+        <p class="border-b border-border px-6 py-2 text-xs text-muted">
           Maximum {MAX_VOUCHER_LINES} lines for one-page printing.
         </p>
       </Show>
-      <div class="mt-4 space-y-3">
+      <div class="hidden border-b border-border bg-surface-muted px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_150px_44px] md:gap-3">
+        <span>Account</span>
+        <span>Description</span>
+        <span>Amount</span>
+        <span />
+      </div>
+      <div class="divide-y divide-border">
         <For each={props.lines}>
           {(line, index) => (
-            <div class="grid gap-3 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_150px_44px]">
-              <Input
-                label={index() === 0 ? "Account" : undefined}
-                value={line.account}
-                onInput={e => props.onChange(index(), "account", e.currentTarget.value)}
-                placeholder={props.title === "Debit" ? "Expense account" : "Bank / cash account"}
-              />
-              <Input
-                label={index() === 0 ? "Description" : undefined}
-                value={line.description}
-                onInput={e => props.onChange(index(), "description", e.currentTarget.value)}
-                placeholder="Optional"
-              />
-              <Input
-                label={index() === 0 ? "Amount" : undefined}
-                type="number"
-                min="0"
-                step="0.01"
-                value={line.amount}
-                onInput={e => props.onChange(index(), "amount", e.currentTarget.value)}
-              />
+            <div class="grid gap-3 px-6 py-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_150px_44px] md:items-end">
+              <label class="block">
+                <span class="mb-1 block text-sm font-medium text-foreground md:hidden">
+                  Account
+                </span>
+                <input
+                  class={formInputClass()}
+                  value={line.account}
+                  onInput={e => props.onChange(index(), "account", e.currentTarget.value)}
+                  placeholder={props.title === "Debit" ? "Expense account" : "Bank / cash account"}
+                  aria-label={fieldLabel("Account", index())}
+                />
+              </label>
+              <label class="block">
+                <span class="mb-1 block text-sm font-medium text-foreground md:hidden">
+                  Description
+                </span>
+                <input
+                  class={formInputClass()}
+                  value={line.description}
+                  onInput={e => props.onChange(index(), "description", e.currentTarget.value)}
+                  placeholder="Optional"
+                  aria-label={fieldLabel("Description", index())}
+                />
+              </label>
+              <label class="block">
+                <span class="mb-1 block text-sm font-medium text-foreground md:hidden">Amount</span>
+                <input
+                  class={`${formInputClass()} text-right tabular-nums`}
+                  inputMode="decimal"
+                  value={line.amount}
+                  onInput={e => props.onChange(index(), "amount", e.currentTarget.value)}
+                  placeholder="0.00"
+                  aria-label={fieldLabel("Amount", index())}
+                />
+              </label>
               <button
                 type="button"
                 onClick={() => props.onRemove(index())}
-                class="mt-auto inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted hover:bg-surface-muted hover:text-danger disabled:pointer-events-none disabled:opacity-40"
+                class="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted hover:bg-surface-muted hover:text-danger disabled:pointer-events-none disabled:opacity-40"
                 disabled={props.lines.length === 1}
                 aria-label={`Remove ${props.title.toLowerCase()} line`}
               >

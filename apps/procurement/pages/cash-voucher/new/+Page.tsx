@@ -66,7 +66,7 @@ export default function NewPettyCashRequestPage() {
         attachments: attachments().length ? attachments() : undefined,
       },
       {
-        onSuccess: request => navigate(`/petty-cash/${request.id}`),
+        onSuccess: request => navigate(`/cash-voucher/${request.id}`),
       }
     )
   }
@@ -76,11 +76,13 @@ export default function NewPettyCashRequestPage() {
       <div class="mb-6 flex items-start gap-3 sm:mb-8 sm:items-center">
         <BackLink
           variant="icon"
-          label="Back to Petty Cash"
-          onClick={() => navigate("/petty-cash")}
+          label="Back to Cash Voucher"
+          onClick={() => navigate("/cash-voucher")}
         />
         <div class="min-w-0">
-          <h1 class="text-xl font-semibold text-foreground sm:text-2xl">New Petty Cash Request</h1>
+          <h1 class="text-xl font-semibold text-foreground sm:text-2xl">
+            New Cash Voucher Request
+          </h1>
           <p class="mt-1 text-sm text-muted">
             Request a small cash release for immediate operating needs.
           </p>

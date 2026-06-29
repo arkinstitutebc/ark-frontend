@@ -83,10 +83,13 @@ function DetailItem(props: { label: string; value?: string | number | null; clas
 }
 
 function VoucherLines(props: { title: string; lines: CheckVoucherLine[] }) {
+  const total = () => props.lines.reduce((sum, line) => sum + Number(line.amount || 0), 0)
+
   return (
     <section class="rounded-lg border border-border bg-surface">
-      <div class="border-b border-border px-4 py-3">
+      <div class="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
         <h3 class="text-sm font-semibold text-foreground">{props.title}</h3>
+        <p class="text-sm font-semibold tabular-nums text-foreground">{formatPeso(total())}</p>
       </div>
       <div class="divide-y divide-border">
         <For each={props.lines}>
@@ -215,6 +218,9 @@ export default function CheckVouchersPage() {
   const showingTo = createMemo(() =>
     Math.min((page() - 1) * PAGE_SIZE + (query.data?.items.length ?? 0), query.data?.total ?? 0)
   )
+  const showingRange = createMemo(() =>
+    query.data?.total ? `${showingFrom()}-${showingTo()} of ${query.data.total}` : "0 of 0"
+  )
   const hasFilter = createMemo(() => search().trim().length > 0 || status() !== "all")
   const confirmVoid = () => {
     const voucher = voucherToVoid()
@@ -326,16 +332,15 @@ export default function CheckVouchersPage() {
             >
               <DataTable class="max-h-[600px] overflow-auto">
                 <THead>
-                  <VoucherTh class="min-w-[150px]">Voucher</VoucherTh>
-                  <VoucherTh class="min-w-[120px]">Date</VoucherTh>
-                  <VoucherTh class="min-w-[190px]">Payee</VoucherTh>
-                  <VoucherTh class="min-w-[320px]">Details</VoucherTh>
-                  <VoucherTh class="min-w-[180px]">Payment</VoucherTh>
+                  <VoucherTh class="min-w-[170px]">Voucher</VoucherTh>
+                  <VoucherTh class="min-w-[240px]">Payee</VoucherTh>
+                  <VoucherTh class="min-w-[320px]">Particular</VoucherTh>
+                  <VoucherTh class="min-w-[190px]">Bank / Check</VoucherTh>
                   <VoucherTh align="right" class="min-w-[140px]">
                     Amount
                   </VoucherTh>
-                  <VoucherTh class="min-w-[120px]">Status</VoucherTh>
-                  <VoucherTh align="right" class="min-w-[150px]">
+                  <VoucherTh class="min-w-[110px]">Status</VoucherTh>
+                  <VoucherTh align="right" class="min-w-[132px]">
                     Actions
                   </VoucherTh>
                 </THead>
@@ -343,24 +348,32 @@ export default function CheckVouchersPage() {
                   <For each={data.items}>
                     {voucher => (
                       <Tr onClick={() => setSelectedVoucher(voucher)}>
-                        <td class="px-6 py-3 text-sm font-semibold text-foreground whitespace-nowrap">
-                          {voucher.voucherNo}
+                        <td class="px-6 py-3 whitespace-nowrap">
+                          <p class="text-sm font-semibold text-foreground">{voucher.voucherNo}</p>
+                          <p class="mt-0.5 text-xs text-muted">
+                            {formatDatePH(voucher.voucherDate)}
+                          </p>
                         </td>
-                        <td class="px-6 py-3 text-sm text-muted whitespace-nowrap">
-                          {formatDatePH(voucher.voucherDate)}
+                        <td class="px-6 py-3">
+                          <p class="text-sm font-medium text-foreground">{voucher.payee}</p>
+                          <p class="mt-0.5 text-xs text-muted">
+                            {voucher.createdBy
+                              ? `Created by ${voucher.createdBy}`
+                              : "Manual voucher"}
+                          </p>
                         </td>
-                        <td class="px-6 py-3 text-sm text-foreground">{voucher.payee}</td>
-                        <td class="px-6 py-3 text-sm text-foreground">
-                          <span class="block max-w-[320px] truncate" title={voucher.particular}>
+                        <td class="px-6 py-3">
+                          <span
+                            class="block max-w-[360px] truncate text-sm text-foreground"
+                            title={voucher.particular}
+                          >
                             {voucher.particular}
                           </span>
                           <span class="mt-0.5 block text-xs text-muted">
-                            {voucher.createdBy
-                              ? `Created by ${voucher.createdBy}`
-                              : "Standalone voucher"}
+                            {voucher.debitLines.length} debit / {voucher.creditLines.length} credit
                           </span>
                         </td>
-                        <td class="px-6 py-3 text-sm text-muted">
+                        <td class="px-6 py-3">
                           <p class="text-sm text-foreground">{voucher.bankName}</p>
                           <p class="text-xs text-muted">{voucher.checkNo || "No check no."}</p>
                         </td>
@@ -398,10 +411,8 @@ export default function CheckVouchersPage() {
                 </tbody>
               </DataTable>
 
-              <div class="flex items-center justify-between gap-3 border-t border-border px-5 py-3">
-                <p class="text-xs text-muted">
-                  Showing {showingFrom()}-{showingTo()} of {data.total}
-                </p>
+              <div class="flex flex-col gap-3 border-t border-border px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <p class="text-xs text-muted">Showing {showingRange()}</p>
                 <div class="flex items-center gap-2">
                   <button
                     type="button"
@@ -420,7 +431,7 @@ export default function CheckVouchersPage() {
                     onClick={() => setPage(p => Math.min(totalPages(), p + 1))}
                     class="rounded-lg border border-border px-3 py-1.5 text-sm hover:bg-surface-muted disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Next 20
+                    Next
                   </button>
                 </div>
               </div>

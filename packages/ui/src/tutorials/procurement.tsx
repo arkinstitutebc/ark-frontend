@@ -11,11 +11,11 @@ export const procurementTutorial: {
   sections: TutorialSection[]
 } = {
   title: "How to use the Procurement portal",
-  subtitle: "Purchase requests, petty cash, purchase orders, approvals, and receiving handoff.",
+  subtitle: "Purchase requests, cash vouchers, purchase orders, approvals, and receiving handoff.",
   intro: (
     <p>
       Procurement covers two operating flows: formal purchasing through <b>PR → PO → receiving</b>,
-      and small immediate cash needs through <b>Petty Cash</b>. Both keep approvals, attachments,
+      and small immediate cash needs through <b>Cash Voucher</b>. Both keep approvals, attachments,
       and printable records in the system.
     </p>
   ),
@@ -24,11 +24,11 @@ export const procurementTutorial: {
     "The request is tied to the correct batch when it is for a training class.",
     "Items, unit prices, and totals match the supplier quote or working canvass.",
     "Purpose, date needed, attachments, and category are complete before approval.",
-    "Petty cash requests include payment details when Digital Transfer is selected.",
+    "Cash voucher requests include payment details when Digital Transfer is selected.",
   ],
   actions: [
     { label: "Open Requests", href: "/pr" },
-    { label: "Open Petty Cash", href: "/petty-cash" },
+    { label: "Open Cash Voucher", href: "/cash-voucher" },
     { label: "Open Approvals", href: "/approvals" },
     { label: "Open Orders", href: "/orders" },
   ],
@@ -44,7 +44,7 @@ export const procurementTutorial: {
             to be approved before it becomes a PO.
           </p>
           <p>
-            Use this portal to draft purchase requests, manage petty cash requests, attach support
+            Use this portal to draft purchase requests, manage cash voucher requests, attach support
             files, send work for approval, create the matching order, and track delivery status.
           </p>
         </>
@@ -71,17 +71,17 @@ export const procurementTutorial: {
       ),
     },
     {
-      id: "petty-cash",
-      title: "Request petty cash",
+      id: "cash-voucher",
+      title: "Request cash voucher",
       body: (
         <>
           <p>
-            Use <b>Petty Cash</b> for small operating expenses that need quick release and later
+            Use <b>Cash Voucher</b> for small operating expenses that need quick release and later
             liquidation. Trainers can request; admins review, release, and close the record.
           </p>
           <ol class="list-decimal pl-5 space-y-1.5">
             <li>
-              Go to <b>Petty Cash</b> → <b>New Request</b>.
+              Go to <b>Cash Voucher</b> → <b>New Request</b>.
             </li>
             <li>Enter the purpose, amount, request date, and release method.</li>
             <li>
@@ -93,17 +93,17 @@ export const procurementTutorial: {
       ),
     },
     {
-      id: "petty-cash-liquidation",
-      title: "Liquidate petty cash",
+      id: "cash-voucher-liquidation",
+      title: "Liquidate cash voucher",
       body: (
         <>
           <p>
-            After cash is released, upload receipts and the liquidation form from the petty cash
+            After cash is released, upload receipts and the liquidation form from the cash voucher
             detail page. The system compares the released amount against the actual amount used and
             shows whether there is excess or shortage.
           </p>
           <ol class="list-decimal pl-5 space-y-1.5">
-            <li>Open the released petty cash request.</li>
+            <li>Open the released cash voucher request.</li>
             <li>Enter the actual amount used and remarks.</li>
             <li>Upload receipts and the liquidation form.</li>
             <li>Submit. Admin can review, record returns when needed, and close the request.</li>

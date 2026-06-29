@@ -5,7 +5,7 @@ import { createMemo } from "solid-js"
 
 const navItems: NavItem[] = [
   { id: "requests", label: "Requests", href: "/", icon: ShoppingCart },
-  { id: "petty-cash", label: "Petty Cash", href: "/petty-cash", icon: WalletCards },
+  { id: "cash-voucher", label: "Cash Voucher", href: "/cash-voucher", icon: WalletCards },
   { id: "orders", label: "Orders", href: "/orders", icon: ShoppingBag },
   { id: "approvals", label: "Approvals", href: "/approvals", icon: CheckCircle },
   { id: "tutorials", label: "How To", href: "/tutorials", icon: HelpCircle },
