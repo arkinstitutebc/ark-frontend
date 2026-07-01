@@ -1,7 +1,7 @@
 import type { CheckVoucherLine } from "@ark/data-types"
 import { BackLink, Button, DateInput, formatPeso, formInputClass, Icons, Input } from "@ark/ui"
 import { useCreateCheckVoucher } from "@data/hooks"
-import { createMemo, createSignal, For, Show } from "solid-js"
+import { createMemo, createSignal, Index, Show } from "solid-js"
 import { navigate } from "vike/client/router"
 
 interface LineDraft {
@@ -376,7 +376,7 @@ function VoucherLines(props: {
         <span />
       </div>
       <div class="divide-y divide-border">
-        <For each={props.lines}>
+        <Index each={props.lines}>
           {(line, index) => (
             <div class="grid gap-3 px-6 py-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_150px_44px] md:items-end">
               <label class="block">
@@ -385,10 +385,10 @@ function VoucherLines(props: {
                 </span>
                 <input
                   class={formInputClass()}
-                  value={line.account}
-                  onInput={e => props.onChange(index(), "account", e.currentTarget.value)}
+                  value={line().account}
+                  onInput={e => props.onChange(index, "account", e.currentTarget.value)}
                   placeholder={props.title === "Debit" ? "Expense account" : "Bank / cash account"}
-                  aria-label={fieldLabel("Account", index())}
+                  aria-label={fieldLabel("Account", index)}
                 />
               </label>
               <label class="block">
@@ -397,10 +397,10 @@ function VoucherLines(props: {
                 </span>
                 <input
                   class={formInputClass()}
-                  value={line.description}
-                  onInput={e => props.onChange(index(), "description", e.currentTarget.value)}
+                  value={line().description}
+                  onInput={e => props.onChange(index, "description", e.currentTarget.value)}
                   placeholder="Optional"
-                  aria-label={fieldLabel("Description", index())}
+                  aria-label={fieldLabel("Description", index)}
                 />
               </label>
               <label class="block">
@@ -408,15 +408,15 @@ function VoucherLines(props: {
                 <input
                   class={`${formInputClass()} text-right tabular-nums`}
                   inputMode="decimal"
-                  value={line.amount}
-                  onInput={e => props.onChange(index(), "amount", e.currentTarget.value)}
+                  value={line().amount}
+                  onInput={e => props.onChange(index, "amount", e.currentTarget.value)}
                   placeholder="0.00"
-                  aria-label={fieldLabel("Amount", index())}
+                  aria-label={fieldLabel("Amount", index)}
                 />
               </label>
               <button
                 type="button"
-                onClick={() => props.onRemove(index())}
+                onClick={() => props.onRemove(index)}
                 class="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted hover:bg-surface-muted hover:text-danger disabled:pointer-events-none disabled:opacity-40"
                 disabled={props.lines.length === 1}
                 aria-label={`Remove ${props.title.toLowerCase()} line`}
@@ -425,7 +425,7 @@ function VoucherLines(props: {
               </button>
             </div>
           )}
-        </For>
+        </Index>
       </div>
     </section>
   )
