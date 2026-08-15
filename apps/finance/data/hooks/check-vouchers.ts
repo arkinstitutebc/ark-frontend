@@ -1,4 +1,9 @@
-import type { CheckVoucher, CheckVoucherLine, CheckVoucherStatus } from "@ark/data-types"
+import type {
+  CheckVoucher,
+  CheckVoucherLine,
+  CheckVoucherPaymentLine,
+  CheckVoucherStatus,
+} from "@ark/data-types"
 import { toast } from "@ark/ui"
 import { createMutation, createQuery, useQueryClient } from "@tanstack/solid-query"
 import { api } from "../api"
@@ -10,7 +15,7 @@ export interface CreateCheckVoucherInput {
   address?: string
   bankName: string
   checkNo?: string
-  particular: string
+  paymentLines: CheckVoucherPaymentLine[]
   debitLines: CheckVoucherLine[]
   creditLines: CheckVoucherLine[]
   preparedBy?: string

@@ -17,7 +17,12 @@ import {
 } from "@ark/ui"
 import { API_URL } from "@data/api"
 import { useCheckVouchers, useDeleteCheckVoucher, useVoidCheckVoucher } from "@data/hooks"
-import type { CheckVoucher, CheckVoucherLine, CheckVoucherStatus } from "@data/types"
+import type {
+  CheckVoucher,
+  CheckVoucherLine,
+  CheckVoucherPaymentLine,
+  CheckVoucherStatus,
+} from "@data/types"
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
 
@@ -94,11 +99,33 @@ function VoucherLines(props: { title: string; lines: CheckVoucherLine[] }) {
       <div class="divide-y divide-border">
         <For each={props.lines}>
           {line => (
-            <div class="grid gap-3 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)_120px] sm:items-center">
-              <div>
-                <p class="text-sm font-medium text-foreground">{line.account}</p>
-              </div>
-              <p class="text-sm text-muted">{line.description || "-"}</p>
+            <div class="grid gap-3 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_120px] sm:items-center">
+              <p class="text-sm font-medium text-foreground">{line.account}</p>
+              <p class="text-left text-sm font-semibold tabular-nums text-foreground sm:text-right">
+                {formatPeso(line.amount)}
+              </p>
+            </div>
+          )}
+        </For>
+      </div>
+    </section>
+  )
+}
+
+function PaymentLines(props: { lines: CheckVoucherPaymentLine[] }) {
+  const total = () => props.lines.reduce((sum, line) => sum + Number(line.amount || 0), 0)
+
+  return (
+    <section class="rounded-lg border border-border bg-surface">
+      <div class="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
+        <h3 class="text-sm font-semibold text-foreground">Payment For</h3>
+        <p class="text-sm font-semibold tabular-nums text-foreground">{formatPeso(total())}</p>
+      </div>
+      <div class="divide-y divide-border">
+        <For each={props.lines}>
+          {line => (
+            <div class="grid gap-3 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_120px] sm:items-center">
+              <p class="text-sm text-foreground">{line.description}</p>
               <p class="text-left text-sm font-semibold tabular-nums text-foreground sm:text-right">
                 {formatPeso(line.amount)}
               </p>
@@ -130,7 +157,9 @@ function CheckVoucherDetailsModal(props: {
               <div class="min-w-0">
                 <StatusBadge status={voucher().status} />
                 <h2 class="mt-3 text-xl font-semibold text-foreground">{voucher().payee}</h2>
-                <p class="mt-1 text-sm leading-6 text-muted">{voucher().particular}</p>
+                <p class="mt-1 text-sm leading-6 text-muted">
+                  {voucher().paymentLines[0]?.description || voucher().particular}
+                </p>
               </div>
               <div class="shrink-0 text-left sm:text-right">
                 <p class="text-xs font-semibold uppercase tracking-wider text-muted">Total</p>
@@ -147,6 +176,8 @@ function CheckVoucherDetailsModal(props: {
               <DetailItem label="Address" value={voucher().address} class="md:col-span-2" />
               <DetailItem label="Created By" value={voucher().createdBy} />
             </div>
+
+            <PaymentLines lines={voucher().paymentLines} />
 
             <div class="grid gap-4 lg:grid-cols-2">
               <VoucherLines title="Debit Lines" lines={voucher().debitLines} />
@@ -334,7 +365,7 @@ export default function CheckVouchersPage() {
                 <THead>
                   <VoucherTh class="min-w-[170px]">Voucher</VoucherTh>
                   <VoucherTh class="min-w-[240px]">Payee</VoucherTh>
-                  <VoucherTh class="min-w-[320px]">Particular</VoucherTh>
+                  <VoucherTh class="min-w-[320px]">Payment For</VoucherTh>
                   <VoucherTh class="min-w-[190px]">Bank / Check</VoucherTh>
                   <VoucherTh align="right" class="min-w-[140px]">
                     Amount
@@ -365,12 +396,13 @@ export default function CheckVouchersPage() {
                         <td class="px-6 py-3">
                           <span
                             class="block max-w-[360px] truncate text-sm text-foreground"
-                            title={voucher.particular}
+                            title={voucher.paymentLines[0]?.description || voucher.particular}
                           >
-                            {voucher.particular}
+                            {voucher.paymentLines[0]?.description || voucher.particular}
                           </span>
                           <span class="mt-0.5 block text-xs text-muted">
-                            {voucher.debitLines.length} debit / {voucher.creditLines.length} credit
+                            {voucher.paymentLines.length} payment / {voucher.debitLines.length}{" "}
+                            debit / {voucher.creditLines.length} credit
                           </span>
                         </td>
                         <td class="px-6 py-3">

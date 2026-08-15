@@ -81,6 +81,11 @@ export interface CheckVoucherLine {
   amount: number
 }
 
+export interface CheckVoucherPaymentLine {
+  description: string
+  amount: number
+}
+
 export interface CheckVoucher {
   id: string
   voucherNo: string
@@ -90,6 +95,7 @@ export interface CheckVoucher {
   bankName: string
   checkNo?: string | null
   particular: string
+  paymentLines: CheckVoucherPaymentLine[]
   debitLines: CheckVoucherLine[]
   creditLines: CheckVoucherLine[]
   totalAmount: number

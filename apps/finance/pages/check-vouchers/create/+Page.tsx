@@ -1,18 +1,23 @@
-import type { CheckVoucherLine } from "@ark/data-types"
+import type { CheckVoucherLine, CheckVoucherPaymentLine } from "@ark/data-types"
 import { BackLink, Button, DateInput, formatPeso, formInputClass, Icons, Input } from "@ark/ui"
 import { useCreateCheckVoucher } from "@data/hooks"
 import { createMemo, createSignal, Index, Show } from "solid-js"
 import { navigate } from "vike/client/router"
 
-interface LineDraft {
-  account: string
+interface PaymentDraft {
   description: string
+  amount: string
+}
+
+interface AccountDraft {
+  account: string
   amount: string
 }
 
 const MAX_VOUCHER_LINES = 6
 const today = () => new Date().toISOString().slice(0, 10)
-const blankLine = (): LineDraft => ({ account: "", description: "", amount: "" })
+const blankPayment = (): PaymentDraft => ({ description: "", amount: "" })
+const blankAccount = (): AccountDraft => ({ account: "", amount: "" })
 
 function parseAmount(value: string) {
   const trimmed = value.trim()
@@ -29,28 +34,34 @@ function sanitizeMoneyInput(value: string) {
   return decimalParts.length ? `${normalizedWhole || "0"}.${decimal}` : normalizedWhole
 }
 
-function toLines(lines: LineDraft[]): CheckVoucherLine[] {
+function paymentValues(lines: PaymentDraft[]): CheckVoucherPaymentLine[] {
   return lines
-    .map(line => ({
-      account: line.account.trim(),
-      description: line.description.trim() || undefined,
-      amount: parseAmount(line.amount),
-    }))
+    .map(line => ({ description: line.description.trim(), amount: parseAmount(line.amount) }))
+    .filter(line => line.description && line.amount > 0)
+}
+
+function accountValues(lines: AccountDraft[]): CheckVoucherLine[] {
+  return lines
+    .map(line => ({ account: line.account.trim(), amount: parseAmount(line.amount) }))
     .filter(line => line.account && line.amount > 0)
 }
 
-function lineTotal(lines: LineDraft[]) {
-  return toLines(lines).reduce((total, line) => total + line.amount, 0)
+function lineTotal(lines: Array<{ amount: string }>) {
+  return lines.reduce((total, line) => total + parseAmount(line.amount), 0)
 }
 
-function hasLineContent(line: LineDraft) {
-  return line.account.trim() || line.description.trim() || line.amount.trim()
+function incompletePayments(lines: PaymentDraft[]) {
+  return lines.some(line => {
+    const hasContent = line.description.trim() || line.amount.trim()
+    return hasContent && (!line.description.trim() || parseAmount(line.amount) <= 0)
+  })
 }
 
-function hasIncompleteLine(lines: LineDraft[]) {
-  return lines.some(
-    line => hasLineContent(line) && (!line.account.trim() || parseAmount(line.amount) <= 0)
-  )
+function incompleteAccounts(lines: AccountDraft[]) {
+  return lines.some(line => {
+    const hasContent = line.account.trim() || line.amount.trim()
+    return hasContent && (!line.account.trim() || parseAmount(line.amount) <= 0)
+  })
 }
 
 export default function CreateCheckVoucherPage() {
@@ -59,56 +70,80 @@ export default function CreateCheckVoucherPage() {
   const [address, setAddress] = createSignal("")
   const [bankName, setBankName] = createSignal("Security Bank")
   const [checkNo, setCheckNo] = createSignal("")
-  const [particular, setParticular] = createSignal("")
   const [preparedBy, setPreparedBy] = createSignal("APRIL HEART A. ESCARO")
   const [approvedBy, setApprovedBy] = createSignal("GEMMA A. ESCARO")
   const [receivedBy, setReceivedBy] = createSignal("")
-  const [debitLines, setDebitLines] = createSignal<LineDraft[]>([blankLine()])
-  const [creditLines, setCreditLines] = createSignal<LineDraft[]>([
-    { account: "Security Bank", description: "", amount: "" },
+  const [paymentLines, setPaymentLines] = createSignal<PaymentDraft[]>([blankPayment()])
+  const [debitLines, setDebitLines] = createSignal<AccountDraft[]>([blankAccount()])
+  const [creditLines, setCreditLines] = createSignal<AccountDraft[]>([
+    { account: "Cash in bank - SB", amount: "" },
   ])
   const [errors, setErrors] = createSignal<Record<string, string>>({})
   const createVoucher = useCreateCheckVoucher()
 
+  const paymentTotal = createMemo(() => lineTotal(paymentLines()))
   const debitTotal = createMemo(() => lineTotal(debitLines()))
   const creditTotal = createMemo(() => lineTotal(creditLines()))
   const totalsMatch = createMemo(
-    () => Math.round(debitTotal() * 100) === Math.round(creditTotal() * 100)
+    () =>
+      paymentTotal() > 0 &&
+      Math.round(paymentTotal() * 100) === Math.round(debitTotal() * 100) &&
+      Math.round(debitTotal() * 100) === Math.round(creditTotal() * 100)
   )
   const linesComplete = createMemo(
-    () => !hasIncompleteLine(debitLines()) && !hasIncompleteLine(creditLines())
+    () =>
+      !incompletePayments(paymentLines()) &&
+      !incompleteAccounts(debitLines()) &&
+      !incompleteAccounts(creditLines())
   )
   const canSubmit = createMemo(
     () =>
       voucherDate().trim() &&
       payee().trim() &&
       bankName().trim() &&
-      particular().trim() &&
-      debitTotal() > 0 &&
+      paymentTotal() > 0 &&
       linesComplete() &&
       totalsMatch() &&
       !createVoucher.isPending
   )
 
-  const updateLine = (
+  const updatePayment = (index: number, field: keyof PaymentDraft, value: string) => {
+    const nextValue = field === "amount" ? sanitizeMoneyInput(value) : value
+    setPaymentLines(lines =>
+      lines.map((line, current) => (current === index ? { ...line, [field]: nextValue } : line))
+    )
+  }
+
+  const updateAccount = (
     kind: "debit" | "credit",
     index: number,
-    field: keyof LineDraft,
+    field: keyof AccountDraft,
     value: string
   ) => {
     const setter = kind === "debit" ? setDebitLines : setCreditLines
     const nextValue = field === "amount" ? sanitizeMoneyInput(value) : value
-    setter(lines => lines.map((line, i) => (i === index ? { ...line, [field]: nextValue } : line)))
+    setter(lines =>
+      lines.map((line, current) => (current === index ? { ...line, [field]: nextValue } : line))
+    )
   }
 
-  const addLine = (kind: "debit" | "credit") => {
+  const addPayment = () =>
+    setPaymentLines(lines =>
+      lines.length >= MAX_VOUCHER_LINES ? lines : [...lines, blankPayment()]
+    )
+  const removePayment = (index: number) =>
+    setPaymentLines(lines =>
+      lines.length === 1 ? lines : lines.filter((_, current) => current !== index)
+    )
+
+  const addAccount = (kind: "debit" | "credit") => {
     const setter = kind === "debit" ? setDebitLines : setCreditLines
-    setter(lines => (lines.length >= MAX_VOUCHER_LINES ? lines : [...lines, blankLine()]))
+    setter(lines => (lines.length >= MAX_VOUCHER_LINES ? lines : [...lines, blankAccount()]))
   }
 
-  const removeLine = (kind: "debit" | "credit", index: number) => {
+  const removeAccount = (kind: "debit" | "credit", index: number) => {
     const setter = kind === "debit" ? setDebitLines : setCreditLines
-    setter(lines => (lines.length === 1 ? lines : lines.filter((_, i) => i !== index)))
+    setter(lines => (lines.length === 1 ? lines : lines.filter((_, current) => current !== index)))
   }
 
   const validate = () => {
@@ -116,17 +151,18 @@ export default function CreateCheckVoucherPage() {
     if (!voucherDate().trim()) next.voucherDate = "Date is required"
     if (!payee().trim()) next.payee = "Payee is required"
     if (!bankName().trim()) next.bankName = "Bank name is required"
-    if (!particular().trim()) next.particular = "Particular is required"
-    if (debitTotal() <= 0) next.lines = "Add at least one debit line"
-    if (hasIncompleteLine(debitLines())) next.debitLines = "Complete or clear every debit line"
-    if (hasIncompleteLine(creditLines())) next.creditLines = "Complete or clear every credit line"
-    if (!totalsMatch()) next.balance = "Debit and credit totals must match"
+    if (paymentTotal() <= 0) next.paymentLines = "Add at least one payment item"
+    if (incompletePayments(paymentLines()))
+      next.paymentLines = "Complete or clear every payment item"
+    if (incompleteAccounts(debitLines())) next.debitLines = "Complete or clear every debit line"
+    if (incompleteAccounts(creditLines())) next.creditLines = "Complete or clear every credit line"
+    if (!totalsMatch()) next.balance = "Payment, debit, and credit totals must match"
     setErrors(next)
     return Object.keys(next).length === 0
   }
 
-  const submit = (e: Event) => {
-    e.preventDefault()
+  const submit = (event: Event) => {
+    event.preventDefault()
     if (!validate()) return
     createVoucher.mutate(
       {
@@ -135,9 +171,9 @@ export default function CreateCheckVoucherPage() {
         address: address().trim() || undefined,
         bankName: bankName().trim(),
         checkNo: checkNo().trim() || undefined,
-        particular: particular().trim(),
-        debitLines: toLines(debitLines()),
-        creditLines: toLines(creditLines()),
+        paymentLines: paymentValues(paymentLines()),
+        debitLines: accountValues(debitLines()),
+        creditLines: accountValues(creditLines()),
         preparedBy: preparedBy().trim() || undefined,
         approvedBy: approvedBy().trim() || undefined,
         receivedBy: receivedBy().trim() || undefined,
@@ -153,7 +189,9 @@ export default function CreateCheckVoucherPage() {
           <BackLink variant="icon" label="Back to check vouchers" href="/check-vouchers" />
           <div>
             <h1 class="text-2xl font-semibold text-foreground">New Check Voucher</h1>
-            <p class="mt-1 text-sm text-muted">Create a printable voucher with balanced entries.</p>
+            <p class="mt-1 text-sm text-muted">
+              Record payment items and the balanced accounting entry for printing.
+            </p>
           </div>
         </div>
 
@@ -168,9 +206,7 @@ export default function CreateCheckVoucherPage() {
                 </Show>
                 <div>
                   <h2 class="text-lg font-semibold text-foreground">Voucher Details</h2>
-                  <p class="mt-1 text-xs text-muted">
-                    This creates the printable check voucher record only.
-                  </p>
+                  <p class="mt-1 text-xs text-muted">These fields appear in the document header.</p>
                 </div>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <DateInput
@@ -182,51 +218,52 @@ export default function CreateCheckVoucherPage() {
                   <Input
                     label="Payee"
                     value={payee()}
-                    onInput={e => setPayee(e.currentTarget.value)}
+                    onInput={event => setPayee(event.currentTarget.value)}
                     placeholder="e.g. CITI Hardware"
-                  />
-                </div>
-                <Input
-                  label="Particular"
-                  value={particular()}
-                  onInput={e => setParticular(e.currentTarget.value)}
-                  placeholder="e.g. Range hood"
-                />
-                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <Input
-                    label="Bank Name"
-                    value={bankName()}
-                    onInput={e => setBankName(e.currentTarget.value)}
-                  />
-                  <Input
-                    label="Check No."
-                    value={checkNo()}
-                    onInput={e => setCheckNo(e.currentTarget.value)}
-                    hint="Optional"
                   />
                 </div>
                 <Input
                   label="Address"
                   value={address()}
-                  onInput={e => setAddress(e.currentTarget.value)}
+                  onInput={event => setAddress(event.currentTarget.value)}
                   hint="Optional"
                 />
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Input
+                    label="Bank Name"
+                    value={bankName()}
+                    onInput={event => setBankName(event.currentTarget.value)}
+                  />
+                  <Input
+                    label="Check No."
+                    value={checkNo()}
+                    onInput={event => setCheckNo(event.currentTarget.value)}
+                    hint="Optional and fully editable"
+                  />
+                </div>
               </section>
 
-              <VoucherLines
-                title="Debit"
-                lines={debitLines()}
-                onAdd={() => addLine("debit")}
-                onRemove={index => removeLine("debit", index)}
-                onChange={(index, field, value) => updateLine("debit", index, field, value)}
+              <PaymentLines
+                lines={paymentLines()}
+                onAdd={addPayment}
+                onRemove={removePayment}
+                onChange={updatePayment}
               />
 
-              <VoucherLines
+              <AccountLines
+                title="Debit"
+                lines={debitLines()}
+                onAdd={() => addAccount("debit")}
+                onRemove={index => removeAccount("debit", index)}
+                onChange={(index, field, value) => updateAccount("debit", index, field, value)}
+              />
+
+              <AccountLines
                 title="Credit"
                 lines={creditLines()}
-                onAdd={() => addLine("credit")}
-                onRemove={index => removeLine("credit", index)}
-                onChange={(index, field, value) => updateLine("credit", index, field, value)}
+                onAdd={() => addAccount("credit")}
+                onRemove={index => removeAccount("credit", index)}
+                onChange={(index, field, value) => updateAccount("credit", index, field, value)}
               />
 
               <section class="space-y-4 rounded-lg border border-border bg-surface p-6">
@@ -238,17 +275,17 @@ export default function CreateCheckVoucherPage() {
                   <Input
                     label="Prepared by"
                     value={preparedBy()}
-                    onInput={e => setPreparedBy(e.currentTarget.value)}
+                    onInput={event => setPreparedBy(event.currentTarget.value)}
                   />
                   <Input
                     label="Approved by"
                     value={approvedBy()}
-                    onInput={e => setApprovedBy(e.currentTarget.value)}
+                    onInput={event => setApprovedBy(event.currentTarget.value)}
                   />
                   <Input
                     label="Received by"
                     value={receivedBy()}
-                    onInput={e => setReceivedBy(e.currentTarget.value)}
+                    onInput={event => setReceivedBy(event.currentTarget.value)}
                     hint="Optional"
                   />
                 </div>
@@ -257,46 +294,35 @@ export default function CreateCheckVoucherPage() {
 
             <div>
               <aside class="sticky top-24 rounded-lg border border-border bg-surface p-6">
-                <h2 class="mb-4 text-lg font-semibold text-foreground">Summary</h2>
+                <h2 class="mb-4 text-lg font-semibold text-foreground">Balance Summary</h2>
                 <div class="space-y-3 text-sm">
-                  <div class="flex justify-between gap-3">
-                    <span class="text-muted">Payee</span>
-                    <span class="text-right font-medium">{payee().trim() || "-"}</span>
-                  </div>
-                  <div class="flex justify-between gap-3">
-                    <span class="text-muted">Bank</span>
-                    <span class="text-right font-medium">{bankName().trim() || "-"}</span>
-                  </div>
-                  <div class="flex justify-between gap-3">
-                    <span class="text-muted">Check No.</span>
-                    <span class="text-right font-medium">{checkNo().trim() || "-"}</span>
+                  <SummaryRow label="Payee" value={payee().trim() || "-"} />
+                  <SummaryRow label="Check No." value={checkNo().trim() || "-"} />
+                  <div class="space-y-2 border-t border-border pt-3">
+                    <SummaryRow label="Payment items" value={formatPeso(paymentTotal())} />
+                    <SummaryRow label="Debit" value={formatPeso(debitTotal())} />
+                    <SummaryRow label="Credit" value={formatPeso(creditTotal())} />
                   </div>
                   <div class="border-t border-border pt-3">
-                    <div class="flex justify-between">
-                      <span class="text-muted">Debit</span>
-                      <span class="font-medium tabular-nums">{formatPeso(debitTotal())}</span>
-                    </div>
-                    <div class="mt-2 flex justify-between">
-                      <span class="text-muted">Credit</span>
-                      <span class="font-medium tabular-nums">{formatPeso(creditTotal())}</span>
-                    </div>
-                  </div>
-                  <div class="border-t border-border pt-3">
-                    <div class="flex justify-between">
-                      <span class="font-medium">Grand Total</span>
-                      <span class="text-xl font-semibold tabular-nums text-foreground">
-                        {formatPeso(debitTotal())}
+                    <div class="flex items-center justify-between gap-3">
+                      <span class="font-medium">Status</span>
+                      <span
+                        class={`text-xs font-semibold ${totalsMatch() ? "text-success" : "text-danger"}`}
+                      >
+                        {totalsMatch() ? "Balanced" : "Not balanced"}
                       </span>
                     </div>
                     <Show when={!totalsMatch()}>
-                      <p class="mt-2 text-xs text-danger">Debit and credit totals must match.</p>
+                      <p class="mt-2 text-xs leading-5 text-danger">
+                        Payment, debit, and credit totals must match before saving.
+                      </p>
                     </Show>
                   </div>
                 </div>
 
                 <Show when={createVoucher.isError}>
-                  <div class="mt-4 rounded-lg bg-red-50 p-3">
-                    <p class="text-xs text-red-700">{createVoucher.error?.message}</p>
+                  <div class="mt-4 rounded-lg border border-danger/20 bg-danger/5 p-3">
+                    <p class="text-xs text-danger">{createVoucher.error?.message}</p>
                   </div>
                 </Show>
 
@@ -330,47 +356,66 @@ export default function CreateCheckVoucherPage() {
   )
 }
 
-function VoucherLines(props: {
-  title: "Debit" | "Credit"
-  lines: LineDraft[]
+function SummaryRow(props: { label: string; value: string }) {
+  return (
+    <div class="flex justify-between gap-3">
+      <span class="text-muted">{props.label}</span>
+      <span class="break-words text-right font-medium tabular-nums">{props.value}</span>
+    </div>
+  )
+}
+
+function EditorHeader(props: {
+  title: string
+  description: string
+  total: number
+  canAdd: boolean
+  onAdd: () => void
+}) {
+  return (
+    <div class="flex flex-col gap-3 border-b border-border px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+      <div>
+        <h2 class="text-lg font-semibold text-foreground">{props.title}</h2>
+        <p class="mt-1 text-xs text-muted">{props.description}</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <p class="text-sm font-semibold tabular-nums text-foreground">{formatPeso(props.total)}</p>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          disabled={!props.canAdd}
+          onClick={props.onAdd}
+        >
+          <Icons.plus class="h-4 w-4" />
+          Add line
+        </Button>
+      </div>
+    </div>
+  )
+}
+
+function PaymentLines(props: {
+  lines: PaymentDraft[]
   onAdd: () => void
   onRemove: (index: number) => void
-  onChange: (index: number, field: keyof LineDraft, value: string) => void
+  onChange: (index: number, field: keyof PaymentDraft, value: string) => void
 }) {
-  const total = () => lineTotal(props.lines)
-  const fieldLabel = (label: string, index: number) =>
-    `${props.title} line ${index + 1} ${label.toLowerCase()}`
-
   return (
     <section class="overflow-hidden rounded-lg border border-border bg-surface">
-      <div class="flex flex-col gap-3 border-b border-border px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 class="text-lg font-semibold text-foreground">{props.title} Lines</h2>
-          <p class="mt-1 text-xs text-muted">
-            {props.title === "Debit" ? "Expense or asset accounts." : "Bank or cash account."}
-          </p>
-        </div>
-        <div class="flex items-center gap-3">
-          <p class="text-sm font-semibold tabular-nums text-foreground">{formatPeso(total())}</p>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            disabled={props.lines.length >= MAX_VOUCHER_LINES}
-            onClick={props.onAdd}
-          >
-            <Icons.plus class="h-4 w-4" />
-            Add line
-          </Button>
-        </div>
-      </div>
+      <EditorHeader
+        title="Payment For"
+        description="Each item prints with its own amount in the Particular section."
+        total={lineTotal(props.lines)}
+        canAdd={props.lines.length < MAX_VOUCHER_LINES}
+        onAdd={props.onAdd}
+      />
       <Show when={props.lines.length >= MAX_VOUCHER_LINES}>
         <p class="border-b border-border px-6 py-2 text-xs text-muted">
           Maximum {MAX_VOUCHER_LINES} lines for one-page printing.
         </p>
       </Show>
-      <div class="hidden border-b border-border bg-surface-muted px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_150px_44px] md:gap-3">
-        <span>Account</span>
+      <div class="hidden border-b border-border bg-surface-muted px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted md:grid md:grid-cols-[minmax(0,1fr)_150px_44px] md:gap-3">
         <span>Description</span>
         <span>Amount</span>
         <span />
@@ -378,19 +423,7 @@ function VoucherLines(props: {
       <div class="divide-y divide-border">
         <Index each={props.lines}>
           {(line, index) => (
-            <div class="grid gap-3 px-6 py-4 md:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_150px_44px] md:items-end">
-              <label class="block">
-                <span class="mb-1 block text-sm font-medium text-foreground md:hidden">
-                  Account
-                </span>
-                <input
-                  class={formInputClass()}
-                  value={line().account}
-                  onInput={e => props.onChange(index, "account", e.currentTarget.value)}
-                  placeholder={props.title === "Debit" ? "Expense account" : "Bank / cash account"}
-                  aria-label={fieldLabel("Account", index)}
-                />
-              </label>
+            <div class="grid gap-3 px-6 py-4 md:grid-cols-[minmax(0,1fr)_150px_44px] md:items-end">
               <label class="block">
                 <span class="mb-1 block text-sm font-medium text-foreground md:hidden">
                   Description
@@ -398,35 +431,123 @@ function VoucherLines(props: {
                 <input
                   class={formInputClass()}
                   value={line().description}
-                  onInput={e => props.onChange(index, "description", e.currentTarget.value)}
-                  placeholder="Optional"
-                  aria-label={fieldLabel("Description", index)}
+                  maxLength={300}
+                  onInput={event => props.onChange(index, "description", event.currentTarget.value)}
+                  placeholder="e.g. 1st of 24th installment Suzuki Carry Van for Mobile Training"
+                  aria-label={`Payment item ${index + 1} description`}
                 />
               </label>
-              <label class="block">
-                <span class="mb-1 block text-sm font-medium text-foreground md:hidden">Amount</span>
-                <input
-                  class={`${formInputClass()} text-right tabular-nums`}
-                  inputMode="decimal"
-                  value={line().amount}
-                  onInput={e => props.onChange(index, "amount", e.currentTarget.value)}
-                  placeholder="0.00"
-                  aria-label={fieldLabel("Amount", index)}
-                />
-              </label>
-              <button
-                type="button"
-                onClick={() => props.onRemove(index)}
-                class="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted hover:bg-surface-muted hover:text-danger disabled:pointer-events-none disabled:opacity-40"
+              <MoneyInput
+                label={`Payment item ${index + 1} amount`}
+                value={line().amount}
+                onInput={value => props.onChange(index, "amount", value)}
+              />
+              <RemoveButton
+                label="Remove payment item"
                 disabled={props.lines.length === 1}
-                aria-label={`Remove ${props.title.toLowerCase()} line`}
-              >
-                <Icons.trash class="h-4 w-4" />
-              </button>
+                onClick={() => props.onRemove(index)}
+              />
             </div>
           )}
         </Index>
       </div>
     </section>
+  )
+}
+
+function AccountLines(props: {
+  title: "Debit" | "Credit"
+  lines: AccountDraft[]
+  onAdd: () => void
+  onRemove: (index: number) => void
+  onChange: (index: number, field: keyof AccountDraft, value: string) => void
+}) {
+  return (
+    <section class="overflow-hidden rounded-lg border border-border bg-surface">
+      <EditorHeader
+        title={`${props.title} Accounts`}
+        description={
+          props.title === "Debit"
+            ? "Expense or asset accounts."
+            : "Bank, cash, or payable accounts."
+        }
+        total={lineTotal(props.lines)}
+        canAdd={props.lines.length < MAX_VOUCHER_LINES}
+        onAdd={props.onAdd}
+      />
+      <Show when={props.lines.length >= MAX_VOUCHER_LINES}>
+        <p class="border-b border-border px-6 py-2 text-xs text-muted">
+          Maximum {MAX_VOUCHER_LINES} lines for one-page printing.
+        </p>
+      </Show>
+      <div class="hidden border-b border-border bg-surface-muted px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted md:grid md:grid-cols-[minmax(0,1fr)_150px_44px] md:gap-3">
+        <span>Account</span>
+        <span>Amount</span>
+        <span />
+      </div>
+      <div class="divide-y divide-border">
+        <Index each={props.lines}>
+          {(line, index) => (
+            <div class="grid gap-3 px-6 py-4 md:grid-cols-[minmax(0,1fr)_150px_44px] md:items-end">
+              <label class="block">
+                <span class="mb-1 block text-sm font-medium text-foreground md:hidden">
+                  Account
+                </span>
+                <input
+                  class={formInputClass()}
+                  value={line().account}
+                  maxLength={120}
+                  onInput={event => props.onChange(index, "account", event.currentTarget.value)}
+                  placeholder={
+                    props.title === "Debit" ? "Expense or asset account" : "Bank or payable account"
+                  }
+                  aria-label={`${props.title} line ${index + 1} account`}
+                />
+              </label>
+              <MoneyInput
+                label={`${props.title} line ${index + 1} amount`}
+                value={line().amount}
+                onInput={value => props.onChange(index, "amount", value)}
+              />
+              <RemoveButton
+                label={`Remove ${props.title.toLowerCase()} line`}
+                disabled={props.lines.length === 1}
+                onClick={() => props.onRemove(index)}
+              />
+            </div>
+          )}
+        </Index>
+      </div>
+    </section>
+  )
+}
+
+function MoneyInput(props: { label: string; value: string; onInput: (value: string) => void }) {
+  return (
+    <label class="block">
+      <span class="mb-1 block text-sm font-medium text-foreground md:hidden">Amount</span>
+      <input
+        class={`${formInputClass()} text-right tabular-nums`}
+        inputMode="decimal"
+        value={props.value}
+        onInput={event => props.onInput(event.currentTarget.value)}
+        placeholder="0.00"
+        aria-label={props.label}
+      />
+    </label>
+  )
+}
+
+function RemoveButton(props: { label: string; disabled: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={props.onClick}
+      class="inline-flex h-11 w-11 items-center justify-center rounded-lg text-muted hover:bg-surface-muted hover:text-danger disabled:pointer-events-none disabled:opacity-40"
+      disabled={props.disabled}
+      aria-label={props.label}
+    >
+      <Icons.trash class="h-4 w-4" />
+    </button>
   )
 }

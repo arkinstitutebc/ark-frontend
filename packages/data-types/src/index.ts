@@ -10,6 +10,7 @@ export type {
   BankId,
   CheckVoucher,
   CheckVoucherLine,
+  CheckVoucherPaymentLine,
   CheckVoucherStatus,
   IncomeStatement,
   IncomeStatementRow,
