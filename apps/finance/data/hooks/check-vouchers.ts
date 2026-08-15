@@ -10,6 +10,7 @@ import { api } from "../api"
 import { queryKeys } from "../query-keys"
 
 export interface CreateCheckVoucherInput {
+  voucherNo?: string
   voucherDate: string
   payee: string
   address?: string

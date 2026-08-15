@@ -65,6 +65,7 @@ function incompleteAccounts(lines: AccountDraft[]) {
 }
 
 export default function CreateCheckVoucherPage() {
+  const [voucherNo, setVoucherNo] = createSignal("")
   const [voucherDate, setVoucherDate] = createSignal(today())
   const [payee, setPayee] = createSignal("")
   const [address, setAddress] = createSignal("")
@@ -166,6 +167,7 @@ export default function CreateCheckVoucherPage() {
     if (!validate()) return
     createVoucher.mutate(
       {
+        voucherNo: voucherNo().trim() || undefined,
         voucherDate: voucherDate(),
         payee: payee().trim(),
         address: address().trim() || undefined,
@@ -183,12 +185,12 @@ export default function CreateCheckVoucherPage() {
   }
 
   return (
-    <div class="px-6 py-8 sm:px-8 lg:px-12">
+    <div class="px-4 py-5 sm:px-8 sm:py-8 lg:px-12">
       <div class="mx-auto max-w-6xl">
-        <div class="mb-8 flex items-center gap-3">
+        <div class="mb-6 flex items-start gap-3 sm:mb-8 sm:items-center">
           <BackLink variant="icon" label="Back to check vouchers" href="/check-vouchers" />
           <div>
-            <h1 class="text-2xl font-semibold text-foreground">New Check Voucher</h1>
+            <h1 class="text-xl font-semibold text-foreground sm:text-2xl">New Check Voucher</h1>
             <p class="mt-1 text-sm text-muted">
               Record payment items and the balanced accounting entry for printing.
             </p>
@@ -198,7 +200,7 @@ export default function CreateCheckVoucherPage() {
         <form onSubmit={submit}>
           <div class="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
             <div class="space-y-6">
-              <section class="space-y-4 rounded-lg border border-border bg-surface p-6">
+              <section class="space-y-4 rounded-lg border border-border bg-surface p-4 sm:p-6">
                 <Show when={Object.keys(errors()).length > 0}>
                   <div class="rounded-lg border border-danger/20 bg-danger/5 px-4 py-3 text-sm text-danger">
                     {Object.values(errors())[0]}
@@ -209,6 +211,13 @@ export default function CreateCheckVoucherPage() {
                   <p class="mt-1 text-xs text-muted">These fields appear in the document header.</p>
                 </div>
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Input
+                    label="Voucher No."
+                    value={voucherNo()}
+                    onInput={event => setVoucherNo(event.currentTarget.value)}
+                    placeholder="0003"
+                    hint="Optional; leave blank to assign automatically"
+                  />
                   <DateInput
                     label="Date"
                     value={voucherDate()}
@@ -266,7 +275,7 @@ export default function CreateCheckVoucherPage() {
                 onChange={(index, field, value) => updateAccount("credit", index, field, value)}
               />
 
-              <section class="space-y-4 rounded-lg border border-border bg-surface p-6">
+              <section class="space-y-4 rounded-lg border border-border bg-surface p-4 sm:p-6">
                 <div>
                   <h2 class="text-lg font-semibold text-foreground">Signatories</h2>
                   <p class="mt-1 text-xs text-muted">Shown at the bottom of the printed voucher.</p>
@@ -293,10 +302,11 @@ export default function CreateCheckVoucherPage() {
             </div>
 
             <div>
-              <aside class="sticky top-24 rounded-lg border border-border bg-surface p-6">
+              <aside class="rounded-lg border border-border bg-surface p-4 sm:p-6 xl:sticky xl:top-24">
                 <h2 class="mb-4 text-lg font-semibold text-foreground">Balance Summary</h2>
                 <div class="space-y-3 text-sm">
                   <SummaryRow label="Payee" value={payee().trim() || "-"} />
+                  <SummaryRow label="Voucher No." value={voucherNo().trim() || "Automatic"} />
                   <SummaryRow label="Check No." value={checkNo().trim() || "-"} />
                   <div class="space-y-2 border-t border-border pt-3">
                     <SummaryRow label="Payment items" value={formatPeso(paymentTotal())} />
@@ -373,7 +383,7 @@ function EditorHeader(props: {
   onAdd: () => void
 }) {
   return (
-    <div class="flex flex-col gap-3 border-b border-border px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
+    <div class="flex flex-col gap-3 border-b border-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
       <div>
         <h2 class="text-lg font-semibold text-foreground">{props.title}</h2>
         <p class="mt-1 text-xs text-muted">{props.description}</p>
@@ -411,7 +421,7 @@ function PaymentLines(props: {
         onAdd={props.onAdd}
       />
       <Show when={props.lines.length >= MAX_VOUCHER_LINES}>
-        <p class="border-b border-border px-6 py-2 text-xs text-muted">
+        <p class="border-b border-border px-4 py-2 text-xs text-muted sm:px-6">
           Maximum {MAX_VOUCHER_LINES} lines for one-page printing.
         </p>
       </Show>
@@ -423,7 +433,7 @@ function PaymentLines(props: {
       <div class="divide-y divide-border">
         <Index each={props.lines}>
           {(line, index) => (
-            <div class="grid gap-3 px-6 py-4 md:grid-cols-[minmax(0,1fr)_150px_44px] md:items-end">
+            <div class="grid gap-3 px-4 py-4 sm:px-6 md:grid-cols-[minmax(0,1fr)_150px_44px] md:items-end">
               <label class="block">
                 <span class="mb-1 block text-sm font-medium text-foreground md:hidden">
                   Description
@@ -476,7 +486,7 @@ function AccountLines(props: {
         onAdd={props.onAdd}
       />
       <Show when={props.lines.length >= MAX_VOUCHER_LINES}>
-        <p class="border-b border-border px-6 py-2 text-xs text-muted">
+        <p class="border-b border-border px-4 py-2 text-xs text-muted sm:px-6">
           Maximum {MAX_VOUCHER_LINES} lines for one-page printing.
         </p>
       </Show>
@@ -488,7 +498,7 @@ function AccountLines(props: {
       <div class="divide-y divide-border">
         <Index each={props.lines}>
           {(line, index) => (
-            <div class="grid gap-3 px-6 py-4 md:grid-cols-[minmax(0,1fr)_150px_44px] md:items-end">
+            <div class="grid gap-3 px-4 py-4 sm:px-6 md:grid-cols-[minmax(0,1fr)_150px_44px] md:items-end">
               <label class="block">
                 <span class="mb-1 block text-sm font-medium text-foreground md:hidden">
                   Account

@@ -13,9 +13,11 @@ test.describe("Finance — Check Vouchers", () => {
 
   test("creates independent payment items with balanced accounting lines", async ({ page }) => {
     const payee = `QA Voucher ${Date.now()}`
+    await page.setViewportSize({ width: 390, height: 844 })
     await page.goto(`${FINANCE_URL}/check-vouchers/create`)
     await waitForReady(page)
 
+    await page.getByLabel("Voucher No.").fill("0003")
     await page.getByLabel("Payee").fill(payee)
     await page.getByLabel("Check No.").fill("QA-8936")
     await page
@@ -32,14 +34,18 @@ test.describe("Finance — Check Vouchers", () => {
     await expect(page.getByText("Balanced", { exact: true })).toBeVisible()
     await page.getByRole("button", { name: "Save Voucher" }).click()
     await expect(page).toHaveURL(/\/check-vouchers$/)
-    await expect(page.getByText(payee)).toBeVisible()
+    await expect(page.getByText("No. 0003", { exact: true }).first()).toBeVisible()
+    await expect(page.locator("article").getByText(payee)).toBeVisible()
 
     const list = await page.request.get(
       `${API_URL}/api/finance/check-vouchers?search=${encodeURIComponent(payee)}`
     )
     expect(list.ok()).toBe(true)
-    const data = (await list.json()) as { items: Array<{ id: string; payee: string }> }
+    const data = (await list.json()) as {
+      items: Array<{ id: string; payee: string; voucherNo: string }>
+    }
     const created = data.items.find(item => item.payee === payee)
+    expect(created?.voucherNo).toBe("0003")
     if (created) await page.request.delete(`${API_URL}/api/finance/check-vouchers/${created.id}`)
   })
 

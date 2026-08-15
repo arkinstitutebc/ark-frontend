@@ -53,6 +53,12 @@ function voucherPdfUrl(voucher: CheckVoucher) {
   return `${API_URL}/api/finance/check-vouchers/${voucher.id}/pdf`
 }
 
+function displayVoucherNo(voucherNo: string) {
+  const sequence = voucherNo.match(/(\d+)$/)?.[1]
+  if (!sequence) return voucherNo
+  return String(Number(sequence)).padStart(4, "0")
+}
+
 function IconAction(props: {
   label: string
   icon: typeof Icons.fileText
@@ -147,7 +153,7 @@ function CheckVoucherDetailsModal(props: {
     <Modal
       open={!!props.voucher}
       onClose={props.onClose}
-      title={props.voucher?.voucherNo ?? "Check Voucher"}
+      title={props.voucher ? `No. ${displayVoucherNo(props.voucher.voucherNo)}` : "Check Voucher"}
       size="xl"
     >
       <Show when={props.voucher}>
@@ -170,6 +176,10 @@ function CheckVoucherDetailsModal(props: {
             </div>
 
             <div class="grid gap-3 md:grid-cols-3">
+              <DetailItem
+                label="Voucher No."
+                value={`No. ${displayVoucherNo(voucher().voucherNo)}`}
+              />
               <DetailItem label="Date" value={formatDatePH(voucher().voucherDate)} />
               <DetailItem label="Bank" value={voucher().bankName} />
               <DetailItem label="Check No." value={voucher().checkNo} />
@@ -297,7 +307,7 @@ export default function CheckVouchersPage() {
   })
 
   return (
-    <div class="mx-auto max-w-[1600px] px-6 py-8 sm:px-8 lg:px-12">
+    <div class="mx-auto max-w-[1600px] px-4 py-5 sm:px-8 sm:py-8 lg:px-12">
       <PageHeader
         title="Check Vouchers"
         subtitle="Standalone payment vouchers with debit and credit lines"
@@ -361,87 +371,158 @@ export default function CheckVouchersPage() {
                 </div>
               }
             >
-              <DataTable class="max-h-[600px] overflow-auto">
-                <THead>
-                  <VoucherTh class="min-w-[170px]">Voucher</VoucherTh>
-                  <VoucherTh class="min-w-[240px]">Payee</VoucherTh>
-                  <VoucherTh class="min-w-[320px]">Payment For</VoucherTh>
-                  <VoucherTh class="min-w-[190px]">Bank / Check</VoucherTh>
-                  <VoucherTh align="right" class="min-w-[140px]">
-                    Amount
-                  </VoucherTh>
-                  <VoucherTh class="min-w-[110px]">Status</VoucherTh>
-                  <VoucherTh align="right" class="min-w-[132px]">
-                    Actions
-                  </VoucherTh>
-                </THead>
-                <tbody>
-                  <For each={data.items}>
-                    {voucher => (
-                      <Tr onClick={() => setSelectedVoucher(voucher)}>
-                        <td class="px-6 py-3 whitespace-nowrap">
-                          <p class="text-sm font-semibold text-foreground">{voucher.voucherNo}</p>
-                          <p class="mt-0.5 text-xs text-muted">
-                            {formatDatePH(voucher.voucherDate)}
-                          </p>
-                        </td>
-                        <td class="px-6 py-3">
-                          <p class="text-sm font-medium text-foreground">{voucher.payee}</p>
-                          <p class="mt-0.5 text-xs text-muted">
-                            {voucher.createdBy
-                              ? `Created by ${voucher.createdBy}`
-                              : "Manual voucher"}
-                          </p>
-                        </td>
-                        <td class="px-6 py-3">
-                          <span
-                            class="block max-w-[360px] truncate text-sm text-foreground"
-                            title={voucher.paymentLines[0]?.description || voucher.particular}
-                          >
-                            {voucher.paymentLines[0]?.description || voucher.particular}
-                          </span>
-                          <span class="mt-0.5 block text-xs text-muted">
-                            {voucher.paymentLines.length} payment / {voucher.debitLines.length}{" "}
-                            debit / {voucher.creditLines.length} credit
-                          </span>
-                        </td>
-                        <td class="px-6 py-3">
-                          <p class="text-sm text-foreground">{voucher.bankName}</p>
-                          <p class="text-xs text-muted">{voucher.checkNo || "No check no."}</p>
-                        </td>
-                        <td class="px-6 py-3 text-right text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">
-                          {formatPeso(voucher.totalAmount)}
-                        </td>
-                        <td class="px-6 py-3">
-                          <StatusBadge status={voucher.status} />
-                        </td>
-                        <td class="px-6 py-3 text-right">
-                          <div class="flex items-center justify-end gap-1">
-                            <IconAction
-                              label="Open PDF"
-                              icon={Icons.fileText}
-                              onClick={event => openPdf(voucher, event)}
-                            />
-                            <Show when={voucher.status !== "void"}>
-                              <IconAction
-                                label="Void voucher"
-                                icon={Icons.xCircle}
-                                onClick={event => openVoidConfirm(voucher, event)}
-                              />
-                            </Show>
-                            <IconAction
-                              label="Delete voucher"
-                              icon={Icons.trash}
-                              tone="danger"
-                              onClick={event => openDeleteConfirm(voucher, event)}
-                            />
+              <div class="divide-y divide-border md:hidden">
+                <For each={data.items}>
+                  {voucher => (
+                    <article>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedVoucher(voucher)}
+                        class="block w-full px-4 py-4 text-left transition-colors hover:bg-surface-muted focus-visible:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                      >
+                        <div class="flex items-start justify-between gap-3">
+                          <div class="min-w-0">
+                            <p class="text-sm font-semibold text-foreground">
+                              No. {displayVoucherNo(voucher.voucherNo)}
+                            </p>
+                            <p class="mt-0.5 text-xs text-muted">
+                              {formatDatePH(voucher.voucherDate)}
+                            </p>
                           </div>
-                        </td>
-                      </Tr>
-                    )}
-                  </For>
-                </tbody>
-              </DataTable>
+                          <StatusBadge status={voucher.status} />
+                        </div>
+                        <p class="mt-3 truncate text-sm font-semibold text-foreground">
+                          {voucher.payee}
+                        </p>
+                        <p class="mt-1 line-clamp-2 text-sm leading-5 text-muted">
+                          {voucher.paymentLines[0]?.description || voucher.particular}
+                        </p>
+                        <div class="mt-4 grid grid-cols-2 gap-3 text-xs">
+                          <div class="min-w-0">
+                            <p class="text-muted">Bank / Check</p>
+                            <p class="mt-0.5 truncate font-medium text-foreground">
+                              {voucher.bankName}
+                            </p>
+                            <p class="truncate text-muted">{voucher.checkNo || "No check no."}</p>
+                          </div>
+                          <div class="text-right">
+                            <p class="text-muted">Amount</p>
+                            <p class="mt-0.5 font-semibold tabular-nums text-foreground">
+                              {formatPeso(voucher.totalAmount)}
+                            </p>
+                          </div>
+                        </div>
+                      </button>
+                      <div class="flex items-center justify-end gap-1 border-t border-border px-3 py-2">
+                        <IconAction
+                          label="Open PDF"
+                          icon={Icons.fileText}
+                          onClick={event => openPdf(voucher, event)}
+                        />
+                        <Show when={voucher.status !== "void"}>
+                          <IconAction
+                            label="Void voucher"
+                            icon={Icons.xCircle}
+                            onClick={event => openVoidConfirm(voucher, event)}
+                          />
+                        </Show>
+                        <IconAction
+                          label="Delete voucher"
+                          icon={Icons.trash}
+                          tone="danger"
+                          onClick={event => openDeleteConfirm(voucher, event)}
+                        />
+                      </div>
+                    </article>
+                  )}
+                </For>
+              </div>
+
+              <div class="hidden md:block">
+                <DataTable class="max-h-[600px] overflow-auto">
+                  <THead>
+                    <VoucherTh class="min-w-[170px]">Voucher</VoucherTh>
+                    <VoucherTh class="min-w-[240px]">Payee</VoucherTh>
+                    <VoucherTh class="min-w-[320px]">Payment For</VoucherTh>
+                    <VoucherTh class="min-w-[190px]">Bank / Check</VoucherTh>
+                    <VoucherTh align="right" class="min-w-[140px]">
+                      Amount
+                    </VoucherTh>
+                    <VoucherTh class="min-w-[110px]">Status</VoucherTh>
+                    <VoucherTh align="right" class="min-w-[132px]">
+                      Actions
+                    </VoucherTh>
+                  </THead>
+                  <tbody>
+                    <For each={data.items}>
+                      {voucher => (
+                        <Tr onClick={() => setSelectedVoucher(voucher)}>
+                          <td class="px-6 py-3 whitespace-nowrap">
+                            <p class="text-sm font-semibold text-foreground">
+                              No. {displayVoucherNo(voucher.voucherNo)}
+                            </p>
+                            <p class="mt-0.5 text-xs text-muted">
+                              {formatDatePH(voucher.voucherDate)}
+                            </p>
+                          </td>
+                          <td class="px-6 py-3">
+                            <p class="text-sm font-medium text-foreground">{voucher.payee}</p>
+                            <p class="mt-0.5 text-xs text-muted">
+                              {voucher.createdBy
+                                ? `Created by ${voucher.createdBy}`
+                                : "Manual voucher"}
+                            </p>
+                          </td>
+                          <td class="px-6 py-3">
+                            <span
+                              class="block max-w-[360px] truncate text-sm text-foreground"
+                              title={voucher.paymentLines[0]?.description || voucher.particular}
+                            >
+                              {voucher.paymentLines[0]?.description || voucher.particular}
+                            </span>
+                            <span class="mt-0.5 block text-xs text-muted">
+                              {voucher.paymentLines.length} payment / {voucher.debitLines.length}{" "}
+                              debit / {voucher.creditLines.length} credit
+                            </span>
+                          </td>
+                          <td class="px-6 py-3">
+                            <p class="text-sm text-foreground">{voucher.bankName}</p>
+                            <p class="text-xs text-muted">{voucher.checkNo || "No check no."}</p>
+                          </td>
+                          <td class="px-6 py-3 text-right text-sm font-semibold text-foreground tabular-nums whitespace-nowrap">
+                            {formatPeso(voucher.totalAmount)}
+                          </td>
+                          <td class="px-6 py-3">
+                            <StatusBadge status={voucher.status} />
+                          </td>
+                          <td class="px-6 py-3 text-right">
+                            <div class="flex items-center justify-end gap-1">
+                              <IconAction
+                                label="Open PDF"
+                                icon={Icons.fileText}
+                                onClick={event => openPdf(voucher, event)}
+                              />
+                              <Show when={voucher.status !== "void"}>
+                                <IconAction
+                                  label="Void voucher"
+                                  icon={Icons.xCircle}
+                                  onClick={event => openVoidConfirm(voucher, event)}
+                                />
+                              </Show>
+                              <IconAction
+                                label="Delete voucher"
+                                icon={Icons.trash}
+                                tone="danger"
+                                onClick={event => openDeleteConfirm(voucher, event)}
+                              />
+                            </div>
+                          </td>
+                        </Tr>
+                      )}
+                    </For>
+                  </tbody>
+                </DataTable>
+              </div>
 
               <div class="flex flex-col gap-3 border-t border-border px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
                 <p class="text-xs text-muted">Showing {showingRange()}</p>
