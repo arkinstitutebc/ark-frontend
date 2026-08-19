@@ -93,9 +93,11 @@ function DetailItem(props: { label: string; value?: string | number | null; clas
   )
 }
 
-function VoucherAccountingRows(props: { debitLines: CheckVoucherLine[]; creditLines: CheckVoucherLine[] }) {
-  const totalDebit = () =>
-    props.debitLines.reduce((sum, line) => sum + Number(line.amount || 0), 0)
+function VoucherAccountingRows(props: {
+  debitLines: CheckVoucherLine[]
+  creditLines: CheckVoucherLine[]
+}) {
+  const totalDebit = () => props.debitLines.reduce((sum, line) => sum + Number(line.amount || 0), 0)
   const totalCredit = () =>
     props.creditLines.reduce((sum, line) => sum + Number(line.amount || 0), 0)
 
