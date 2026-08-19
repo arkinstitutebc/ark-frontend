@@ -93,26 +93,54 @@ function DetailItem(props: { label: string; value?: string | number | null; clas
   )
 }
 
-function VoucherLines(props: { title: string; lines: CheckVoucherLine[] }) {
-  const total = () => props.lines.reduce((sum, line) => sum + Number(line.amount || 0), 0)
+function VoucherAccountingRows(props: { debitLines: CheckVoucherLine[]; creditLines: CheckVoucherLine[] }) {
+  const totalDebit = () =>
+    props.debitLines.reduce((sum, line) => sum + Number(line.amount || 0), 0)
+  const totalCredit = () =>
+    props.creditLines.reduce((sum, line) => sum + Number(line.amount || 0), 0)
 
   return (
     <section class="rounded-lg border border-border bg-surface">
-      <div class="flex items-center justify-between gap-3 border-b border-border px-4 py-3">
-        <h3 class="text-sm font-semibold text-foreground">{props.title}</h3>
-        <p class="text-sm font-semibold tabular-nums text-foreground">{formatPeso(total())}</p>
+      <div class="border-b border-border px-4 py-3">
+        <h3 class="text-sm font-semibold text-foreground">Accounting Lines</h3>
+        <div class="mt-2 grid grid-cols-3 gap-3 text-xs font-semibold uppercase tracking-wider text-muted">
+          <span>Account</span>
+          <span class="text-right">Debit</span>
+          <span class="text-right">Credit</span>
+        </div>
       </div>
       <div class="divide-y divide-border">
-        <For each={props.lines}>
+        <For each={props.debitLines}>
           {line => (
-            <div class="grid gap-3 px-4 py-3 sm:grid-cols-[minmax(0,1fr)_120px] sm:items-center">
+            <div class="grid gap-3 px-4 py-3 md:grid-cols-[minmax(0,1fr)_120px_120px] md:items-center">
               <p class="text-sm font-medium text-foreground">{line.account}</p>
+              <p class="text-left text-sm font-semibold tabular-nums text-foreground sm:text-right">
+                {formatPeso(line.amount)}
+              </p>
+              <p class="text-left text-sm text-muted sm:text-right">-</p>
+            </div>
+          )}
+        </For>
+        <For each={props.creditLines}>
+          {line => (
+            <div class="grid gap-3 px-4 py-3 md:grid-cols-[minmax(0,1fr)_120px_120px] md:items-center">
+              <p class="text-sm font-medium text-foreground">{line.account}</p>
+              <p class="text-left text-sm text-muted sm:text-right">-</p>
               <p class="text-left text-sm font-semibold tabular-nums text-foreground sm:text-right">
                 {formatPeso(line.amount)}
               </p>
             </div>
           )}
         </For>
+        <div class="grid gap-3 bg-surface-muted px-4 py-3 md:grid-cols-[minmax(0,1fr)_120px_120px] md:items-center">
+          <p class="text-sm font-semibold text-foreground">TOTAL</p>
+          <p class="text-left text-sm font-semibold tabular-nums text-foreground sm:text-right">
+            {formatPeso(totalDebit())}
+          </p>
+          <p class="text-left text-sm font-semibold tabular-nums text-foreground sm:text-right">
+            {formatPeso(totalCredit())}
+          </p>
+        </div>
       </div>
     </section>
   )
@@ -189,10 +217,10 @@ function CheckVoucherDetailsModal(props: {
 
             <PaymentLines lines={voucher().paymentLines} />
 
-            <div class="grid gap-4 lg:grid-cols-2">
-              <VoucherLines title="Debit Lines" lines={voucher().debitLines} />
-              <VoucherLines title="Credit Lines" lines={voucher().creditLines} />
-            </div>
+            <VoucherAccountingRows
+              debitLines={voucher().debitLines}
+              creditLines={voucher().creditLines}
+            />
 
             <div class="grid gap-3 md:grid-cols-3">
               <DetailItem label="Prepared By" value={voucher().preparedBy} />
