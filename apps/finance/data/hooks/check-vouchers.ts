@@ -25,6 +25,12 @@ export interface CreateCheckVoucherInput {
   status?: CheckVoucherStatus
 }
 
+export interface UpdateCheckVoucherInput
+  extends Omit<CreateCheckVoucherInput, "voucherNo" | "status"> {
+  id: string
+  voucherNo: string
+}
+
 export interface CheckVoucherListFilters {
   page?: number
   limit?: number
@@ -57,6 +63,14 @@ export function useCheckVouchers(filters?: () => CheckVoucherListFilters) {
   })
 }
 
+export function useCheckVoucher(id: () => string) {
+  return createQuery(() => ({
+    queryKey: queryKeys.checkVouchers.detail(id()),
+    queryFn: () => api<CheckVoucher>(`/api/finance/check-vouchers/${id()}`),
+    enabled: !!id(),
+  }))
+}
+
 export function useCreateCheckVoucher() {
   const qc = useQueryClient()
   return createMutation(() => ({
@@ -68,6 +82,23 @@ export function useCreateCheckVoucher() {
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.checkVouchers.all })
       toast.success("Check voucher created")
+    },
+    onError: (err: Error) => toast.error(err.message),
+  }))
+}
+
+export function useUpdateCheckVoucher() {
+  const qc = useQueryClient()
+  return createMutation(() => ({
+    mutationFn: ({ id, ...data }: UpdateCheckVoucherInput) =>
+      api<CheckVoucher>(`/api/finance/check-vouchers/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+    onSuccess: voucher => {
+      qc.invalidateQueries({ queryKey: queryKeys.checkVouchers.all })
+      qc.setQueryData(queryKeys.checkVouchers.detail(voucher.id), voucher)
+      toast.success("Check voucher updated")
     },
     onError: (err: Error) => toast.error(err.message),
   }))

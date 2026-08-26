@@ -32,9 +32,12 @@ export {
   type CheckVoucherListFilters,
   type CheckVoucherListResponse,
   type CreateCheckVoucherInput,
+  type UpdateCheckVoucherInput,
+  useCheckVoucher,
   useCheckVouchers,
   useCreateCheckVoucher,
   useDeleteCheckVoucher,
+  useUpdateCheckVoucher,
   useVoidCheckVoucher,
 } from "./check-vouchers"
 export {

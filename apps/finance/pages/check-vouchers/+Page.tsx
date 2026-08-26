@@ -16,7 +16,12 @@ import {
   Tr,
 } from "@ark/ui"
 import { API_URL } from "@data/api"
-import { useCheckVouchers, useDeleteCheckVoucher, useVoidCheckVoucher } from "@data/hooks"
+import {
+  useCheckVouchers,
+  useCurrentUser,
+  useDeleteCheckVoucher,
+  useVoidCheckVoucher,
+} from "@data/hooks"
 import type {
   CheckVoucher,
   CheckVoucherLine,
@@ -27,6 +32,7 @@ import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
 
 const PAGE_SIZE = 20
+const CHECK_VOUCHER_EDITOR_EMAIL = "heart@arkinstitutebc.com"
 
 const statusOptions = [
   { label: "All statuses", value: "all" },
@@ -54,7 +60,7 @@ function voucherPdfUrl(voucher: CheckVoucher) {
 }
 
 function displayVoucherNo(voucherNo: string) {
-  const sequence = voucherNo.match(/(\d+)$/)?.[1]
+  const sequence = voucherNo.match(/^CV-\d{4}-(\d+)$/i)?.[1]
   if (!sequence) return voucherNo
   return String(Number(sequence)).padStart(4, "0")
 }
@@ -105,7 +111,7 @@ function VoucherAccountingRows(props: {
     <section class="rounded-lg border border-border bg-surface">
       <div class="border-b border-border px-4 py-3">
         <h3 class="text-sm font-semibold text-foreground">Accounting Lines</h3>
-        <div class="mt-2 grid grid-cols-3 gap-3 text-xs font-semibold uppercase tracking-wider text-muted">
+        <div class="mt-2 hidden grid-cols-[minmax(0,1fr)_120px_120px] gap-3 text-xs font-semibold uppercase tracking-wider text-muted md:grid">
           <span>Account</span>
           <span class="text-right">Debit</span>
           <span class="text-right">Credit</span>
@@ -114,37 +120,44 @@ function VoucherAccountingRows(props: {
       <div class="divide-y divide-border">
         <For each={props.debitLines}>
           {line => (
-            <div class="grid gap-3 px-4 py-3 md:grid-cols-[minmax(0,1fr)_120px_120px] md:items-center">
+            <div class="grid gap-2 px-4 py-3 md:grid-cols-[minmax(0,1fr)_120px_120px] md:items-center md:gap-3">
               <p class="text-sm font-medium text-foreground">{line.account}</p>
-              <p class="text-left text-sm font-semibold tabular-nums text-foreground sm:text-right">
-                {formatPeso(line.amount)}
-              </p>
-              <p class="text-left text-sm text-muted sm:text-right">-</p>
+              <AccountingAmount label="Debit" value={formatPeso(line.amount)} />
+              <AccountingAmount label="Credit" value="-" muted />
             </div>
           )}
         </For>
         <For each={props.creditLines}>
           {line => (
-            <div class="grid gap-3 px-4 py-3 md:grid-cols-[minmax(0,1fr)_120px_120px] md:items-center">
+            <div class="grid gap-2 px-4 py-3 md:grid-cols-[minmax(0,1fr)_120px_120px] md:items-center md:gap-3">
               <p class="text-sm font-medium text-foreground">{line.account}</p>
-              <p class="text-left text-sm text-muted sm:text-right">-</p>
-              <p class="text-left text-sm font-semibold tabular-nums text-foreground sm:text-right">
-                {formatPeso(line.amount)}
-              </p>
+              <AccountingAmount label="Debit" value="-" muted />
+              <AccountingAmount label="Credit" value={formatPeso(line.amount)} />
             </div>
           )}
         </For>
-        <div class="grid gap-3 bg-surface-muted px-4 py-3 md:grid-cols-[minmax(0,1fr)_120px_120px] md:items-center">
+        <div class="grid gap-2 bg-surface-muted px-4 py-3 md:grid-cols-[minmax(0,1fr)_120px_120px] md:items-center md:gap-3">
           <p class="text-sm font-semibold text-foreground">TOTAL</p>
-          <p class="text-left text-sm font-semibold tabular-nums text-foreground sm:text-right">
-            {formatPeso(totalDebit())}
-          </p>
-          <p class="text-left text-sm font-semibold tabular-nums text-foreground sm:text-right">
-            {formatPeso(totalCredit())}
-          </p>
+          <AccountingAmount label="Debit" value={formatPeso(totalDebit())} />
+          <AccountingAmount label="Credit" value={formatPeso(totalCredit())} />
         </div>
       </div>
     </section>
+  )
+}
+
+function AccountingAmount(props: { label: string; value: string; muted?: boolean }) {
+  return (
+    <div class="flex items-center justify-between gap-3 md:block md:text-right">
+      <span class="text-xs font-semibold uppercase tracking-wider text-muted md:hidden">
+        {props.label}
+      </span>
+      <span
+        class={`text-sm tabular-nums ${props.muted ? "text-muted" : "font-semibold text-foreground"}`}
+      >
+        {props.value}
+      </span>
+    </div>
   )
 }
 
@@ -176,6 +189,8 @@ function PaymentLines(props: { lines: CheckVoucherPaymentLine[] }) {
 function CheckVoucherDetailsModal(props: {
   voucher: CheckVoucher | null
   onClose: () => void
+  canEdit: boolean
+  onEdit: (voucher: CheckVoucher) => void
   onVoid: (voucher: CheckVoucher) => void
   onDelete: (voucher: CheckVoucher) => void
 }) {
@@ -240,6 +255,16 @@ function CheckVoucherDetailsModal(props: {
                 Delete Voucher
               </button>
               <div class="flex flex-col gap-2 sm:flex-row">
+                <Show when={props.canEdit && voucher().status !== "void"}>
+                  <button
+                    type="button"
+                    onClick={() => props.onEdit(voucher())}
+                    class="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-surface-muted"
+                  >
+                    <Icons.edit class="h-4 w-4" />
+                    Edit
+                  </button>
+                </Show>
                 <Show when={voucher().status !== "void"}>
                   <button
                     type="button"
@@ -276,6 +301,10 @@ export default function CheckVouchersPage() {
   const [voucherToDelete, setVoucherToDelete] = createSignal<CheckVoucher | null>(null)
   const voidVoucher = useVoidCheckVoucher()
   const deleteVoucher = useDeleteCheckVoucher()
+  const currentUser = useCurrentUser()
+  const canEdit = createMemo(
+    () => currentUser.data?.email.trim().toLowerCase() === CHECK_VOUCHER_EDITOR_EMAIL
+  )
 
   const query = useCheckVouchers(() => ({
     page: page(),
@@ -316,6 +345,10 @@ export default function CheckVouchersPage() {
   const openPdf = (voucher: CheckVoucher, event: MouseEvent) => {
     event.stopPropagation()
     window.open(voucherPdfUrl(voucher), "_blank", "noopener,noreferrer")
+  }
+  const openEdit = (voucher: CheckVoucher, event?: MouseEvent) => {
+    event?.stopPropagation()
+    void navigate(`/check-vouchers/${voucher.id}/edit`)
   }
   const openVoidConfirm = (voucher: CheckVoucher, event?: MouseEvent) => {
     event?.stopPropagation()
@@ -449,6 +482,13 @@ export default function CheckVouchersPage() {
                           icon={Icons.fileText}
                           onClick={event => openPdf(voucher, event)}
                         />
+                        <Show when={canEdit() && voucher.status !== "void"}>
+                          <IconAction
+                            label="Edit voucher"
+                            icon={Icons.edit}
+                            onClick={event => openEdit(voucher, event)}
+                          />
+                        </Show>
                         <Show when={voucher.status !== "void"}>
                           <IconAction
                             label="Void voucher"
@@ -532,6 +572,13 @@ export default function CheckVouchersPage() {
                                 icon={Icons.fileText}
                                 onClick={event => openPdf(voucher, event)}
                               />
+                              <Show when={canEdit() && voucher.status !== "void"}>
+                                <IconAction
+                                  label="Edit voucher"
+                                  icon={Icons.edit}
+                                  onClick={event => openEdit(voucher, event)}
+                                />
+                              </Show>
                               <Show when={voucher.status !== "void"}>
                                 <IconAction
                                   label="Void voucher"
@@ -606,6 +653,11 @@ export default function CheckVouchersPage() {
       <CheckVoucherDetailsModal
         voucher={selectedVoucher()}
         onClose={() => setSelectedVoucher(null)}
+        canEdit={canEdit()}
+        onEdit={voucher => {
+          setSelectedVoucher(null)
+          openEdit(voucher)
+        }}
         onVoid={voucher => {
           setSelectedVoucher(null)
           openVoidConfirm(voucher)
