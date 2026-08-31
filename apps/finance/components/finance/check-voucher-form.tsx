@@ -40,7 +40,7 @@ interface AccountDraft {
   amount: string
 }
 
-const MAX_VOUCHER_LINES = 6
+const MAX_VOUCHER_LINES = 20
 const blankPayment = (): PaymentDraft => ({ description: "", amount: "" })
 const blankAccount = (): AccountDraft => ({ account: "", amount: "" })
 
@@ -479,7 +479,7 @@ function PaymentLines(props: {
       />
       <Show when={props.lines.length >= MAX_VOUCHER_LINES}>
         <p class="border-b border-border px-4 py-2 text-xs text-muted sm:px-6">
-          Maximum {MAX_VOUCHER_LINES} lines for one-page printing.
+          Maximum {MAX_VOUCHER_LINES} lines per section.
         </p>
       </Show>
       <div class="hidden border-b border-border bg-surface-muted px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted md:grid md:grid-cols-[minmax(0,1fr)_150px_44px] md:gap-3">
@@ -544,7 +544,7 @@ function AccountLines(props: {
       />
       <Show when={props.lines.length >= MAX_VOUCHER_LINES}>
         <p class="border-b border-border px-4 py-2 text-xs text-muted sm:px-6">
-          Maximum {MAX_VOUCHER_LINES} lines for one-page printing.
+          Maximum {MAX_VOUCHER_LINES} lines per section.
         </p>
       </Show>
       <div class="hidden border-b border-border bg-surface-muted px-6 py-3 text-xs font-semibold uppercase tracking-wider text-muted md:grid md:grid-cols-[minmax(0,1fr)_150px_44px] md:gap-3">

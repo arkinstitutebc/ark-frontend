@@ -26,6 +26,24 @@ function voucherPayload(suffix: string, status: "draft" | "paid" | "void" = "dra
   }
 }
 
+function expandedVoucherPayload(suffix: string, count: number) {
+  return {
+    ...voucherPayload(suffix),
+    paymentLines: Array.from({ length: count }, (_, index) => ({
+      description: `Payment item ${index + 1}`,
+      amount: 1.25,
+    })),
+    debitLines: Array.from({ length: count }, (_, index) => ({
+      account: `Debit account ${index + 1}`,
+      amount: 1.25,
+    })),
+    creditLines: Array.from({ length: count }, (_, index) => ({
+      account: `Credit account ${index + 1}`,
+      amount: 1.25,
+    })),
+  }
+}
+
 test.describe("Finance — Check Vouchers", () => {
   test.beforeEach(async ({ page }, testInfo) => {
     await requireBackend(testInfo)
@@ -83,6 +101,50 @@ test.describe("Finance — Check Vouchers", () => {
 
     await expect(page.getByText("Not balanced", { exact: true })).toBeVisible()
     await expect(page.getByRole("button", { name: "Save Voucher" })).toBeDisabled()
+  })
+
+  test("supports 20 lines in creation and Heart's edit form", async ({ page }) => {
+    const suffix = String(Date.now())
+    await loginAsAdmin(page, HEART_ADMIN)
+    await page.goto(`${FINANCE_URL}/check-vouchers/create`)
+    await waitForReady(page)
+
+    const paymentAddButton = page.getByRole("button", { name: "Add line" }).nth(0)
+    for (let index = 1; index < 20; index += 1) await paymentAddButton.click()
+    await expect(page.getByLabel("Payment item 20 description")).toBeVisible()
+    await expect(paymentAddButton).toBeDisabled()
+    await expect(page.getByText("Maximum 20 lines per section.")).toHaveCount(1)
+
+    const original = expandedVoucherPayload(suffix, 20)
+    const create = await page.request.post(`${API_URL}/api/finance/check-vouchers`, {
+      data: original,
+    })
+    expect(create.ok()).toBe(true)
+    const created = (await create.json()) as { id: string }
+
+    await page.goto(`${FINANCE_URL}/check-vouchers/${created.id}/edit`)
+    await waitForReady(page)
+    await expect(page.getByLabel("Payment item 20 description")).toBeVisible()
+    await expect(page.getByLabel("Debit line 20 account")).toBeVisible()
+    await expect(page.getByLabel("Credit line 20 account")).toBeVisible()
+    await expect(page.getByText("Maximum 20 lines per section.")).toHaveCount(3)
+    for (const button of await page.getByRole("button", { name: "Add line" }).all()) {
+      await expect(button).toBeDisabled()
+    }
+
+    await page.getByRole("button", { name: "Save Changes" }).click()
+    await expect(page).toHaveURL(/\/check-vouchers$/)
+    const saved = await page.request.get(`${API_URL}/api/finance/check-vouchers/${created.id}`)
+    expect(saved.ok()).toBe(true)
+    const voucher = (await saved.json()) as {
+      paymentLines: unknown[]
+      debitLines: unknown[]
+      creditLines: unknown[]
+    }
+    expect(voucher.paymentLines).toHaveLength(20)
+    expect(voucher.debitLines).toHaveLength(20)
+    expect(voucher.creditLines).toHaveLength(20)
+    await page.request.delete(`${API_URL}/api/finance/check-vouchers/${created.id}`)
   })
 
   test("lets Heart edit a paid voucher and locks it after voiding", async ({ page }) => {
