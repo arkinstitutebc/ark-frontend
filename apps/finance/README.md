@@ -6,7 +6,7 @@
 
 `/` overview, `/banks`, `/transfers`, `/transfers/create`, `/disbursements`, `/disbursements/create` (4-axis classification + smart defaults from GL catalog), `/check-vouchers`, `/check-vouchers/create`, `/check-vouchers/:id/edit` (Heart-only, non-void), `/pnl`, `/income-statement` (segmented), `/gl-accounts` (admin), `/settings` (profit centers, training offerings, classification rules, recent settings activity), `/reimbursements`, `/reimbursements/create`, `/reimbursements/:id`, `/reimbursements/:id/edit` (pending-only), `/reimbursements/approvals`, `/tutorials`
 
-Check vouchers support up to 20 payment, debit, and credit lines. Longer vouchers paginate in the backend-generated PDF.
+Check vouchers support up to 15 payment, debit, and credit lines in the original one-page PDF layout. Fully zero-valued vouchers are valid when all three totals balance at zero.
 
 ## Dev
 

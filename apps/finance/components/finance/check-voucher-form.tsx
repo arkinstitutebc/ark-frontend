@@ -40,13 +40,13 @@ interface AccountDraft {
   amount: string
 }
 
-const MAX_VOUCHER_LINES = 20
+const MAX_VOUCHER_LINES = 15
 const blankPayment = (): PaymentDraft => ({ description: "", amount: "" })
 const blankAccount = (): AccountDraft => ({ account: "", amount: "" })
 
 function amountInput(amount: number | string) {
   const parsed = Number(amount)
-  return Number.isFinite(parsed) && parsed > 0 ? parsed.toFixed(2) : ""
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed.toFixed(2) : ""
 }
 
 function paymentDrafts(lines: CheckVoucherPaymentLine[]) {
@@ -68,6 +68,10 @@ function parseAmount(value: string) {
   return Number.isFinite(parsed) ? parsed : 0
 }
 
+function isValidAmount(value: string) {
+  return /^\d+(\.\d{1,2})?$/.test(value.trim())
+}
+
 function sanitizeMoneyInput(value: string) {
   const cleaned = value.replace(/[^\d.]/g, "")
   const [whole = "", ...decimalParts] = cleaned.split(".")
@@ -77,15 +81,19 @@ function sanitizeMoneyInput(value: string) {
 }
 
 function paymentValues(lines: PaymentDraft[]): CheckVoucherPaymentLine[] {
-  return lines
-    .map(line => ({ description: line.description.trim(), amount: parseAmount(line.amount) }))
-    .filter(line => line.description && line.amount > 0)
+  return lines.flatMap(line => {
+    const description = line.description.trim()
+    if (!description || !isValidAmount(line.amount)) return []
+    return [{ description, amount: parseAmount(line.amount) }]
+  })
 }
 
 function accountValues(lines: AccountDraft[]): CheckVoucherLine[] {
-  return lines
-    .map(line => ({ account: line.account.trim(), amount: parseAmount(line.amount) }))
-    .filter(line => line.account && line.amount > 0)
+  return lines.flatMap(line => {
+    const account = line.account.trim()
+    if (!account || !isValidAmount(line.amount)) return []
+    return [{ account, amount: parseAmount(line.amount) }]
+  })
 }
 
 function lineTotal(lines: Array<{ amount: string }>) {
@@ -95,14 +103,14 @@ function lineTotal(lines: Array<{ amount: string }>) {
 function incompletePayments(lines: PaymentDraft[]) {
   return lines.some(line => {
     const hasContent = line.description.trim() || line.amount.trim()
-    return hasContent && (!line.description.trim() || parseAmount(line.amount) <= 0)
+    return hasContent && (!line.description.trim() || !isValidAmount(line.amount))
   })
 }
 
 function incompleteAccounts(lines: AccountDraft[]) {
   return lines.some(line => {
     const hasContent = line.account.trim() || line.amount.trim()
-    return hasContent && (!line.account.trim() || parseAmount(line.amount) <= 0)
+    return hasContent && (!line.account.trim() || !isValidAmount(line.amount))
   })
 }
 
@@ -131,30 +139,18 @@ export function CheckVoucherForm(props: CheckVoucherFormProps) {
   const paymentTotal = createMemo(() => lineTotal(paymentLines()))
   const debitTotal = createMemo(() => lineTotal(debitLines()))
   const creditTotal = createMemo(() => lineTotal(creditLines()))
-  const totalsMatch = createMemo(
-    () =>
-      paymentTotal() > 0 &&
+  const totalsMatch = createMemo(() => {
+    if (
+      !paymentValues(paymentLines()).length ||
+      !accountValues(debitLines()).length ||
+      !accountValues(creditLines()).length
+    )
+      return false
+    return (
       Math.round(paymentTotal() * 100) === Math.round(debitTotal() * 100) &&
       Math.round(debitTotal() * 100) === Math.round(creditTotal() * 100)
-  )
-  const linesComplete = createMemo(
-    () =>
-      !incompletePayments(paymentLines()) &&
-      !incompleteAccounts(debitLines()) &&
-      !incompleteAccounts(creditLines())
-  )
-  const canSubmit = createMemo(
-    () =>
-      (!props.voucherNumberRequired || voucherNo().trim()) &&
-      voucherDate().trim() &&
-      payee().trim() &&
-      bankName().trim() &&
-      paymentTotal() > 0 &&
-      linesComplete() &&
-      totalsMatch() &&
-      !props.pending
-  )
-
+    )
+  })
   const updatePayment = (index: number, field: keyof PaymentDraft, value: string) => {
     const nextValue = field === "amount" ? sanitizeMoneyInput(value) : value
     setPaymentLines(lines =>
@@ -201,7 +197,12 @@ export function CheckVoucherForm(props: CheckVoucherFormProps) {
     if (!voucherDate().trim()) next.voucherDate = "Date is required"
     if (!payee().trim()) next.payee = "Payee is required"
     if (!bankName().trim()) next.bankName = "Bank name is required"
-    if (paymentTotal() <= 0) next.paymentLines = "Add at least one payment item"
+    if (!paymentValues(paymentLines()).length)
+      next.paymentLines = "Add at least one complete payment item"
+    if (!accountValues(debitLines()).length)
+      next.debitLines = "Add at least one complete debit line"
+    if (!accountValues(creditLines()).length)
+      next.creditLines = "Add at least one complete credit line"
     if (incompletePayments(paymentLines()))
       next.paymentLines = "Complete or clear every payment item"
     if (incompleteAccounts(debitLines())) next.debitLines = "Complete or clear every debit line"
@@ -396,7 +397,7 @@ export function CheckVoucherForm(props: CheckVoucherFormProps) {
                 <div class="mt-6 space-y-3">
                   <Button
                     type="submit"
-                    disabled={!canSubmit()}
+                    disabled={props.pending}
                     size="sm"
                     class="w-full"
                     loading={props.pending}

@@ -100,22 +100,51 @@ test.describe("Finance — Check Vouchers", () => {
     await page.getByLabel("Credit line 1 amount").fill("900")
 
     await expect(page.getByText("Not balanced", { exact: true })).toBeVisible()
-    await expect(page.getByRole("button", { name: "Save Voucher" })).toBeDisabled()
+    await page.getByRole("button", { name: "Save Voucher" }).click()
+    await expect(
+      page.getByText("Payment, debit, and credit totals must match").first()
+    ).toBeVisible()
+    await expect(page).toHaveURL(/\/check-vouchers\/create$/)
   })
 
-  test("supports 20 lines in creation and Heart's edit form", async ({ page }) => {
+  test("creates a fully zero balanced voucher", async ({ page }) => {
+    const payee = `QA Zero Voucher ${Date.now()}`
+    await page.goto(`${FINANCE_URL}/check-vouchers/create`)
+    await waitForReady(page)
+
+    await page.getByLabel("Payee").fill(payee)
+    await page.getByLabel("Payment item 1 description").fill("Zero-value voucher")
+    await page.getByLabel("Payment item 1 amount").fill("0")
+    await page.getByLabel("Debit line 1 account").fill("Zero-value debit")
+    await page.getByLabel("Debit line 1 amount").fill("0")
+    await page.getByLabel("Credit line 1 amount").fill("0")
+
+    await expect(page.getByText("Balanced", { exact: true })).toBeVisible()
+    await page.getByRole("button", { name: "Save Voucher" }).click()
+    await expect(page).toHaveURL(/\/check-vouchers$/)
+
+    const list = await page.request.get(
+      `${API_URL}/api/finance/check-vouchers?search=${encodeURIComponent(payee)}`
+    )
+    const data = (await list.json()) as { items: Array<{ id: string; payee: string }> }
+    const created = data.items.find(item => item.payee === payee)
+    expect(created).toBeTruthy()
+    if (created) await page.request.delete(`${API_URL}/api/finance/check-vouchers/${created.id}`)
+  })
+
+  test("supports 15 lines in creation and Heart's edit form", async ({ page }) => {
     const suffix = String(Date.now())
     await loginAsAdmin(page, HEART_ADMIN)
     await page.goto(`${FINANCE_URL}/check-vouchers/create`)
     await waitForReady(page)
 
     const paymentAddButton = page.getByRole("button", { name: "Add line" }).nth(0)
-    for (let index = 1; index < 20; index += 1) await paymentAddButton.click()
-    await expect(page.getByLabel("Payment item 20 description")).toBeVisible()
+    for (let index = 1; index < 15; index += 1) await paymentAddButton.click()
+    await expect(page.getByLabel("Payment item 15 description")).toBeVisible()
     await expect(paymentAddButton).toBeDisabled()
-    await expect(page.getByText("Maximum 20 lines per section.")).toHaveCount(1)
+    await expect(page.getByText("Maximum 15 lines per section.")).toHaveCount(1)
 
-    const original = expandedVoucherPayload(suffix, 20)
+    const original = expandedVoucherPayload(suffix, 15)
     const create = await page.request.post(`${API_URL}/api/finance/check-vouchers`, {
       data: original,
     })
@@ -124,10 +153,10 @@ test.describe("Finance — Check Vouchers", () => {
 
     await page.goto(`${FINANCE_URL}/check-vouchers/${created.id}/edit`)
     await waitForReady(page)
-    await expect(page.getByLabel("Payment item 20 description")).toBeVisible()
-    await expect(page.getByLabel("Debit line 20 account")).toBeVisible()
-    await expect(page.getByLabel("Credit line 20 account")).toBeVisible()
-    await expect(page.getByText("Maximum 20 lines per section.")).toHaveCount(3)
+    await expect(page.getByLabel("Payment item 15 description")).toBeVisible()
+    await expect(page.getByLabel("Debit line 15 account")).toBeVisible()
+    await expect(page.getByLabel("Credit line 15 account")).toBeVisible()
+    await expect(page.getByText("Maximum 15 lines per section.")).toHaveCount(3)
     for (const button of await page.getByRole("button", { name: "Add line" }).all()) {
       await expect(button).toBeDisabled()
     }
@@ -141,9 +170,9 @@ test.describe("Finance — Check Vouchers", () => {
       debitLines: unknown[]
       creditLines: unknown[]
     }
-    expect(voucher.paymentLines).toHaveLength(20)
-    expect(voucher.debitLines).toHaveLength(20)
-    expect(voucher.creditLines).toHaveLength(20)
+    expect(voucher.paymentLines).toHaveLength(15)
+    expect(voucher.debitLines).toHaveLength(15)
+    expect(voucher.creditLines).toHaveLength(15)
     await page.request.delete(`${API_URL}/api/finance/check-vouchers/${created.id}`)
   })
 
