@@ -3,6 +3,7 @@ import type { CreateQueryResult } from "@tanstack/solid-query"
 import { createEffect, type JSX, Show } from "solid-js"
 import { PageLoading } from "../feedback/page-loading"
 import { Icons } from "../icons"
+import { resolveAuthGateState } from "./auth-gate-state"
 
 const DEFAULT_PORTAL_URL =
   typeof import.meta !== "undefined" && import.meta.env?.VITE_MAIN_PORTAL_URL
@@ -16,35 +17,42 @@ export interface AuthGateProps {
   /** URL of main portal for redirect on 401. Defaults to env var. */
   mainPortalUrl?: string
   allowedRoles?: readonly UserRole[]
+  /** Session resolved during SSR. When set, renders without waiting on userQuery. */
+  ssrUser?: CurrentUser | null
 }
 
 export function AuthGate(props: AuthGateProps) {
   const portal = () => props.mainPortalUrl ?? DEFAULT_PORTAL_URL
+
+  const state = () =>
+    resolveAuthGateState({
+      ssrUser: props.ssrUser,
+      isPending: props.userQuery.isPending,
+      isError: props.userQuery.isError,
+      data: props.userQuery.data,
+      allowedRoles: props.allowedRoles,
+    })
 
   // Reactive redirect: fires not only on initial 401 but also when the session
   // expires mid-use (refetch flips isError true). A bare top-of-body `if` would
   // only run once at mount and miss late expirations.
   createEffect(() => {
     if (typeof window === "undefined") return
-    if (!props.userQuery.isError) return
+    if (state() !== "redirect") return
     const returnTo = encodeURIComponent(window.location.href)
     window.location.href = `${portal()}/login?return=${returnTo}`
   })
 
-  const hasAccess = () =>
-    !props.allowedRoles ||
-    (!!props.userQuery.data && props.allowedRoles.includes(props.userQuery.data.role))
-
   return (
     <Show
-      when={!props.userQuery.isPending && !props.userQuery.isError}
+      when={state() !== "loading" && state() !== "redirect"}
       fallback={
         <div class="flex h-screen items-center justify-center">
           <PageLoading />
         </div>
       }
     >
-      <Show when={hasAccess()} fallback={<NoPortalAccess mainPortalUrl={portal()} />}>
+      <Show when={state() === "allowed"} fallback={<NoPortalAccess mainPortalUrl={portal()} />}>
         {props.children}
       </Show>
     </Show>

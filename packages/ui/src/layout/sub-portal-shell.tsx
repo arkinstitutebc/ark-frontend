@@ -1,4 +1,4 @@
-import { type UserRole, useCurrentUser } from "@ark/api-client"
+import { type CurrentUser, type UserRole, useCurrentUser } from "@ark/api-client"
 import type { JSX } from "solid-js"
 import { AuthGate } from "./auth-gate"
 import { SidebarProvider } from "./sidebar-context"
@@ -10,6 +10,8 @@ export interface SubPortalShellProps {
   topBar: JSX.Element
   children: JSX.Element
   allowedRoles?: readonly UserRole[]
+  /** Session resolved during SSR, passed through to AuthGate. */
+  ssrUser?: CurrentUser | null
 }
 
 /**
@@ -25,7 +27,7 @@ export interface SubPortalShellProps {
 export function SubPortalShell(props: SubPortalShellProps) {
   const userQuery = useCurrentUser()
   return (
-    <AuthGate userQuery={userQuery} allowedRoles={props.allowedRoles}>
+    <AuthGate userQuery={userQuery} allowedRoles={props.allowedRoles} ssrUser={props.ssrUser}>
       <SidebarProvider>
         {/* Outer overflow stays hidden vertically (so child scroll boundaries
             work) but allows horizontal overflow so the sidebar's mid-edge
