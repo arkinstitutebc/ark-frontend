@@ -60,6 +60,39 @@ ssh ark-api 'systemctl status ark-portal-* | grep -E "Memory|CPU"'
 
 `/etc/caddy/Caddyfile` on the VPS has reverse-proxy blocks for the portal subdomains. `forms.arkinstitutebc.com` points to the main portal service because public forms live in the main app. The blocks live in `infra/caddy/Caddyfile.portals` and are appended to `/etc/caddy/Caddyfile` during install. The pre-existing `api.arkinstitutebc.com` block (managed by `ark-services`) stays at the top of the file untouched.
 
+### Compression and asset caching
+
+Every portal block imports the `(portal_common)` snippet, which applies two
+directives:
+
+```caddyfile
+(portal_common) {
+	encode zstd gzip
+	header /assets/* >Cache-Control "public, max-age=31536000, immutable"
+}
+```
+
+`encode zstd gzip` — Caddy's Caddyfile ships **zstd and gzip encoders only**;
+there is no brotli encoder, so `encode zstd br gzip` will not parse. Caddy does
+not re-encode a response that already carries `Content-Encoding`, so Vike's
+own brotli on `/assets/*` is preserved and this only adds compression for SSR
+HTML. Measured on finance: 6139 → 2190 bytes.
+
+`header /assets/*` — Vike writes content-hashed filenames into `/assets/` but
+sets no cache headers, so browsers re-downloaded every asset on every
+navigation (17 assets / ~105 KB per finance load). The `>` defer flag applies
+the header after the proxy writes its own. Scoped to `/assets/*` deliberately:
+SSR HTML is per-user and must keep Vike's `no-store`.
+
+`api.arkinstitutebc.com` gets `encode zstd gzip` too, via
+`ark-services/scripts/setup-vps.sh`. Responses below Caddy's `minimum_length`
+default are left uncompressed, so `/api/health` (54 bytes) stays raw — that is
+expected.
+
+To roll back, restore a `/etc/caddy/Caddyfile.bak.*` and
+`systemctl reload caddy`. Always `caddy validate --config <file> --adapter
+caddyfile` before reloading.
+
 Install / refresh on the VPS:
 
 ```bash
