@@ -72,4 +72,5 @@ export {
   type UserRole,
   userRoles,
 } from "./rbac"
+export { resolveUserFromCookie, type SsrAuthResult } from "./ssr-auth"
 export { validateForm } from "./validate"
