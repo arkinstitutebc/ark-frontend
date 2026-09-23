@@ -3,11 +3,13 @@ import { AppToaster, CrossPortalLoadingOverlay, ThemeProvider, TopProgressBar } 
 import "@ark/design-system/globals.css"
 import "@fontsource-variable/montserrat"
 import type { JSX } from "solid-js"
+import { usePageContext } from "vike-solid/usePageContext"
 
 export function Layout(props: { children: JSX.Element }) {
+  const pageContext = usePageContext()
   return (
     <ThemeProvider>
-      <QueryProvider>
+      <QueryProvider session={pageContext.user}>
         <TopProgressBar />
         <CrossPortalLoadingOverlay />
         <AppToaster />

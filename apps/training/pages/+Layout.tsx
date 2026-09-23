@@ -17,7 +17,7 @@ export function Layout(props: { children: JSX.Element }) {
   const pageContext = usePageContext()
   return (
     <ThemeProvider>
-      <QueryProvider>
+      <QueryProvider session={pageContext.user}>
         <TopProgressBar />
         <CrossPortalLoadingOverlay />
         <AppToaster />

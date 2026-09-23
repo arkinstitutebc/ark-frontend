@@ -5,6 +5,8 @@ export default {
   extends: [vikeSolid],
   ssr: true,
   server: true,
+  // Expose the SSR-resolved session to the client.
+  passToClient: ["user", "authResolved"],
   // Global defaults (can be overridden per page)
   title: "Ark Institute Portal",
   description:

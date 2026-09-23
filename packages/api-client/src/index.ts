@@ -53,6 +53,7 @@ export {
   useMarkRead,
   useNotifications,
 } from "./notifications"
+export { isPublicPath } from "./public-paths"
 export {
   getPublicTrainingBatch,
   type PublicStudentEnrollmentInput,
