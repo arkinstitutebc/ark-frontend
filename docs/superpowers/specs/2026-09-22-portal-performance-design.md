@@ -218,3 +218,44 @@ anything touches auth.
   content-hashed filenames. Any future unhashed file under that path would be
   a problem.
 - Changing `packages/ui` rebuilds all 7 portals in CI.
+
+---
+
+## Follow-up work completed 2026-09-23
+
+### Transactions date filter
+
+Two behaviour issues found while fixing the 500, both pre-existing:
+
+- **End date excluded part of the final day.** `BETWEEN … AND '2026-09-23'`
+  resolves to midnight, dropping rows whose `transaction_date` is NULL and
+  whose `created_at` falls later that day. Replaced with
+  `>= start` / `< end + interval '1 day'`. Measured against production:
+  filtering to `endDate=2026-09-21` returned **474 rows before, 475 after** —
+  the old query was silently losing a real transaction.
+- **No date-format validation.** `startDate`/`endDate` were `z.string()`, so
+  `?startDate=banana` reached Postgres and produced a 500. Now
+  `z.string().date()`, which also rejects impossible dates like `2026-02-31`.
+  Verified the only frontend caller sends `YYYY-MM-DD`, so no regression.
+
+### `bun build` inlines NODE_ENV — three production branches were wrong
+
+Neither the CI deploy, `scripts/deploy-production.sh`, nor the `build` script
+set `NODE_ENV`, so **every** `process.env.NODE_ENV === "development"` check
+compiled to `true` in the shipped bundle:
+
+| Source | Shipped as | Impact |
+|---|---|---|
+| `middleware/auth.ts:18` dev bypass | `!token && true && DEV_BYPASS === "true"` | Auth bypass gated on `DEV_BYPASS` alone. **Inert only because `DEV_BYPASS` is unset in production.** |
+| `modules/auth/routes.ts:50` cookie | `secure: false` | Session cookie set without the `Secure` flag (HSTS mitigated it). |
+| `middleware/error.ts:178` | always `err.message` | Internal errors returned to clients — this is why the transactions `TypeError` surfaced in the browser. |
+
+Fixed by setting `NODE_ENV=production` in the `build` script itself (so every
+build path inherits it), plus explicitly in `deploy-production.sh` and the CI
+workflow. Verified in the deployed bundle: `DEV_BYPASS` is now **dead-code
+eliminated (0 occurrences)**, `"Internal server error"` is present, and the
+cookie compiles to `secure: true`.
+
+**Lesson for future work:** `bun build` substitutes `process.env.NODE_ENV` at
+build time. Any behaviour keyed off it is decided when the bundle is built,
+not when it runs.
