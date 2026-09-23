@@ -21,7 +21,8 @@ packages/                      shared, edit once
 │                              Modal / ModalFooter / ConfirmDialog, Input, Select, Button, BackLink,
 │                              AttachmentUploader, TutorialShell, AuthGate, QueryBoundary, createCrudHooks,
 │                              theme + categoryTone helpers, Icons (lucide-solid)
-├── api-client/                api(), useCurrentUser, useLogin, performLogout, queryClient, validateForm
+├── api-client/                api(), useCurrentUser, useLogin, performLogout, getQueryClient,
+│                              resolveUserFromCookie, validateForm
 ├── data-types/                Bank, Batch, Student, Transfer, PR, PO, RR, GlAccount, etc.
 └── design-system/             globals.css, Tailwind theme, semantic tokens
 ```
