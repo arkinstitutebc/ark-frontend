@@ -259,3 +259,35 @@ cookie compiles to `secure: true`.
 **Lesson for future work:** `bun build` substitutes `process.env.NODE_ENV` at
 build time. Any behaviour keyed off it is decided when the bundle is built,
 not when it runs.
+
+### QueryClient was shared across SSR requests (fixed 2026-09-23)
+
+`packages/api-client/src/query-client.ts` exported a module-level
+`new QueryClient()`. TanStack's own SSR guide names this exact pattern:
+
+> NEVER DO THIS ON THE SERVER … Creating the queryClient at the module root
+> level makes the cache shared between all requests and means *all* data gets
+> passed to *all* users. Besides being bad for performance, this also leaks
+> any sensitive data.
+
+Replaced with the documented `makeQueryClient()` / `getQueryClient()` pair:
+a fresh client per request when `isServer`, a reused singleton in the browser.
+`QueryProvider` now calls `getQueryClient()`.
+
+Covered by 5 tests in `query-client.test.ts`. Note that bun resolves
+`solid-js/web` to its **server** build, so `isServer` is `true` under test —
+the suite therefore exercises the SSR branch, which is the one that matters.
+
+Also removed 12 dead files (`apps/*/data/query-client.ts` and
+`query-provider.tsx` across six portals). Every layout imports `QueryProvider`
+from `@ark/api-client`; those per-app copies were never referenced and only
+re-exported the unsafe singleton.
+
+Verified after deploy: interleaved SSR requests from different users return
+their own data, and all 7 portals plus the public form routes are healthy.
+
+### NODE_ENV audit of ark-frontend — clean
+
+Checked for the same build-time inlining class that affected the backend.
+`ark-frontend` has **no** `process.env.NODE_ENV`, `import.meta.env.MODE`,
+`.DEV` or `.PROD` usages in application code. Nothing to fix.
