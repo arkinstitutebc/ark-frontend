@@ -59,7 +59,7 @@ export {
   submitPublicStudentEnrollment,
   uploadPublicStudentFile,
 } from "./public-training"
-export { queryClient } from "./query-client"
+export { getQueryClient, makeQueryClient } from "./query-client"
 export { QueryProvider } from "./query-provider"
 export {
   hasPortalAccess,
