@@ -27,10 +27,3 @@ export function formatDatePH(date: string | Date | null | undefined): string {
     year: "numeric",
   })
 }
-
-export function formatMonthYear(date: string | Date | null | undefined): string {
-  if (!date) return "—"
-  const d = typeof date === "string" ? new Date(date) : date
-  if (Number.isNaN(d.getTime())) return "—"
-  return d.toLocaleDateString("en-US", { month: "long", year: "numeric" })
-}

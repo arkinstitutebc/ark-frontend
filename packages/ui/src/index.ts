@@ -4,8 +4,8 @@
  * **Architecture**: Files are organized by concern under `packages/ui/src/`:
  *   - `forms/` — interactive form controls (Button, Input, Select, Textarea)
  *   - `display/` — small visual primitives (Card, RolePill, StatusBadge, NotificationBell)
- *   - `feedback/` — loading + status overlays (Modal, AppToaster, EmptyState,
- *     PageLoading, TopProgressBar, TableSkeleton, QueryBoundary)
+ *   - `feedback/` — loading + status overlays (Modal, AppToaster, PageLoading,
+ *     TopProgressBar, TableSkeleton, QueryBoundary)
  *   - `layout/` — page structure (Sidebar, TopBar, PortalTopBar, SubPortalShell, AuthGate)
  *   - `theme/` — ThemeProvider, ThemeToggle, NO_FOUC_SCRIPT
  *   - `icons.tsx`, `utils.ts` — primitives
@@ -59,7 +59,6 @@ export { AppToaster, toast } from "./feedback/app-toaster"
 export { AvatarCropper, type AvatarCropperProps } from "./feedback/avatar-cropper"
 export { ConfirmDialog, type ConfirmDialogProps } from "./feedback/confirm-dialog"
 export { CrossPortalLoadingOverlay } from "./feedback/cross-portal-loading-overlay"
-export { EmptyState, type EmptyStateProps } from "./feedback/empty-state"
 export { Modal } from "./feedback/modal"
 export { ModalFooter, modalFooterClass, modalFooterShellClass } from "./feedback/modal-footer"
 export { PageLoading } from "./feedback/page-loading"
@@ -74,7 +73,6 @@ export {
 } from "./forms/attachment-uploader"
 export { Button } from "./forms/button"
 export { Field, type FieldProps, fieldInputClass } from "./forms/field"
-export { FormSection, type FormSectionProps } from "./forms/form-section"
 export { formErrorClass, formInputClass, formLabelClass } from "./forms/form-styles"
 export { DateInput, Input, Textarea } from "./forms/input"
 export {
@@ -124,7 +122,7 @@ export {
   formatCostType,
   formatExpenseCategory,
 } from "./utils/classification-labels"
-export { formatDatePH, formatMonthYear, formatPeso } from "./utils/format"
+export { formatDatePH, formatPeso } from "./utils/format"
 export {
   categoryTone,
   categoryToneClass,
