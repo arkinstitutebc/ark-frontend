@@ -5,6 +5,8 @@ export default {
   extends: [vikeSolid],
   ssr: true,
   server: true,
+  // Expose the SSR-resolved session so AuthGate renders without waiting on /me.
+  passToClient: ["user", "authResolved"],
   title: "Training | Ark Institute",
   description: "Manage training batches and student enrollments",
 } satisfies Config
