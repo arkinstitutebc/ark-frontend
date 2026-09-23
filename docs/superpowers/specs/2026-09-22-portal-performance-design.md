@@ -128,36 +128,53 @@ genuinely public routes — `/login`, plus `/forms/student/@batchId` and
 `+guard.ts` there would break public student enrollment. Giving `main` the
 same treatment needs its own design and is not covered by this spec.
 
-### 3. Lazy exceljs
+### 3. Lazy exceljs — no change needed (verified 2026-09-23)
 
-`chunk-C4zoc1yC.js` is 938 KB raw / 218 KB brotli (exceljs + jszip) and is
-already code-split to the P&L page. Move it behind a dynamic `import()` fired
-on export click so visiting P&L does not pay for it.
+`chunk-C4zoc1yC.js` is 938 KB raw / 218 KB brotli (exceljs + jszip). The spec
+assumed it loaded on page view; it does not. `pages/pnl/+Page.tsx:47` already
+uses `await import("exceljs/dist/exceljs.min.js")` inside the export handler.
 
-### 4. Logging
+Verified in the build output and end to end:
+- the chunk is **not** among the pnl entry's static imports
+- it is reached via `import("../chunks/chunk-C4zoc1yC.js")` with an empty
+  Vite preload-deps array
+- serving `/pnl` to an authenticated user returns HTML with **zero**
+  references to the chunk (14 assets, none of them exceljs)
 
-`src/lib/logger.ts` constructs pino with no `level` option, so it defaults to
-`info` — and pino does **not** read `LOG_LEVEL` on its own. `pino-http` then
-writes full request and response header objects for every request. Journald
-now holds **3.9 GB** spanning 2026-05-14 to 2026-09-22, large enough that
-`journalctl` queries time out.
+The earlier inference came from the entry *referencing* the chunk, which is
+just the dynamic-import mapping. No work required.
 
-Setting an env var alone therefore fixes nothing. This needs a code change:
-make the level configurable and stop serializing full headers.
+### 4. Logging — root cause was worse than described (fixed 2026-09-23)
 
-```ts
-export const logger = pino({
-  level: process.env.LOG_LEVEL ?? "info",
-  transport: ...
-})
+The spec blamed verbose `pino-http` serialisers. That was real but secondary.
+
+`bun build` **inlines `process.env.NODE_ENV` at build time**, and neither the
+CI deploy nor `scripts/deploy-production.sh` sets it for the build step. The
+ternary in `src/lib/logger.ts` therefore collapsed to its development branch
+and the production bundle shipped with pino-pretty hardcoded:
+
+```js
+var logger = import_pino.default({ transport: { target: "pino-pretty", options: { colorize: true } } });
 ```
 
-plus `pino-http` serializers that log method, url and status rather than the
-whole header object. Then set `LOG_LEVEL=warn` in the production `.env`.
+Production had been writing multi-line ANSI-coloured logs instead of JSON,
+and paying pino-pretty's cost on every request. That, not the headers, drove
+journald to 4.0 GB.
 
-This is disk hygiene and log usability, not latency — the logging is not on
-the critical path. Listed here because it was found during inspection and it
-is actively blocking production diagnostics.
+Fixes applied:
+- `logger.ts` keys pretty output off an explicit `LOG_PRETTY` flag that bun
+  does not substitute, so the decision is made at runtime. `bun run dev` sets
+  `LOG_PRETTY=true`; production leaves it unset.
+- `logger.ts` reads `LOG_LEVEL` (pino does not do this on its own).
+- `app.ts` trims the `pino-http` req/res serialisers to method, url and
+  status.
+- journald gained `SystemMaxUse=500M` / `SystemKeepFree=1G`, so it cannot
+  silently regrow.
+
+Result: one request log went from a multi-line coloured block with ~25 header
+fields to a single 192-byte JSON line. Journal vacuumed 4.0 GB → 483 MB, and
+a 7-day `journalctl` aggregation that previously exceeded a 120 s timeout now
+finishes in ~11 s.
 
 ### 5. Documentation drift
 
