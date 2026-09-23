@@ -121,12 +121,19 @@ Shared logic lives in one module exported from `@ark/api-client`; each app's
   is request-scoped and safe. Any future work on that fallback must first make
   the QueryClient per-request.
 
-**The `main` portal is deliberately excluded from this pattern.** Unlike the
-six sub-portals it has no `SubPortalShell`, handles auth per-page, and serves
-genuinely public routes — `/login`, plus `/forms/student/@batchId` and
-`/student/@batchId`, which back `forms.arkinstitutebc.com`. A blanket
-`+guard.ts` there would break public student enrollment. Giving `main` the
-same treatment needs its own design and is not covered by this spec.
+**The `main` portal was initially excluded and has since been completed
+(2026-09-23).** It has no `SubPortalShell` and authenticates per-page, and it
+serves genuinely public routes, so a blanket guard would have broken public
+student enrolment. Its `+guard.ts` therefore uses a public-prefix allowlist
+(`/login`, `/forms`, `/student`, `/_error`) and treats everything else as
+private — a new page is guarded by accident rather than exposed by accident.
+
+The matching helper, `isPublicPath()`, lives in `@ark/api-client` with 7 tests,
+including the segment-boundary case that stops `/loginsomething` being served
+anonymously.
+
+Verified in production: `/login`, `/forms/student/…` and `/student/…` return
+200; `/`, `/profile`, `/learn` and `/admin/users` return 302 to `/login`.
 
 ### 3. Lazy exceljs — no change needed (verified 2026-09-23)
 
