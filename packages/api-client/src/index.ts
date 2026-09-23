@@ -22,12 +22,14 @@ export {
 export { API_URL, api } from "./api"
 export {
   type CurrentUser,
+  type LoginCredentials,
+  loginRedirectTarget,
+  performLogin,
   performLogout,
   requestPasswordReset,
   type UpdateMeInput,
   useChangePassword,
   useCurrentUser,
-  useLogin,
   useUpdateMe,
   useUploadAvatar,
 } from "./auth"

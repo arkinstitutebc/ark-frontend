@@ -1,6 +1,16 @@
-import { requestPasswordReset } from "@ark/api-client"
+import { loginRedirectTarget, performLogin, requestPasswordReset } from "@ark/api-client"
 import { createSignal, For, onCleanup, onMount } from "solid-js"
 import { Button, Input, UI } from "@/components/ui"
+
+const PORTAL_ORIGINS = [
+  import.meta.env.VITE_MAIN_PORTAL_URL,
+  import.meta.env.VITE_TRAINING_PORTAL_URL,
+  import.meta.env.VITE_PROCUREMENT_PORTAL_URL,
+  import.meta.env.VITE_INVENTORY_PORTAL_URL,
+  import.meta.env.VITE_FINANCE_PORTAL_URL,
+  import.meta.env.VITE_BILLING_PORTAL_URL,
+  import.meta.env.VITE_HR_PORTAL_URL,
+].filter((url): url is string => !!url)
 
 const collageImages = [
   {
@@ -100,33 +110,11 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || "http://localhost:4000"
-      const res = await fetch(`${apiUrl}/api/auth/login`, {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email().trim(), password: password() }),
-      })
+      const user = await performLogin({ email: email().trim(), password: password() })
 
-      if (!res.ok) {
-        const body = await res.json().catch(() => ({}))
-        throw new Error(body.error || "Invalid credentials")
-      }
-
-      const user = await res.json().catch(() => ({}))
-
-      // Honor ?return= query (e.g., from sub-portal AuthGate redirect)
-      // unless the user must change their password — that takes priority
-      const params = new URLSearchParams(window.location.search)
-      const returnTo = params.get("return")
-
-      if (user.mustChangePassword) {
-        window.location.href = "/profile?required=1"
-      } else if (returnTo) {
-        window.location.href = returnTo
-      } else {
-        window.location.href = "/"
-      }
+      // `?return=` (set by a sub-portal's AuthGate) is only honoured for known
+      // portal origins — see loginRedirectTarget.
+      window.location.href = loginRedirectTarget(user, window.location.search, PORTAL_ORIGINS)
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed")
     } finally {

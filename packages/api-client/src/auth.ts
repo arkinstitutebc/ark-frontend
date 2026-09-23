@@ -35,18 +35,56 @@ export function useCurrentUser() {
   }))
 }
 
-export function useLogin() {
-  const qc = useQueryClient()
-  return createMutation(() => ({
-    mutationFn: (data: { email: string; password: string }) =>
-      api<CurrentUser>("/api/auth/login", {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["auth"] })
-    },
-  }))
+export interface LoginCredentials {
+  email: string
+  password: string
+}
+
+/** POSTs /api/auth/login. The session arrives as an httpOnly cookie. */
+export function performLogin(credentials: LoginCredentials) {
+  return api<CurrentUser>("/api/auth/login", {
+    method: "POST",
+    body: JSON.stringify(credentials),
+  })
+}
+
+/**
+ * Where to send someone straight after a successful login.
+ *
+ * `?return=` is attacker-controllable — AuthGate puts the user's previous URL
+ * there — so it is only honoured when it resolves to a known portal origin or
+ * a relative path. Anything else falls back to the dashboard rather than
+ * bouncing a freshly authenticated user to a site someone else controls.
+ */
+export function loginRedirectTarget(
+  user: { mustChangePassword?: boolean },
+  search: string,
+  allowedOrigins: readonly string[]
+): string {
+  if (user.mustChangePassword) return "/profile?required=1"
+
+  const requested = new URLSearchParams(search).get("return")
+  if (!requested) return "/"
+
+  // A relative path stays on this origin. Reject "//host" — the browser reads
+  // that as protocol-relative and leaves the site.
+  if (requested.startsWith("/") && !requested.startsWith("//")) return requested
+
+  let url: URL
+  try {
+    url = new URL(requested)
+  } catch {
+    return "/"
+  }
+
+  const allowed = allowedOrigins.some(origin => {
+    try {
+      return new URL(origin).origin === url.origin
+    } catch {
+      return false
+    }
+  })
+  return allowed ? url.href : "/"
 }
 
 /** POSTs /api/auth/logout, then redirects to {mainPortalUrl}/login. */
