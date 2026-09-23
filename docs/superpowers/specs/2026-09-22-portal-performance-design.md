@@ -102,12 +102,31 @@ across 7 servers, at a cost of 4 ms.
 Shared logic lives in one module exported from `@ark/api-client`; each app's
 `+onCreatePageContext.server.ts` is a thin re-export rather than 7 copies.
 
-**Open item to verify during implementation, not assume:** Vike's docs note
-that `passToClient` containing `user` can trigger a `pageContext.json`
-request on client-side navigation. This must be measured on finance before
-rollout. If it adds a round trip to SPA navigation, fall back to seeding the
-TanStack cache from SSR and keeping `useCurrentUser()` as the client-side
-source of truth.
+**Resolved during implementation (2026-09-23):**
+
+- *Cross-origin `redirect()` from a Vike guard* — **works**. Verified locally
+  and in production: an unauthenticated request to any sub-portal returns
+  `302` with `location: https://portal.arkinstitutebc.com/login`. The
+  documented fallback was not needed.
+- *`pageContext.json` on SPA navigation* — **it does fire**, ~423 B per
+  client-side navigation. Accepted rather than reverted: the initial-load win
+  is large and user-confirmed, and the request is small. The documented
+  fallback (seed the TanStack cache, drop `user` from `passToClient`) is
+  **not viable as written** — see below.
+- *Seeding the TanStack cache from SSR is unsafe.* `packages/api-client/src/query-client.ts`
+  exports a **module-level singleton** `QueryClient`, shared across every
+  request on the server. Calling `setQueryData(["auth","me"], user)` during
+  SSR would leak one user's session into another user's response. The
+  implementation passes `ssrUser` through `pageContext` props instead, which
+  is request-scoped and safe. Any future work on that fallback must first make
+  the QueryClient per-request.
+
+**The `main` portal is deliberately excluded from this pattern.** Unlike the
+six sub-portals it has no `SubPortalShell`, handles auth per-page, and serves
+genuinely public routes — `/login`, plus `/forms/student/@batchId` and
+`/student/@batchId`, which back `forms.arkinstitutebc.com`. A blanket
+`+guard.ts` there would break public student enrollment. Giving `main` the
+same treatment needs its own design and is not covered by this spec.
 
 ### 3. Lazy exceljs
 
