@@ -1,5 +1,7 @@
 # Cross-Repo Audit — 2026-09-23
 
+**Status:** Completed 2026-09-23. All findings fixed, shipped and verified in production.
+
 Seven sweeps over `ark-services` and `ark-frontend`, each targeting a bug class
 actually hit during the performance work rather than a generic checklist.
 

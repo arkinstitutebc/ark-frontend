@@ -10,6 +10,29 @@
 
 **Spec:** `docs/superpowers/specs/2026-09-22-portal-performance-design.md`
 
+---
+
+## STATUS: COMPLETE (2026-09-23)
+
+All tasks shipped and verified in production. Three deviated from the plan as
+written — recorded here because the plan was wrong, not the execution:
+
+| Task | Outcome |
+|---|---|
+| 1 Caddy compression + immutable caching | done. `encode zstd gzip` — Caddy has no brotli encoder, so `encode zstd br gzip` (as first drafted) would not parse. |
+| 2 SSR auth resolver | done, 7 tests. |
+| 3 AuthGate accepts `ssrUser` | done, but **not** via the planned render test — this repo has no DOM test setup, so the decision was extracted into a pure `resolveAuthGateState()` with 11 tests instead of adding two devDependencies. |
+| 4 SSR auth on finance | done. Cross-origin `redirect()` works (the plan flagged it as unverified). `passToClient` **does** add a `pageContext.json` request per SPA navigation — accepted, since the documented fallback turned out to be unsafe until the QueryClient was made per-request. |
+| 5 Roll out to remaining portals | done — six sub-portals, then `main` separately with a public-prefix allowlist. |
+| 6 Lazy exceljs | **no change needed.** The plan's premise was wrong: it was already behind a dynamic `import()` in the export handler. Verified three ways. |
+| 7 pino logging | done, and the root cause was worse than described — `bun build` inlines `NODE_ENV`, so production shipped with pino-pretty hardcoded. `LOG_LEVEL=warn` was **not** set: that would have silenced request logs, and fixing the format made volume a non-issue. |
+| 8 Documentation drift | done, plus further drift found later (a documented login rate limit that did not exist, and a deploy script pointing at an unresolvable host). |
+
+Work found during execution that was not in this plan is recorded in
+`../specs/2026-09-23-backend-audit.md` and both repos' changelogs.
+
+---
+
 ## Global Constraints
 
 - **Caddy `encode` supports `zstd` and `gzip` only.** Brotli is not a Caddyfile encoder. Never write `encode zstd br gzip` — it will not parse.
@@ -36,7 +59,7 @@ measure this before anything touches auth.
 - Consumes: nothing.
 - Produces: `Cache-Control: public, max-age=31536000, immutable` on `/assets/*` and `Content-Encoding: zstd|gzip` on SSR HTML and API JSON.
 
-- [ ] **Step 1: Capture the "before" baseline**
+- [x] **Step 1: Capture the "before" baseline**
 
 The measurement script already exists from the inspection. Recreate it and
 record the numbers so the improvement is provable:
@@ -73,7 +96,7 @@ curl -s -o /dev/null -w 'raw=%{size_download}\n' https://finance.arkinstitutebc.
 
 Expected before: both identical (6087).
 
-- [ ] **Step 2: Back up the live Caddyfile (this is the rollback)**
+- [x] **Step 2: Back up the live Caddyfile (this is the rollback)**
 
 ```bash
 ssh ark-api 'cp /etc/caddy/Caddyfile /etc/caddy/Caddyfile.bak.$(date +%Y%m%d%H%M%S) && ls -la /etc/caddy/'
@@ -82,7 +105,7 @@ ssh ark-api 'cp /etc/caddy/Caddyfile /etc/caddy/Caddyfile.bak.$(date +%Y%m%d%H%M
 Rollback at any point is `cp` that file back plus `systemctl reload caddy` —
 seconds, no git, no rebuild.
 
-- [ ] **Step 3: Update the repo source of truth for portals**
+- [x] **Step 3: Update the repo source of truth for portals**
 
 Every block in `ark-frontend/infra/caddy/Caddyfile.portals` gains two lines.
 Full file:
@@ -152,7 +175,7 @@ hr.arkinstitutebc.com {
 A Caddyfile snippet (`(name)` + `import`) keeps the two directives defined
 once rather than repeated eight times.
 
-- [ ] **Step 4: Update the API block generator**
+- [x] **Step 4: Update the API block generator**
 
 In `ark-services/scripts/setup-vps.sh`, the heredoc at line 162 becomes:
 
@@ -168,7 +191,7 @@ EOF
 This only affects fresh VPS bootstraps. The running server is edited in
 Step 5.
 
-- [ ] **Step 5: Apply to the live server and validate BEFORE reloading**
+- [x] **Step 5: Apply to the live server and validate BEFORE reloading**
 
 `caddy validate` is the gate — a malformed Caddyfile must never reach a
 reload.
@@ -180,7 +203,7 @@ ssh ark-api 'caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile'
 Expected: `Valid configuration`. If it fails, fix the file; nothing has
 changed yet because reload has not run.
 
-- [ ] **Step 6: Reload Caddy**
+- [x] **Step 6: Reload Caddy**
 
 ```bash
 ssh ark-api 'systemctl reload caddy && systemctl is-active caddy'
@@ -188,7 +211,7 @@ ssh ark-api 'systemctl reload caddy && systemctl is-active caddy'
 
 Expected: `active`. Reload is graceful — in-flight requests are not dropped.
 
-- [ ] **Step 7: Measure the "after" and confirm the win**
+- [x] **Step 7: Measure the "after" and confirm the win**
 
 ```bash
 bash /tmp/wf.sh https://finance.arkinstitutebc.com /
@@ -210,7 +233,7 @@ curl -sI -H 'Accept-Encoding: br' https://finance.arkinstitutebc.com/assets/stat
 
 Expected: still `br`.
 
-- [ ] **Step 8: Verify all 7 portals still serve**
+- [x] **Step 8: Verify all 7 portals still serve**
 
 ```bash
 for h in portal training procurement inventory finance billing hr; do
@@ -221,7 +244,7 @@ done
 
 Expected: `200` for all seven.
 
-- [ ] **Step 9: Commit (two repos, scoped separately)**
+- [x] **Step 9: Commit (two repos, scoped separately)**
 
 ```bash
 cd ark-frontend
@@ -258,7 +281,7 @@ must redirect. A network failure means *unknown* — the API being briefly
 unreachable must not log every user out. On `unknown` the page renders and
 the existing client-side `AuthGate` decides, exactly as it does today.
 
-- [ ] **Step 1: Write the failing tests**
+- [x] **Step 1: Write the failing tests**
 
 Create `packages/api-client/src/ssr-auth.test.ts`:
 
@@ -326,7 +349,7 @@ describe("resolveUserFromCookie()", () => {
 })
 ```
 
-- [ ] **Step 2: Run the tests and confirm they fail**
+- [x] **Step 2: Run the tests and confirm they fail**
 
 ```bash
 cd ark-frontend && bun test packages/api-client/src/ssr-auth.test.ts
@@ -334,7 +357,7 @@ cd ark-frontend && bun test packages/api-client/src/ssr-auth.test.ts
 
 Expected: FAIL — cannot resolve module `./ssr-auth`.
 
-- [ ] **Step 3: Implement the module**
+- [x] **Step 3: Implement the module**
 
 Create `packages/api-client/src/ssr-auth.ts`:
 
@@ -377,7 +400,7 @@ export async function resolveUserFromCookie(
 }
 ```
 
-- [ ] **Step 4: Run the tests and confirm they pass**
+- [x] **Step 4: Run the tests and confirm they pass**
 
 ```bash
 cd ark-frontend && bun test packages/api-client/src/ssr-auth.test.ts
@@ -385,7 +408,7 @@ cd ark-frontend && bun test packages/api-client/src/ssr-auth.test.ts
 
 Expected: 5 pass.
 
-- [ ] **Step 5: Export from the package barrel**
+- [x] **Step 5: Export from the package barrel**
 
 Add to `packages/api-client/src/index.ts`, keeping the existing alphabetical
 export-block ordering (place it after the `./rbac` block, before `./validate`):
@@ -394,7 +417,7 @@ export-block ordering (place it after the `./rbac` block, before `./validate`):
 export { resolveUserFromCookie, type SsrAuthResult } from "./ssr-auth"
 ```
 
-- [ ] **Step 6: Run lint, typecheck and the full unit suite**
+- [x] **Step 6: Run lint, typecheck and the full unit suite**
 
 ```bash
 cd ark-frontend && bunx biome check . && bun run test:unit && bun run --filter '*' typecheck
@@ -402,7 +425,7 @@ cd ark-frontend && bunx biome check . && bun run test:unit && bun run --filter '
 
 Expected: all pass.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add packages/api-client/src/ssr-auth.ts packages/api-client/src/ssr-auth.test.ts packages/api-client/src/index.ts
@@ -431,7 +454,7 @@ Semantics of `ssrUser`:
 - `CurrentUser` → render immediately, no pending state, no spinner.
 - `null` or omitted → today's behavior: wait on `userQuery`.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 Create `packages/ui/src/layout/auth-gate.test.tsx`. This asserts the one
 behavior that matters — that a server-resolved user removes the loading
@@ -481,7 +504,7 @@ describe("AuthGate", () => {
 })
 ```
 
-- [ ] **Step 2: Run it and confirm it fails**
+- [x] **Step 2: Run it and confirm it fails**
 
 ```bash
 cd ark-frontend && bun test packages/ui/src/layout/auth-gate.test.tsx
@@ -489,7 +512,7 @@ cd ark-frontend && bun test packages/ui/src/layout/auth-gate.test.tsx
 
 Expected: FAIL — `ssrUser` is not a known prop, first assertion fails.
 
-- [ ] **Step 3: Implement in auth-gate.tsx**
+- [x] **Step 3: Implement in auth-gate.tsx**
 
 Add `ssrUser` to the props interface:
 
@@ -541,7 +564,7 @@ effect when SSR already proved the session:
   )
 ```
 
-- [ ] **Step 4: Thread ssrUser through SubPortalShell**
+- [x] **Step 4: Thread ssrUser through SubPortalShell**
 
 In `packages/ui/src/layout/sub-portal-shell.tsx`, add `ssrUser?: CurrentUser | null`
 to its props and forward it:
@@ -552,7 +575,7 @@ to its props and forward it:
 
 Import the type: `import type { CurrentUser } from "@ark/api-client"`.
 
-- [ ] **Step 5: Run the tests and confirm they pass**
+- [x] **Step 5: Run the tests and confirm they pass**
 
 ```bash
 cd ark-frontend && bun test packages/ui/src/layout/auth-gate.test.tsx
@@ -562,13 +585,13 @@ Expected: 2 pass. If the Solid render helper does not work under `bun test`
 in this repo, check how `packages/ui/src/data/create-crud-hooks.test.ts`
 sets up its environment and match that pattern rather than inventing a new one.
 
-- [ ] **Step 6: Full checks**
+- [x] **Step 6: Full checks**
 
 ```bash
 cd ark-frontend && bunx biome check . && bun run test:unit && bun run --filter '*' typecheck
 ```
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add packages/ui/src/layout/auth-gate.tsx packages/ui/src/layout/sub-portal-shell.tsx packages/ui/src/layout/auth-gate.test.tsx
@@ -594,7 +617,7 @@ The first task that changes real behavior, on one portal, so the open
 - Consumes: `resolveUserFromCookie`, `SsrAuthResult` (Task 2); `SubPortalShellProps.ssrUser` (Task 3).
 - Produces: `pageContext.user: CurrentUser | null` on every finance page, passed to the client.
 
-- [ ] **Step 1: Add the server-side context hook**
+- [x] **Step 1: Add the server-side context hook**
 
 Create `apps/finance/pages/+onCreatePageContext.server.ts`:
 
@@ -620,7 +643,7 @@ declare global {
 }
 ```
 
-- [ ] **Step 2: Add the route guard**
+- [x] **Step 2: Add the route guard**
 
 Create `apps/finance/pages/+guard.ts`. It redirects only when SSR is
 *certain* the visitor is logged out — `authResolved === false` falls through
@@ -652,7 +675,7 @@ If Vike refuses a cross-origin redirect, drop `+guard.ts` and let `AuthGate`
 handle the redirect client-side as it does today — the SSR speedup in Step 3
 does not depend on the guard.
 
-- [ ] **Step 3: Expose the user to the client**
+- [x] **Step 3: Expose the user to the client**
 
 Modify `apps/finance/pages/+config.ts`:
 
@@ -670,7 +693,7 @@ export default {
 } satisfies Config
 ```
 
-- [ ] **Step 4: Consume it in the layout**
+- [x] **Step 4: Consume it in the layout**
 
 Modify `apps/finance/pages/+Layout.tsx` to read `pageContext` and pass the
 user down:
@@ -696,7 +719,7 @@ then on the shell:
         >
 ```
 
-- [ ] **Step 5: Build and preview locally**
+- [x] **Step 5: Build and preview locally**
 
 ```bash
 cd ark-frontend/apps/finance && bun run build && bun run preview
@@ -707,13 +730,13 @@ Expected: build succeeds. The preview server needs a reachable API at
 `status: "unknown"` and the old client-side behavior — which is itself the
 correct fallback and worth confirming.
 
-- [ ] **Step 6: Full checks**
+- [x] **Step 6: Full checks**
 
 ```bash
 cd ark-frontend && bunx biome check . && bun run test:unit && bun run --filter '*' typecheck
 ```
 
-- [ ] **Step 7: Commit and push finance only**
+- [x] **Step 7: Commit and push finance only**
 
 ```bash
 git add apps/finance/pages/
@@ -724,7 +747,7 @@ git push origin main
 CI runs biome, unit tests and typecheck, then rebuilds finance only
 (`apps/finance/**` is not a `packages/**` change) and health-checks all 7.
 
-- [ ] **Step 8: Verify in production**
+- [x] **Step 8: Verify in production**
 
 ```bash
 curl -s -o /dev/null -w 'ttfb=%{time_starttransfer} code=%{http_code}\n' https://finance.arkinstitutebc.com/
@@ -759,7 +782,7 @@ business day.
 - Consumes: everything from Tasks 2–4.
 - Produces: identical SSR auth behavior across all 7.
 
-- [ ] **Step 1: Copy the finance files into each app**
+- [x] **Step 1: Copy the finance files into each app**
 
 The three files are identical across apps except `+config.ts`, which keeps
 each app's own `title` and `description`, and `+Layout.tsx`, which keeps each
@@ -786,13 +809,13 @@ export function guard(pageContext: PageContextServer) {
 Confirm the real public route list against `apps/main/pages/` before writing
 this — do not assume those three paths.
 
-- [ ] **Step 2: Full checks**
+- [x] **Step 2: Full checks**
 
 ```bash
 cd ark-frontend && bunx biome check . && bun run test:unit && bun run --filter '*' typecheck
 ```
 
-- [ ] **Step 3: Commit and push**
+- [x] **Step 3: Commit and push**
 
 ```bash
 git add apps/
@@ -800,7 +823,7 @@ git commit -m "perf(portals): resolve session during ssr across remaining portal
 git push origin main
 ```
 
-- [ ] **Step 4: Verify all seven**
+- [x] **Step 4: Verify all seven**
 
 ```bash
 for h in portal training procurement inventory finance billing hr; do
@@ -829,7 +852,7 @@ P&L pays for it even without exporting.
 - Consumes: nothing from earlier tasks.
 - Produces: no exceljs in the P&L entry chunk.
 
-- [ ] **Step 1: Record the current chunk graph**
+- [x] **Step 1: Record the current chunk graph**
 
 ```bash
 cd ark-frontend/apps/finance && bun run build
@@ -846,7 +869,7 @@ for f in dist/client/assets/chunks/*.js; do
 done
 ```
 
-- [ ] **Step 2: Move the runtime import inside the export handler**
+- [x] **Step 2: Move the runtime import inside the export handler**
 
 `apps/finance/pages/pnl/+Page.tsx:3` already imports only a type
 (`import type { Cell } from "exceljs"`), which is erased at build time and is
@@ -861,7 +884,7 @@ into the export click handler:
   }
 ```
 
-- [ ] **Step 3: Rebuild and confirm the chunk left the entry**
+- [x] **Step 3: Rebuild and confirm the chunk left the entry**
 
 ```bash
 cd ark-frontend/apps/finance && bun run build
@@ -871,13 +894,13 @@ grep -l "jszip" dist/client/assets/entries/*.js || echo "OK: exceljs no longer i
 Expected: `OK: exceljs no longer in any entry`. The chunk still exists — it is
 now fetched on click instead of on page load.
 
-- [ ] **Step 4: Verify the export still works**
+- [x] **Step 4: Verify the export still works**
 
 Run the portal locally, open P&L, click export, and confirm the downloaded
 `.xlsx` opens with the expected rows. This is a user-visible feature; a build
 check alone is not sufficient.
 
-- [ ] **Step 5: Full checks and commit**
+- [x] **Step 5: Full checks and commit**
 
 ```bash
 cd ark-frontend && bunx biome check . && bun run test:unit && bun run --filter '*' typecheck
@@ -904,7 +927,7 @@ blocks production diagnostics.
 - Consumes: nothing.
 - Produces: `logger` honouring `LOG_LEVEL`; request logs carrying method, url and status rather than full header objects.
 
-- [ ] **Step 1: Make the level configurable**
+- [x] **Step 1: Make the level configurable**
 
 `src/lib/logger.ts` currently passes no `level`, so pino defaults to `info`
 and does **not** read `LOG_LEVEL` on its own:
@@ -919,7 +942,7 @@ export const logger = pino({
 });
 ```
 
-- [ ] **Step 2: Trim the request serializers**
+- [x] **Step 2: Trim the request serializers**
 
 In `src/app.ts:35`, replace `app.use(pinoHttp({ logger }))` with:
 
@@ -935,7 +958,7 @@ In `src/app.ts:35`, replace `app.use(pinoHttp({ logger }))` with:
 	);
 ```
 
-- [ ] **Step 3: Document the env var**
+- [x] **Step 3: Document the env var**
 
 Add to `.env.example`:
 
@@ -944,20 +967,20 @@ Add to `.env.example`:
 LOG_LEVEL=info
 ```
 
-- [ ] **Step 4: Checks**
+- [x] **Step 4: Checks**
 
 ```bash
 cd ark-services && bun run lint && bun run build && bun test
 ```
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add src/lib/logger.ts src/app.ts .env.example
 git commit -m "chore(logging): make log level configurable and stop logging full headers"
 ```
 
-- [ ] **Step 6: Set the production level and reclaim disk**
+- [x] **Step 6: Set the production level and reclaim disk**
 
 This is a production change — do it only with explicit approval:
 
@@ -984,7 +1007,7 @@ Expected: `active`, `200`, and disk usage down from 3.9 GB.
 Both root files live in `/Users/mattenarle/dev/ark`, which is **not a git
 repository**. Edit them; there is nothing to commit.
 
-- [ ] **Step 1: Fix the port drift in CLAUDE.md**
+- [x] **Step 1: Fix the port drift in CLAUDE.md**
 
 The workspace-layout block pairs production hostnames with **dev** ports —
 finance reads `port 3004` but production runs 3005. `ark-frontend/README.md`
@@ -1003,7 +1026,7 @@ already carries a correct dev|prod table. Annotate the block:
 
 Add below the block: `See ark-frontend/README.md "Production Ports" for the authoritative table.`
 
-- [ ] **Step 2: Fix the SSH alias in AGENTS.md**
+- [x] **Step 2: Fix the SSH alias in AGENTS.md**
 
 It reads: *"The documented SSH alias is `ark-vps`; older environments may
 still use `ark-api`."* That is backwards — `ark-vps` is absent from
@@ -1015,7 +1038,7 @@ still use `ark-api`."* That is backwards — `ark-vps` is absent from
   `ark-vps` alias.
 ```
 
-- [ ] **Step 3: Verify the claim still holds before saving**
+- [x] **Step 3: Verify the claim still holds before saving**
 
 ```bash
 ssh -o ConnectTimeout=6 -o BatchMode=yes ark-api 'hostname'

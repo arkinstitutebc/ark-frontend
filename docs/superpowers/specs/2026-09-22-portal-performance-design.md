@@ -1,7 +1,7 @@
 # Portal Performance — Design
 
 **Date:** 2026-09-22
-**Status:** Approved for implementation
+**Status:** Completed 2026-09-23 — all work shipped and verified in production. Follow-up findings recorded in `2026-09-23-backend-audit.md`.
 **Repos:** `ark-frontend`, `ark-services`
 
 ## Problem
