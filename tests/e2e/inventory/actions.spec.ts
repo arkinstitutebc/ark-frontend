@@ -49,7 +49,8 @@ test.describe("Inventory actions", () => {
 
     const dialog = page.getByRole("dialog")
     await dialog.getByLabel(/adjustment amount/i).fill("1")
-    await dialog.getByLabel(/reason/i).selectOption("correction")
+    await dialog.getByRole("combobox", { name: /adjustment reason/i }).click()
+    await page.getByRole("option", { name: "Count Correction", exact: true }).click()
     await dialog.getByRole("button", { name: /update stock/i }).click()
 
     await expect(dialog).toBeHidden()

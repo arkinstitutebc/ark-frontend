@@ -26,6 +26,7 @@ export interface StatCardProps {
  * label, a large numeric value, and an optional hint underneath.
  */
 export function StatCard(props: StatCardProps) {
+  const icon = props.icon
   // When the caller passes `valueClass`, drop the default text color so
   // overrides like `text-green-700` don't fight `text-foreground` for
   // tailwind specificity (same-specificity utilities go by source order
@@ -45,13 +46,13 @@ export function StatCard(props: StatCardProps) {
 
   return (
     <div class={`bg-surface rounded-lg border border-border p-4 ${props.class ?? ""}`}>
-      <Show when={props.icon} fallback={inner}>
+      <Show when={icon != null} fallback={inner}>
         <div class="flex items-center justify-between">
           <div>{inner}</div>
           <div
             class={`w-12 h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${props.iconClass ?? "bg-primary/10 text-primary"}`}
           >
-            {props.icon}
+            {icon}
           </div>
         </div>
       </Show>
