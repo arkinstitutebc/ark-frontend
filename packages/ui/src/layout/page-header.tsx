@@ -33,9 +33,7 @@ export function PageHeader(props: PageHeaderProps) {
           <p class="text-sm text-muted mt-1">{props.subtitle}</p>
         </Show>
       </div>
-      <Show when={props.action}>
-        <div class="flex-shrink-0">{props.action}</div>
-      </Show>
+      <div class="flex-shrink-0">{props.action}</div>
     </div>
   )
 }
