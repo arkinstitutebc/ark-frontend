@@ -53,3 +53,7 @@ Use semantic utilities — `bg-surface`, `bg-surface-muted`, `text-foreground`, 
 ## When to add here
 
 If 2+ apps would share it. Domain-specific stuff (e.g. `PrStatusBadge` for procurement) stays in the app.
+
+## SSR hydration
+
+Keep optional JSX slots stable between server render and client hydration. `PageHeader` renders its `action` in a stable container; `StatCard` evaluates its optional `icon` once before choosing the icon or no-icon layout. Changes to those branches should be checked in a production SSR preview, not only client-side navigation.

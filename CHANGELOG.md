@@ -22,6 +22,10 @@ All notable changes to the ark-frontend monorepo (7 portals + 4 shared packages)
 - **Login goes through the shared client** — the page used a raw `fetch()`, bypassing the `api()` wrapper every other call uses. It now calls `performLogin()`.
 - **`AuthGate` accepts `ssrUser`** — renders immediately when the session was resolved during SSR. A live 401 still wins, so sessions expiring mid-use continue to redirect.
 
+### Fixed
+- **Training page hydration** — `PageHeader` keeps its optional action in a stable container, preventing a client-side `TypeError: e is not a function` after SSR.
+- **Inventory page hydration** — `StatCard` evaluates its optional icon once and uses a consistent render branch, preventing the same client-side crash on inventory pages.
+
 ### Removed
 - **Dead code** — `useLogin` (superseded by `performLogin`), the unused `EmptyState` and `FormSection` components, `formatMonthYear`, and 12 unreferenced per-app `query-client.ts` / `query-provider.tsx` files. The remaining unused barrel exports are `*Props` types belonging to exported components and were deliberately kept as API surface.
 

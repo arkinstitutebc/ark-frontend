@@ -24,4 +24,4 @@ To fix something shared → edit `packages/<name>/` once, all apps inherit.
 
 ## Deploy
 
-`git push` to monorepo main. CI deploys only changed apps.
+`git push` to monorepo main triggers CI. App-only changes rebuild that portal; shared `packages/**` changes rebuild all 7 portals.
