@@ -4,7 +4,7 @@
 
 ## Pages
 
-`/` Revenue dashboard, `/receivables` (training-synced AR list, edit/delete/payment actions), `/tutorials`.
+`/` Revenue dashboard, `/receivables` (training-synced AR list, edit/delete/payment actions), `/tutorials`. Receivables with payment history cannot be deleted; create them through Training, not Billing.
 
 ## Dev
 

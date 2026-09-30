@@ -4,7 +4,9 @@
 
 ## Pages
 
-`/` batches list, `/board` batch status board, `/batch/:id` batch detail (roster + attendance + assessments), `/students` (auto STU-YYYY-NNNNN codes), `/tutorials`.
+`/` batches list and creation, `/board` separate batch status board (drag whole cards between columns; collapse columns), `/batch/:id` batch detail (gross/98% summary, NTP, roster, attendance, assessments, guarded delete), `/students` (auto STU-YYYY-NNNNN codes), `/settings` training schemes, `/tutorials`.
+
+Batch detail no longer embeds Billing or Budget Control panels; receivable actions belong in Billing. `LEGACY` identifies older batches with no recorded scheme and is not offered when creating a batch. Delete is rejected when a batch has dependent operational or paid billing history.
 
 ## Dev
 

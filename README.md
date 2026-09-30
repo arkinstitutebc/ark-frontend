@@ -9,7 +9,7 @@ API, type, and design-system packages. **Current**: v1.2.1
 ```
 apps/                          one Vike SSR app per ERP portal
 ├── main/                      → portal.arkinstitutebc.com       login, SSO hub, /learn manuals
-├── training/                  → training.arkinstitutebc.com     batches, students, attendance
+├── training/                  → training.arkinstitutebc.com     batches, separate status board, students, NTP
 ├── procurement/               → procurement.arkinstitutebc.com  PR approval, PO workflow, petty cash
 ├── inventory/                 → inventory.arkinstitutebc.com    toolkeeping, monthly checks, damages
 ├── finance/                   → finance.arkinstitutebc.com      disbursements, GL, RR, assets
@@ -46,6 +46,7 @@ bun run test:e2e:update        # update snapshots after intentional UI changes
 ```
 
 You also need the backend running locally — see `ark-services/README.md`.
+For the Training historical-scheme label regression, run `bun test tests/unit/training-scheme-label.test.ts` explicitly; the current `test:unit` script does not include `tests/unit/`.
 
 Copy an app's `.env.example` when you need local portal-link overrides. Production
 uses each app's tracked `.env.production` for public URLs and systemd `PORT`.

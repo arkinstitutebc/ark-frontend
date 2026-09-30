@@ -6,6 +6,8 @@
 
 `/` trainers and per-batch fee detail, `/trainer-fees`, `/employees`, `/attendance`, `/calendar` (holidays and leave), `/cash-advances`, `/payroll`, `/payroll/:period` (pay period detail), `/tutorials`.
 
+Trainer and employee delete actions are guarded: trainer assignments/attendance/payroll and employee attendance/leave/payroll/cash advances must be retained.
+
 ## Dev
 
 From monorepo root: `bun install && bun run dev:hr`. Backend must also be running ([`ark-services`](https://github.com/arkinstitutebc/ark-services)).
