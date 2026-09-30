@@ -42,6 +42,13 @@ export function useOrders(query?: () => OrdersListQuery | undefined) {
   return usePaginatedOrders(query)
 }
 
+export function useAllOrders() {
+  return createQuery(() => ({
+    queryKey: queryKeys.orders.allList,
+    queryFn: () => api<PurchaseOrder[]>("/api/procurement/purchase-orders"),
+  }))
+}
+
 export function useOrder(id: () => string) {
   return createQuery(() => ({
     queryKey: queryKeys.orders.detail(id()),

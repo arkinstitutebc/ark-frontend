@@ -1,5 +1,4 @@
 import {
-  AttachmentUploader,
   BackLink,
   formatDatePH,
   formatPeso,
@@ -9,8 +8,8 @@ import {
   THead,
   Th,
 } from "@ark/ui"
-import { useAcknowledgePo, useConfirmPo, useOrder, useSubmitPoLiquidation } from "@data/hooks"
-import type { PrAttachment, PurchaseOrder } from "@data/types"
+import { useAcknowledgePo, useConfirmPo, useOrder } from "@data/hooks"
+import type { PurchaseOrder } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
 import { EditPoModal } from "@/components/edit-po-modal"
@@ -24,15 +23,11 @@ export default function PoDetailPage() {
   const query = useOrder(id)
   const confirmMutation = useConfirmPo()
   const acknowledgeMutation = useAcknowledgePo()
-  const liquidationMutation = useSubmitPoLiquidation()
   const [documentModalOpen, setDocumentModalOpen] = createSignal(false)
   const [editModalOpen, setEditModalOpen] = createSignal(false)
   const [recipientName, setRecipientName] = createSignal("")
   const [signatureUrl, setSignatureUrl] = createSignal("")
   const [acknowledgmentNotes, setAcknowledgmentNotes] = createSignal("")
-  const [actualAmount, setActualAmount] = createSignal(0)
-  const [varianceReason, setVarianceReason] = createSignal("")
-  const [receipts, setReceipts] = createSignal<PrAttachment[]>([])
 
   return (
     <PageContainer>
@@ -162,62 +157,18 @@ export default function PoDetailPage() {
             </Show>
 
             <Show when={po.status === "acknowledged"}>
-              <form
-                class="space-y-4 rounded-lg border border-border bg-surface p-6"
-                onSubmit={event => {
-                  event.preventDefault()
-                  liquidationMutation.mutate({
-                    poId: po.id,
-                    actualAmount: actualAmount(),
-                    varianceReason: varianceReason() || undefined,
-                    receipts: receipts(),
-                  })
-                }}
-              >
-                <div>
-                  <h2 class="text-lg font-semibold">Submit Liquidation</h2>
-                  <p class="text-sm text-muted">
-                    Enter the actual amount spent and attach receipts for Finance.
-                  </p>
-                </div>
-                <label class="block text-sm font-medium">
-                  Actual amount spent
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    required
-                    value={actualAmount() || ""}
-                    onInput={event => setActualAmount(Number(event.currentTarget.value))}
-                    class="mt-1 w-full rounded-lg border border-border px-3 py-2 font-normal"
-                  />
-                </label>
-                <Show when={Math.abs(Number(po.totalAmount) - actualAmount()) >= 0.005}>
-                  <label class="block text-sm font-medium">
-                    Surplus / excess explanation
-                    <textarea
-                      required
-                      value={varianceReason()}
-                      onInput={event => setVarianceReason(event.currentTarget.value)}
-                      class="mt-1 w-full rounded-lg border border-border px-3 py-2 font-normal"
-                    />
-                  </label>
-                </Show>
-                <AttachmentUploader
-                  attachments={receipts()}
-                  onChange={setReceipts}
-                  signatureEndpoint="/api/procurement/upload-signature/attachment"
-                />
-                <button
-                  type="submit"
-                  disabled={
-                    actualAmount() <= 0 || receipts().length === 0 || liquidationMutation.isPending
-                  }
-                  class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+              <div class="rounded-lg border border-border bg-surface p-6">
+                <h2 class="text-lg font-semibold">Ready for liquidation</h2>
+                <p class="mt-1 text-sm text-muted">
+                  Enter actual spending and upload purchase receipts in Finance / Liquidation.
+                </p>
+                <a
+                  href={`/liquidation?search=${encodeURIComponent(po.poCode)}`}
+                  class="mt-4 inline-flex rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white"
                 >
-                  Submit to Finance
-                </button>
-              </form>
+                  Open Finance / Liquidation
+                </a>
+              </div>
             </Show>
 
             <Show when={po.status === "liquidated"}>

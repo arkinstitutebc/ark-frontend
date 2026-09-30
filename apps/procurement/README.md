@@ -4,7 +4,7 @@
 
 ## Pages
 
-`/` PR list, `/pr/:id`, `/pr/create` (Operations/Assets taxonomy), `/pr/:id/edit` (pending-only), `/approvals` (single approval that generates a pending PO), `/orders`, `/orders/:id` (confirm, acknowledge, liquidate), `/liquidation`, `/expense-settings`, `/cash-voucher`, `/cash-voucher/new`, `/cash-voucher/:id`, `/tutorials`
+`/` PR list, `/pr/:id`, `/pr/create` (Operations/Assets taxonomy), `/pr/:id/edit` (pending-only), `/approvals` (single approval that generates a pending PO), `/orders`, `/orders/:id` (confirm and acknowledge), `/liquidation` (all PO statuses, receipt upload for acknowledged POs, Finance review, completed history), `/expense-settings`, `/cash-voucher`, `/cash-voucher/new`, `/cash-voucher/:id`, `/tutorials`. Cash-voucher liquidation remains in its own flow.
 
 ## Dev
 

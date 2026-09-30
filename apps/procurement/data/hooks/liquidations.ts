@@ -29,6 +29,7 @@ export function useSubmitPoLiquidation() {
       }),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.liquidations.all })
+      qc.invalidateQueries({ queryKey: queryKeys.orders.all })
       toast.success("Liquidation submitted for finance review")
     },
     onError: (error: Error) => toast.error(error.message),
