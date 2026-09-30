@@ -8,6 +8,7 @@ export {
   useCreateEmployee,
   useCreateHoliday,
   useCreateLeave,
+  useDeleteEmployee,
   useEmployeeAttendance,
   useEmployees,
   useHrCalendar,
@@ -24,4 +25,10 @@ export {
   useProcessPayroll,
   useUpdatePayrollEntry,
 } from "./payroll"
-export { useCreateTrainer, useTrainer, useTrainers, useUpdateTrainer } from "./trainers"
+export {
+  useCreateTrainer,
+  useDeleteTrainer,
+  useTrainer,
+  useTrainers,
+  useUpdateTrainer,
+} from "./trainers"

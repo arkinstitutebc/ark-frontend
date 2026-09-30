@@ -96,6 +96,17 @@ export const useCreateEmployee = () =>
     monthlySalary: number
     employeeCode?: string
   }>("/api/hr/employees", queryKeys.employees.all, "Employee created")
+export function useDeleteEmployee() {
+  const qc = useQueryClient()
+  return createMutation(() => ({
+    mutationFn: (id: string) => api(`/api/hr/employees/${id}`, { method: "DELETE" }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.employees.all })
+      toast.success("Employee deleted")
+    },
+    onError: (error: Error) => toast.error(error.message),
+  }))
+}
 export const useUpsertEmployeeAttendance = () =>
   useOperationMutation<{
     employeeId: string

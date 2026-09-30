@@ -277,7 +277,13 @@ export default function ReceivablesPage() {
                             >
                               Edit
                             </button>
-                            <Show when={Number(ar.paidAmount ?? 0) === 0}>
+                            <Show
+                              when={
+                                Number(ar.paidAmount ?? 0) === 0 &&
+                                ar.status !== "paid" &&
+                                ar.status !== "partially_paid"
+                              }
+                            >
                               <button
                                 type="button"
                                 onClick={() => handleDelete(ar)}

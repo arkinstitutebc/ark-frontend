@@ -23,6 +23,7 @@ export const useBatches = crud.useList
 export const useBatch = crud.useOne
 export const useCreateBatch = crud.useCreate
 export const useUpdateBatch = crud.useUpdate
+export const useDeleteBatch = crud.useDelete
 
 export function useRegenerateReceivable() {
   const qc = useQueryClient()

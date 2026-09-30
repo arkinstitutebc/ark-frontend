@@ -48,3 +48,4 @@ export const useTrainers = crud.useList
 export const useTrainer = crud.useOne
 export const useCreateTrainer = crud.useCreate
 export const useUpdateTrainer = crud.useUpdate
+export const useDeleteTrainer = crud.useDelete

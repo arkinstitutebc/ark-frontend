@@ -1,5 +1,5 @@
 import { Button, formatDatePH, formatPeso, PageHeader, StatCard, THead, Th } from "@ark/ui"
-import { useTrainers } from "@data/hooks"
+import { useDeleteTrainer, useTrainers } from "@data/hooks"
 import type { Trainer, TrainerStatus } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { TrainerDetailModal } from "@/components/trainer-detail-modal"
@@ -8,6 +8,7 @@ import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
 export default function Page() {
   const query = useTrainers()
+  const deleteTrainer = useDeleteTrainer()
   const [filter, setFilter] = createSignal<TrainerStatus | "all">("all")
   const [search, setSearch] = createSignal("")
   const [selectedTrainer, setSelectedTrainer] = createSignal<Trainer | null>(null)
@@ -51,6 +52,16 @@ export default function Page() {
     setEditingTrainer(trainer)
     setModalOpen(false)
     setFormOpen(true)
+  }
+
+  const handleDelete = (trainer: Trainer) => {
+    if (
+      !window.confirm(
+        `Delete trainer ${trainer.name}? This cannot be undone. Trainers with assignments, attendance, or payroll cannot be deleted.`
+      )
+    )
+      return
+    deleteTrainer.mutate(trainer.id, { onSuccess: () => setModalOpen(false) })
   }
 
   return (
@@ -171,6 +182,8 @@ export default function Page() {
         onClose={() => setModalOpen(false)}
         trainer={selectedTrainer()}
         onEdit={handleEdit}
+        onDelete={handleDelete}
+        deleting={deleteTrainer.isPending}
       />
       <TrainerFormModal
         open={formOpen()}

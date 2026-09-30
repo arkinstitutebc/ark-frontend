@@ -9,6 +9,8 @@ interface TrainerDetailModalProps {
   onClose: () => void
   trainer: Trainer | null
   onEdit?: (trainer: Trainer) => void
+  onDelete?: (trainer: Trainer) => void
+  deleting?: boolean
 }
 
 export function TrainerDetailModal(props: TrainerDetailModalProps) {
@@ -38,14 +40,26 @@ export function TrainerDetailModal(props: TrainerDetailModalProps) {
                 </div>
                 <p class="text-sm text-muted mt-1">{trainer().specialization}</p>
               </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => props.onEdit?.(trainer())}
-              >
-                Edit
-              </Button>
+              <div class="flex gap-2">
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => props.onEdit?.(trainer())}
+                >
+                  Edit
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  class="text-red-700 hover:bg-red-50"
+                  disabled={props.deleting}
+                  onClick={() => props.onDelete?.(trainer())}
+                >
+                  Delete
+                </Button>
+              </div>
             </div>
 
             <div class="grid grid-cols-2 gap-4">

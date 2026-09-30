@@ -1,15 +1,25 @@
 import { formatPeso, PageContainer, PageHeader, StatCard } from "@ark/ui"
-import { useCreateEmployee, useEmployees } from "@data/hooks"
+import { useCreateEmployee, useDeleteEmployee, useEmployees } from "@data/hooks"
 import { createSignal, For, Show } from "solid-js"
 import { QueryBoundary, StatusBadge } from "@/components/ui"
 
 export default function EmployeesPage() {
   const query = useEmployees()
   const createEmployee = useCreateEmployee()
+  const deleteEmployee = useDeleteEmployee()
   const [name, setName] = createSignal("")
   const [email, setEmail] = createSignal("")
   const [jobTitle, setJobTitle] = createSignal("")
   const [salary, setSalary] = createSignal(0)
+  const handleDelete = (id: string, name: string) => {
+    if (
+      !window.confirm(
+        `Delete employee ${name}? This cannot be undone. Employees with attendance, leave, payroll, or cash advances cannot be deleted.`
+      )
+    )
+      return
+    deleteEmployee.mutate(id)
+  }
   return (
     <PageContainer>
       <PageHeader title="Employees" subtitle="Employee payroll directory, separate from trainers" />
@@ -87,18 +97,26 @@ export default function EmployeesPage() {
             <div class="overflow-hidden rounded-lg border border-border bg-surface">
               <For each={rows}>
                 {row => (
-                  <div class="grid grid-cols-[1fr_1fr_auto] items-center gap-4 border-b border-border px-5 py-4 last:border-0">
-                    <div>
+                  <div class="flex flex-wrap items-center gap-4 border-b border-border px-5 py-4 last:border-0 sm:grid sm:grid-cols-[1fr_1fr_auto_auto]">
+                    <div class="min-w-0 flex-1 sm:flex-auto">
                       <p class="font-medium">{row.person.name}</p>
                       <p class="text-xs text-muted">{row.person.email || "No email"}</p>
                     </div>
-                    <div>
+                    <div class="min-w-0 flex-1 sm:flex-auto">
                       <p class="text-sm">{row.employee.jobTitle || "—"}</p>
                       <p class="text-xs text-muted">
                         {formatPeso(Number(row.employee.monthlySalary))} / month
                       </p>
                     </div>
                     <StatusBadge status={row.employee.status} />
+                    <button
+                      type="button"
+                      class="rounded-md px-2 py-1 text-sm font-medium text-red-700 hover:bg-red-50 disabled:opacity-50"
+                      disabled={deleteEmployee.isPending}
+                      onClick={() => handleDelete(row.employee.id, row.person.name)}
+                    >
+                      Delete
+                    </button>
                   </div>
                 )}
               </For>

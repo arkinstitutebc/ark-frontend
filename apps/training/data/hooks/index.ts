@@ -5,6 +5,7 @@ export {
   useBatches,
   useBatchStudents,
   useCreateBatch,
+  useDeleteBatch,
   useRegenerateReceivable,
   useUpdateBatch,
   useUpdateNoticeToProceed,

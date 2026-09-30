@@ -13,6 +13,8 @@ import {
   useBatch,
   useBatchAudit,
   useBatchStudents,
+  useCurrentUser,
+  useDeleteBatch,
   useRegenerateReceivable,
   useStudent,
   useUpdateNoticeToProceed,
@@ -55,12 +57,30 @@ export default function BatchDetailPage() {
 
   const id = createMemo(() => pageContext.routeParams.id as string)
   const batchQuery = useBatch(id)
+  const currentUser = useCurrentUser()
   const batchAuditQuery = useBatchAudit(id)
   const studentsQuery = useBatchStudents(id)
   const editingStudentQuery = useStudent(() => editingStudentId() || "")
   const deletingStudentQuery = useStudent(() => deletingStudentId() || "")
   const updateNtp = useUpdateNoticeToProceed()
   const regenerateReceivable = useRegenerateReceivable()
+  const deleteBatch = useDeleteBatch()
+
+  const handleDeleteBatch = () => {
+    const batch = batchQuery.data
+    if (
+      !batch ||
+      !window.confirm(
+        `Delete batch ${batch.batchCode} and its unpaid receivable? This cannot be undone. Batches with linked records cannot be deleted.`
+      )
+    )
+      return
+    deleteBatch.mutate(batch.id, {
+      onSuccess: () => {
+        window.location.href = "/"
+      },
+    })
+  }
 
   const publicEnrollmentUrl = () => `${PUBLIC_FORMS_URL}/student/${id()}`
 
@@ -162,6 +182,22 @@ export default function BatchDetailPage() {
                     >
                       Edit Batch
                     </Button>
+                    <Show
+                      when={
+                        currentUser.data?.role === "admin" || currentUser.data?.role === "director"
+                      }
+                    >
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        class="border border-red-200 text-red-700 hover:bg-red-50"
+                        disabled={deleteBatch.isPending}
+                        onClick={handleDeleteBatch}
+                      >
+                        Delete Batch
+                      </Button>
+                    </Show>
                   </div>
                 </div>
 
