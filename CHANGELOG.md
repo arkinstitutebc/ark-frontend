@@ -9,6 +9,7 @@ All notable changes to the ark-frontend monorepo (7 portals + 4 shared packages)
 - **QueryClient was shared across SSR requests** — `query-client.ts` exported a module-level `new QueryClient()`, which TanStack's SSR guide names explicitly as a data leak: one cache serving every request on the server. `getQueryClient()` now returns a fresh client per request on the server and a singleton in the browser.
 
 ### Added
+- **Training catalog clarity** — New/Edit Batch labels the Film and Digital Content Production choice as a Microcredential and supports its non-NC level. The active qualification, trainer, venue, and JDVP choices come from their API catalogs.
 - **Guarded delete actions** — Training batches, Billing receivables, HR trainers, and HR employees can be deleted from their respective pages when the backend finds no protected dependent history.
 - **Separate Training Batch Board** — `/board` is its own sidebar page, with whole-card drag-and-drop between status columns and collapsible columns; the Batches list remains at `/`.
 - **SSR session resolution on all 7 portals** — `+onCreatePageContext.server.ts` reads the `token` cookie during SSR and resolves the session over loopback (~4ms) instead of the browser paying a ~60ms round trip to `/api/auth/me`. `+guard.ts` redirects unauthenticated visitors server-side. An authenticated finance dashboard now arrives fully rendered (48KB, no spinner) rather than as a loading state.

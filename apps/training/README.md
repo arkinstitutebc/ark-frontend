@@ -8,6 +8,10 @@
 
 Batch detail no longer embeds Billing or Budget Control panels; receivable actions belong in Billing. `LEGACY` identifies older batches with no recorded scheme and is not offered when creating a batch. Delete is rejected when a batch has dependent operational or paid billing history.
 
+The Qualification dropdown reads active Training Offerings from the API. Add, edit, or deactivate those under Finance → Settings → Training Offerings; Training → Batch Settings manages program schemes instead.
+
+The Microcredential offering is labeled in New/Edit Batch, and its level is derived as `Microcredential` rather than an NC level. Instructor choices come from active HR trainers only; a historical instructor remains editable as free text. Default venues are On-site, Mobile, and Hybrid. JDVP HYBRID is the only active JDVP scheme.
+
 ## Dev
 
 From monorepo root: `bun install && bun run dev:training`. Backend must also be running ([`ark-services`](https://github.com/arkinstitutebc/ark-services)).

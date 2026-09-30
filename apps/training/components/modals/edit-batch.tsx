@@ -69,7 +69,10 @@ export function EditBatchModal(props: EditBatchModalProps) {
   })
 
   const trainingOptions = createMemo(() =>
-    (offeringsQuery.data ?? []).map(item => ({ label: item.label, value: item.id }))
+    (offeringsQuery.data ?? []).map(item => ({
+      label: item.sector === "Microcredentials" ? `Microcredentials — ${item.label}` : item.label,
+      value: item.id,
+    }))
   )
   const schemeOptions = createMemo(() =>
     (schemesQuery.data ?? []).map(item => ({
@@ -169,7 +172,15 @@ export function EditBatchModal(props: EditBatchModalProps) {
             <Select
               options={trainingOptions()}
               value={trainingOfferingId()}
-              onChange={v => setTrainingOfferingId(v)}
+              onChange={v => {
+                setTrainingOfferingId(v)
+                const offering = offeringsQuery.data?.find(item => item.id === v)
+                const level =
+                  offering?.sector === "Microcredentials"
+                    ? "Microcredential"
+                    : offering?.label.match(/\bNC (?:I|II|III|IV|V)$/)?.[0]
+                if (level) setTrainingLevel(level as Batch["trainingLevel"])
+              }}
               placeholder="Select qualification"
               ariaLabel="Qualification"
             />

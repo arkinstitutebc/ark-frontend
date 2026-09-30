@@ -41,7 +41,10 @@ export function AddBatchModal(props: AddBatchModalProps) {
   const [instructorOther, setInstructorOther] = createSignal("")
 
   const trainingOptions = createMemo(() =>
-    (offeringsQuery.data ?? []).map(item => ({ label: item.label, value: item.id }))
+    (offeringsQuery.data ?? []).map(item => ({
+      label: item.sector === "Microcredentials" ? `Microcredentials — ${item.label}` : item.label,
+      value: item.id,
+    }))
   )
   const schemeOptions = createMemo(() =>
     (schemesQuery.data ?? [])

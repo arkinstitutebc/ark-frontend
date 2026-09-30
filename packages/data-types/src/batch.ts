@@ -2,7 +2,7 @@
 export type BatchStatus = "Not Started" | "In Progress" | "Completed" | "On Hold"
 
 // Training NC Level Types
-export type TrainingLevel = "NC I" | "NC II" | "NC III" | "NC IV" | "NC V"
+export type TrainingLevel = "NC I" | "NC II" | "NC III" | "NC IV" | "NC V" | "Microcredential"
 
 // Training Categories
 export type TrainingCategory =
@@ -84,6 +84,7 @@ export interface TrainingSettingOption {
   id: string
   code: string
   label: string
+  sector?: string | null
   active: boolean
   sortOrder: number
 }

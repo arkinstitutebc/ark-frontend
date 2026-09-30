@@ -1,8 +1,11 @@
 export const TRAINING_TYPES = [
-  "Cookery NC II",
+  "Food and Beverage Services NC II",
   "Housekeeping NC II",
-  "Food & Beverage Services NC II",
-  "Bartending NC II",
-  "Bread & Pastry Production NC II",
-  "Front Office Services NC II",
+  "Events Management NC III",
+  "Bread and Pastry Production NC II",
+  "Tourism Promotion Services NC II",
+  "Ship's Catering Services NC I",
+  "Cookery NC I",
+  "Trainer's Methodology NC I",
+  "Film and Digital Content Production",
 ] as const

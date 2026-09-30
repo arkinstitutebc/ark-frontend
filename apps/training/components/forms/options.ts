@@ -3,7 +3,14 @@ import type { Batch, Student } from "@data/types"
 
 export const OTHER_INSTRUCTOR = "__other__"
 
-export const TRAINING_LEVELS = ["NC I", "NC II", "NC III", "NC IV", "NC V"] as const
+export const TRAINING_LEVELS = [
+  "NC I",
+  "NC II",
+  "NC III",
+  "NC IV",
+  "NC V",
+  "Microcredential",
+] as const
 export const BATCH_STATUSES: Batch["status"][] = [
   "Not Started",
   "In Progress",
