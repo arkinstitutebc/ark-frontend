@@ -11,15 +11,16 @@ export const procurementTutorial: {
   sections: TutorialSection[]
 } = {
   title: "How to use the Procurement portal",
-  subtitle: "Purchase requests, cash vouchers, purchase orders, approvals, and receiving handoff.",
+  subtitle: "Purchase requests, one-step approval, purchase orders, and Finance liquidation.",
   intro: (
     <p>
-      Procurement covers two operating flows: formal purchasing through <b>PR → PO → receiving</b>,
-      and small immediate cash needs through <b>Cash Voucher</b>. Both keep approvals, attachments,
-      and printable records in the system.
+      Procurement covers formal purchasing through{" "}
+      <b>PR → approval → PO → acknowledgment → liquidation</b>, plus small immediate cash needs
+      through <b>Cash Voucher</b>. Both keep approvals, attachments, and printable records in the
+      system.
     </p>
   ),
-  workflow: ["Request", "Review", "Approve", "Release or order", "Receive or liquidate"],
+  workflow: ["Request", "Approve", "Confirm PO", "Acknowledge", "Liquidate"],
   checklist: [
     "The request is tied to the correct batch when it is for a training class.",
     "Items, unit prices, and totals match the supplier quote or working canvass.",
@@ -45,7 +46,7 @@ export const procurementTutorial: {
           </p>
           <p>
             Use this portal to draft purchase requests, manage cash voucher requests, attach support
-            files, send work for approval, create the matching order, and track delivery status.
+            files, approve work, acknowledge delivery, and liquidate actual spending.
           </p>
         </>
       ),
@@ -58,10 +59,8 @@ export const procurementTutorial: {
           <li>
             Go to <b>Requests</b> and click <b>+ New Request</b>.
           </li>
-          <li>Pick the batch when the items are for a specific class.</li>
-          <li>
-            Pick a category. Don't have one? Hit <b>Manage categories</b> to add one.
-          </li>
+          <li>Choose Operations or Assets, then the matching expense item.</li>
+          <li>Training Expenses require a batch; Company Overhead and Assets do not.</li>
           <li>Add items: name, quantity, unit, unit price. Add as many rows as needed.</li>
           <li>(Optional) Attach receipts, supplier quotes, or invoices.</li>
           <li>
@@ -125,38 +124,28 @@ export const procurementTutorial: {
     },
     {
       id: "approvals",
-      title: "3-signature approval workflow",
+      title: "Approve a Purchase Request",
       body: (
         <>
-          <p>
-            Every PR needs three signatures: <b>Requestor → Coordinator → Management</b>. The
-            <b> Approvals</b> page has two queues so each role only sees what's theirs.
-          </p>
+          <p>A pending PR has one approval decision. The requestor cannot approve their own PR.</p>
           <ol class="list-decimal pl-5 space-y-1.5">
             <li>
-              <b>Coordinator queue</b>: PRs in <b>pending</b> status. The coordinator reviews items
-              and supporting details, then sends up or sends back. Same-actor guard means the
-              requestor can't review their own PR.
+              Open the pending request from Approvals and verify its scope, items, and support.
             </li>
-            <li>
-              <b>Management queue</b>: PRs after coordinator review. Management approves (notes
-              optional) or rejects (notes required). A different actor than the coordinator must
-              sign here too.
-            </li>
-            <li>The fully-approved PR is now ready to become a PO.</li>
+            <li>Approve with optional notes, or reject with the reason.</li>
+            <li>Approval atomically creates one uniquely numbered pending PO.</li>
           </ol>
         </>
       ),
     },
     {
       id: "create-po",
-      title: "Turn an approved PR into a PO",
+      title: "Complete the Purchase Order",
       body: (
         <p>
-          Open the approved PR and click <b>Create PO</b>. Fill in the supplier, expected delivery
-          date, and any notes. Items are pulled in from the PR — they stay frozen on the PO so you
-          can compare quote-vs-actual later. The system only allows PO creation from an{" "}
-          <b>approved</b> PR. Save it and the PR's status flips to <b>ordered</b>.
+          Approval already creates the PO. Open it, add the supplier and expected delivery details,
+          then confirm it. When the goods or service are handed over, record the recipient name and
+          drawn signature to acknowledge the PO.
         </p>
       ),
     },
@@ -165,9 +154,9 @@ export const procurementTutorial: {
       title: "Edit a Purchase Order",
       body: (
         <p>
-          From the PO detail page, click <b>Edit</b>. You can change supplier, estimated delivery,
-          status, and notes. Items are not editable (they came from the approved PR). The Edit
-          button disappears once the PO is <b>received</b> or <b>cancelled</b>.
+          From the PO detail page, click <b>Edit</b> while it is pending. You can change supplier,
+          estimated delivery, and notes. Items remain frozen from the approved PR. After
+          acknowledgment, enter the actual amount and attach receipts for Finance review.
         </p>
       ),
     },

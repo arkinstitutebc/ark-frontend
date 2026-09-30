@@ -1,169 +1,177 @@
-import { formatDatePH, PageHeader, Select, StatCard, THead, Th } from "@ark/ui"
-import { useAttendance, useTrainers } from "@data/hooks"
-import type { AttendanceStatus, HrAttendance, Trainer } from "@data/types"
+import { formatDatePH, PageContainer, PageHeader, Select, StatCard, THead, Th } from "@ark/ui"
+import { useEmployeeAttendance, useEmployees, useUpsertEmployeeAttendance } from "@data/hooks"
+import type { EmployeeAttendanceStatus } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
-import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
+import { QueryBoundary, StatusBadge } from "@/components/ui"
 
-export default function Page() {
-  const [filterTrainer, setFilterTrainer] = createSignal<string>("all")
-  const [filterStatus, setFilterStatus] = createSignal<AttendanceStatus | "all">("all")
+const statusOptions: Array<{ label: string; value: EmployeeAttendanceStatus }> = [
+  { label: "Present", value: "present" },
+  { label: "Late", value: "late" },
+  { label: "Absent", value: "absent" },
+  { label: "On Leave", value: "leave" },
+  { label: "Holiday", value: "holiday" },
+]
+
+export default function AttendancePage() {
+  const employees = useEmployees()
+  const save = useUpsertEmployeeAttendance()
+  const [filterEmployee, setFilterEmployee] = createSignal("")
   const [filterDate, setFilterDate] = createSignal("")
-
-  const trainersQuery = useTrainers()
-  const attendanceQuery = useAttendance(() => {
-    const f: { trainerId?: string; date?: string } = {}
-    if (filterTrainer() !== "all") f.trainerId = filterTrainer()
-    if (filterDate()) f.date = filterDate()
-    return f
-  })
-
-  const filteredRecords = createMemo(() => {
-    const data = attendanceQuery.data || []
-    return data
-      .filter(r => filterStatus() === "all" || r.status === filterStatus())
-      .sort((a, b) => b.date.localeCompare(a.date))
-  })
-
-  const stats = createMemo(() => {
-    const records = filteredRecords()
-    return {
-      total: records.length,
-      present: records.filter(r => r.status === "present").length,
-      late: records.filter(r => r.status === "late").length,
-      absent: records.filter(r => r.status === "absent").length,
-    }
-  })
-
-  const getTrainerName = (trainerId: string) => {
-    const trainer = (trainersQuery.data || []).find((t: Trainer) => t.id === trainerId)
-    return trainer?.name || trainerId
-  }
+  const query = useEmployeeAttendance(() => ({
+    employeeId: filterEmployee() || undefined,
+    startDate: filterDate() || undefined,
+    endDate: filterDate() || undefined,
+  }))
+  const [employeeId, setEmployeeId] = createSignal("")
+  const [date, setDate] = createSignal(new Date().toISOString().slice(0, 10))
+  const [status, setStatus] = createSignal<EmployeeAttendanceStatus>("present")
+  const [timeIn, setTimeIn] = createSignal("")
+  const [timeOut, setTimeOut] = createSignal("")
+  const [notes, setNotes] = createSignal("")
+  const employeeOptions = createMemo(() =>
+    (employees.data ?? []).map(row => ({ label: row.person.name, value: row.employee.id }))
+  )
+  const employeeName = (id: string) =>
+    (employees.data ?? []).find(row => row.employee.id === id)?.person.name ?? "Unknown employee"
 
   return (
-    <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
-      <PageHeader title="Attendance" subtitle="Biometric time-in/out records" />
-
-      <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        <StatCard label="Total Records" value={attendanceQuery.isSuccess ? stats().total : "-"} />
-        <StatCard
-          label="Present"
-          valueClass="text-green-700"
-          value={attendanceQuery.isSuccess ? stats().present : "-"}
-        />
-        <StatCard
-          label="Late"
-          valueClass="text-yellow-700"
-          value={attendanceQuery.isSuccess ? stats().late : "-"}
-        />
-        <StatCard
-          label="Absent"
-          valueClass="text-red-700"
-          value={attendanceQuery.isSuccess ? stats().absent : "-"}
-        />
-      </div>
-
-      <div class="flex flex-col sm:flex-row gap-3 mb-6">
-        <div class="relative">
-          <Icons.calendar class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" />
-          <input
-            type="date"
-            value={filterDate()}
-            onInput={e => setFilterDate(e.currentTarget.value)}
-            class="pl-9 pr-4 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
-          />
-        </div>
+    <PageContainer>
+      <PageHeader
+        title="Employee Attendance"
+        subtitle="Track daily presence, absences, holidays, and approved leave"
+      />
+      <form
+        class="mb-6 grid gap-3 rounded-lg border border-border bg-surface p-5 md:grid-cols-3"
+        onSubmit={event => {
+          event.preventDefault()
+          save.mutate({
+            employeeId: employeeId(),
+            date: date(),
+            status: status(),
+            timeIn: timeIn() || undefined,
+            timeOut: timeOut() || undefined,
+            notes: notes() || undefined,
+          })
+        }}
+      >
         <Select
-          value={filterTrainer()}
-          onChange={setFilterTrainer}
-          options={[
-            { label: "All Trainers", value: "all" },
-            ...(trainersQuery.data || []).map((t: Trainer) => ({ label: t.name, value: t.id })),
-          ]}
-          ariaLabel="Trainer filter"
-          class="min-w-48"
+          options={employeeOptions()}
+          value={employeeId() || undefined}
+          onChange={setEmployeeId}
+          placeholder="Employee"
+          ariaLabel="Employee"
+        />
+        <input
+          type="date"
+          required
+          value={date()}
+          onInput={event => setDate(event.currentTarget.value)}
+          class="rounded-lg border border-border px-3 py-2 text-sm"
+        />
+        <Select
+          options={statusOptions}
+          value={status()}
+          onChange={value => setStatus(value as EmployeeAttendanceStatus)}
+          ariaLabel="Attendance status"
+        />
+        <input
+          type="time"
+          value={timeIn()}
+          onInput={event => setTimeIn(event.currentTarget.value)}
+          class="rounded-lg border border-border px-3 py-2 text-sm"
+          aria-label="Time in"
+        />
+        <input
+          type="time"
+          value={timeOut()}
+          onInput={event => setTimeOut(event.currentTarget.value)}
+          class="rounded-lg border border-border px-3 py-2 text-sm"
+          aria-label="Time out"
         />
         <div class="flex gap-2">
-          <For
-            each={[
-              { value: "all" as const, label: "All" },
-              { value: "present" as const, label: "Present" },
-              { value: "late" as const, label: "Late" },
-              { value: "absent" as const, label: "Absent" },
-            ]}
+          <input
+            value={notes()}
+            onInput={event => setNotes(event.currentTarget.value)}
+            placeholder="Notes"
+            class="min-w-0 flex-1 rounded-lg border border-border px-3 py-2 text-sm"
+          />
+          <button
+            type="submit"
+            disabled={!employeeId() || save.isPending}
+            class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
           >
-            {item => (
-              <button
-                type="button"
-                onClick={() => setFilterStatus(item.value)}
-                class={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${filterStatus() === item.value ? "bg-primary text-white" : "bg-surface text-foreground border border-border hover:bg-surface-muted"}`}
-              >
-                {item.label}
-              </button>
-            )}
-          </For>
+            Save
+          </button>
         </div>
+      </form>
+
+      <div class="mb-5 grid gap-3 sm:grid-cols-2">
+        <Select
+          options={[{ label: "All Employees", value: "" }, ...employeeOptions()]}
+          value={filterEmployee()}
+          onChange={setFilterEmployee}
+          ariaLabel="Filter by employee"
+        />
+        <input
+          type="date"
+          value={filterDate()}
+          onInput={event => setFilterDate(event.currentTarget.value)}
+          class="rounded-lg border border-border px-3 py-2 text-sm"
+          aria-label="Filter by date"
+        />
       </div>
 
-      <QueryBoundary query={attendanceQuery}>
-        {(_data: HrAttendance[]) => (
-          <div class="bg-surface rounded-lg border border-border overflow-hidden">
-            <Show
-              when={filteredRecords().length > 0}
-              fallback={
-                <div class="py-16 text-center">
-                  <Icons.clock class="w-12 h-12 mx-auto mb-3 text-muted" />
-                  <p class="text-sm font-medium text-foreground">No attendance records</p>
-                  <p class="text-sm text-muted mt-1">Try adjusting your filters.</p>
-                </div>
-              }
-            >
-              <table class="w-full">
-                <THead>
-                  <Th>Trainer</Th>
-                  <Th>Date</Th>
-                  <Th>Time In</Th>
-                  <Th>Time Out</Th>
-                  <Th align="right">Hours</Th>
-                  <Th>Status</Th>
-                </THead>
-                <tbody>
-                  <For each={filteredRecords()}>
-                    {(record: HrAttendance) => (
-                      <tr class="border-t border-border hover:bg-surface-muted transition-colors">
-                        <td class="py-4 px-6">
-                          <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
-                              <Icons.user class="w-4 h-4 text-primary" />
-                            </div>
-                            <p class="text-sm text-foreground">
-                              {getTrainerName(record.trainerId)}
-                            </p>
-                          </div>
-                        </td>
-                        <td class="py-4 px-6 text-sm text-foreground">
-                          {formatDatePH(record.date)}
-                        </td>
-                        <td class="py-4 px-6 text-sm text-muted font-mono">
-                          {record.timeIn || "—"}
-                        </td>
-                        <td class="py-4 px-6 text-sm text-muted font-mono">
-                          {record.timeOut || "—"}
-                        </td>
-                        <td class="py-4 px-6 text-right text-sm text-foreground">
-                          {record.hoursWorked}
-                        </td>
-                        <td class="py-4 px-6">
-                          <StatusBadge status={record.status} />
-                        </td>
-                      </tr>
-                    )}
-                  </For>
-                </tbody>
-              </table>
-            </Show>
-          </div>
+      <QueryBoundary query={query}>
+        {rows => (
+          <>
+            <div class="mb-4 grid grid-cols-3 gap-4">
+              <StatCard label="Records" value={rows.length} />
+              <StatCard
+                label="Present / Late"
+                value={rows.filter(row => ["present", "late"].includes(row.status)).length}
+              />
+              <StatCard label="Absent" value={rows.filter(row => row.status === "absent").length} />
+            </div>
+            <div class="overflow-hidden rounded-lg border border-border bg-surface">
+              <Show
+                when={rows.length > 0}
+                fallback={
+                  <p class="py-12 text-center text-sm text-muted">No attendance records.</p>
+                }
+              >
+                <table class="w-full">
+                  <THead>
+                    <Th>Employee</Th>
+                    <Th>Date</Th>
+                    <Th>Status</Th>
+                    <Th>Time</Th>
+                    <Th>Notes</Th>
+                  </THead>
+                  <tbody>
+                    <For each={rows}>
+                      {row => (
+                        <tr class="border-t border-border">
+                          <td class="px-6 py-4 text-sm font-medium">
+                            {employeeName(row.employeeId)}
+                          </td>
+                          <td class="px-6 py-4 text-sm">{formatDatePH(row.date)}</td>
+                          <td class="px-6 py-4">
+                            <StatusBadge status={row.status} />
+                          </td>
+                          <td class="px-6 py-4 text-sm text-muted">
+                            {row.timeIn || "—"}–{row.timeOut || "—"}
+                          </td>
+                          <td class="px-6 py-4 text-sm text-muted">{row.notes || "—"}</td>
+                        </tr>
+                      )}
+                    </For>
+                  </tbody>
+                </table>
+              </Show>
+            </div>
+          </>
         )}
       </QueryBoundary>
-    </div>
+    </PageContainer>
   )
 }

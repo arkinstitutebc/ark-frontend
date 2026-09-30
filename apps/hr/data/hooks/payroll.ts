@@ -5,12 +5,12 @@ import { queryKeys } from "../query-keys"
 import type { PayrollEntry, PayrollPeriod } from "../types"
 
 interface PayrollPeriodDetail extends PayrollPeriod {
-  entries: Array<PayrollEntry & { trainerName: string }>
+  entries: Array<PayrollEntry & { employeeName: string; trainerName?: string }>
 }
 
 interface ProcessPayrollResult {
   period: PayrollPeriod
-  entries: Array<PayrollEntry & { trainerName: string }>
+  entries: PayrollEntry[]
 }
 
 const crud = createCrudHooks<PayrollPeriod, PayrollPeriodDetail, never, never, void>({
@@ -37,6 +37,31 @@ export function useProcessPayroll() {
       qc.invalidateQueries({ queryKey: queryKeys.payroll.all })
       qc.invalidateQueries({ queryKey: queryKeys.payroll.detail(periodId) })
       toast.success("Payroll processed")
+    },
+    onError: (err: Error) => toast.error(err.message),
+  }))
+}
+
+export function useUpdatePayrollEntry(periodId: () => string) {
+  const qc = useQueryClient()
+  return createMutation(() => ({
+    mutationFn: ({
+      id,
+      manualAdjustment,
+      adjustmentNotes,
+    }: {
+      id: string
+      manualAdjustment: number
+      adjustmentNotes: string
+    }) =>
+      api(`/api/hr/payroll/entries/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({ manualAdjustment, adjustmentNotes }),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.payroll.all })
+      qc.invalidateQueries({ queryKey: queryKeys.payroll.detail(periodId()) })
+      toast.success("Payroll adjustment saved")
     },
     onError: (err: Error) => toast.error(err.message),
   }))

@@ -28,17 +28,25 @@ const portals: PortalSmokeCase[] = [
   {
     portal: "Training",
     url: PORTAL_URLS.training,
-    routes: ["/", "/students", "/tutorials"],
+    routes: ["/", "/students", "/settings", "/tutorials"],
   },
   {
     portal: "Procurement",
     url: PORTAL_URLS.procurement,
-    routes: ["/", "/approvals", "/orders", "/pr/create", "/orders/create", "/tutorials"],
+    routes: [
+      "/",
+      "/approvals",
+      "/orders",
+      "/pr/create",
+      "/expense-settings",
+      "/liquidation",
+      "/tutorials",
+    ],
   },
   {
     portal: "Inventory",
     url: PORTAL_URLS.inventory,
-    routes: ["/", "/receiving", "/movements", "/count", "/tutorials"],
+    routes: ["/", "/monthly", "/movements", "/count", "/tutorials"],
   },
   {
     portal: "Finance",
@@ -64,12 +72,21 @@ const portals: PortalSmokeCase[] = [
   {
     portal: "Billing",
     url: PORTAL_URLS.billing,
-    routes: ["/", "/receivables", "/receivables/create", "/tutorials"],
+    routes: ["/", "/receivables", "/tutorials"],
   },
   {
     portal: "HR",
     url: PORTAL_URLS.hr,
-    routes: ["/", "/attendance", "/payroll", "/tutorials"],
+    routes: [
+      "/",
+      "/attendance",
+      "/payroll",
+      "/calendar",
+      "/cash-advances",
+      "/trainer-fees",
+      "/employees",
+      "/tutorials",
+    ],
   },
 ]
 

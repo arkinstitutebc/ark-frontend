@@ -5,7 +5,6 @@ import { queryKeys } from "../query-keys"
 import type { StockItem, StockMovement } from "../types"
 
 interface StockListQuery {
-  batchId?: string
   page?: number
   limit?: number
   search?: string
@@ -33,7 +32,7 @@ const crud = createCrudHooks<
   label: "Stock item",
   queryKeys: {
     all: queryKeys.stock.all,
-    list: q => queryKeys.stock.byBatch(q?.batchId),
+    list: () => queryKeys.stock.list,
     detail: id => queryKeys.stock.detail(id),
   },
 })
@@ -41,11 +40,31 @@ const crud = createCrudHooks<
 export const useStock = crud.useList
 export const useStockItem = crud.useOne
 
+export function useCreateTool() {
+  const qc = useQueryClient()
+  return createMutation(() => ({
+    mutationFn: (data: {
+      name: string
+      category: string
+      unit: string
+      unitPrice: number
+      trackingMode: "quantity" | "individual"
+      quantityOnHand: number
+      assetTag?: string
+      serialNumber?: string
+    }) => api<StockItem>("/api/inventory/stock", { method: "POST", body: JSON.stringify(data) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: queryKeys.stock.all })
+      toast.success("Tool added")
+    },
+    onError: (error: Error) => toast.error(error.message),
+  }))
+}
+
 export function usePaginatedStock(query?: () => StockListQuery | undefined) {
   return createQuery(() => {
     const q = query?.() ?? { page: 1, limit: 20 }
     const params = new URLSearchParams()
-    if (q.batchId) params.set("batchId", q.batchId)
     if (q.page) params.set("page", String(q.page))
     if (q.limit) params.set("limit", String(q.limit))
     if (q.search) params.set("search", q.search)
@@ -77,26 +96,6 @@ export function useAdjustStock() {
       qc.invalidateQueries({ queryKey: queryKeys.stock.all })
       qc.invalidateQueries({ queryKey: queryKeys.movements.all })
       toast.success("Stock adjusted")
-    },
-    onError: (err: Error) => toast.error(err.message),
-  }))
-}
-
-interface ReceivePoInput {
-  poId: string
-  items: Array<{ name: string; unit?: string; quantityReceived: number }>
-}
-
-export function useReceivePo() {
-  const qc = useQueryClient()
-  return createMutation(() => ({
-    mutationFn: (data: ReceivePoInput) =>
-      api<StockItem[]>("/api/inventory/receive", { method: "POST", body: JSON.stringify(data) }),
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: queryKeys.stock.all })
-      qc.invalidateQueries({ queryKey: queryKeys.movements.all })
-      qc.invalidateQueries({ queryKey: queryKeys.orders.all })
-      toast.success("Receipt completed")
     },
     onError: (err: Error) => toast.error(err.message),
   }))

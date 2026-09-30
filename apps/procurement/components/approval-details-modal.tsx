@@ -2,7 +2,7 @@ import { categoryToneClass, formatDatePH, formatPeso, Modal, StatusBadge } from 
 import type { PurchaseRequest } from "@data/types"
 import { createSignal, Show } from "solid-js"
 
-export type ApprovalAction = "view" | "coordinator-review" | "approve" | "reject"
+export type ApprovalAction = "view" | "approve" | "reject"
 
 interface ApprovalDetailsModalProps {
   open: boolean
@@ -11,7 +11,6 @@ interface ApprovalDetailsModalProps {
   mode: ApprovalAction
   onApprove: (id: string, notes?: string) => void
   onReject: (id: string, notes: string) => void
-  onCoordinatorReview: (id: string, notes?: string) => void
   processing: boolean
 }
 
@@ -25,29 +24,17 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
   const modalTitle = () => {
     if (props.mode === "approve") return "Approve Purchase Request"
     if (props.mode === "reject") return "Reject Purchase Request"
-    if (props.mode === "coordinator-review") return "Coordinator Review"
     return "Purchase Request Details"
   }
 
-  const canCoordinatorReview = (pr: PurchaseRequest) =>
-    pr.status === "pending" && props.mode === "coordinator-review"
-  const canApprove = (pr: PurchaseRequest) =>
-    pr.status === "under_review" && props.mode === "approve"
+  const canApprove = (pr: PurchaseRequest) => pr.status === "pending" && props.mode === "approve"
   const canReject = (pr: PurchaseRequest) =>
     (pr.status === "pending" || pr.status === "under_review") && props.mode === "reject"
-  const actionable = (pr: PurchaseRequest) =>
-    canCoordinatorReview(pr) || canApprove(pr) || canReject(pr)
+  const actionable = (pr: PurchaseRequest) => canApprove(pr) || canReject(pr)
 
   const handleApprove = () => {
     if (!props.pr) return
     props.onApprove(props.pr.id, notes().trim() || undefined)
-    setNotes("")
-    setShowError(false)
-  }
-
-  const handleCoordinatorReview = () => {
-    if (!props.pr) return
-    props.onCoordinatorReview(props.pr.id, notes().trim() || undefined)
     setNotes("")
     setShowError(false)
   }
@@ -271,11 +258,7 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
               <Show when={actionable(pr())}>
                 <div>
                   <label for="approval-notes" class="text-xs text-muted mb-2 block">
-                    {notesRequired()
-                      ? "Reason for rejection"
-                      : props.mode === "coordinator-review"
-                        ? "Coordinator notes (optional)"
-                        : "Approval notes (optional)"}
+                    {notesRequired() ? "Reason for rejection" : "Approval notes (optional)"}
                     <Show when={notesRequired()}>
                       <span class="text-red-500 ml-0.5">*</span>
                     </Show>
@@ -290,9 +273,7 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
                     placeholder={
                       notesRequired()
                         ? "Tell the requester what to fix so they can resubmit..."
-                        : props.mode === "coordinator-review"
-                          ? "Comments for management before final approval..."
-                          : "Add notes for this approval..."
+                        : "Add notes for this approval..."
                     }
                     rows={3}
                     class={`w-full px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 resize-none ${
@@ -320,16 +301,6 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
               >
                 Cancel
               </button>
-              <Show when={canCoordinatorReview(pr())}>
-                <button
-                  type="button"
-                  onClick={handleCoordinatorReview}
-                  disabled={props.processing}
-                  class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
-                >
-                  {props.processing ? "Submitting..." : "Submit coordinator review"}
-                </button>
-              </Show>
               <Show when={canApprove(pr())}>
                 <button
                   type="button"
@@ -337,7 +308,7 @@ export function ApprovalDetailsModal(props: ApprovalDetailsModalProps) {
                   disabled={props.processing}
                   class="px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors disabled:opacity-50 cursor-pointer"
                 >
-                  {props.processing ? "Approving..." : "Confirm approval"}
+                  {props.processing ? "Approving..." : "Approve & generate PO"}
                 </button>
               </Show>
               <Show when={canReject(pr())}>

@@ -1,10 +1,16 @@
 import { formErrorClass, formInputClass, formLabelClass, Modal, ModalFooter, Select } from "@ark/ui"
-import { useCreateBatch, useInstructors, useVenues } from "@data/hooks"
+import {
+  useCreateBatch,
+  useInstructors,
+  useTrainingOfferings,
+  useTrainingSchemes,
+  useVenues,
+} from "@data/hooks"
 import { createBatchSchema } from "@data/schemas"
 import type { Batch } from "@data/types"
 import { validateForm } from "@data/validate"
 import { createMemo, createSignal, Show } from "solid-js"
-import { OTHER_INSTRUCTOR, trainingTypeOptions } from "@/components/forms/options"
+import { OTHER_INSTRUCTOR } from "@/components/forms/options"
 import { ManageVenuesModal } from "./manage-venues"
 
 interface AddBatchModalProps {
@@ -16,10 +22,13 @@ export function AddBatchModal(props: AddBatchModalProps) {
   const mutation = useCreateBatch()
   const instructorsQuery = useInstructors()
   const venuesQuery = useVenues()
+  const offeringsQuery = useTrainingOfferings()
+  const schemesQuery = useTrainingSchemes()
   const [errors, setErrors] = createSignal<Record<string, string>>({})
   const [showManageVenues, setShowManageVenues] = createSignal(false)
 
-  const [trainingName, setTrainingName] = createSignal("")
+  const [trainingOfferingId, setTrainingOfferingId] = createSignal("")
+  const [trainingSchemeId, setTrainingSchemeId] = createSignal("")
   const [batchNo, setBatchNo] = createSignal("")
   const [rqm, setRqm] = createSignal("")
   const [senator, setSenator] = createSignal("")
@@ -31,7 +40,18 @@ export function AddBatchModal(props: AddBatchModalProps) {
   const [instructorId, setInstructorId] = createSignal("")
   const [instructorOther, setInstructorOther] = createSignal("")
 
-  const trainingOptions = createMemo(trainingTypeOptions)
+  const trainingOptions = createMemo(() =>
+    (offeringsQuery.data ?? []).map(item => ({ label: item.label, value: item.id }))
+  )
+  const schemeOptions = createMemo(() =>
+    (schemesQuery.data ?? []).map(item => ({ label: item.label, value: item.id }))
+  )
+  const budgetBreakdown = createMemo(() => {
+    const gross = Number(budget())
+    if (!Number.isFinite(gross) || gross <= 0) return null
+    const withholding = Math.round(gross * 2) / 100
+    return { gross, withholding, net: gross - withholding }
+  })
 
   const venueOptions = createMemo(() =>
     (venuesQuery.data ?? []).map(v => ({ label: v.name, value: v.name }))
@@ -55,7 +75,8 @@ export function AddBatchModal(props: AddBatchModalProps) {
   const handleSubmit = (e: Event) => {
     e.preventDefault()
     const data = {
-      trainingName: trainingName(),
+      trainingOfferingId: trainingOfferingId(),
+      trainingSchemeId: trainingSchemeId(),
       batchNo: batchNo().trim(),
       rqm: rqm().trim(),
       senator: senator(),
@@ -92,7 +113,8 @@ export function AddBatchModal(props: AddBatchModalProps) {
   }
 
   const resetForm = () => {
-    setTrainingName("")
+    setTrainingOfferingId("")
+    setTrainingSchemeId("")
     setBatchNo("")
     setRqm("")
     setSenator("")
@@ -125,18 +147,35 @@ export function AddBatchModal(props: AddBatchModalProps) {
           </p>
         </div>
 
-        <div>
-          <span class={labelClass}>Training Type</span>
-          <Select
-            options={trainingOptions()}
-            value={trainingName() || undefined}
-            onChange={v => setTrainingName(v)}
-            placeholder="Select training type"
-            ariaLabel="Training type"
-          />
-          <Show when={errors().trainingName}>
-            <p class={errorClass}>{errors().trainingName}</p>
-          </Show>
+        <div class="grid gap-3 md:grid-cols-2">
+          <div>
+            <span class={labelClass}>Qualification</span>
+            <Select
+              options={trainingOptions()}
+              value={trainingOfferingId() || undefined}
+              onChange={v => setTrainingOfferingId(v)}
+              placeholder={offeringsQuery.isLoading ? "Loading…" : "Select qualification"}
+              disabled={offeringsQuery.isLoading}
+              ariaLabel="Qualification"
+            />
+            <Show when={errors().trainingOfferingId}>
+              <p class={errorClass}>{errors().trainingOfferingId}</p>
+            </Show>
+          </div>
+          <div>
+            <span class={labelClass}>Program Scheme</span>
+            <Select
+              options={schemeOptions()}
+              value={trainingSchemeId() || undefined}
+              onChange={v => setTrainingSchemeId(v)}
+              placeholder={schemesQuery.isLoading ? "Loading…" : "Select program scheme"}
+              disabled={schemesQuery.isLoading}
+              ariaLabel="Program scheme"
+            />
+            <Show when={errors().trainingSchemeId}>
+              <p class={errorClass}>{errors().trainingSchemeId}</p>
+            </Show>
+          </div>
         </div>
 
         <div class="grid gap-3 md:grid-cols-3">
@@ -206,8 +245,7 @@ export function AddBatchModal(props: AddBatchModalProps) {
           </label>
           <label class="block">
             <span class="text-sm font-medium text-foreground mb-1 flex items-center justify-between">
-              <span>Budget</span>
-              <span class="text-xs text-muted font-normal">Optional</span>
+              <span>Gross Revenue / Budget</span>
             </span>
             <input
               type="number"
@@ -220,6 +258,24 @@ export function AddBatchModal(props: AddBatchModalProps) {
             />
             <Show when={errors().budget}>
               <p class={errorClass}>{errors().budget}</p>
+            </Show>
+            <Show when={budgetBreakdown()}>
+              {amounts => (
+                <div class="mt-2 rounded-lg border border-border bg-surface-muted px-3 py-2 text-xs">
+                  <div class="flex justify-between text-muted">
+                    <span>2% withholding</span>
+                    <span>
+                      {amounts().withholding.toLocaleString("en-PH", { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                  <div class="mt-1 flex justify-between font-semibold text-foreground">
+                    <span>Spendable 98%</span>
+                    <span>
+                      {amounts().net.toLocaleString("en-PH", { minimumFractionDigits: 2 })}
+                    </span>
+                  </div>
+                </div>
+              )}
             </Show>
           </label>
         </div>

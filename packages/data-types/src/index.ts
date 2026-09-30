@@ -1,7 +1,13 @@
 export type { Assessment } from "./assessment"
 export type { Asset, AssetStatus } from "./asset"
 export type { Attendance } from "./attendance"
-export type { Batch, BatchStatus, TrainingCategory, TrainingLevel } from "./batch"
+export type {
+  Batch,
+  BatchStatus,
+  TrainingCategory,
+  TrainingLevel,
+  TrainingSettingOption,
+} from "./batch"
 export type { DashboardStats } from "./dashboard"
 export type {
   AccountReceivable,
@@ -26,8 +32,28 @@ export type {
 } from "./finance"
 export type { GlAccount, GlAccountSection } from "./gl-account"
 export type { AttendanceStatus, HrAttendance } from "./hr-attendance"
+export type {
+  CashAdvance,
+  CashAdvanceListItem,
+  CashAdvanceStatus,
+  Employee,
+  EmployeeAttendance,
+  EmployeeAttendanceStatus,
+  EmployeeLeave,
+  EmployeeListItem,
+  Holiday,
+  HrCalendar,
+  HrPerson,
+  TrainerAssignment,
+} from "./hr-operations"
 export type { Instructor } from "./instructor"
-export type { StockItem, StockMovement, StockReceipt, StockStatus } from "./inventory"
+export type {
+  MonthlyToolkeepingLine,
+  MonthlyToolkeepingReport,
+  StockItem,
+  StockMovement,
+  StockStatus,
+} from "./inventory"
 export type { PayrollEntry, PayrollPeriod, PayrollStatus } from "./payroll"
 export type {
   AccountingTreatment,
@@ -42,9 +68,16 @@ export type {
   PettyCashRequest,
   PettyCashStatus,
   PettyCashSummary,
+  PoLiquidation,
+  PoLiquidationListItem,
+  PoLiquidationReceipt,
+  PoLiquidationStatus,
   PoStatus,
   PrAttachment,
   PrItem,
+  ProcurementExpenseItem,
+  ProcurementExpenseType,
+  ProcurementOperationsSubtype,
   ProfitCenter,
   PrStatus,
   PurchaseOrder,

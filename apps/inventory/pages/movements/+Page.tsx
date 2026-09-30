@@ -135,7 +135,6 @@ export default function MovementsPage() {
                       <td class="px-6 py-4 text-sm text-foreground">{formatDate(m.createdAt)}</td>
                       <td class="px-6 py-4">
                         <p class="text-sm font-medium text-foreground">{m.itemName}</p>
-                        <p class="text-xs text-muted mt-0.5">{m.batchCode}</p>
                       </td>
                       <td class="px-6 py-4">
                         <span

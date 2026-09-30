@@ -11,10 +11,10 @@ apps/                          one Vike SSR app per ERP portal
 ├── main/                      → portal.arkinstitutebc.com       login, SSO hub, /learn manuals
 ├── training/                  → training.arkinstitutebc.com     batches, students, attendance
 ├── procurement/               → procurement.arkinstitutebc.com  PR approval, PO workflow, petty cash
-├── inventory/                 → inventory.arkinstitutebc.com    receiving, stock take, movements
+├── inventory/                 → inventory.arkinstitutebc.com    toolkeeping, monthly checks, damages
 ├── finance/                   → finance.arkinstitutebc.com      disbursements, GL, RR, assets
 ├── billing/                   → billing.arkinstitutebc.com      TESDA billing, receivables
-└── hr/                        → hr.arkinstitutebc.com           trainers, attendance, payroll
+└── hr/                        → hr.arkinstitutebc.com           employees, trainers, leave, payroll
 
 packages/                      shared, edit once
 ├── ui/                        Sidebar, TopBar, PageHeader, StatCard / InfoCard, DataTable, StatusBadge,

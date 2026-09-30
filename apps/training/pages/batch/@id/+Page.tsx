@@ -13,8 +13,11 @@ import {
   useBatch,
   useBatchAudit,
   useBatchStudents,
+  useRegenerateReceivable,
   useStudent,
+  useUpdateNoticeToProceed,
 } from "@data/hooks"
+import { uploadTrainingFile } from "@data/uploads"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
 import {
@@ -45,6 +48,7 @@ export default function BatchDetailPage() {
   const [showEditModal, setShowEditModal] = createSignal(false)
   const [editingStudentId, setEditingStudentId] = createSignal<string | null>(null)
   const [deletingStudentId, setDeletingStudentId] = createSignal<string | null>(null)
+  const [uploadingNtp, setUploadingNtp] = createSignal(false)
   const [studentViewMode, setStudentViewMode] = createSignal<StudentViewMode>(
     getInitialStudentViewMode()
   )
@@ -55,6 +59,8 @@ export default function BatchDetailPage() {
   const studentsQuery = useBatchStudents(id)
   const editingStudentQuery = useStudent(() => editingStudentId() || "")
   const deletingStudentQuery = useStudent(() => deletingStudentId() || "")
+  const updateNtp = useUpdateNoticeToProceed()
+  const regenerateReceivable = useRegenerateReceivable()
 
   const publicEnrollmentUrl = () => `${PUBLIC_FORMS_URL}/student/${id()}`
 
@@ -71,6 +77,24 @@ export default function BatchDetailPage() {
     setStudentViewMode(mode)
     if (typeof window !== "undefined") {
       window.localStorage.setItem(STUDENT_VIEW_MODE_KEY, mode)
+    }
+  }
+
+  const uploadNoticeToProceed = async (file?: File) => {
+    if (!file) return
+    setUploadingNtp(true)
+    try {
+      const uploaded = await uploadTrainingFile("notice-to-proceed", file)
+      updateNtp.mutate({
+        batchId: id(),
+        url: uploaded.secure_url,
+        name: file.name,
+        type: file.type,
+      })
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Notice to Proceed upload failed")
+    } finally {
+      setUploadingNtp(false)
     }
   }
 
@@ -119,7 +143,10 @@ export default function BatchDetailPage() {
                         {b().status}
                       </span>
                     </div>
-                    <p class="text-muted">{b().trainingName}</p>
+                    <p class="text-muted">{b().trainingOfferingLabel ?? b().trainingName}</p>
+                    <p class="mt-1 text-sm font-medium text-primary">
+                      {b().trainingSchemeLabel ?? "Legacy / Unspecified"}
+                    </p>
                   </div>
                   <div class="flex flex-wrap items-center gap-2">
                     <FormLinkActions
@@ -138,17 +165,103 @@ export default function BatchDetailPage() {
                   </div>
                 </div>
 
-                <div class="grid gap-px border-t border-border bg-border sm:grid-cols-2 xl:grid-cols-4">
+                <div class="grid gap-px border-t border-border bg-border sm:grid-cols-2 xl:grid-cols-5">
                   <SummaryMetric
                     label="Schedule"
                     value={`${formatDatePH(b().startDate)} – ${formatDatePH(b().endDate)}`}
                   />
                   <SummaryMetric label="Weekly" value={b().weeklySchedule || "Not set"} />
                   <SummaryMetric label="Students" value={b().studentsEnrolled} />
-                  <SummaryMetric
-                    label="Budget"
-                    value={Number(b().budget) > 0 ? formatPeso(b().budget) : "Not set"}
-                  />
+                  <SummaryMetric label="Gross Revenue" value={formatPeso(b().grossRevenue)} />
+                  <SummaryMetric label="Spendable 98%" value={formatPeso(b().netBudget)} />
+                </div>
+              </section>
+
+              <section class="mb-6 grid gap-4 xl:grid-cols-3">
+                <div class="rounded-xl border border-border bg-surface p-5">
+                  <div class="flex items-start justify-between gap-3">
+                    <div>
+                      <h2 class="text-sm font-semibold text-foreground">Billing</h2>
+                      <p class="mt-1 text-xs text-muted">Automatically synced from this batch.</p>
+                    </div>
+                    <span class="capitalize text-sm font-semibold text-foreground">
+                      {b().billing?.status.replace("_", " ") ?? "Missing"}
+                    </span>
+                  </div>
+                  <div class="mt-4 grid grid-cols-3 gap-3 text-sm">
+                    <DetailItem label="2% Withholding" value={formatPeso(b().withholdingAmount)} />
+                    <DetailItem label="Paid" value={formatPeso(b().billing?.paidAmount ?? 0)} />
+                    <DetailItem
+                      label="Outstanding"
+                      value={formatPeso(b().billing?.outstandingAmount ?? b().grossRevenue)}
+                    />
+                  </div>
+                  <Show when={!b().billing}>
+                    <Button
+                      type="button"
+                      size="sm"
+                      class="mt-4"
+                      disabled={regenerateReceivable.isPending}
+                      onClick={() => regenerateReceivable.mutate(b().id)}
+                    >
+                      Regenerate Receivable
+                    </Button>
+                  </Show>
+                </div>
+
+                <Show when={b().budgetSummary}>
+                  {summary => (
+                    <div class="rounded-xl border border-border bg-surface p-5">
+                      <h2 class="text-sm font-semibold text-foreground">Budget Control</h2>
+                      <p class="mt-1 text-xs text-muted">
+                        Commitments and actual spending across Procurement and HR.
+                      </p>
+                      <div class="mt-4 grid grid-cols-3 gap-3 text-sm">
+                        <DetailItem
+                          label="Committed"
+                          value={formatPeso(summary().committedAmount)}
+                        />
+                        <DetailItem label="Actual" value={formatPeso(summary().actualAmount)} />
+                        <DetailItem
+                          label="Available"
+                          value={formatPeso(summary().availableAmount)}
+                        />
+                      </div>
+                    </div>
+                  )}
+                </Show>
+
+                <div class="rounded-xl border border-border bg-surface p-5">
+                  <h2 class="text-sm font-semibold text-foreground">Notice to Proceed</h2>
+                  <Show
+                    when={b().noticeToProceedUrl}
+                    fallback={<p class="mt-2 text-sm text-muted">No NTP attached.</p>}
+                  >
+                    <a
+                      href={b().noticeToProceedUrl ?? "#"}
+                      target="_blank"
+                      rel="noreferrer"
+                      class="mt-2 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+                    >
+                      <Icons.fileText class="h-4 w-4" />
+                      {b().noticeToProceedName ?? "View Notice to Proceed"}
+                    </a>
+                  </Show>
+                  <label class="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-surface-muted">
+                    <Icons.upload class="h-4 w-4" />
+                    {uploadingNtp()
+                      ? "Uploading…"
+                      : b().noticeToProceedUrl
+                        ? "Replace NTP"
+                        : "Upload NTP"}
+                    <input
+                      type="file"
+                      accept="application/pdf,image/jpeg,image/png,image/webp"
+                      class="hidden"
+                      disabled={uploadingNtp() || updateNtp.isPending}
+                      onChange={event => void uploadNoticeToProceed(event.currentTarget.files?.[0])}
+                    />
+                  </label>
                 </div>
               </section>
 

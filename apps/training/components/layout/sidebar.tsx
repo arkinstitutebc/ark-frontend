@@ -1,9 +1,10 @@
 import { type NavItem, Sidebar as SharedSidebar } from "@ark/ui"
-import { Folder, GraduationCap, HelpCircle, Users } from "lucide-solid"
+import { Folder, GraduationCap, HelpCircle, SlidersHorizontal, Users } from "lucide-solid"
 
 const navItems: NavItem[] = [
   { id: "batches", label: "Batches", href: "/", icon: Folder },
   { id: "students", label: "Students", href: "/students", icon: Users },
+  { id: "settings", label: "Batch Settings", href: "/settings", icon: SlidersHorizontal },
   { id: "tutorials", label: "How To", href: "/tutorials", icon: HelpCircle },
 ]
 

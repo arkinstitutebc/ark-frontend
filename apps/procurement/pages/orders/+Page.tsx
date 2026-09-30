@@ -7,14 +7,23 @@ import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
 
 function getEmptyStateMessage(filter: PoStatus | "all") {
   switch (filter) {
-    case "draft":
-      return { title: "No draft orders", message: "No purchase orders in draft status." }
-    case "sent":
-      return { title: "No sent orders", message: "No orders have been sent to suppliers." }
-    case "partial":
-      return { title: "No partial orders", message: "No orders are currently partially received." }
-    case "received":
-      return { title: "No received orders", message: "No orders have been received yet." }
+    case "pending":
+      return { title: "No pending POs", message: "Approved requests automatically appear here." }
+    case "confirmed":
+      return {
+        title: "No confirmed POs",
+        message: "No purchase orders are awaiting acknowledgment.",
+      }
+    case "acknowledged":
+      return {
+        title: "No acknowledged POs",
+        message: "No purchase orders are awaiting liquidation.",
+      }
+    case "liquidated":
+      return {
+        title: "No liquidated POs",
+        message: "No purchase orders have completed finance review.",
+      }
     default:
       return { title: "No purchase orders", message: "Create a purchase order to get started." }
   }
@@ -33,10 +42,10 @@ export default function OrdersPage() {
   }))
   const filters = [
     { value: "all" as const, label: "All" },
-    { value: "draft" as const, label: "Draft" },
-    { value: "sent" as const, label: "Sent" },
-    { value: "partial" as const, label: "Partial" },
-    { value: "received" as const, label: "Received" },
+    { value: "pending" as const, label: "Pending" },
+    { value: "confirmed" as const, label: "Confirmed" },
+    { value: "acknowledged" as const, label: "Acknowledged" },
+    { value: "liquidated" as const, label: "Liquidated" },
   ]
 
   const rows = createMemo(() => query.data?.items ?? [])
@@ -48,10 +57,10 @@ export default function OrdersPage() {
     const counts = query.data?.summary.byStatus ?? {}
     return {
       total: Object.values(counts).reduce((sum, count) => sum + (count ?? 0), 0),
-      draft: counts.draft ?? 0,
-      sent: counts.sent ?? 0,
-      partial: counts.partial ?? 0,
-      received: counts.received ?? 0,
+      pending: counts.pending ?? 0,
+      confirmed: counts.confirmed ?? 0,
+      acknowledged: counts.acknowledged ?? 0,
+      liquidated: counts.liquidated ?? 0,
     }
   })
 
@@ -70,24 +79,16 @@ export default function OrdersPage() {
     <PageContainer>
       <PageHeader
         title="Purchase Orders"
-        subtitle="Manage supplier orders and delivery tracking"
-        action={
-          <a
-            href="/orders/create"
-            class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
-          >
-            <Icons.plus class="w-4 h-4" />+ Create PO
-          </a>
-        }
+        subtitle="POs are generated automatically when purchase requests are approved"
       />
 
       {/* Stats Cards */}
       <div class="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-8">
         <StatCard label="Total" value={query.isSuccess ? stats().total : "-"} />
-        <StatCard label="Draft" value={query.isSuccess ? stats().draft : "-"} />
-        <StatCard label="Sent" value={query.isSuccess ? stats().sent : "-"} />
-        <StatCard label="Partial" value={query.isSuccess ? stats().partial : "-"} />
-        <StatCard label="Received" value={query.isSuccess ? stats().received : "-"} />
+        <StatCard label="Pending" value={query.isSuccess ? stats().pending : "-"} />
+        <StatCard label="Confirmed" value={query.isSuccess ? stats().confirmed : "-"} />
+        <StatCard label="Acknowledged" value={query.isSuccess ? stats().acknowledged : "-"} />
+        <StatCard label="Liquidated" value={query.isSuccess ? stats().liquidated : "-"} />
       </div>
 
       {/* Filters */}

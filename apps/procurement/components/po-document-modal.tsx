@@ -146,7 +146,7 @@ export function PoDocumentModal(props: PoDocumentModalProps) {
                 Close
               </button>
               <a
-                href={`${API_URL}/api/procurement/orders/${po().id}/pdf`}
+                href={`${API_URL}/api/procurement/purchase-orders/${po().id}/pdf`}
                 target="_blank"
                 rel="noopener noreferrer"
                 class="px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 transition-colors cursor-pointer"

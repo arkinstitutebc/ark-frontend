@@ -3,20 +3,41 @@ import { loginAsAdmin, requireBackend } from "../auth-helper"
 import { waitForReady } from "../helpers"
 import { API_URL, PORTAL_URLS } from "../test-config"
 
-interface BatchFixture {
-  id: string
-  batchCode: string
-}
-
-async function firstBatch(
-  page: import("@playwright/test").Page,
-  testInfo: import("@playwright/test").TestInfo
-) {
-  const res = await page.request.get(`${API_URL}/api/training/batches`)
-  expect(res.status()).toBe(200)
-  const batches = (await res.json()) as BatchFixture[]
-  testInfo.skip(batches.length === 0, "No seeded training batches available for billing E2E")
-  return batches[0]
+async function createTrainingReceivable(page: import("@playwright/test").Page) {
+  const [offeringsResponse, schemesResponse] = await Promise.all([
+    page.request.get(`${API_URL}/api/training/settings/offerings`),
+    page.request.get(`${API_URL}/api/training/settings/schemes`),
+  ])
+  expect(offeringsResponse.status()).toBe(200)
+  expect(schemesResponse.status()).toBe(200)
+  const offerings = (await offeringsResponse.json()) as { id: string }[]
+  const schemes = (await schemesResponse.json()) as { id: string }[]
+  expect(offerings.length).toBeGreaterThan(0)
+  expect(schemes.length).toBeGreaterThan(0)
+  const created = await page.request.post(`${API_URL}/api/training/batches`, {
+    data: {
+      trainingOfferingId: offerings[0].id,
+      trainingSchemeId: schemes[0].id,
+      senator: `E2E Billing ${Date.now()}`,
+      startDate: "2026-05-01",
+      endDate: "2026-05-31",
+      venue: "On-site",
+      instructor: "E2E Trainer",
+      budget: "1234.56",
+    },
+  })
+  expect(created.status()).toBe(201)
+  const batch = (await created.json()) as { id: string; batchCode: string }
+  const receivables = await page.request.get(
+    `${API_URL}/api/billing/receivables?search=${batch.batchCode}`
+  )
+  expect(receivables.status()).toBe(200)
+  const response = (await receivables.json()) as {
+    items: { id: string; batchCode: string; amount: string }[]
+  }
+  const receivable = response.items.find(item => item.batchCode === batch.batchCode)
+  if (!receivable) throw new Error(`Training batch ${batch.batchCode} has no receivable`)
+  return receivable
 }
 
 test.describe("Billing actions", () => {
@@ -25,26 +46,16 @@ test.describe("Billing actions", () => {
     await loginAsAdmin(page)
   })
 
-  test("marks a receivable billed, then records full payment", async ({ page }, testInfo) => {
-    const batch = await firstBatch(page, testInfo)
-    const amount = 1234.56
-    const createRes = await page.request.post(`${API_URL}/api/billing/receivables`, {
-      data: {
-        batchId: batch.id,
-        amount: String(amount),
-        notes: `E2E billing action ${Date.now()}`,
-      },
-    })
-    expect(createRes.status()).toBe(201)
-    const receivable = (await createRes.json()) as { id: string }
+  test("records payment on a training-generated receivable", async ({ page }) => {
+    const receivable = await createTrainingReceivable(page)
+    const amount = Number(receivable.amount)
 
     await page.goto(`${PORTAL_URLS.billing}/receivables`)
     await waitForReady(page)
-    await page.getByPlaceholder(/search batch/i).fill(batch.batchCode)
+    await page.getByPlaceholder(/search batch/i).fill(receivable.batchCode)
 
-    const row = page.getByRole("row").filter({ hasText: batch.batchCode }).first()
+    const row = page.getByRole("row").filter({ hasText: receivable.batchCode }).first()
     await expect(row).toBeVisible()
-    await row.getByRole("button", { name: /mark billed/i }).click()
     await expect(row.getByRole("button", { name: /record payment/i })).toBeVisible()
 
     await row.getByRole("button", { name: /record payment/i }).click()

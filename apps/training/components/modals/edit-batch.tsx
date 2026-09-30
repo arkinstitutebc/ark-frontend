@@ -1,5 +1,11 @@
 import { formErrorClass, formInputClass, formLabelClass, Modal, ModalFooter, Select } from "@ark/ui"
-import { useInstructors, useUpdateBatch, useVenues } from "@data/hooks"
+import {
+  useInstructors,
+  useTrainingOfferings,
+  useTrainingSchemes,
+  useUpdateBatch,
+  useVenues,
+} from "@data/hooks"
 import { updateBatchSchema } from "@data/schemas"
 import type { Batch } from "@data/types"
 import { validateForm } from "@data/validate"
@@ -8,7 +14,6 @@ import {
   batchStatusOptions,
   OTHER_INSTRUCTOR,
   trainingLevelOptions,
-  trainingTypeOptions,
 } from "@/components/forms/options"
 import { ManageVenuesModal } from "./manage-venues"
 
@@ -27,10 +32,13 @@ export function EditBatchModal(props: EditBatchModalProps) {
   const mutation = useUpdateBatch()
   const venuesQuery = useVenues()
   const instructorsQuery = useInstructors()
+  const offeringsQuery = useTrainingOfferings()
+  const schemesQuery = useTrainingSchemes()
   const [errors, setErrors] = createSignal<Record<string, string>>({})
   const [showManageVenues, setShowManageVenues] = createSignal(false)
 
-  const [trainingName, setTrainingName] = createSignal(props.batch.trainingName)
+  const [trainingOfferingId, setTrainingOfferingId] = createSignal(props.batch.trainingOfferingId)
+  const [trainingSchemeId, setTrainingSchemeId] = createSignal(props.batch.trainingSchemeId)
   const [trainingLevel, setTrainingLevel] = createSignal(props.batch.trainingLevel)
   const [batchNo, setBatchNo] = createSignal(props.batch.batchNo ?? "")
   const [rqm, setRqm] = createSignal(props.batch.rqm ?? "")
@@ -59,7 +67,12 @@ export function EditBatchModal(props: EditBatchModalProps) {
     }
   })
 
-  const trainingOptions = createMemo(trainingTypeOptions)
+  const trainingOptions = createMemo(() =>
+    (offeringsQuery.data ?? []).map(item => ({ label: item.label, value: item.id }))
+  )
+  const schemeOptions = createMemo(() =>
+    (schemesQuery.data ?? []).map(item => ({ label: item.label, value: item.id }))
+  )
   const levelOptions = createMemo(trainingLevelOptions)
   const statusOptions = createMemo(batchStatusOptions)
 
@@ -84,7 +97,8 @@ export function EditBatchModal(props: EditBatchModalProps) {
   const handleSubmit = (e: Event) => {
     e.preventDefault()
     const data = {
-      trainingName: trainingName(),
+      trainingOfferingId: trainingOfferingId(),
+      trainingSchemeId: trainingSchemeId(),
       trainingLevel: trainingLevel(),
       batchNo: batchNo().trim(),
       rqm: rqm().trim(),
@@ -115,7 +129,8 @@ export function EditBatchModal(props: EditBatchModalProps) {
   }
 
   const handleClose = () => {
-    setTrainingName(props.batch.trainingName)
+    setTrainingOfferingId(props.batch.trainingOfferingId)
+    setTrainingSchemeId(props.batch.trainingSchemeId)
     setTrainingLevel(props.batch.trainingLevel)
     setBatchNo(props.batch.batchNo ?? "")
     setRqm(props.batch.rqm ?? "")
@@ -144,18 +159,33 @@ export function EditBatchModal(props: EditBatchModalProps) {
           </p>
         </div>
 
-        <div>
-          <span class={labelClass}>Training Type</span>
-          <Select
-            options={trainingOptions()}
-            value={trainingName()}
-            onChange={v => setTrainingName(v)}
-            placeholder="Select training type"
-            ariaLabel="Training type"
-          />
-          <Show when={errors().trainingName}>
-            <p class={errorClass}>{errors().trainingName}</p>
-          </Show>
+        <div class="grid gap-3 md:grid-cols-2">
+          <div>
+            <span class={labelClass}>Qualification</span>
+            <Select
+              options={trainingOptions()}
+              value={trainingOfferingId()}
+              onChange={v => setTrainingOfferingId(v)}
+              placeholder="Select qualification"
+              ariaLabel="Qualification"
+            />
+            <Show when={errors().trainingOfferingId}>
+              <p class={errorClass}>{errors().trainingOfferingId}</p>
+            </Show>
+          </div>
+          <div>
+            <span class={labelClass}>Program Scheme</span>
+            <Select
+              options={schemeOptions()}
+              value={trainingSchemeId()}
+              onChange={v => setTrainingSchemeId(v)}
+              placeholder="Select program scheme"
+              ariaLabel="Program scheme"
+            />
+            <Show when={errors().trainingSchemeId}>
+              <p class={errorClass}>{errors().trainingSchemeId}</p>
+            </Show>
+          </div>
         </div>
 
         <div class="grid grid-cols-2 gap-3">
@@ -254,8 +284,7 @@ export function EditBatchModal(props: EditBatchModalProps) {
           </label>
           <label class="block">
             <span class="text-sm font-medium text-foreground mb-1 flex items-center justify-between">
-              <span>Budget</span>
-              <span class="text-xs text-muted font-normal">Optional</span>
+              <span>Gross Revenue / Budget</span>
             </span>
             <input
               type="number"
@@ -263,11 +292,15 @@ export function EditBatchModal(props: EditBatchModalProps) {
               step="0.01"
               value={budget()}
               onInput={e => setBudget(e.target.value)}
+              disabled={Number(props.batch.billing?.paidAmount ?? 0) > 0}
               placeholder="0.00"
               class={inputClass("budget")}
             />
             <Show when={errors().budget}>
               <p class={errorClass}>{errors().budget}</p>
+            </Show>
+            <Show when={Number(props.batch.billing?.paidAmount ?? 0) > 0}>
+              <p class="mt-1 text-xs text-muted">Locked after the first Billing payment.</p>
             </Show>
           </label>
         </div>

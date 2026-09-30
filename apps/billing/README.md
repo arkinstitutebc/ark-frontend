@@ -4,7 +4,7 @@
 
 ## Pages
 
-`/` dashboard, `/receivables` (AR list), `/receivables/create`, `/tutorials`.
+`/` Revenue dashboard, `/receivables` (training-synced AR list, edit/delete/payment actions), `/tutorials`.
 
 ## Dev
 

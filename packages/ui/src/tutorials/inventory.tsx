@@ -10,104 +10,56 @@ export const inventoryTutorial: {
   actions?: { label: string; href: string }[]
   sections: TutorialSection[]
 } = {
-  title: "How to use the Inventory portal",
-  subtitle: "Stock items, receiving deliveries, and the movement log.",
+  title: "How to use Toolkeeping",
+  subtitle: "Catalog tools and equipment, record damage, and complete a monthly physical check.",
   intro: (
     <p>
-      Inventory closes the loop after Procurement. Receiving validates delivered items against the
-      PO, updates on-hand stock, and leaves an immutable movement trail for audit.
+      Toolkeeping is independent from Purchase Orders. Add the tools actually held by ARK, then use
+      one monthly checklist to confirm quantity and condition.
     </p>
   ),
-  workflow: ["Receive PO", "Update stock", "Review partials", "Count shelf", "Adjust variances"],
+  workflow: ["Add tool", "Record price", "Generate month", "Count all tools", "Complete check"],
   checklist: [
-    "Use the PO from Procurement, not a manual supplier note.",
-    "Count actual delivered quantities before saving.",
-    "Use Stock Take for full shelf reconciliation and Adjust for one item correction.",
+    "Use individual tracking for serialized or uniquely tagged equipment.",
+    "Record damaged, for-repair, or lost condition as soon as it is known.",
+    "Generate one checklist each month; it automatically includes every existing tool.",
   ],
   actions: [
-    { label: "Open Stock", href: "/" },
-    { label: "Open Receiving", href: "/receiving" },
-    { label: "Open Movements", href: "/movements" },
+    { label: "Open Toolkeeping", href: "/" },
+    { label: "Open Monthly Checks", href: "/monthly" },
   ],
   sections: [
     {
-      id: "overview",
-      title: "What this portal is for",
+      id: "catalog",
+      title: "Maintain the tool catalog",
       body: (
         <p>
-          Inventory tracks <b>stock items</b> (training materials, supplies) and records every{" "}
-          <b>movement</b> in or out. Items show their on-hand quantity, reorder level, and a derived
-          stock status so users can quickly see what needs replenishment.
+          Add each tool or equipment type with its unit price, quantity, reorder level, tracking
+          mode, and current condition. Asset tags and serial numbers are available for individually
+          tracked equipment.
         </p>
       ),
     },
     {
-      id: "receive",
-      title: "Receive a delivery",
+      id: "monthly",
+      title: "Run the monthly check",
       body: (
-        <>
-          <p>
-            When a PO arrives, go to <b>Receiving</b>, link the purchase order, and confirm
-            quantities. Items get auto-bumped on hand and a movement row is logged for each item.
-            The PO stays <b>partial</b> until cumulative received quantities match the ordered
-            quantities for every line.
-          </p>
-          <ol class="list-decimal pl-5 space-y-1.5">
-            <li>
-              Click <b>Receive PO</b>.
-            </li>
-            <li>Pick the PO from the dropdown.</li>
-            <li>Adjust quantities if the supplier shorted delivery. Over-receiving is blocked.</li>
-            <li>Save. Movements appear in the Movements log instantly.</li>
-          </ol>
-        </>
+        <ol class="list-decimal pl-5 space-y-1.5">
+          <li>Open Monthly Checks and generate the month.</li>
+          <li>Open the checklist; every tool that existed at generation time is included.</li>
+          <li>Enter counted and damaged quantities, condition, and any notes.</li>
+          <li>Save progress while counting, then complete only after every line is checked.</li>
+        </ol>
       ),
     },
     {
-      id: "stock-take",
-      title: "Run a stock take (cycle count)",
-      body: (
-        <>
-          <p>
-            Use <b>Stock Take</b> to reconcile the whole shelf in one session — counter walks the
-            items, types each <b>Counted</b> quantity, and submits once. The variance column shows
-            what'll change before you commit.
-          </p>
-          <ol class="list-decimal pl-5 space-y-1.5">
-            <li>
-              Open <b>Stock Take</b> from the sidebar.
-            </li>
-            <li>(Optional) Add a session note — appears on every adjustment row.</li>
-            <li>Type the counted quantity for each item. Leave blank to skip.</li>
-            <li>
-              Hit <b>Submit count</b>. Items that match on-hand are skipped; differences become
-              adjustment movements automatically.
-            </li>
-          </ol>
-          <p>
-            The whole submission is saved together. If anything fails, nothing is partly updated.
-          </p>
-        </>
-      ),
-    },
-    {
-      id: "adjust",
-      title: "Adjust a single item",
+      id: "damage",
+      title: "Track damage and condition",
       body: (
         <p>
-          Open an item from the <b>Stock</b> page and click <b>Adjust</b>. Enter a quantity
-          (positive = in, negative = out, or pick "adjustment" for corrections) and a reason. Each
-          adjustment writes one movement row — the log is your audit trail.
-        </p>
-      ),
-    },
-    {
-      id: "movements",
-      title: "Read the movement log",
-      body: (
-        <p>
-          The <b>Movements</b> tab is the full ledger: who did what, when, and why. Filter by item
-          or type. Use this when something doesn't reconcile against the physical shelf.
+          Use <b>Damaged</b>, <b>For repair</b>, or <b>Lost</b> when the physical check finds an
+          issue. Completing the checklist updates the catalog quantity, damaged count, condition,
+          and low-stock status together.
         </p>
       ),
     },
@@ -117,10 +69,10 @@ export const inventoryTutorial: {
       body: (
         <ul class="list-disc pl-5 space-y-1.5">
           <li>
-            Stock status comes from on-hand quantity and reorder level; update counts, not labels.
+            Do not recreate Procurement receipts here; Toolkeeping represents physical custody.
           </li>
-          <li>If receiving fails, the PO and stock do not change. Retry after fixing the issue.</li>
-          <li>Movements are immutable. Made a typo? Create a new "adjustment" row to correct.</li>
+          <li>Use notes to identify the exact damaged unit or explain a variance.</li>
+          <li>Completed monthly reports are locked as the audit record for that month.</li>
         </ul>
       ),
     },

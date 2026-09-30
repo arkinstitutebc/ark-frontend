@@ -4,9 +4,6 @@ import { useMovements } from "@data/hooks"
 import type { StockItem } from "@data/types"
 import { For, Show } from "solid-js"
 
-const PROCUREMENT_PORTAL_URL =
-  import.meta.env.VITE_PROCUREMENT_PORTAL_URL || "https://procurement.arkinstitutebc.com"
-
 interface ViewItemModalProps {
   open: boolean
   onClose: () => void
@@ -139,46 +136,6 @@ export function ViewItemModal(props: ViewItemModalProps) {
                       <p class="text-sm font-medium text-foreground">
                         {formatDatePH(_item().lastUpdated)}
                       </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Batch Information */}
-                <div>
-                  <h4 class="text-sm font-medium text-foreground mb-3">Batch Information</h4>
-                  <div class="bg-surface-muted rounded-lg px-4 py-3">
-                    <div class="grid grid-cols-2 gap-4">
-                      <div>
-                        <p class="text-xs text-muted">Batch Code</p>
-                        <p class="text-sm font-mono font-medium text-foreground">
-                          {_item().batchCode}
-                        </p>
-                      </div>
-                      <div>
-                        <p class="text-xs text-muted">Batch Name</p>
-                        <p class="text-sm font-medium text-foreground">{_item().batchName}</p>
-                      </div>
-                      {_item().poReference ? (
-                        <>
-                          <div>
-                            <p class="text-xs text-muted">PO Reference</p>
-                            <a
-                              href={`${PROCUREMENT_PORTAL_URL}/orders`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              class="inline-flex items-center gap-1.5 text-sm font-medium text-primary hover:text-primary/80 hover:underline"
-                              title="Open in procurement portal"
-                            >
-                              {_item().poReference}
-                              <Icons.arrowRight class="w-3.5 h-3.5" />
-                            </a>
-                          </div>
-                          <div>
-                            <p class="text-xs text-muted">Source</p>
-                            <p class="text-sm font-medium text-foreground">Procurement</p>
-                          </div>
-                        </>
-                      ) : null}
                     </div>
                   </div>
                 </div>

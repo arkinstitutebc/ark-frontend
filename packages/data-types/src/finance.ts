@@ -108,17 +108,23 @@ export interface CheckVoucher {
   updatedAt: string
 }
 
-export type ArStatus = "created" | "billed" | "paid" | "overdue"
+export type ArStatus = "unpaid" | "partially_paid" | "paid" | "overdue" | "cancelled"
 
 export interface AccountReceivable {
   id: string
   batchId: string
   batchCode: string
   amount: number
+  withholdingRate: number
+  grossRevenue: number
+  withholdingAmount: number
+  netRevenue: number
+  outstandingAmount: number
   status: ArStatus
   billedAt?: string
   paidAt?: string
   paidAmount?: number
+  dueDate?: string | null
   notes?: string
   createdAt: string
 }

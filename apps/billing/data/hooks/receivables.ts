@@ -4,16 +4,9 @@ import { api } from "../api"
 import { queryKeys } from "../query-keys"
 import type { AccountReceivable } from "../types"
 
-interface CreateArInput {
-  batchId: string
-  batchCode: string
-  amount: string
-  notes?: string
-}
-
 interface UpdateArInput {
-  status?: string
-  billedAt?: string
+  amount?: number
+  status?: "cancelled"
   dueDate?: string
   notes?: string
 }
@@ -32,6 +25,8 @@ export interface ReceivablesListResponse {
   limit: number
   summary: {
     totalAmount: number
+    withholdingAmount: number
+    netRevenue: number
     paidAmount: number
     outstandingAmount: number
     byStatus: Partial<
@@ -60,14 +55,14 @@ interface RecordPaymentResult {
 const crud = createCrudHooks<
   AccountReceivable,
   AccountReceivable,
-  CreateArInput,
+  never,
   UpdateArInput,
   ReceivablesListQuery
 >({
   basePath: "/api/billing/receivables",
   domain: "receivables",
   label: "Receivable",
-  messages: { create: "Billing created", update: "Receivable updated" },
+  messages: { create: false, update: "Receivable updated", delete: "Receivable deleted" },
   queryKeys: {
     all: queryKeys.receivables.all,
     list: q => queryKeys.receivables.filtered(q),
@@ -91,8 +86,8 @@ export function useReceivables(query?: () => ReceivablesListQuery | undefined) {
   })
 }
 export const useReceivable = crud.useOne
-export const useCreateAr = crud.useCreate
 export const useUpdateAr = crud.useUpdate
+export const useDeleteAr = crud.useDelete
 
 // Bespoke: payment endpoint nested under the AR
 export function useRecordPayment() {

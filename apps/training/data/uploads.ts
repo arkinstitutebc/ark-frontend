@@ -1,10 +1,11 @@
 import type { CloudinarySignature, CloudinaryUploadResult } from "@ark/api-client"
 import { api } from "./api"
 
-export type StudentUploadKind = "photo" | "certificate"
+export type TrainingUploadKind = "photo" | "certificate" | "notice-to-proceed"
+export type StudentUploadKind = Exclude<TrainingUploadKind, "notice-to-proceed">
 
 const UPLOAD_RULES: Record<
-  StudentUploadKind,
+  TrainingUploadKind,
   { types: Set<string>; maxBytes: number; label: string }
 > = {
   photo: {
@@ -17,9 +18,14 @@ const UPLOAD_RULES: Record<
     maxBytes: 10_000_000,
     label: "PDF, JPG, PNG, or WebP up to 10MB",
   },
+  "notice-to-proceed": {
+    types: new Set(["image/jpeg", "image/png", "image/webp", "application/pdf"]),
+    maxBytes: 10_000_000,
+    label: "PDF, JPG, PNG, or WebP up to 10MB",
+  },
 }
 
-function validateStudentUpload(kind: StudentUploadKind, file: File) {
+function validateTrainingUpload(kind: TrainingUploadKind, file: File) {
   const rule = UPLOAD_RULES[kind]
   if (!rule.types.has(file.type)) throw new Error(`Upload a ${rule.label}.`)
   if (file.size > rule.maxBytes) throw new Error(`Upload a ${rule.label}.`)
@@ -29,11 +35,18 @@ export async function uploadStudentFile(
   kind: StudentUploadKind,
   file: File
 ): Promise<CloudinaryUploadResult> {
-  validateStudentUpload(kind, file)
+  return uploadTrainingFile(kind, file)
+}
+
+export async function uploadTrainingFile(
+  kind: TrainingUploadKind,
+  file: File
+): Promise<CloudinaryUploadResult> {
+  validateTrainingUpload(kind, file)
   const sig = await api<CloudinarySignature>(`/api/training/upload-signature/${kind}`, {
     method: "POST",
   })
-  const isRaw = kind === "certificate" && file.type === "application/pdf"
+  const isRaw = file.type === "application/pdf"
   const form = new FormData()
   form.append("file", file)
   form.append("api_key", sig.apiKey)

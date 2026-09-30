@@ -19,4 +19,10 @@ export const queryKeys = {
     all: ["training-venues"] as const,
     detail: (id: string) => ["training-venues", id] as const,
   },
+  settings: {
+    offerings: ["training-settings", "offerings"] as const,
+    schemes: ["training-settings", "schemes"] as const,
+    schemesFiltered: (includeInactive: boolean) =>
+      ["training-settings", "schemes", { includeInactive }] as const,
+  },
 } as const

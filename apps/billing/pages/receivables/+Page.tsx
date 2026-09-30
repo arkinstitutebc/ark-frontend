@@ -1,5 +1,5 @@
 import { formatDatePH, formatPeso, PageContainer, PageHeader, StatCard, THead, Th } from "@ark/ui"
-import { useReceivables, useRecordPayment, useUpdateAr } from "@data/hooks"
+import { useDeleteAr, useReceivables, useRecordPayment, useUpdateAr } from "@data/hooks"
 import type { AccountReceivable, ArStatus } from "@data/types"
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { Icons, Modal, QueryBoundary, StatusBadge } from "@/components/ui"
@@ -14,6 +14,10 @@ export default function ReceivablesPage() {
   const [selectedAr, setSelectedAr] = createSignal<AccountReceivable | null>(null)
   const [paymentAmount, setPaymentAmount] = createSignal("")
   const [paymentNotes, setPaymentNotes] = createSignal("")
+  const [editModalOpen, setEditModalOpen] = createSignal(false)
+  const [editAmount, setEditAmount] = createSignal("")
+  const [editDueDate, setEditDueDate] = createSignal("")
+  const [editNotes, setEditNotes] = createSignal("")
 
   const query = useReceivables(() => ({
     ...(filterStatus() !== "all" ? { status: filterStatus() } : {}),
@@ -23,6 +27,7 @@ export default function ReceivablesPage() {
   }))
   const updateMutation = useUpdateAr()
   const paymentMutation = useRecordPayment()
+  const deleteMutation = useDeleteAr()
   const selectedOutstanding = () => {
     const ar = selectedAr()
     if (!ar) return 0
@@ -60,15 +65,39 @@ export default function ReceivablesPage() {
     }
   })
 
-  const handleMarkBilled = (ar: AccountReceivable) => {
-    updateMutation.mutate({ id: ar.id, status: "billed", billedAt: new Date().toISOString() })
-  }
-
   const openPaymentModal = (ar: AccountReceivable) => {
     setSelectedAr(ar)
     setPaymentAmount(String(Number(ar.amount) - Number(ar.paidAmount || 0)))
     setPaymentNotes("")
     setPaymentModalOpen(true)
+  }
+
+  const openEditModal = (ar: AccountReceivable) => {
+    setSelectedAr(ar)
+    setEditAmount(String(Number(ar.amount)))
+    setEditDueDate(ar.dueDate ?? "")
+    setEditNotes(ar.notes ?? "")
+    setEditModalOpen(true)
+  }
+
+  const handleSaveEdit = () => {
+    const ar = selectedAr()
+    const amount = Number(editAmount())
+    if (!ar || !Number.isFinite(amount) || amount <= 0) return
+    updateMutation.mutate(
+      {
+        id: ar.id,
+        ...(Number(ar.paidAmount ?? 0) === 0 ? { amount } : {}),
+        dueDate: editDueDate() || undefined,
+        notes: editNotes() || undefined,
+      },
+      { onSuccess: () => setEditModalOpen(false) }
+    )
+  }
+
+  const handleDelete = (ar: AccountReceivable) => {
+    if (!window.confirm(`Delete the unpaid receivable for ${ar.batchCode}?`)) return
+    deleteMutation.mutate(ar.id)
   }
 
   const handleRecordPayment = () => {
@@ -108,34 +137,23 @@ export default function ReceivablesPage() {
 
   return (
     <PageContainer>
-      <PageHeader
-        title="Accounts Receivable"
-        subtitle="Manage TESDA billing statements and payments"
-        action={
-          <a
-            href="/receivables/create"
-            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary hover:bg-primary/90 rounded-lg transition-colors"
-          >
-            <Icons.plus class="w-4 h-4" /> Create Billing
-          </a>
-        }
-      />
+      <PageHeader title="Accounts Receivable" subtitle="Synced from Training batches" />
 
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         <StatCard label="Total" numeric value={query.data ? stats().total : "-"} />
         <StatCard
-          label="Total Amount"
+          label="Total Revenue"
           numeric
           value={query.data ? formatPeso(stats().totalAmount) : "-"}
         />
         <StatCard
-          label="Collected"
+          label="Total Debited Amount"
           numeric
           valueClass="text-green-700"
           value={query.data ? formatPeso(stats().collected) : "-"}
         />
         <StatCard
-          label="Outstanding"
+          label="Outstanding Receivables"
           numeric
           valueClass="text-red-700"
           value={query.data ? formatPeso(stats().outstanding) : "-"}
@@ -147,10 +165,11 @@ export default function ReceivablesPage() {
           <For
             each={[
               { value: "all" as FilterStatus, label: "All" },
-              { value: "created" as FilterStatus, label: "Created" },
-              { value: "billed" as FilterStatus, label: "Billed" },
+              { value: "unpaid" as FilterStatus, label: "Unpaid" },
+              { value: "partially_paid" as FilterStatus, label: "Partially Paid" },
               { value: "overdue" as FilterStatus, label: "Overdue" },
               { value: "paid" as FilterStatus, label: "Paid" },
+              { value: "cancelled" as FilterStatus, label: "Cancelled" },
             ]}
           >
             {filter => (
@@ -207,7 +226,8 @@ export default function ReceivablesPage() {
                 <table class="w-full">
                   <THead>
                     <Th>Batch</Th>
-                    <Th align="right">Amount</Th>
+                    <Th align="right">Gross Revenue</Th>
+                    <Th align="right">Net 98%</Th>
                     <Th align="center">Status</Th>
                     <Th align="right">Paid</Th>
                     <Th align="center">Actions</Th>
@@ -219,6 +239,9 @@ export default function ReceivablesPage() {
                           <td class="py-4 px-6 text-sm text-foreground">{ar.batchCode}</td>
                           <td class="py-4 px-6 text-right text-sm font-semibold text-foreground tabular-nums">
                             {formatPeso(Number(ar.amount))}
+                          </td>
+                          <td class="py-4 px-6 text-right text-sm text-foreground tabular-nums">
+                            {formatPeso(ar.netRevenue)}
                           </td>
                           <td class="py-4 px-6 text-center">
                             <StatusBadge status={ar.status} />
@@ -233,17 +256,9 @@ export default function ReceivablesPage() {
                             )}
                           </td>
                           <td class="py-4 px-6 text-center">
-                            <Show when={ar.status === "created"}>
-                              <button
-                                type="button"
-                                onClick={() => handleMarkBilled(ar)}
-                                disabled={updateMutation.isPending}
-                                class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors disabled:opacity-50"
-                              >
-                                {updateMutation.isPending ? "Updating..." : "Mark Billed"}
-                              </button>
-                            </Show>
-                            <Show when={ar.status === "billed" || ar.status === "overdue"}>
+                            <Show
+                              when={["unpaid", "partially_paid", "overdue"].includes(ar.status)}
+                            >
                               <button
                                 type="button"
                                 onClick={() => openPaymentModal(ar)}
@@ -255,22 +270,30 @@ export default function ReceivablesPage() {
                             <Show when={ar.status === "paid"}>
                               <span class="text-xs text-green-600">Paid</span>
                             </Show>
-                            <Show
-                              when={
-                                ar.status === "billed" ||
-                                ar.status === "overdue" ||
-                                ar.status === "paid"
-                              }
+                            <button
+                              type="button"
+                              onClick={() => openEditModal(ar)}
+                              class="ml-2 inline-flex px-2 py-1 text-xs font-medium text-muted hover:text-foreground"
                             >
-                              <a
-                                href={`${import.meta.env.VITE_API_URL || "http://localhost:4000"}/api/billing/receivables/${ar.id}/pdf`}
-                                target="_blank"
-                                rel="noopener"
-                                class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-muted hover:text-foreground ml-2"
+                              Edit
+                            </button>
+                            <Show when={Number(ar.paidAmount ?? 0) === 0}>
+                              <button
+                                type="button"
+                                onClick={() => handleDelete(ar)}
+                                class="inline-flex px-2 py-1 text-xs font-medium text-red-600 hover:text-red-700"
                               >
-                                PDF
-                              </a>
+                                Delete
+                              </button>
                             </Show>
+                            <a
+                              href={`${import.meta.env.VITE_API_URL || "http://localhost:4000"}/api/billing/receivables/${ar.id}/pdf`}
+                              target="_blank"
+                              rel="noopener"
+                              class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium text-muted hover:text-foreground"
+                            >
+                              PDF
+                            </a>
                           </td>
                         </tr>
                       )}
@@ -393,6 +416,61 @@ export default function ReceivablesPage() {
             </div>
           )}
         </Show>
+      </Modal>
+
+      <Modal open={editModalOpen()} onClose={() => setEditModalOpen(false)} title="Edit Receivable">
+        <div class="space-y-4">
+          <label class="block">
+            <span class="mb-1 block text-sm font-medium text-foreground">Gross Revenue</span>
+            <input
+              type="number"
+              min="0.01"
+              step="0.01"
+              value={editAmount()}
+              disabled={Number(selectedAr()?.paidAmount ?? 0) > 0}
+              onInput={event => setEditAmount(event.currentTarget.value)}
+              class="w-full rounded-lg border border-border px-3 py-2 text-sm disabled:bg-surface-muted"
+            />
+            <Show when={Number(selectedAr()?.paidAmount ?? 0) > 0}>
+              <p class="mt-1 text-xs text-muted">Locked after the first payment.</p>
+            </Show>
+          </label>
+          <label class="block">
+            <span class="mb-1 block text-sm font-medium text-foreground">Due Date</span>
+            <input
+              type="date"
+              value={editDueDate()}
+              onInput={event => setEditDueDate(event.currentTarget.value)}
+              class="w-full rounded-lg border border-border px-3 py-2 text-sm"
+            />
+          </label>
+          <label class="block">
+            <span class="mb-1 block text-sm font-medium text-foreground">Notes</span>
+            <textarea
+              rows={3}
+              value={editNotes()}
+              onInput={event => setEditNotes(event.currentTarget.value)}
+              class="w-full rounded-lg border border-border px-3 py-2 text-sm"
+            />
+          </label>
+          <div class="flex justify-end gap-2">
+            <button
+              type="button"
+              onClick={() => setEditModalOpen(false)}
+              class="rounded-lg border border-border px-4 py-2 text-sm font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              onClick={handleSaveEdit}
+              disabled={updateMutation.isPending}
+              class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+            >
+              {updateMutation.isPending ? "Saving…" : "Save Changes"}
+            </button>
+          </div>
+        </div>
       </Modal>
     </PageContainer>
   )

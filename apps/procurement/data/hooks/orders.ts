@@ -1,41 +1,10 @@
-import { createCrudHooks, toast } from "@ark/ui"
+import { toast } from "@ark/ui"
 import { createMutation, createQuery, useQueryClient } from "@tanstack/solid-query"
 import { api } from "../api"
 import { queryKeys } from "../query-keys"
-import type { PoStatus, PrItem, PurchaseOrder } from "../types"
+import type { PoStatus, PurchaseOrder } from "../types"
 
-interface PurchaseOrderListItem {
-  id: string
-  poCode: string
-  prId: string
-  prCode?: string | null
-  batchId: string
-  batchName?: string | null
-  supplier?: string | null
-  status: PoStatus
-  estimatedDelivery?: string | null
-}
-
-export type { PurchaseOrderListItem }
-
-interface CreatePoInput {
-  poCode: string
-  prId: string
-  batchId: string
-  batchName?: string
-  supplier: string
-  items: PrItem[]
-  totalAmount: string
-  estimatedDelivery?: string
-  notes?: string
-}
-
-interface UpdatePoInput {
-  supplier?: string
-  notes?: string
-  estimatedDelivery?: string
-  status?: string
-}
+export type PurchaseOrderListItem = PurchaseOrder
 
 interface OrdersListQuery {
   status?: string
@@ -45,38 +14,12 @@ interface OrdersListQuery {
 }
 
 export interface OrdersListResponse {
-  items: PurchaseOrderListItem[]
+  items: PurchaseOrder[]
   total: number
   page: number
   limit: number
-  summary: {
-    totalAmount: number
-    byStatus: Partial<Record<PoStatus, number>>
-  }
+  summary: { totalAmount: number; byStatus: Partial<Record<PoStatus, number>> }
 }
-
-const crud = createCrudHooks<
-  PurchaseOrderListItem,
-  PurchaseOrder,
-  CreatePoInput,
-  UpdatePoInput,
-  OrdersListQuery
->({
-  basePath: "/api/procurement/orders",
-  domain: "orders",
-  label: "Order",
-  // useCreatePo overrides the default toast + cross-invalidates requests, so silence the factory's
-  messages: { create: false },
-  queryKeys: {
-    all: queryKeys.orders.all,
-    list: q => queryKeys.orders.byStatus(q?.status),
-    detail: id => queryKeys.orders.detail(id),
-  },
-})
-
-export const useOrders = crud.useList
-export const useOrder = crud.useOne
-export const useUpdatePo = crud.useUpdate
 
 export function usePaginatedOrders(query?: () => OrdersListQuery | undefined) {
   return createQuery(() => {
@@ -89,22 +32,69 @@ export function usePaginatedOrders(query?: () => OrdersListQuery | undefined) {
     const qs = params.toString()
     return {
       queryKey: queryKeys.orders.filtered(q),
-      queryFn: () => api<OrdersListResponse>(`/api/procurement/orders${qs ? `?${qs}` : ""}`),
+      queryFn: () =>
+        api<OrdersListResponse>(`/api/procurement/purchase-orders${qs ? `?${qs}` : ""}`),
     }
   })
 }
 
-// Bespoke create — also invalidates requests since creating a PO marks PR as "ordered"
-export function useCreatePo() {
+export function useOrders(query?: () => OrdersListQuery | undefined) {
+  return usePaginatedOrders(query)
+}
+
+export function useOrder(id: () => string) {
+  return createQuery(() => ({
+    queryKey: queryKeys.orders.detail(id()),
+    queryFn: () => api<PurchaseOrder>(`/api/procurement/purchase-orders/${id()}`),
+    enabled: Boolean(id()),
+  }))
+}
+
+function usePoAction<T>(action: string, success: string) {
   const qc = useQueryClient()
   return createMutation(() => ({
-    mutationFn: (data: CreatePoInput) =>
-      api<PurchaseOrder>("/api/procurement/orders", { method: "POST", body: JSON.stringify(data) }),
-    onSuccess: () => {
+    mutationFn: ({ id, body }: { id: string; body?: T }) =>
+      api<PurchaseOrder>(`/api/procurement/purchase-orders/${id}/${action}`, {
+        method: "POST",
+        body: body ? JSON.stringify(body) : undefined,
+      }),
+    onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: queryKeys.orders.all })
-      qc.invalidateQueries({ queryKey: queryKeys.requests.all })
-      toast.success("Order created")
+      qc.invalidateQueries({ queryKey: queryKeys.orders.detail(variables.id) })
+      toast.success(success)
     },
-    onError: (err: Error) => toast.error(err.message),
+    onError: (error: Error) => toast.error(error.message),
+  }))
+}
+
+export const useConfirmPo = () => usePoAction<never>("confirm", "Purchase order confirmed")
+export const useAcknowledgePo = () =>
+  usePoAction<{ recipientName: string; recipientSignatureUrl: string; notes?: string }>(
+    "acknowledge",
+    "Purchase order acknowledged"
+  )
+
+export function useUpdatePo() {
+  const qc = useQueryClient()
+  return createMutation(() => ({
+    mutationFn: ({
+      id,
+      ...data
+    }: {
+      id: string
+      supplier?: string
+      notes?: string
+      estimatedDelivery?: string
+    }) =>
+      api<PurchaseOrder>(`/api/procurement/purchase-orders/${id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      }),
+    onSuccess: (_data, variables) => {
+      qc.invalidateQueries({ queryKey: queryKeys.orders.all })
+      qc.invalidateQueries({ queryKey: queryKeys.orders.detail(variables.id) })
+      toast.success("Purchase order updated")
+    },
+    onError: (error: Error) => toast.error(error.message),
   }))
 }

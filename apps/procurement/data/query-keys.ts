@@ -18,6 +18,14 @@ export const queryKeys = {
       ["orders", filters] as const,
     detail: (id: string) => ["orders", id] as const,
   },
+  expenseItems: {
+    all: ["procurement-expense-items"] as const,
+    filtered: (includeInactive: boolean) =>
+      ["procurement-expense-items", { includeInactive }] as const,
+  },
+  liquidations: {
+    all: ["po-liquidations"] as const,
+  },
   batches: {
     all: ["batches"] as const,
   },

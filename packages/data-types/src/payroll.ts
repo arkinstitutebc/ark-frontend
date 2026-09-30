@@ -2,12 +2,15 @@ export type PayrollStatus = "draft" | "processed" | "paid"
 
 export interface PayrollEntry {
   id: string
-  trainerId: string
+  trainerId?: string | null
+  employeeId?: string | null
   periodId: string
   totalHours: number
   hourlyRate: number
   grossPay: number
   deductions: number
+  manualAdjustment: number
+  adjustmentNotes?: string | null
   netPay: number
   status: PayrollStatus
 }

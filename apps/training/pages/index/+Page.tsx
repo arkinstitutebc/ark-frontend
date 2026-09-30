@@ -13,6 +13,7 @@ import { useBatches } from "@data/hooks"
 import type { Batch } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
+import { BatchKanban } from "@/components/batch-kanban"
 import { AddBatchModal } from "@/components/modals"
 
 function rqmLabel(value: string) {
@@ -32,6 +33,7 @@ function batchMeta(batch: Batch) {
 export default function BatchesPage() {
   const [showAddModal, setShowAddModal] = createSignal(false)
   const [openingBatchId, setOpeningBatchId] = createSignal<string | null>(null)
+  const [viewMode, setViewMode] = createSignal<"kanban" | "list">("kanban")
   const query = useBatches()
   const batches = createMemo(() => query.data ?? [])
   const activeBatches = createMemo(
@@ -67,6 +69,25 @@ export default function BatchesPage() {
       />
 
       <AddBatchModal open={showAddModal()} onClose={() => setShowAddModal(false)} />
+
+      <div class="mb-4 flex justify-end gap-2">
+        <Button
+          type="button"
+          size="sm"
+          variant={viewMode() === "kanban" ? "primary" : "secondary"}
+          onClick={() => setViewMode("kanban")}
+        >
+          Board
+        </Button>
+        <Button
+          type="button"
+          size="sm"
+          variant={viewMode() === "list" ? "primary" : "secondary"}
+          onClick={() => setViewMode("list")}
+        >
+          List
+        </Button>
+      </div>
 
       <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
         <div class="rounded-xl border border-border bg-surface p-4">
@@ -107,95 +128,102 @@ export default function BatchesPage() {
             </div>
           }
         >
-          <div class="bg-surface rounded-xl border border-border overflow-hidden">
-            <div class="max-h-[640px] overflow-auto">
-              <table class="w-full min-w-[1240px] table-fixed">
-                <colgroup>
-                  <col class="w-[320px]" />
-                  <col class="w-[330px]" />
-                  <col class="w-[270px]" />
-                  <col class="w-[120px]" />
-                  <col class="w-[90px]" />
-                  <col class="w-[160px]" />
-                </colgroup>
-                <THead>
-                  <Th>Batch</Th>
-                  <Th>Training</Th>
-                  <Th>Schedule</Th>
-                  <Th>Venue</Th>
-                  <Th>Students</Th>
-                  <Th>Status</Th>
-                </THead>
-                <tbody>
-                  <For each={batches()}>
-                    {(batch: Batch) => (
-                      <tr
-                        class="border-t border-border hover:bg-primary/5 transition-colors cursor-pointer"
-                        onClick={() => openBatch(batch.id)}
-                      >
-                        <td class="py-4 px-5 align-middle">
-                          <div class="min-w-0">
-                            <span class="block truncate font-mono text-sm font-semibold text-foreground">
-                              {batch.batchCode}
-                            </span>
-                            <Show when={batchMeta(batch)}>
-                              {meta => (
-                                <p
-                                  class="mt-1 truncate text-xs font-medium text-muted"
-                                  title={meta()}
-                                >
-                                  {meta()}
+          <Show
+            when={viewMode() === "kanban"}
+            fallback={
+              <div class="bg-surface rounded-xl border border-border overflow-hidden">
+                <div class="max-h-[640px] overflow-auto">
+                  <table class="w-full min-w-[1240px] table-fixed">
+                    <colgroup>
+                      <col class="w-[320px]" />
+                      <col class="w-[330px]" />
+                      <col class="w-[270px]" />
+                      <col class="w-[120px]" />
+                      <col class="w-[90px]" />
+                      <col class="w-[160px]" />
+                    </colgroup>
+                    <THead>
+                      <Th>Batch</Th>
+                      <Th>Training</Th>
+                      <Th>Schedule</Th>
+                      <Th>Venue</Th>
+                      <Th>Students</Th>
+                      <Th>Status</Th>
+                    </THead>
+                    <tbody>
+                      <For each={batches()}>
+                        {(batch: Batch) => (
+                          <tr
+                            class="border-t border-border hover:bg-primary/5 transition-colors cursor-pointer"
+                            onClick={() => openBatch(batch.id)}
+                          >
+                            <td class="py-4 px-5 align-middle">
+                              <div class="min-w-0">
+                                <span class="block truncate font-mono text-sm font-semibold text-foreground">
+                                  {batch.batchCode}
+                                </span>
+                                <Show when={batchMeta(batch)}>
+                                  {meta => (
+                                    <p
+                                      class="mt-1 truncate text-xs font-medium text-muted"
+                                      title={meta()}
+                                    >
+                                      {meta()}
+                                    </p>
+                                  )}
+                                </Show>
+                              </div>
+                            </td>
+                            <td class="py-4 px-5 align-middle">
+                              <div class="min-w-0">
+                                <p class="text-sm font-medium leading-5 text-foreground">
+                                  {batch.trainingName}
                                 </p>
-                              )}
-                            </Show>
-                          </div>
-                        </td>
-                        <td class="py-4 px-5 align-middle">
-                          <div class="min-w-0">
-                            <p class="text-sm font-medium leading-5 text-foreground">
-                              {batch.trainingName}
-                            </p>
-                            <p class="mt-1 line-clamp-2 text-xs leading-5 text-muted">
-                              {batch.senator}
-                            </p>
-                          </div>
-                        </td>
-                        <td class="py-4 px-5 align-middle">
-                          <div class="min-w-0 space-y-1.5">
-                            <div class="flex items-start gap-1.5 text-sm leading-5 text-muted">
-                              <Icons.calendar class="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-muted" />
-                              <span>
-                                {formatDatePH(batch.startDate)} - {formatDatePH(batch.endDate)}
+                                <p class="mt-1 line-clamp-2 text-xs leading-5 text-muted">
+                                  {batch.senator}
+                                </p>
+                              </div>
+                            </td>
+                            <td class="py-4 px-5 align-middle">
+                              <div class="min-w-0 space-y-1.5">
+                                <div class="flex items-start gap-1.5 text-sm leading-5 text-muted">
+                                  <Icons.calendar class="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-muted" />
+                                  <span>
+                                    {formatDatePH(batch.startDate)} - {formatDatePH(batch.endDate)}
+                                  </span>
+                                </div>
+                                <Show when={batch.weeklySchedule}>
+                                  <p class="text-xs font-medium leading-5 text-muted">
+                                    {batch.weeklySchedule}
+                                  </p>
+                                </Show>
+                              </div>
+                            </td>
+                            <td class="py-4 px-5 align-middle text-sm text-muted">
+                              <span class="block truncate" title={batch.venue}>
+                                {batch.venue}
                               </span>
-                            </div>
-                            <Show when={batch.weeklySchedule}>
-                              <p class="text-xs font-medium leading-5 text-muted">
-                                {batch.weeklySchedule}
-                              </p>
-                            </Show>
-                          </div>
-                        </td>
-                        <td class="py-4 px-5 align-middle text-sm text-muted">
-                          <span class="block truncate" title={batch.venue}>
-                            {batch.venue}
-                          </span>
-                        </td>
-                        <td class="py-4 px-5 align-middle">
-                          <div class="flex items-center gap-1.5 whitespace-nowrap text-sm text-muted">
-                            <Icons.users class="h-3.5 w-3.5 text-muted" />
-                            {batch.studentsEnrolled}
-                          </div>
-                        </td>
-                        <td class="py-4 px-5 align-middle whitespace-nowrap [&>span]:whitespace-nowrap">
-                          <StatusBadge status={batch.status} />
-                        </td>
-                      </tr>
-                    )}
-                  </For>
-                </tbody>
-              </table>
-            </div>
-          </div>
+                            </td>
+                            <td class="py-4 px-5 align-middle">
+                              <div class="flex items-center gap-1.5 whitespace-nowrap text-sm text-muted">
+                                <Icons.users class="h-3.5 w-3.5 text-muted" />
+                                {batch.studentsEnrolled}
+                              </div>
+                            </td>
+                            <td class="py-4 px-5 align-middle whitespace-nowrap [&>span]:whitespace-nowrap">
+                              <StatusBadge status={batch.status} />
+                            </td>
+                          </tr>
+                        )}
+                      </For>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            }
+          >
+            <BatchKanban batches={batches()} onOpen={openBatch} />
+          </Show>
         </Show>
       </Show>
     </PageContainer>

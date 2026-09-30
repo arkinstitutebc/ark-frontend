@@ -4,7 +4,7 @@
 
 ## Pages
 
-`/` trainers list, `/attendance`, `/payroll`, `/payroll/:period` (pay period detail), `/tutorials`.
+`/` trainers and per-batch fee detail, `/trainer-fees`, `/employees`, `/attendance`, `/calendar` (holidays and leave), `/cash-advances`, `/payroll`, `/payroll/:period` (pay period detail), `/tutorials`.
 
 ## Dev
 

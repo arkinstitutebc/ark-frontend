@@ -8,7 +8,12 @@ import {
   THead,
   Th,
 } from "@ark/ui"
-import { type PayrollPeriodDetail, usePayrollPeriod, useProcessPayroll } from "@data/hooks"
+import {
+  type PayrollPeriodDetail,
+  usePayrollPeriod,
+  useProcessPayroll,
+  useUpdatePayrollEntry,
+} from "@data/hooks"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
@@ -18,7 +23,10 @@ export default function Page() {
   const periodId = createMemo(() => pageContext.routeParams.period as string)
   const query = usePayrollPeriod(periodId)
   const processMutation = useProcessPayroll()
+  const updateEntry = useUpdatePayrollEntry(periodId)
   const [confirmOpen, setConfirmOpen] = createSignal(false)
+  const [adjustments, setAdjustments] = createSignal<Record<string, number>>({})
+  const [adjustmentNotes, setAdjustmentNotes] = createSignal<Record<string, string>>({})
 
   const handleProcess = () => {
     if (!periodId()) return
@@ -71,7 +79,7 @@ export default function Page() {
                 value={formatPeso(Number(data.totalGross || 0))}
               />
               <StatCard label="Total Net" numeric value={formatPeso(Number(data.totalNet || 0))} />
-              <StatCard label="Trainers" value={data.trainerCount || 0} />
+              <StatCard label="Employees" value={data.trainerCount || 0} />
               {data.status !== "draft" && (
                 <StatCard
                   label="Processed"
@@ -93,9 +101,10 @@ export default function Page() {
               <div class="overflow-x-auto">
                 <table class="w-full">
                   <THead>
-                    <Th>Trainer</Th>
-                    <Th align="right">Hours</Th>
-                    <Th align="right">Rate/hr</Th>
+                    <Th>Employee</Th>
+                    <Th align="right">Base Salary</Th>
+                    <Th align="right">Manual Adjustment</Th>
+                    <Th>Adjustment Note</Th>
                     <Th align="right">Gross</Th>
                     <Th align="right">Deductions</Th>
                     <Th align="right">Net Pay</Th>
@@ -105,12 +114,13 @@ export default function Page() {
                       when={(data.entries || []).length > 0}
                       fallback={
                         <tr>
-                          <td colSpan={6} class="py-10 px-6 text-center">
+                          <td colSpan={7} class="py-10 px-6 text-center">
                             <p class="text-sm font-medium text-foreground">
                               No payroll entries yet
                             </p>
                             <p class="text-sm text-muted mt-1">
-                              Process payroll after trainer attendance for this period is complete.
+                              Process payroll to create one fixed semi-monthly entry per active
+                              employee.
                             </p>
                           </td>
                         </tr>
@@ -120,13 +130,66 @@ export default function Page() {
                         {entry => (
                           <tr class="border-t border-border hover:bg-surface-muted transition-colors">
                             <td class="py-4 px-6 text-sm text-foreground">
-                              {entry.trainerName || "—"}
+                              {entry.employeeName || entry.trainerName || "—"}
                             </td>
                             <td class="py-4 px-6 text-right text-sm text-muted tabular-nums">
-                              {Number(entry.totalHours || 0).toFixed(1)}
+                              {formatPeso(Number(entry.grossPay || 0))}
                             </td>
-                            <td class="py-4 px-6 text-right text-sm text-muted tabular-nums">
-                              {formatPeso(Number(entry.hourlyRate || 0))}
+                            <td class="py-3 px-3 text-right">
+                              <input
+                                type="number"
+                                step="0.01"
+                                value={
+                                  adjustments()[entry.id] ?? Number(entry.manualAdjustment || 0)
+                                }
+                                onInput={event =>
+                                  setAdjustments(values => ({
+                                    ...values,
+                                    [entry.id]: Number(event.currentTarget.value),
+                                  }))
+                                }
+                                class="w-28 rounded-md border border-border px-2 py-1.5 text-right text-sm"
+                                aria-label={`Adjustment for ${entry.employeeName || entry.trainerName}`}
+                              />
+                            </td>
+                            <td class="py-3 px-3">
+                              <div class="flex min-w-52 gap-2">
+                                <input
+                                  value={adjustmentNotes()[entry.id] ?? entry.adjustmentNotes ?? ""}
+                                  onInput={event =>
+                                    setAdjustmentNotes(values => ({
+                                      ...values,
+                                      [entry.id]: event.currentTarget.value,
+                                    }))
+                                  }
+                                  placeholder="Reason for adjustment"
+                                  class="min-w-0 flex-1 rounded-md border border-border px-2 py-1.5 text-sm"
+                                />
+                                <button
+                                  type="button"
+                                  disabled={
+                                    updateEntry.isPending ||
+                                    !(
+                                      adjustmentNotes()[entry.id] ??
+                                      entry.adjustmentNotes ??
+                                      ""
+                                    ).trim()
+                                  }
+                                  onClick={() =>
+                                    updateEntry.mutate({
+                                      id: entry.id,
+                                      manualAdjustment:
+                                        adjustments()[entry.id] ??
+                                        Number(entry.manualAdjustment || 0),
+                                      adjustmentNotes:
+                                        adjustmentNotes()[entry.id] ?? entry.adjustmentNotes ?? "",
+                                    })
+                                  }
+                                  class="rounded-md border border-border px-2 py-1.5 text-xs font-medium disabled:opacity-50"
+                                >
+                                  Save
+                                </button>
+                              </div>
                             </td>
                             <td class="py-4 px-6 text-right text-sm text-foreground tabular-nums">
                               {formatPeso(Number(entry.grossPay || 0))}
@@ -144,7 +207,7 @@ export default function Page() {
                   </tbody>
                   <tfoot class="bg-surface-muted border-t border-border">
                     <tr>
-                      <td class="py-4 px-6 text-sm font-semibold text-foreground" colSpan={3}>
+                      <td class="py-4 px-6 text-sm font-semibold text-foreground" colSpan={4}>
                         Total
                       </td>
                       <td class="py-4 px-6 text-right text-sm font-semibold text-foreground tabular-nums">
@@ -169,12 +232,13 @@ export default function Page() {
               description={
                 <div class="space-y-2">
                   <p>
-                    This will create payroll entries for active trainers with attendance from{" "}
+                    This will create fixed semi-monthly payroll entries for active employees from{" "}
                     <span class="font-medium">{formatDatePH(data.periodStart)}</span> to{" "}
                     <span class="font-medium">{formatDatePH(data.periodEnd)}</span>.
                   </p>
                   <p class="text-muted">
-                    If no payable attendance is found, the period cannot be processed.
+                    Absences, leave, holidays, and any manual adjustment remain visible records;
+                    deductions are entered explicitly.
                   </p>
                 </div>
               }

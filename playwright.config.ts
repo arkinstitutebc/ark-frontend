@@ -1,5 +1,16 @@
 import { defineConfig, devices } from "@playwright/test"
 
+const localPortalEnv = {
+  VITE_API_URL: "http://localhost:4000",
+  VITE_MAIN_PORTAL_URL: "http://localhost:3000",
+  VITE_TRAINING_PORTAL_URL: "http://localhost:3001",
+  VITE_PROCUREMENT_PORTAL_URL: "http://localhost:3002",
+  VITE_INVENTORY_PORTAL_URL: "http://localhost:3003",
+  VITE_FINANCE_PORTAL_URL: "http://localhost:3004",
+  VITE_BILLING_PORTAL_URL: "http://localhost:3005",
+  VITE_HR_PORTAL_URL: "http://localhost:3006",
+}
+
 /**
  * Playwright config for Ark frontend dark-mode visual regression.
  *
@@ -46,42 +57,49 @@ export default defineConfig({
   webServer: [
     {
       command: "cd apps/main && bun run build && PORT=3000 bun run preview --port 3000",
+      env: localPortalEnv,
       url: "http://localhost:3000",
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
     },
     {
       command: "cd apps/training && bun run build && PORT=3001 bun run preview --port 3001",
+      env: localPortalEnv,
       url: "http://localhost:3001",
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
     },
     {
       command: "cd apps/finance && bun run build && PORT=3004 bun run preview --port 3004",
+      env: localPortalEnv,
       url: "http://localhost:3004",
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
     },
     {
       command: "cd apps/procurement && bun run build && PORT=3002 bun run preview --port 3002",
+      env: localPortalEnv,
       url: "http://localhost:3002",
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
     },
     {
       command: "cd apps/inventory && bun run build && PORT=3003 bun run preview --port 3003",
+      env: localPortalEnv,
       url: "http://localhost:3003",
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
     },
     {
       command: "cd apps/billing && bun run build && PORT=3005 bun run preview --port 3005",
+      env: localPortalEnv,
       url: "http://localhost:3005",
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
     },
     {
       command: "cd apps/hr && bun run build && PORT=3006 bun run preview --port 3006",
+      env: localPortalEnv,
       url: "http://localhost:3006",
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,

@@ -6,10 +6,13 @@ import type { PrAttachment, PrItem, PrStatus, PurchaseRequest } from "../types"
 
 // `prCode` no longer accepted from the client — backend generates `PR-YYYY-NNNNN`.
 interface CreatePrInput {
-  batchId: string
+  batchId?: string
   batchName?: string
   batchCode?: string
-  category: string
+  expenseItemId: string
+  expenseType: "operations" | "assets"
+  operationsSubtype?: "training_expense" | "company_overhead"
+  specialRequestNote?: string
   purpose: string
   dateNeeded: string
   items: PrItem[]
@@ -23,6 +26,10 @@ interface UpdatePrInput {
   batchName?: string
   batchCode?: string
   category?: string
+  expenseItemId?: string
+  expenseType?: "operations" | "assets"
+  operationsSubtype?: "training_expense" | "company_overhead"
+  specialRequestNote?: string
   purpose?: string
   dateNeeded?: string
   items?: PrItem[]
@@ -95,37 +102,23 @@ export const useRequest = crud.useOne
 export const useCreatePr = crud.useCreate
 export const useUpdatePr = crud.useUpdate
 
-// Bespoke: coordinator review (intermediate stage before management approval)
-export function useCoordinatorReviewPr() {
-  const qc = useQueryClient()
-  return createMutation(() => ({
-    mutationFn: ({ id, ...data }: { id: string; notes?: string }) =>
-      api<PurchaseRequest>(`/api/procurement/requests/${id}/coordinator-review`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
-    onSuccess: (_data, variables) => {
-      qc.invalidateQueries({ queryKey: queryKeys.requests.all })
-      qc.invalidateQueries({ queryKey: queryKeys.requests.detail(variables.id) })
-      toast.success("Coordinator review submitted")
-    },
-    onError: (err: Error) => toast.error(err.message),
-  }))
-}
-
 // Bespoke: approve / reject action endpoints
 export function useApprovePr() {
   const qc = useQueryClient()
   return createMutation(() => ({
     mutationFn: ({ id, ...data }: { id: string; approvalNotes?: string }) =>
-      api<PurchaseRequest>(`/api/procurement/requests/${id}/approve`, {
-        method: "POST",
-        body: JSON.stringify(data),
-      }),
+      api<{ request: PurchaseRequest; purchaseOrder: import("../types").PurchaseOrder }>(
+        `/api/procurement/requests/${id}/approve`,
+        {
+          method: "POST",
+          body: JSON.stringify(data),
+        }
+      ),
     onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: queryKeys.requests.all })
       qc.invalidateQueries({ queryKey: queryKeys.requests.detail(variables.id) })
-      toast.success("Request approved")
+      qc.invalidateQueries({ queryKey: queryKeys.orders.all })
+      toast.success("Request approved and purchase order generated")
     },
     onError: (err: Error) => toast.error(err.message),
   }))

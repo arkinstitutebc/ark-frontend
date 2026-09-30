@@ -1,5 +1,5 @@
 import { Button, formatDatePH, formatPeso, Modal, THead, Th } from "@ark/ui"
-import { useAttendance } from "@data/hooks"
+import { useAttendance, useTrainerAssignments } from "@data/hooks"
 import type { Trainer } from "@data/types"
 import { For, Show } from "solid-js"
 import { Icons, StatusBadge } from "@/components/ui"
@@ -15,6 +15,7 @@ export function TrainerDetailModal(props: TrainerDetailModalProps) {
   const attendanceQuery = useAttendance(() =>
     props.trainer?.id ? { trainerId: props.trainer.id } : {}
   )
+  const assignmentsQuery = useTrainerAssignments(() => props.trainer?.id)
 
   const recentAttendance = () => {
     if (!props.trainer || !attendanceQuery.data) return []
@@ -70,6 +71,43 @@ export function TrainerDetailModal(props: TrainerDetailModalProps) {
                   {trainer().hireDate ? formatDatePH(trainer().hireDate) : "—"}
                 </p>
               </div>
+            </div>
+
+            <div>
+              <h4 class="text-sm font-semibold text-foreground mb-3">Batches & Fees</h4>
+              <Show
+                when={(assignmentsQuery.data?.length ?? 0) > 0}
+                fallback={
+                  <p class="text-sm text-muted">
+                    {assignmentsQuery.isPending ? "Loading..." : "No batches assigned."}
+                  </p>
+                }
+              >
+                <div class="space-y-2">
+                  <For each={assignmentsQuery.data ?? []}>
+                    {row => (
+                      <div class="flex items-start justify-between gap-4 rounded-lg border border-border bg-surface-muted p-3 text-sm">
+                        <div>
+                          <p class="font-medium">
+                            {row.batch.trainingOfferingLabel ?? row.batch.trainingName}
+                          </p>
+                          <p class="text-xs text-muted">
+                            {row.batch.batchCode} ·{" "}
+                            {row.batch.trainingSchemeLabel ?? "Legacy scheme"} · {row.batch.status}
+                          </p>
+                        </div>
+                        <div class="shrink-0 text-right">
+                          <p>{formatPeso(Number(row.assignment.fixedFee))} fee</p>
+                          <p class="text-xs text-muted">
+                            {formatPeso(row.paidAmount)} paid · {formatPeso(row.outstandingAmount)}{" "}
+                            due
+                          </p>
+                        </div>
+                      </div>
+                    )}
+                  </For>
+                </div>
+              </Show>
             </div>
 
             <div>

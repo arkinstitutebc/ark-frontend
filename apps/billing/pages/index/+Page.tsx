@@ -9,7 +9,8 @@ export default function Page() {
   const arStats = createMemo(() => {
     const summary = query.data?.summary
     const billed =
-      (summary?.byStatus.billed?.count ?? 0) +
+      (summary?.byStatus.unpaid?.count ?? 0) +
+      (summary?.byStatus.partially_paid?.count ?? 0) +
       (summary?.byStatus.overdue?.count ?? 0) +
       (summary?.byStatus.paid?.count ?? 0)
     return {
@@ -17,6 +18,7 @@ export default function Page() {
       outstanding: summary?.outstandingAmount ?? 0,
       batchesBilled: billed,
       paymentsReceived: summary?.paidAmount ?? 0,
+      netRevenue: summary?.netRevenue ?? 0,
       total: query.data?.total ?? 0,
     }
   })
@@ -33,25 +35,25 @@ export default function Page() {
 
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
         <StatCard
-          label="Total AR Amount"
+          label="Revenue"
           numeric
           value={query.data ? formatPeso(arStats().totalAmount) : "-"}
           hint={query.data ? `${arStats().total} receivables` : ""}
         />
         <StatCard
-          label="Outstanding"
+          label="Outstanding Receivables"
           numeric
           value={query.data ? formatPeso(arStats().outstanding) : "-"}
           hint="Unpaid balance"
         />
         <StatCard
-          label="Batches Billed"
+          label="Net Revenue (98%)"
           numeric
-          value={query.data ? arStats().batchesBilled : "-"}
-          hint={query.data ? `of ${arStats().total} total` : ""}
+          value={query.data ? formatPeso(arStats().netRevenue) : "-"}
+          hint={query.data ? `${arStats().batchesBilled} active records` : ""}
         />
         <StatCard
-          label="Payments Received"
+          label="Total Debited Amount"
           numeric
           value={query.data ? formatPeso(arStats().paymentsReceived) : "-"}
           hint="Collected to date"
@@ -64,7 +66,7 @@ export default function Page() {
             <div class="bg-surface rounded-lg border border-border p-5 mb-8">
               <h3 class="text-sm font-semibold text-foreground mb-4">AR by Status</h3>
               <div class="space-y-3">
-                <For each={["created", "billed", "overdue", "paid"] as const}>
+                <For each={["unpaid", "partially_paid", "overdue", "paid", "cancelled"] as const}>
                   {status => {
                     const item = () => data.summary.byStatus[status]
                     return (

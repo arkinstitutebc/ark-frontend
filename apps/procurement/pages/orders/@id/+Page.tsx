@@ -1,4 +1,5 @@
 import {
+  AttachmentUploader,
   BackLink,
   formatDatePH,
   formatPeso,
@@ -8,239 +9,232 @@ import {
   THead,
   Th,
 } from "@ark/ui"
-import { api } from "@data/api"
-import { useOrder } from "@data/hooks"
-import { queryKeys } from "@data/query-keys"
-import type { PurchaseOrder } from "@data/types"
-import { createQuery } from "@tanstack/solid-query"
+import { useAcknowledgePo, useConfirmPo, useOrder, useSubmitPoLiquidation } from "@data/hooks"
+import type { PrAttachment, PurchaseOrder } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
 import { EditPoModal } from "@/components/edit-po-modal"
 import { PoDocumentModal } from "@/components/po-document-modal"
+import { SignaturePad } from "@/components/signature-pad"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
-
-interface ReceiptMovement {
-  id: string
-  itemName: string
-  quantity: number
-  type: "in" | "out" | "adjustment"
-  reference?: string
-  reason?: string
-  createdAt: string
-  createdBy?: string
-}
 
 export default function PoDetailPage() {
   const pageContext = usePageContext()
   const id = createMemo(() => pageContext.routeParams.id as string)
   const query = useOrder(id)
+  const confirmMutation = useConfirmPo()
+  const acknowledgeMutation = useAcknowledgePo()
+  const liquidationMutation = useSubmitPoLiquidation()
   const [documentModalOpen, setDocumentModalOpen] = createSignal(false)
   const [editModalOpen, setEditModalOpen] = createSignal(false)
+  const [recipientName, setRecipientName] = createSignal("")
+  const [signatureUrl, setSignatureUrl] = createSignal("")
+  const [acknowledgmentNotes, setAcknowledgmentNotes] = createSignal("")
+  const [actualAmount, setActualAmount] = createSignal(0)
+  const [varianceReason, setVarianceReason] = createSignal("")
+  const [receipts, setReceipts] = createSignal<PrAttachment[]>([])
 
   return (
     <PageContainer>
-      {/* Back Link */}
       <div class="mb-6">
-        <BackLink href="/orders">Back to Orders</BackLink>
+        <BackLink href="/orders">Back to Purchase Orders</BackLink>
       </div>
-
       <QueryBoundary query={query}>
-        {(p: PurchaseOrder) => {
-          const receiptsQuery = createQuery(() => ({
-            queryKey: queryKeys.receipts.byPoCode(p.poCode),
-            queryFn: () =>
-              api<ReceiptMovement[]>(
-                `/api/inventory/movements?reference=${encodeURIComponent(p.poCode)}`
-              ),
-            enabled: !!p.poCode,
-          }))
-          const receipts = () => receiptsQuery.data ?? []
-          const totalReceived = () => receipts().reduce((sum, r) => sum + r.quantity, 0)
-          return (
-            <>
-              {/* Header */}
-              <PageHeader
-                title={p.poCode}
-                badge={<StatusBadge status={p.status} />}
-                subtitle={p.batchName}
-                action={
-                  <div class="flex items-center gap-2">
-                    <Show when={p.status !== "received" && p.status !== "cancelled"}>
-                      <button
-                        type="button"
-                        onClick={() => setEditModalOpen(true)}
-                        class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors"
-                      >
-                        <Icons.edit class="w-4 h-4" /> Edit
-                      </button>
-                    </Show>
+        {(po: PurchaseOrder) => (
+          <>
+            <PageHeader
+              title={po.poCode}
+              badge={<StatusBadge status={po.status} />}
+              subtitle={po.batchName || "Company expense"}
+              action={
+                <div class="flex flex-wrap items-center gap-2">
+                  <Show when={po.status === "pending"}>
                     <button
                       type="button"
-                      onClick={() => setDocumentModalOpen(true)}
-                      class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors"
+                      onClick={() => setEditModalOpen(true)}
+                      class="rounded-lg border border-border px-4 py-2 text-sm font-medium"
                     >
-                      <Icons.fileText class="w-4 h-4" /> View PDF
+                      <Icons.edit class="mr-2 inline h-4 w-4" /> Edit details
                     </button>
-                  </div>
-                }
-              />
-
-              {/* Info Cards */}
-              <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                <InfoCard label="PR Reference" mono value={p.prCode ?? p.prId} />
-                <InfoCard label="Supplier" value={p.supplier} />
-                <InfoCard label="Total Amount" value={formatPeso(Number(p.totalAmount))} />
-                <InfoCard label="Created" value={formatDatePH(p.createdAt)} />
-              </div>
-
-              {/* Details Section */}
-              <div class="bg-surface rounded-lg border border-border mb-8">
-                <div class="px-6 py-4 border-b border-border">
-                  <h2 class="text-lg font-semibold text-foreground">Order Details</h2>
-                </div>
-                <div class="divide-y divide-border">
-                  <div class="flex py-4 px-6">
-                    <span class="w-40 text-sm text-muted">Batch</span>
-                    <span class="text-sm text-foreground">{p.batchName}</span>
-                  </div>
-                  <Show when={p.notes}>
-                    <div class="flex py-4 px-6">
-                      <span class="w-40 text-sm text-muted">Notes</span>
-                      <span class="text-sm text-foreground flex-1">{p.notes}</span>
-                    </div>
+                    <button
+                      type="button"
+                      disabled={confirmMutation.isPending}
+                      onClick={() => confirmMutation.mutate({ id: po.id })}
+                      class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                    >
+                      Confirm PO
+                    </button>
                   </Show>
+                  <button
+                    type="button"
+                    onClick={() => setDocumentModalOpen(true)}
+                    class="rounded-lg border border-border px-4 py-2 text-sm font-medium"
+                  >
+                    <Icons.fileText class="mr-2 inline h-4 w-4" /> View PDF
+                  </button>
                 </div>
+              }
+            />
+
+            <div class="mb-8 grid grid-cols-2 gap-4 md:grid-cols-4">
+              <InfoCard label="PR Reference" mono value={po.prCode ?? po.prId} />
+              <InfoCard label="Supplier" value={po.supplier || "Not set"} />
+              <InfoCard label="PO Amount" value={formatPeso(Number(po.totalAmount))} />
+              <InfoCard label="Created" value={formatDatePH(po.createdAt)} />
+            </div>
+
+            <div class="mb-8 overflow-hidden rounded-lg border border-border bg-surface">
+              <div class="border-b border-border px-6 py-4">
+                <h2 class="text-lg font-semibold">PO Items</h2>
               </div>
-
-              {/* Items Table */}
-              <div class="bg-surface rounded-lg border border-border mb-8">
-                <div class="px-6 py-4 border-b border-border">
-                  <h2 class="text-lg font-semibold text-foreground">Items ({p.items.length})</h2>
-                </div>
-                <div class="overflow-x-auto">
-                  <table class="w-full">
-                    <THead>
-                      <Th>Item</Th>
-                      <Th>Qty</Th>
-                      <Th>Unit</Th>
-                      <Th align="right">Unit Price</Th>
-                      <Th align="right">Total</Th>
-                    </THead>
-                    <tbody>
-                      <For each={p.items}>
-                        {item => (
-                          <tr class="border-t border-border">
-                            <td class="py-4 px-6 text-sm text-foreground">{item.name}</td>
-                            <td class="py-4 px-6 text-sm text-foreground">{item.quantity}</td>
-                            <td class="py-4 px-6 text-sm text-muted">{item.unit}</td>
-                            <td class="py-4 px-6 text-sm text-foreground text-right">
-                              {formatPeso(item.unitPrice)}
-                            </td>
-                            <td class="py-4 px-6 text-sm text-foreground text-right">
-                              {formatPeso(item.total)}
-                            </td>
-                          </tr>
-                        )}
-                      </For>
-                    </tbody>
-                    <tfoot class="border-t border-border">
-                      <tr>
-                        <td
-                          colSpan={4}
-                          class="py-4 px-6 text-right text-sm font-medium text-foreground"
-                        >
-                          Grand Total
-                        </td>
-                        <td class="py-4 px-6 text-right text-base text-foreground">
-                          {formatPeso(Number(p.totalAmount))}
-                        </td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <THead>
+                    <Th>Item</Th>
+                    <Th>Qty</Th>
+                    <Th>Unit</Th>
+                    <Th align="right">Unit Price</Th>
+                    <Th align="right">Total</Th>
+                  </THead>
+                  <tbody>
+                    <For each={po.items}>
+                      {item => (
+                        <tr class="border-t border-border">
+                          <td class="px-6 py-4 text-sm">{item.name}</td>
+                          <td class="px-6 py-4 text-sm">{item.quantity}</td>
+                          <td class="px-6 py-4 text-sm text-muted">{item.unit}</td>
+                          <td class="px-6 py-4 text-right text-sm">{formatPeso(item.unitPrice)}</td>
+                          <td class="px-6 py-4 text-right text-sm">{formatPeso(item.total)}</td>
+                        </tr>
+                      )}
+                    </For>
+                  </tbody>
+                </table>
               </div>
+            </div>
 
-              {/* Delivery Section */}
-              <div class="bg-surface rounded-lg border border-border mb-8">
-                <div class="px-6 py-4 border-b border-border">
-                  <h2 class="text-lg font-semibold text-foreground">Delivery</h2>
+            <Show when={po.status === "confirmed"}>
+              <form
+                class="mb-8 space-y-4 rounded-lg border border-border bg-surface p-6"
+                onSubmit={event => {
+                  event.preventDefault()
+                  acknowledgeMutation.mutate({
+                    id: po.id,
+                    body: {
+                      recipientName: recipientName(),
+                      recipientSignatureUrl: signatureUrl(),
+                      notes: acknowledgmentNotes() || undefined,
+                    },
+                  })
+                }}
+              >
+                <div>
+                  <h2 class="text-lg font-semibold">Acknowledge Receipt</h2>
+                  <p class="text-sm text-muted">Record the recipient and their drawn signature.</p>
                 </div>
-                <div class="divide-y divide-border">
-                  <div class="flex py-4 px-6">
-                    <span class="w-40 text-sm text-muted">Status</span>
-                    <StatusBadge status={p.status} />
-                  </div>
-                  <div class="flex py-4 px-6">
-                    <span class="w-40 text-sm text-muted">Est. Delivery</span>
-                    <span class="text-sm text-foreground">{formatDatePH(p.estimatedDelivery)}</span>
-                  </div>
-                  <Show when={p.actualDelivery}>
-                    <div class="flex py-4 px-6">
-                      <span class="w-40 text-sm text-muted">Actual Delivery</span>
-                      <span class="text-sm text-foreground">{formatDatePH(p.actualDelivery)}</span>
-                    </div>
-                  </Show>
+                <label class="block text-sm font-medium">
+                  Recipient name
+                  <input
+                    required
+                    value={recipientName()}
+                    onInput={event => setRecipientName(event.currentTarget.value)}
+                    class="mt-1 w-full rounded-lg border border-border px-3 py-2 font-normal"
+                  />
+                </label>
+                <SignaturePad onUploaded={setSignatureUrl} />
+                <Show when={signatureUrl()}>
+                  <p class="text-xs text-green-700">Signature saved and ready.</p>
+                </Show>
+                <textarea
+                  value={acknowledgmentNotes()}
+                  onInput={event => setAcknowledgmentNotes(event.currentTarget.value)}
+                  placeholder="Acknowledgment notes (optional)"
+                  class="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                />
+                <button
+                  type="submit"
+                  disabled={!recipientName() || !signatureUrl() || acknowledgeMutation.isPending}
+                  class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                >
+                  Acknowledge PO
+                </button>
+              </form>
+            </Show>
+
+            <Show when={po.status === "acknowledged"}>
+              <form
+                class="space-y-4 rounded-lg border border-border bg-surface p-6"
+                onSubmit={event => {
+                  event.preventDefault()
+                  liquidationMutation.mutate({
+                    poId: po.id,
+                    actualAmount: actualAmount(),
+                    varianceReason: varianceReason() || undefined,
+                    receipts: receipts(),
+                  })
+                }}
+              >
+                <div>
+                  <h2 class="text-lg font-semibold">Submit Liquidation</h2>
+                  <p class="text-sm text-muted">
+                    Enter the actual amount spent and attach receipts for Finance.
+                  </p>
                 </div>
+                <label class="block text-sm font-medium">
+                  Actual amount spent
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    required
+                    value={actualAmount() || ""}
+                    onInput={event => setActualAmount(Number(event.currentTarget.value))}
+                    class="mt-1 w-full rounded-lg border border-border px-3 py-2 font-normal"
+                  />
+                </label>
+                <Show when={Math.abs(Number(po.totalAmount) - actualAmount()) >= 0.005}>
+                  <label class="block text-sm font-medium">
+                    Surplus / excess explanation
+                    <textarea
+                      required
+                      value={varianceReason()}
+                      onInput={event => setVarianceReason(event.currentTarget.value)}
+                      class="mt-1 w-full rounded-lg border border-border px-3 py-2 font-normal"
+                    />
+                  </label>
+                </Show>
+                <AttachmentUploader
+                  attachments={receipts()}
+                  onChange={setReceipts}
+                  signatureEndpoint="/api/procurement/upload-signature/attachment"
+                />
+                <button
+                  type="submit"
+                  disabled={
+                    actualAmount() <= 0 || receipts().length === 0 || liquidationMutation.isPending
+                  }
+                  class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+                >
+                  Submit to Finance
+                </button>
+              </form>
+            </Show>
+
+            <Show when={po.status === "liquidated"}>
+              <div class="rounded-lg border border-green-200 bg-green-50 p-5 text-sm text-green-800">
+                Finance approved this liquidation. Its actual amount is posted as an immutable
+                expense.
               </div>
+            </Show>
 
-              {/* Receipts — stock movements written when this PO was received */}
-              <Show when={receipts().length > 0}>
-                <div class="bg-surface rounded-lg border border-border">
-                  <div class="flex items-center justify-between px-6 py-4 border-b border-border">
-                    <div>
-                      <h2 class="text-lg font-semibold text-foreground">Receipts</h2>
-                      <p class="text-xs text-muted mt-0.5">
-                        Stock movements logged when this PO was received into inventory.
-                      </p>
-                    </div>
-                    <span class="text-sm text-muted">
-                      Total received:{" "}
-                      <span class="font-semibold text-foreground">{totalReceived()}</span>
-                    </span>
-                  </div>
-                  <div class="overflow-x-auto">
-                    <table class="w-full">
-                      <THead>
-                        <Th size="dense">Date</Th>
-                        <Th size="dense">Item</Th>
-                        <Th size="dense" align="right">
-                          Qty
-                        </Th>
-                        <Th size="dense">Recorded by</Th>
-                      </THead>
-                      <tbody>
-                        <For each={receipts()}>
-                          {r => (
-                            <tr class="border-t border-border">
-                              <td class="py-3 px-6 text-sm text-muted whitespace-nowrap">
-                                {formatDatePH(r.createdAt)}
-                              </td>
-                              <td class="py-3 px-6 text-sm text-foreground">{r.itemName}</td>
-                              <td class="py-3 px-6 text-sm text-right text-foreground tabular-nums">
-                                +{r.quantity}
-                              </td>
-                              <td class="py-3 px-6 text-sm text-muted">{r.createdBy ?? "—"}</td>
-                            </tr>
-                          )}
-                        </For>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </Show>
-
-              {/* Document Modal */}
-              <PoDocumentModal
-                open={documentModalOpen()}
-                onClose={() => setDocumentModalOpen(false)}
-                po={p}
-              />
-
-              {/* Edit Modal */}
-              <EditPoModal open={editModalOpen()} onClose={() => setEditModalOpen(false)} po={p} />
-            </>
-          )
-        }}
+            <PoDocumentModal
+              open={documentModalOpen()}
+              onClose={() => setDocumentModalOpen(false)}
+              po={po}
+            />
+            <EditPoModal open={editModalOpen()} onClose={() => setEditModalOpen(false)} po={po} />
+          </>
+        )}
       </QueryBoundary>
     </PageContainer>
   )

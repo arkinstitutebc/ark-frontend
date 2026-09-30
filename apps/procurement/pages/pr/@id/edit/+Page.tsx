@@ -62,7 +62,7 @@ export default function EditPrPage() {
       navigate(`/pr/${pr.id}`)
       return
     }
-    setSelectedBatchId(pr.batchId)
+    setSelectedBatchId(pr.batchId ?? "")
     setCategory(pr.category ?? "")
     setPurpose(pr.purpose ?? "")
     setDateNeeded(pr.dateNeeded ? pr.dateNeeded.slice(0, 10) : "")

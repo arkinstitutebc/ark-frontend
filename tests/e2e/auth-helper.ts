@@ -11,6 +11,8 @@ export const SEEDED_ADMIN: SeededAdmin = {
   password: process.env.E2E_ADMIN_PASSWORD || "changeme",
 }
 
+const sessionTokens = new Map<string, string>()
+
 function cookieDomain(url: string): string {
   const { hostname } = new URL(url)
   if (hostname === "localhost" || /^\d+\.\d+\.\d+\.\d+$/.test(hostname)) return hostname
@@ -39,35 +41,39 @@ export async function requireBackend(testInfo: TestInfo): Promise<void> {
  * is a direct shortcut.
  */
 export async function loginAsAdmin(page: Page, creds: SeededAdmin = SEEDED_ADMIN): Promise<void> {
-  const res = await page.request.post(`${API_URL}/api/auth/login`, {
-    data: creds,
-    failOnStatusCode: false,
-  })
-  if (!res.ok()) {
-    throw new Error(`Login failed: ${res.status()} ${await res.text()}`)
+  const key = `${API_URL}:${creds.email}`
+  let token = sessionTokens.get(key)
+  if (!token) {
+    const res = await page.request.post(`${API_URL}/api/auth/login`, {
+      data: creds,
+      failOnStatusCode: false,
+    })
+    if (!res.ok()) {
+      throw new Error(`Login failed: ${res.status()} ${await res.text()}`)
+    }
+    const setCookie = res.headers()["set-cookie"]
+    token = setCookie
+      ?.split(";")
+      .map(part => part.trim())
+      .find(part => part.startsWith("token="))
+      ?.slice("token=".length)
+    if (!token) throw new Error("Login response did not set a token cookie")
+    sessionTokens.set(key, token)
   }
   // In some Playwright runs, page.request cookie storage does not reliably
   // hydrate the browser context for cross-port portal URLs. Mirror token
   // cookie explicitly so page navigations are authenticated deterministically.
-  const setCookie = res.headers()["set-cookie"]
-  const token = setCookie
-    ?.split(";")
-    .map(part => part.trim())
-    .find(part => part.startsWith("token="))
-    ?.slice("token=".length)
-  if (token) {
-    await page.context().addCookies([
-      {
-        name: "token",
-        value: token,
-        domain: cookieDomain(API_URL),
-        path: "/",
-        httpOnly: true,
-        sameSite: "Lax",
-        secure: API_URL.startsWith("https://"),
-      },
-    ])
-  }
+  await page.context().addCookies([
+    {
+      name: "token",
+      value: token,
+      domain: cookieDomain(API_URL),
+      path: "/",
+      httpOnly: true,
+      sameSite: "Lax",
+      secure: API_URL.startsWith("https://"),
+    },
+  ])
 }
 
 /** Convenience: log in then go to a path. */

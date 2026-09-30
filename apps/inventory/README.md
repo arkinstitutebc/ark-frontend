@@ -4,7 +4,7 @@
 
 ## Pages
 
-`/` stock items (with category badges), `/receiving` (PO receive), `/count` (stock take bulk reconcile), `/movements` (audit log), `/tutorials`.
+`/` independent toolkeeping catalog with price, condition, and damage tracking; `/monthly` generates a checklist from all current tools; `/monthly/:id` records monthly counts and condition; `/tutorials`.
 
 ## Dev
 

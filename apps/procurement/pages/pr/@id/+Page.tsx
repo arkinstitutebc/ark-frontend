@@ -1,4 +1,3 @@
-import { useCurrentUser } from "@ark/api-client"
 import {
   BackLink,
   categoryToneClass,
@@ -21,9 +20,7 @@ export default function PrDetailPage() {
   const pageContext = usePageContext()
   const id = createMemo(() => pageContext.routeParams.id as string)
   const query = useRequest(id)
-  const userQuery = useCurrentUser()
   const [documentModalOpen, setDocumentModalOpen] = createSignal(false)
-  const canCreatePo = () => userQuery.data?.role === "admin" || userQuery.data?.role === "director"
 
   return (
     <PageContainer>
@@ -46,14 +43,6 @@ export default function PrDetailPage() {
                       class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-foreground bg-surface border border-border rounded-lg hover:bg-surface-muted transition-colors"
                     >
                       <Icons.edit class="w-4 h-4" /> Edit
-                    </a>
-                  </Show>
-                  <Show when={p.status === "approved" && canCreatePo()}>
-                    <a
-                      href={`/orders/create?prId=${p.id}`}
-                      class="px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
-                    >
-                      Create PO
                     </a>
                   </Show>
                   <button

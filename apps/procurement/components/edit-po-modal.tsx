@@ -1,4 +1,4 @@
-import { formErrorClass, formInputClass, formLabelClass, Modal, ModalFooter, Select } from "@ark/ui"
+import { formErrorClass, formInputClass, formLabelClass, Modal, ModalFooter } from "@ark/ui"
 import { useUpdatePo } from "@data/hooks"
 import type { PurchaseOrder } from "@data/types"
 import { createEffect, createSignal, Show } from "solid-js"
@@ -9,19 +9,12 @@ interface EditPoModalProps {
   po: PurchaseOrder | null
 }
 
-const statusOptions = [
-  { label: "Draft", value: "draft" },
-  { label: "Sent", value: "sent" },
-  { label: "Cancelled", value: "cancelled" },
-]
-
 export function EditPoModal(props: EditPoModalProps) {
   const updateMutation = useUpdatePo()
 
   const [supplier, setSupplier] = createSignal("")
   const [notes, setNotes] = createSignal("")
   const [estimatedDelivery, setEstimatedDelivery] = createSignal("")
-  const [status, setStatus] = createSignal<string>("draft")
   const [errors, setErrors] = createSignal<Record<string, string>>({})
 
   // Re-hydrate fields each time the modal opens with a fresh PO.
@@ -31,7 +24,6 @@ export function EditPoModal(props: EditPoModalProps) {
     setSupplier(po.supplier ?? "")
     setNotes(po.notes ?? "")
     setEstimatedDelivery(po.estimatedDelivery ?? "")
-    setStatus(po.status ?? "draft")
     setErrors({})
   })
 
@@ -51,7 +43,6 @@ export function EditPoModal(props: EditPoModalProps) {
         supplier: supplier().trim(),
         notes: notes().trim() || undefined,
         estimatedDelivery: estimatedDelivery() || undefined,
-        status: status() as "draft" | "sent" | "cancelled",
       },
       {
         onSuccess: () => {
@@ -91,16 +82,6 @@ export function EditPoModal(props: EditPoModalProps) {
               value={estimatedDelivery()}
               onInput={e => setEstimatedDelivery(e.currentTarget.value)}
               class={formInputClass({})}
-            />
-          </div>
-
-          <div>
-            <span class={formLabelClass}>Status</span>
-            <Select
-              options={statusOptions}
-              value={status()}
-              onChange={v => setStatus(v)}
-              ariaLabel="Status"
             />
           </div>
 

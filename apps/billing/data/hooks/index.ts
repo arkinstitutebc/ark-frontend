@@ -1,6 +1,6 @@
 export { useCurrentUser } from "./auth"
 export {
-  useCreateAr,
+  useDeleteAr,
   useReceivable,
   useReceivables,
   useRecordPayment,

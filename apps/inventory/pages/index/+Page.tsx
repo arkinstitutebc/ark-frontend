@@ -3,6 +3,7 @@ import { categoryToneClass, PageHeader, StatCard, THead, Th } from "@ark/ui"
 import {
   type StockListResponse,
   useAdjustStock,
+  useCreateTool,
   usePaginatedMovements,
   usePaginatedStock,
 } from "@data/hooks"
@@ -14,6 +15,7 @@ import { ViewItemModal } from "@/components/view-item-modal"
 
 export default function Page() {
   const adjustMutation = useAdjustStock()
+  const createTool = useCreateTool()
   const userQuery = useCurrentUser()
   const [page, setPage] = createSignal(1)
   const PAGE_SIZE = 20
@@ -22,6 +24,11 @@ export default function Page() {
   const [viewModalOpen, setViewModalOpen] = createSignal(false)
   const [selectedItem, setSelectedItem] = createSignal<StockItem | null>(null)
   const [searchQuery, setSearchQuery] = createSignal("")
+  const [name, setName] = createSignal("")
+  const [category, setCategory] = createSignal("")
+  const [unitPrice, setUnitPrice] = createSignal(0)
+  const [quantity, setQuantity] = createSignal(0)
+  const [trackingMode, setTrackingMode] = createSignal<"quantity" | "individual">("quantity")
 
   const stockQuery = usePaginatedStock(() => ({
     page: page(),
@@ -80,19 +87,77 @@ export default function Page() {
   return (
     <div class="px-6 sm:px-8 lg:px-12 py-8 max-w-6xl mx-auto">
       <PageHeader
-        title="Stock Overview"
-        subtitle="Track inventory levels across all batches"
-        action={
-          <Show when={canWriteStock()}>
-            <a
-              href="/receiving"
-              class="inline-flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-lg text-sm font-medium hover:bg-primary/90 transition-colors"
-            >
-              <Icons.plus class="w-4 h-4" /> New Receipt
-            </a>
-          </Show>
-        }
+        title="Toolkeeping"
+        subtitle="Track tools and equipment independently from procurement"
       />
+
+      <Show when={canWriteStock()}>
+        <form
+          class="mb-6 grid gap-3 rounded-lg border border-border bg-surface p-5 md:grid-cols-[1fr_1fr_120px_120px_140px_auto]"
+          onSubmit={event => {
+            event.preventDefault()
+            createTool.mutate({
+              name: name(),
+              category: category(),
+              unit: "pcs",
+              unitPrice: unitPrice(),
+              trackingMode: trackingMode(),
+              quantityOnHand: trackingMode() === "individual" ? 1 : quantity(),
+            })
+          }}
+        >
+          <input
+            required
+            value={name()}
+            onInput={event => setName(event.currentTarget.value)}
+            placeholder="Tool / equipment"
+            class="rounded-lg border border-border px-3 py-2 text-sm"
+          />
+          <input
+            required
+            value={category()}
+            onInput={event => setCategory(event.currentTarget.value)}
+            placeholder="Category"
+            class="rounded-lg border border-border px-3 py-2 text-sm"
+          />
+          <input
+            type="number"
+            min="0"
+            step="0.01"
+            required
+            value={unitPrice() || ""}
+            onInput={event => setUnitPrice(Number(event.currentTarget.value))}
+            placeholder="Price"
+            class="rounded-lg border border-border px-3 py-2 text-sm"
+          />
+          <input
+            type="number"
+            min="0"
+            required
+            disabled={trackingMode() === "individual"}
+            value={trackingMode() === "individual" ? 1 : quantity()}
+            onInput={event => setQuantity(Number(event.currentTarget.value))}
+            placeholder="Qty"
+            class="rounded-lg border border-border px-3 py-2 text-sm"
+          />
+          <select
+            value={trackingMode()}
+            onChange={event =>
+              setTrackingMode(event.currentTarget.value as "quantity" | "individual")
+            }
+            class="rounded-lg border border-border px-3 py-2 text-sm"
+          >
+            <option value="quantity">Quantity</option>
+            <option value="individual">Individual unit</option>
+          </select>
+          <button
+            type="submit"
+            class="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white"
+          >
+            Add tool
+          </button>
+        </form>
+      </Show>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
         <StatCard
@@ -126,7 +191,7 @@ export default function Page() {
           <div class="bg-surface rounded-lg border border-border overflow-hidden">
             <div class="px-6 py-4 border-b border-border">
               <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-foreground">Current Stock</h2>
+                <h2 class="text-lg font-semibold text-foreground">Tool & Equipment Catalog</h2>
                 <div class="relative">
                   <Icons.search class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted" />
                   <input
@@ -142,9 +207,9 @@ export default function Page() {
             <table class="w-full">
               <THead>
                 <Th size="dense">Item</Th>
-                <Th size="dense">Batch</Th>
+                <Th size="dense">Price</Th>
                 <Th size="dense">On Hand</Th>
-                <Th size="dense">Status</Th>
+                <Th size="dense">Condition / Damage</Th>
                 <Th size="dense" align="right">
                   Actions
                 </Th>
@@ -162,8 +227,13 @@ export default function Page() {
                         </span>
                       </td>
                       <td class="px-6 py-4">
-                        <span class="text-sm text-foreground">{item.batchCode}</span>
-                        <p class="text-xs text-muted mt-0.5">{item.batchName}</p>
+                        <span class="text-sm text-foreground">
+                          {Number(item.unitPrice).toLocaleString("en-PH", {
+                            style: "currency",
+                            currency: "PHP",
+                          })}
+                        </span>
+                        <p class="text-xs text-muted mt-0.5">{item.trackingMode}</p>
                       </td>
                       <td class="px-6 py-4">
                         <span class="text-sm font-medium text-foreground">
@@ -171,7 +241,8 @@ export default function Page() {
                         </span>
                       </td>
                       <td class="px-6 py-4">
-                        <StatusBadge status={item.status} />
+                        <StatusBadge status={item.condition} />
+                        <p class="mt-1 text-xs text-muted">{item.damagedQuantity} damaged</p>
                       </td>
                       <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-2">

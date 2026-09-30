@@ -13,18 +13,21 @@ async function selectOption(page: Page, scope: Locator, label: string, option: s
 async function createBatch(page: Page, seed: string) {
   await page.goto(`${TRAINING_URL}/`)
   await waitForReady(page)
+  await page.getByRole("button", { name: "List", exact: true }).click()
 
   await page.getByRole("button", { name: /new batch/i }).click()
   const dialog = page.getByRole("dialog")
   await expect(dialog).toBeVisible()
 
-  await selectOption(page, dialog, "Training type", "Bartending NC II")
+  await selectOption(page, dialog, "Qualification", "Bartending NC II")
+  await selectOption(page, dialog, "Program scheme", "STANDARD IBT")
   await dialog.getByPlaceholder(/Sen\. Alan Cayetano|Juan Dela Cruz/i).fill(`QA Sponsor ${seed}`)
   await dialog.locator('input[type="date"]').nth(0).fill("2026-04-01")
   await dialog.locator('input[type="date"]').nth(1).fill("2026-04-15")
   await selectOption(page, dialog, "Venue", "On-site")
   await selectOption(page, dialog, "Instructor", "Other (type below)")
   await dialog.getByPlaceholder(/Chef Maria Santos/i).fill(`QA Instructor ${seed}`)
+  await dialog.getByRole("spinbutton", { name: /gross revenue \/ budget/i }).fill("1234.56")
   await dialog.getByRole("button", { name: /create batch/i }).click()
 
   await expect(dialog).toBeHidden()
@@ -49,7 +52,8 @@ test.describe("Training — batch and student actions", () => {
 
     await dialog.getByRole("button", { name: /create batch/i }).click()
 
-    await expect(dialog.getByText("Training type is required")).toBeVisible()
+    await expect(dialog.getByText("Qualification is required")).toBeVisible()
+    await expect(dialog.getByText("Program scheme is required")).toBeVisible()
     await expect(dialog.getByText("Sponsor is required")).toBeVisible()
     await expect(dialog.getByText("Start date is required")).toBeVisible()
     await expect(dialog.getByText("Venue is required")).toBeVisible()

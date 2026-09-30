@@ -7,13 +7,29 @@ const prItemSchema = z.object({
   unitPrice: z.number().positive("Unit price must be greater than zero"),
 })
 
-export const createPrSchema = z.object({
-  batchId: z.string().min(1, "Batch is required"),
-  category: z.string().min(1, "Category is required"),
-  purpose: z.string().min(1, "Purpose is required"),
-  dateNeeded: z.string().min(1, "Date needed is required"),
-  items: z.array(prItemSchema).min(1, "At least one item is required"),
-})
+export const createPrSchema = z
+  .object({
+    expenseType: z.enum(["operations", "assets"]),
+    operationsSubtype: z.enum(["training_expense", "company_overhead"]).optional(),
+    expenseItemId: z.string().min(1, "Expense item is required"),
+    batchId: z.string().optional(),
+    specialRequestNote: z.string().optional(),
+    purpose: z.string().min(1, "Purpose is required"),
+    dateNeeded: z.string().min(1, "Date needed is required"),
+    items: z.array(prItemSchema).min(1, "At least one item is required"),
+  })
+  .superRefine((data, ctx) => {
+    if (data.expenseType === "operations" && !data.operationsSubtype) {
+      ctx.addIssue({
+        code: "custom",
+        path: ["operationsSubtype"],
+        message: "Choose an operations type",
+      })
+    }
+    if (data.operationsSubtype === "training_expense" && !data.batchId) {
+      ctx.addIssue({ code: "custom", path: ["batchId"], message: "Batch is required" })
+    }
+  })
 
 export const createPoSchema = z.object({
   prId: z.string().min(1, "Purchase request is required"),

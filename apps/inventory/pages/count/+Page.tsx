@@ -129,9 +129,7 @@ export default function StockTakePage() {
                             <tr class="border-t border-border">
                               <td class="px-6 py-3 text-sm">
                                 <div class="font-medium text-foreground">{item.name}</div>
-                                <div class="text-xs text-muted">
-                                  {item.batchCode} · {item.unit}
-                                </div>
+                                <div class="text-xs text-muted">{item.unit}</div>
                               </td>
                               <td class="px-6 py-3">
                                 <span

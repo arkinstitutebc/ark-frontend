@@ -1,5 +1,5 @@
 import { categoryToneClass, formatDatePH, formatPeso, PageContainer, PageHeader } from "@ark/ui"
-import { useApprovePr, useCoordinatorReviewPr, useRejectPr, useRequests } from "@data/hooks"
+import { useApprovePr, useRejectPr, useRequests } from "@data/hooks"
 import type { PrStatus, PurchaseRequest } from "@data/types"
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { type ApprovalAction, ApprovalDetailsModal } from "@/components/approval-details-modal"
@@ -10,14 +10,14 @@ function getEmptyStateMessage(filter: PrStatus | "all") {
     case "pending":
       return {
         icon: Icons.checkCircle,
-        title: "No requests awaiting coordinator review",
+        title: "No requests awaiting approval",
         message: "Newly submitted purchase requests will show here.",
       }
     case "under_review":
       return {
         icon: Icons.checkCircle,
         title: "No requests awaiting management approval",
-        message: "Coordinator-reviewed requests will show here.",
+        message: "Legacy requests already in review will show here.",
       }
     case "approved":
       return {
@@ -42,7 +42,6 @@ function getEmptyStateMessage(filter: PrStatus | "all") {
 
 function ApprovalCard(props: {
   pr: PurchaseRequest
-  onCoordinatorReview: (pr: PurchaseRequest) => void
   onApprove: (pr: PurchaseRequest) => void
   onReject: (pr: PurchaseRequest) => void
   onViewDetails: (pr: PurchaseRequest) => void
@@ -124,7 +123,7 @@ function ApprovalCard(props: {
         </div>
 
         <Show
-          when={props.pr.status === "pending" || props.pr.status === "under_review"}
+          when={props.pr.status === "pending"}
           fallback={
             <button
               type="button"
@@ -144,26 +143,14 @@ function ApprovalCard(props: {
             >
               Reject
             </button>
-            <Show when={props.pr.status === "pending"}>
-              <button
-                type="button"
-                disabled={props.processing}
-                onClick={() => props.onCoordinatorReview(props.pr)}
-                class="px-3 py-1.5 text-xs font-medium text-white bg-primary hover:bg-primary/90 hover:scale-105 active:scale-95 rounded transition-all disabled:opacity-50 cursor-pointer"
-              >
-                Coordinator Review
-              </button>
-            </Show>
-            <Show when={props.pr.status === "under_review"}>
-              <button
-                type="button"
-                disabled={props.processing}
-                onClick={() => props.onApprove(props.pr)}
-                class="px-3 py-1.5 text-xs font-medium text-white bg-primary hover:bg-primary/90 hover:scale-105 active:scale-95 rounded transition-all disabled:opacity-50 cursor-pointer"
-              >
-                Approve
-              </button>
-            </Show>
+            <button
+              type="button"
+              disabled={props.processing}
+              onClick={() => props.onApprove(props.pr)}
+              class="px-3 py-1.5 text-xs font-medium text-white bg-primary hover:bg-primary/90 hover:scale-105 active:scale-95 rounded transition-all disabled:opacity-50 cursor-pointer"
+            >
+              Approve & Generate PO
+            </button>
           </div>
         </Show>
       </div>
@@ -174,7 +161,6 @@ function ApprovalCard(props: {
 export default function ApprovalsPage() {
   const approveMutation = useApprovePr()
   const rejectMutation = useRejectPr()
-  const coordinatorReviewMutation = useCoordinatorReviewPr()
 
   const [filter, setFilter] = createSignal<PrStatus | "all">("pending")
   const [search, setSearch] = createSignal("")
@@ -189,8 +175,7 @@ export default function ApprovalsPage() {
     search: search().trim() || undefined,
   }))
 
-  const isProcessing = () =>
-    approveMutation.isPending || rejectMutation.isPending || coordinatorReviewMutation.isPending
+  const isProcessing = () => approveMutation.isPending || rejectMutation.isPending
 
   const requests = createMemo(() => query.data?.items ?? [])
   const pageCount = createMemo(() =>
@@ -220,7 +205,6 @@ export default function ApprovalsPage() {
     setModalOpen(true)
   }
 
-  const handleCoordinatorReview = (pr: PurchaseRequest) => openModal(pr, "coordinator-review")
   const handleApprove = (pr: PurchaseRequest) => openModal(pr, "approve")
   const handleReject = (pr: PurchaseRequest) => openModal(pr, "reject")
   const handleViewDetails = (pr: PurchaseRequest) => openModal(pr, "view")
@@ -228,15 +212,6 @@ export default function ApprovalsPage() {
   const handleModalApprove = (id: string, notes?: string) => {
     approveMutation.mutate(
       { id, approvalNotes: notes },
-      {
-        onSuccess: () => setModalOpen(false),
-      }
-    )
-  }
-
-  const handleModalCoordinatorReview = (id: string, notes?: string) => {
-    coordinatorReviewMutation.mutate(
-      { id, notes },
       {
         onSuccess: () => setModalOpen(false),
       }
@@ -257,15 +232,9 @@ export default function ApprovalsPage() {
       <PageHeader title="Approvals" subtitle="Review and approve purchase requests" />
 
       {/* Error banner */}
-      <Show
-        when={
-          approveMutation.isError || rejectMutation.isError || coordinatorReviewMutation.isError
-        }
-      >
+      <Show when={approveMutation.isError || rejectMutation.isError}>
         <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-          {approveMutation.error?.message ||
-            rejectMutation.error?.message ||
-            coordinatorReviewMutation.error?.message}
+          {approveMutation.error?.message || rejectMutation.error?.message}
         </div>
       </Show>
 
@@ -275,11 +244,11 @@ export default function ApprovalsPage() {
           <p class="text-2xl text-foreground">{query.isSuccess ? stats().total : "-"}</p>
         </div>
         <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Coordinator queue</p>
+          <p class="text-sm text-muted mb-1">Pending approval</p>
           <p class="text-2xl text-foreground">{query.isSuccess ? stats().pending : "-"}</p>
         </div>
         <div class="bg-surface rounded-lg border border-border p-4">
-          <p class="text-sm text-muted mb-1">Management queue</p>
+          <p class="text-sm text-muted mb-1">Legacy review</p>
           <p class="text-2xl text-foreground">{query.isSuccess ? stats().underReview : "-"}</p>
         </div>
         <div class="bg-surface rounded-lg border border-border p-4">
@@ -308,8 +277,8 @@ export default function ApprovalsPage() {
           <For
             each={[
               { value: "all" as const, label: "All" },
-              { value: "pending" as const, label: "Coordinator queue" },
-              { value: "under_review" as const, label: "Management queue" },
+              { value: "pending" as const, label: "Pending" },
+              { value: "under_review" as const, label: "Legacy review" },
               { value: "approved" as const, label: "Approved" },
               { value: "rejected" as const, label: "Rejected" },
             ]}
@@ -349,7 +318,6 @@ export default function ApprovalsPage() {
                   {pr => (
                     <ApprovalCard
                       pr={pr}
-                      onCoordinatorReview={handleCoordinatorReview}
                       onApprove={handleApprove}
                       onReject={handleReject}
                       onViewDetails={handleViewDetails}
@@ -396,7 +364,6 @@ export default function ApprovalsPage() {
         mode={modalMode()}
         onApprove={handleModalApprove}
         onReject={handleModalReject}
-        onCoordinatorReview={handleModalCoordinatorReview}
         processing={isProcessing()}
       />
     </PageContainer>

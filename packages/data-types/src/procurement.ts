@@ -44,10 +44,14 @@ export interface PrAttachment {
 export interface PurchaseRequest {
   id: string
   prCode: string
-  batchId: string
-  batchName: string
-  batchCode: string
-  category: string
+  batchId?: string | null
+  batchName?: string | null
+  batchCode?: string | null
+  category?: string | null
+  expenseItemId?: string | null
+  expenseType?: ProcurementExpenseType | null
+  operationsSubtype?: ProcurementOperationsSubtype | null
+  specialRequestNote?: string | null
   purpose: string
   /** Date by which the requested items must be on hand (YYYY-MM-DD). */
   dateNeeded?: string
@@ -62,7 +66,7 @@ export interface PurchaseRequest {
   status: PrStatus
   createdBy: string
   createdAt: string
-  /** Intermediate stage in the 3-signature flow (Requestor → Coordinator → Management). */
+  /** Legacy coordinator audit fields retained for existing records; new PRs use one approval. */
   coordinatorReviewedAt?: string
   coordinatorReviewedBy?: string
   coordinatorNotes?: string
@@ -71,16 +75,31 @@ export interface PurchaseRequest {
   approvalNotes?: string
 }
 
-export type PoStatus = "draft" | "sent" | "partial" | "received" | "cancelled"
+export type PoStatus = "pending" | "confirmed" | "acknowledged" | "liquidated" | "cancelled"
+
+export type ProcurementExpenseType = "operations" | "assets"
+export type ProcurementOperationsSubtype = "training_expense" | "company_overhead"
+
+export interface ProcurementExpenseItem {
+  id: string
+  code: string
+  label: string
+  expenseType: ProcurementExpenseType
+  operationsSubtype?: ProcurementOperationsSubtype | null
+  requiresSpecialRequestNote: boolean
+  active: boolean
+  sortOrder: number
+  schemeIds: string[]
+}
 
 export interface PurchaseOrder {
   id: string
   poCode: string
   prId: string
   prCode?: string | null // derived via JOIN on list/get endpoints
-  batchId: string
-  batchName: string
-  supplier: string
+  batchId?: string | null
+  batchName?: string | null
+  supplier?: string | null
   items: PrItem[]
   totalAmount: number
   status: PoStatus
@@ -88,6 +107,43 @@ export interface PurchaseOrder {
   estimatedDelivery?: string
   actualDelivery?: string
   notes?: string
+  confirmedAt?: string | null
+  recipientName?: string | null
+  recipientSignatureUrl?: string | null
+  acknowledgedAt?: string | null
+  acknowledgmentNotes?: string | null
+}
+
+export type PoLiquidationStatus = "submitted" | "approved" | "rejected"
+
+export interface PoLiquidationReceipt {
+  name: string
+  url: string
+  type?: string
+  size?: number
+}
+
+export interface PoLiquidation {
+  id: string
+  poId: string
+  actualAmount: number | string
+  varianceAmount: number | string
+  varianceReason?: string | null
+  receipts: PoLiquidationReceipt[]
+  status: PoLiquidationStatus
+  submittedByEmail?: string | null
+  submittedAt: string
+  reviewedByEmail?: string | null
+  reviewedAt?: string | null
+  bankId?: string | null
+  transactionId?: string | null
+  reviewNotes?: string | null
+}
+
+export interface PoLiquidationListItem {
+  liquidation: PoLiquidation
+  purchaseOrder: PurchaseOrder
+  purchaseRequest: PurchaseRequest
 }
 
 export type PettyCashStatus =

@@ -1,8 +1,8 @@
 export const queryKeys = {
   stock: {
     all: ["stock"] as const,
-    byBatch: (batchId?: string) => ["stock", { batchId }] as const,
-    filtered: (filters?: { batchId?: string; page?: number; limit?: number; search?: string }) =>
+    list: ["stock", "list"] as const,
+    filtered: (filters?: { page?: number; limit?: number; search?: string }) =>
       ["stock", filters] as const,
     detail: (id: string) => ["stock", id] as const,
   },
@@ -18,7 +18,8 @@ export const queryKeys = {
       search?: string
     }) => ["movements", filters] as const,
   },
-  orders: {
-    all: ["orders"] as const,
+  monthly: {
+    all: ["monthly-toolkeeping"] as const,
+    detail: (id: string) => ["monthly-toolkeeping", id] as const,
   },
 } as const

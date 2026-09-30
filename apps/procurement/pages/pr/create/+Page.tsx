@@ -1,6 +1,6 @@
 import { AttachmentUploader, BackLink, formatPeso, Icons, PageContainer, Select } from "@ark/ui"
 import { api } from "@data/api"
-import { useCategories, useCreatePr } from "@data/hooks"
+import { useCreatePr, useExpenseItems } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
 import { createPrSchema } from "@data/schemas"
 import type { Batch, PrAttachment } from "@data/types"
@@ -8,7 +8,6 @@ import { validateForm } from "@data/validate"
 import { createQuery } from "@tanstack/solid-query"
 import { createMemo, createSignal, Index, Show } from "solid-js"
 import { navigate } from "vike/client/router"
-import { ManageCategoriesModal } from "@/components/manage-categories-modal"
 
 interface PrItemInput {
   id: string
@@ -27,15 +26,19 @@ export default function CreatePrPage() {
     queryKey: queryKeys.batches.all,
     queryFn: () => api<Batch[]>("/api/training/batches"),
   }))
-  const categoriesQuery = useCategories()
+  const expenseItemsQuery = useExpenseItems()
   const createPrMutation = useCreatePr()
 
   const [errors, setErrors] = createSignal<Record<string, string>>({})
   const [selectedBatchId, setSelectedBatchId] = createSignal("")
-  const [category, setCategory] = createSignal("")
+  const [expenseType, setExpenseType] = createSignal<"operations" | "assets">("operations")
+  const [operationsSubtype, setOperationsSubtype] = createSignal<
+    "training_expense" | "company_overhead"
+  >("training_expense")
+  const [expenseItemId, setExpenseItemId] = createSignal("")
+  const [specialRequestNote, setSpecialRequestNote] = createSignal("")
   const [purpose, setPurpose] = createSignal("")
   const [dateNeeded, setDateNeeded] = createSignal("")
-  const [showManageCategories, setShowManageCategories] = createSignal(false)
   const [items, setItems] = createSignal<PrItemInput[]>([
     { id: "1", name: "", quantity: 1, unit: "pcs", unitPrice: 0 },
   ])
@@ -81,8 +84,11 @@ export default function CreatePrPage() {
       }))
 
     const data = {
-      batchId: selectedBatchId(),
-      category: category(),
+      batchId: operationsSubtype() === "training_expense" ? selectedBatchId() : undefined,
+      expenseType: expenseType(),
+      operationsSubtype: expenseType() === "operations" ? operationsSubtype() : undefined,
+      expenseItemId: expenseItemId(),
+      specialRequestNote: specialRequestNote(),
       purpose: purpose(),
       dateNeeded: dateNeeded(),
       items:
@@ -118,10 +124,13 @@ export default function CreatePrPage() {
 
     createPrMutation.mutate(
       {
-        batchId: selectedBatchId(),
+        batchId: operationsSubtype() === "training_expense" ? selectedBatchId() : undefined,
         batchName: batch?.trainingName || "",
         batchCode: batch?.batchCode || "",
-        category: category(),
+        expenseType: expenseType(),
+        operationsSubtype: expenseType() === "operations" ? operationsSubtype() : undefined,
+        expenseItemId: expenseItemId(),
+        specialRequestNote: specialRequestNote().trim() || undefined,
         purpose: purpose(),
         dateNeeded: dateNeeded(),
         items: prItems,
@@ -143,8 +152,19 @@ export default function CreatePrPage() {
     }))
   )
 
-  const categoryOptions = createMemo(() =>
-    (categoriesQuery.data ?? []).map(c => ({ label: c.name, value: c.name }))
+  const expenseItemOptions = createMemo(() =>
+    (expenseItemsQuery.data ?? [])
+      .filter(item => item.expenseType === expenseType())
+      .filter(item => expenseType() === "assets" || item.operationsSubtype === operationsSubtype())
+      .filter(item => {
+        if (operationsSubtype() !== "training_expense" || item.schemeIds.length === 0) return true
+        const schemeId = selectedBatch()?.trainingSchemeId
+        return Boolean(schemeId && item.schemeIds.includes(schemeId))
+      })
+      .map(item => ({ label: item.label, value: item.id }))
+  )
+  const selectedExpenseItem = createMemo(() =>
+    (expenseItemsQuery.data ?? []).find(item => item.id === expenseItemId())
   )
   const unitOptions = createMemo(() => units.map(u => ({ label: u, value: u })))
 
@@ -169,65 +189,110 @@ export default function CreatePrPage() {
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Form */}
           <div class="lg:col-span-2 space-y-6">
-            {/* Batch & Category */}
+            {/* Expense hierarchy */}
             <div class="bg-surface rounded-lg border border-border p-6">
               <h2 class="text-lg font-semibold text-foreground mb-4">Request Details</h2>
 
               <div class="space-y-4">
                 <div>
-                  <span class="block text-sm font-medium text-foreground mb-1">
-                    Batch <span class="text-red-500">*</span>
-                  </span>
+                  <span class="block text-sm font-medium text-foreground mb-1">Expense Type</span>
                   <Select
-                    options={batchOptions()}
-                    value={selectedBatchId() || undefined}
-                    onChange={v => setSelectedBatchId(v)}
-                    placeholder={batchesQuery.isPending ? "Loading batches…" : "Select a batch"}
-                    disabled={batchesQuery.isPending}
-                    ariaLabel="Batch"
+                    options={[
+                      { label: "Operations", value: "operations" },
+                      { label: "Assets", value: "assets" },
+                    ]}
+                    value={expenseType()}
+                    onChange={value => {
+                      setExpenseType(value as "operations" | "assets")
+                      setExpenseItemId("")
+                    }}
+                    ariaLabel="Expense type"
                   />
-                  <Show when={errors().batchId}>
-                    <p class="text-xs text-red-600 mt-1">{errors().batchId}</p>
-                  </Show>
-                  <Show when={selectedBatch()}>
-                    <p class="text-xs text-muted mt-1">
-                      Budget: {formatPeso(selectedBatch()?.budget || 0)} | Used:{" "}
-                      {formatPeso(selectedBatch()?.budgetUsed || 0)}
-                    </p>
+                </div>
+
+                <Show when={expenseType() === "operations"}>
+                  <div>
+                    <span class="block text-sm font-medium text-foreground mb-1">
+                      Operations Type
+                    </span>
+                    <Select
+                      options={[
+                        { label: "Training Expense", value: "training_expense" },
+                        { label: "Company Overhead", value: "company_overhead" },
+                      ]}
+                      value={operationsSubtype()}
+                      onChange={value => {
+                        setOperationsSubtype(value as "training_expense" | "company_overhead")
+                        setExpenseItemId("")
+                      }}
+                      ariaLabel="Operations type"
+                    />
+                  </div>
+                </Show>
+
+                <Show
+                  when={
+                    expenseType() === "operations" && operationsSubtype() === "training_expense"
+                  }
+                >
+                  <div>
+                    <span class="block text-sm font-medium text-foreground mb-1">
+                      Batch <span class="text-red-500">*</span>
+                    </span>
+                    <Select
+                      options={batchOptions()}
+                      value={selectedBatchId() || undefined}
+                      onChange={v => {
+                        setSelectedBatchId(v)
+                        setExpenseItemId("")
+                      }}
+                      placeholder={batchesQuery.isPending ? "Loading batches…" : "Select a batch"}
+                      disabled={batchesQuery.isPending}
+                      ariaLabel="Batch"
+                    />
+                    <Show when={errors().batchId}>
+                      <p class="text-xs text-red-600 mt-1">{errors().batchId}</p>
+                    </Show>
+                    <Show when={selectedBatch()}>
+                      <p class="text-xs text-muted mt-1">
+                        Spendable after 2% withholding:{" "}
+                        {formatPeso(Number(selectedBatch()?.netBudget ?? 0))}
+                      </p>
+                    </Show>
+                  </div>
+                </Show>
+
+                <div>
+                  <span class="block text-sm font-medium text-foreground mb-1">Expense Item</span>
+                  <Select
+                    options={expenseItemOptions()}
+                    value={expenseItemId() || undefined}
+                    onChange={setExpenseItemId}
+                    placeholder={
+                      expenseItemsQuery.isPending ? "Loading expense items…" : "Select expense item"
+                    }
+                    disabled={expenseItemsQuery.isPending}
+                    ariaLabel="Expense item"
+                  />
+                  <Show when={errors().expenseItemId}>
+                    <p class="text-xs text-red-600 mt-1">{errors().expenseItemId}</p>
                   </Show>
                 </div>
 
-                <div>
-                  <div class="flex items-center justify-between mb-1">
-                    <span class="block text-sm font-medium text-foreground">
-                      Category <span class="text-red-500">*</span>
+                <Show when={selectedExpenseItem()?.requiresSpecialRequestNote}>
+                  <label class="block">
+                    <span class="block text-sm font-medium text-foreground mb-1">
+                      Special Request Details
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => setShowManageCategories(true)}
-                      class="text-xs font-normal text-primary hover:text-primary/80 transition-colors"
-                    >
-                      Manage categories
-                    </button>
-                  </div>
-                  <Select
-                    options={categoryOptions()}
-                    value={category() || undefined}
-                    onChange={v => setCategory(v)}
-                    placeholder={
-                      categoriesQuery.isLoading
-                        ? "Loading categories…"
-                        : categoryOptions().length
-                          ? "Select category"
-                          : "No categories — use Manage categories to add one"
-                    }
-                    disabled={categoriesQuery.isLoading}
-                    ariaLabel="Category"
-                  />
-                  <Show when={errors().category}>
-                    <p class="text-xs text-red-600 mt-1">{errors().category}</p>
-                  </Show>
-                </div>
+                    <textarea
+                      value={specialRequestNote()}
+                      onInput={event => setSpecialRequestNote(event.currentTarget.value)}
+                      rows={2}
+                      required
+                      class="w-full px-3 py-2 border border-border rounded-lg text-sm"
+                    />
+                  </label>
+                </Show>
 
                 <div>
                   <label
@@ -475,10 +540,6 @@ export default function CreatePrPage() {
           />
         </div>
       </form>
-      <ManageCategoriesModal
-        open={showManageCategories()}
-        onClose={() => setShowManageCategories(false)}
-      />
     </PageContainer>
   )
 }
