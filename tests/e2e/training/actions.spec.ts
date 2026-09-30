@@ -1,3 +1,4 @@
+import type { Batch, BatchStatus } from "@ark/data-types"
 import { expect, type Locator, type Page, test } from "@playwright/test"
 import { loginAsAdmin, requireBackend } from "../auth-helper"
 import { waitForReady } from "../helpers"
@@ -13,7 +14,6 @@ async function selectOption(page: Page, scope: Locator, label: string, option: s
 async function createBatch(page: Page, seed: string) {
   await page.goto(`${TRAINING_URL}/`)
   await waitForReady(page)
-  await page.getByRole("button", { name: "List", exact: true }).click()
 
   await page.getByRole("button", { name: /new batch/i }).click()
   const dialog = page.getByRole("dialog")
@@ -90,6 +90,70 @@ test.describe("Training — batch and student actions", () => {
 
     await expect(confirm).toBeHidden()
     await expect(studentRow).toHaveCount(0)
+  })
+
+  test("moves a batch on the separate board", async ({ page }) => {
+    await page.setViewportSize({ width: 1920, height: 1080 })
+    const batch: Batch = {
+      id: "25b809e9-5396-4d6d-90d6-871395d923f2",
+      batchCode: "TEST-BOARD-001",
+      senator: "QA sponsor",
+      trainingName: "Bartending NC II",
+      trainingOfferingId: "d5101bc8-014e-47dd-a9ea-14ac3da2c6dd",
+      trainingSchemeId: "dcdd3bc9-bbae-47cf-8b76-0f6d37c76ec4",
+      trainingLevel: "NC II",
+      trainingCategory: "Bartending",
+      startDate: "2026-09-01",
+      endDate: "2026-09-30",
+      venue: "On-site",
+      instructor: "QA trainer",
+      studentsEnrolled: 12,
+      studentsCapacity: 25,
+      budget: 100000,
+      budgetUsed: 0,
+      withholdingRate: 2,
+      grossRevenue: 100000,
+      withholdingAmount: 2000,
+      netBudget: 98000,
+      status: "Not Started",
+      completionPercentage: 0,
+      createdAt: "2026-09-01T00:00:00Z",
+      updatedAt: "2026-09-01T00:00:00Z",
+    }
+    let status: BatchStatus = batch.status
+    await page.route("**/api/training/batches", async route => {
+      await route.fulfill({ json: [{ ...batch, status }] })
+    })
+    await page.route(`**/api/training/batches/${batch.id}`, async route => {
+      status = (route.request().postDataJSON() as { status: BatchStatus }).status
+      await route.fulfill({ json: { ...batch, status } })
+    })
+
+    await page.goto(`${TRAINING_URL}/`)
+    await waitForReady(page)
+    await expect(page.getByRole("row").filter({ hasText: batch.batchCode })).toBeVisible()
+    await expect(page.getByRole("button", { name: "Board", exact: true })).toHaveCount(0)
+
+    await page.goto(`${TRAINING_URL}/board`)
+    await waitForReady(page)
+    await expect(page.getByRole("heading", { name: "Batch Board" })).toBeVisible()
+
+    const card = page.locator("article").filter({ hasText: batch.batchCode })
+    const cardIn = (status: string) =>
+      page
+        .locator(`section[aria-label="${status} batches"] article`)
+        .filter({ hasText: batch.batchCode })
+    await expect(cardIn("Not Started")).toBeVisible()
+
+    await card
+      .getByRole("combobox", { name: `Move ${batch.batchCode} to` })
+      .selectOption("In Progress")
+    await expect(cardIn("In Progress")).toBeVisible()
+
+    await card
+      .getByRole("button", { name: `Drag ${batch.batchCode}` })
+      .dragTo(page.locator('section[aria-label="Completed batches"]'))
+    await expect(cardIn("Completed")).toBeVisible()
   })
 
   test("student modal blocks blank single-student submissions", async ({ page }) => {

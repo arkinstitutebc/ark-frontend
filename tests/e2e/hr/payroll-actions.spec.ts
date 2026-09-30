@@ -21,6 +21,21 @@ test.describe("HR payroll actions", () => {
     await loginAsAdmin(page)
   })
 
+  test("holiday button aligns with its inputs", async ({ page }) => {
+    await page.goto(`${PORTAL_URLS.hr}/calendar`)
+    await waitForReady(page)
+
+    const form = page
+      .locator("form")
+      .filter({ has: page.getByRole("button", { name: "Add holiday" }) })
+    const button = await form.getByRole("button", { name: "Add holiday" }).boundingBox()
+    const date = await form.locator('input[type="date"]').boundingBox()
+
+    if (!button || !date) throw new Error("Holiday form controls are not visible")
+    expect(button.height).toBeLessThanOrEqual(44)
+    expect(Math.abs(button.y - date.y)).toBeLessThanOrEqual(2)
+  })
+
   test("processes the seeded demo payroll period", async ({ page }, testInfo) => {
     const res = await page.request.get(`${API_URL}/api/hr/payroll`)
     expect(res.status()).toBe(200)

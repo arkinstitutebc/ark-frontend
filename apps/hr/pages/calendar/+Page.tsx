@@ -44,7 +44,7 @@ export default function CalendarPage() {
       />
       <div class="mb-6 grid gap-4 lg:grid-cols-2">
         <form
-          class="grid gap-3 rounded-lg border border-border bg-surface p-5 md:grid-cols-[160px_1fr_auto]"
+          class="grid content-start gap-3 rounded-lg border border-border bg-surface p-5 md:grid-cols-[160px_minmax(0,1fr)_auto]"
           onSubmit={event => {
             event.preventDefault()
             addHoliday.mutate({ date: holidayDate(), name: holidayName(), type: "regular" })
@@ -55,16 +55,19 @@ export default function CalendarPage() {
             required
             value={holidayDate()}
             onInput={event => setHolidayDate(event.currentTarget.value)}
-            class="rounded-lg border border-border px-3 py-2 text-sm"
+            class="h-10 min-w-0 rounded-lg border border-border px-3 py-2 text-sm"
           />
           <input
             required
             value={holidayName()}
             onInput={event => setHolidayName(event.currentTarget.value)}
             placeholder="Holiday name"
-            class="rounded-lg border border-border px-3 py-2 text-sm"
+            class="h-10 min-w-0 rounded-lg border border-border px-3 py-2 text-sm"
           />
-          <button type="submit" class="rounded-lg bg-primary px-3 py-2 text-sm text-white">
+          <button
+            type="submit"
+            class="h-10 whitespace-nowrap rounded-lg bg-primary px-3 py-2 text-sm text-white"
+          >
             Add holiday
           </button>
         </form>

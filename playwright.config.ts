@@ -11,6 +11,27 @@ const localPortalEnv = {
   VITE_HR_PORTAL_URL: "http://localhost:3006",
 }
 
+const portalPorts = {
+  main: 3000,
+  training: 3001,
+  procurement: 3002,
+  inventory: 3003,
+  finance: 3004,
+  billing: 3005,
+  hr: 3006,
+} as const
+
+const portalNames = Object.keys(portalPorts) as (keyof typeof portalPorts)[]
+const selectedPortals = process.env.E2E_PORTALS
+  ? process.env.E2E_PORTALS.split(",").map(name => name.trim())
+  : portalNames
+const unknownPortals = selectedPortals.filter(
+  name => !portalNames.includes(name as keyof typeof portalPorts)
+)
+if (unknownPortals.length > 0) {
+  throw new Error(`Unknown E2E_PORTALS: ${unknownPortals.join(", ")}`)
+}
+
 /**
  * Playwright config for Ark frontend dark-mode visual regression.
  *
@@ -48,63 +69,22 @@ export default defineConfig({
     },
   ],
   /**
-   * Build + serve each portal. Tests use full URLs against the per-portal
-   * local ports so cross-portal auth, shells, and route hydration are covered.
+   * Build + serve selected portals. Defaults to all; E2E_PORTALS=main,training
+   * keeps focused module tests from rebuilding unrelated apps.
    *
    * Tests run against the production build (vike preview), not dev, so the
    * Tailwind class-generation + SSR hydration path matches prod.
    */
-  webServer: [
-    {
-      command: "cd apps/main && bun run build && PORT=3000 bun run preview --port 3000",
+  webServer: selectedPortals.map(name => {
+    const port = portalPorts[name as keyof typeof portalPorts]
+    return {
+      command: `cd apps/${name} && bun run build && PORT=${port} bun run preview --port ${port}`,
       env: localPortalEnv,
-      url: "http://localhost:3000",
+      url: `http://localhost:${port}`,
       reuseExistingServer: !process.env.CI,
       timeout: 180_000,
-    },
-    {
-      command: "cd apps/training && bun run build && PORT=3001 bun run preview --port 3001",
-      env: localPortalEnv,
-      url: "http://localhost:3001",
-      reuseExistingServer: !process.env.CI,
-      timeout: 180_000,
-    },
-    {
-      command: "cd apps/finance && bun run build && PORT=3004 bun run preview --port 3004",
-      env: localPortalEnv,
-      url: "http://localhost:3004",
-      reuseExistingServer: !process.env.CI,
-      timeout: 180_000,
-    },
-    {
-      command: "cd apps/procurement && bun run build && PORT=3002 bun run preview --port 3002",
-      env: localPortalEnv,
-      url: "http://localhost:3002",
-      reuseExistingServer: !process.env.CI,
-      timeout: 180_000,
-    },
-    {
-      command: "cd apps/inventory && bun run build && PORT=3003 bun run preview --port 3003",
-      env: localPortalEnv,
-      url: "http://localhost:3003",
-      reuseExistingServer: !process.env.CI,
-      timeout: 180_000,
-    },
-    {
-      command: "cd apps/billing && bun run build && PORT=3005 bun run preview --port 3005",
-      env: localPortalEnv,
-      url: "http://localhost:3005",
-      reuseExistingServer: !process.env.CI,
-      timeout: 180_000,
-    },
-    {
-      command: "cd apps/hr && bun run build && PORT=3006 bun run preview --port 3006",
-      env: localPortalEnv,
-      url: "http://localhost:3006",
-      reuseExistingServer: !process.env.CI,
-      timeout: 180_000,
-    },
-  ],
+    }
+  }),
   expect: {
     toHaveScreenshot: {
       maxDiffPixelRatio: 0.02,

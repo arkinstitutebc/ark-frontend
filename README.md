@@ -40,6 +40,8 @@ bun run test:unit              # Bun unit tests for shared API/form helpers
 bun run typecheck              # tsc per workspace
 bun run build                  # Vike production build for every app/package with a build script
 bun run test:e2e               # Playwright portal smoke + focused E2E (LOCAL ONLY, NOT in CI)
+bun run test:e2e:training      # Training tests; builds only main + Training previews
+bun run test:e2e:hr            # HR tests; builds only main + HR previews
 bun run test:e2e:update        # update snapshots after intentional UI changes
 ```
 
