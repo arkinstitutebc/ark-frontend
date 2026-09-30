@@ -1,7 +1,8 @@
 import { formatDatePH, formatPeso, Icons, StatusBadge } from "@ark/ui"
 import { useUpdateBatch } from "@data/hooks"
+import { displayTrainingScheme } from "@data/scheme-label"
 import type { Batch, BatchStatus } from "@data/types"
-import { GripVertical } from "lucide-solid"
+import { ChevronDown, GripVertical } from "lucide-solid"
 import { createSignal, For, Show } from "solid-js"
 
 const COLUMNS: BatchStatus[] = ["Not Started", "In Progress", "On Hold", "Completed"]
@@ -14,6 +15,17 @@ interface BatchKanbanProps {
 export function BatchKanban(props: BatchKanbanProps) {
   const updateBatch = useUpdateBatch()
   const [hoverStatus, setHoverStatus] = createSignal<BatchStatus | null>(null)
+  const [draggingId, setDraggingId] = createSignal<string | null>(null)
+  const [collapsedStatuses, setCollapsedStatuses] = createSignal<Set<BatchStatus>>(new Set())
+
+  const toggleCollapsed = (status: BatchStatus) => {
+    setCollapsedStatuses(current => {
+      const next = new Set(current)
+      if (next.has(status)) next.delete(status)
+      else next.add(status)
+      return next
+    })
+  }
 
   const moveBatch = (id: string, status: BatchStatus) => {
     const batch = props.batches.find(item => item.id === id)
@@ -23,35 +35,53 @@ export function BatchKanban(props: BatchKanbanProps) {
 
   return (
     <div class="overflow-x-auto pb-3">
-      <div class="grid min-w-[1160px] grid-cols-4 items-start gap-4">
+      <div class="flex min-w-full items-start gap-4">
         <For each={COLUMNS}>
           {status => {
             const items = () => props.batches.filter(batch => batch.status === status)
+            const collapsed = () => collapsedStatuses().has(status)
             return (
               <section
                 aria-label={`${status} batches`}
-                class={`min-h-72 rounded-xl border p-3 transition-colors ${
+                class={`${collapsed() ? "w-44 shrink-0" : "min-w-[280px] flex-1"} min-h-72 rounded-xl border p-3 transition-colors ${
                   hoverStatus() === status
                     ? "border-primary bg-primary/5"
                     : "border-border bg-surface-muted/40"
                 }`}
                 onDragOver={event => {
+                  if (!draggingId()) return
                   event.preventDefault()
+                  if (event.dataTransfer) event.dataTransfer.dropEffect = "move"
                   setHoverStatus(status)
                 }}
                 onDrop={event => {
                   event.preventDefault()
                   setHoverStatus(null)
-                  moveBatch(event.dataTransfer?.getData("text/plain") ?? "", status)
+                  moveBatch(draggingId() ?? "", status)
+                  setDraggingId(null)
                 }}
               >
-                <div class="mb-3 flex h-8 items-center justify-between gap-2 px-1">
+                <button
+                  type="button"
+                  aria-label={`${collapsed() ? "Expand" : "Collapse"} ${status} column`}
+                  aria-expanded={!collapsed()}
+                  aria-controls={`batch-column-${status.replace(/ /g, "-")}`}
+                  onClick={() => toggleCollapsed(status)}
+                  class="mb-3 flex h-8 w-full items-center justify-between gap-2 rounded-md px-1 text-left hover:bg-surface-muted"
+                >
                   <StatusBadge status={status} />
-                  <span class="rounded-full bg-surface px-2 py-0.5 text-xs font-semibold text-muted">
+                  <span class="ml-auto rounded-full bg-surface px-2 py-0.5 text-xs font-semibold text-muted">
                     {items().length}
                   </span>
-                </div>
-                <div class="space-y-3">
+                  <ChevronDown
+                    class={`h-4 w-4 shrink-0 text-muted transition-transform ${collapsed() ? "-rotate-90" : ""}`}
+                  />
+                </button>
+                <div
+                  id={`batch-column-${status.replace(/ /g, "-")}`}
+                  hidden={collapsed()}
+                  class="space-y-3"
+                >
                   <For
                     each={items()}
                     fallback={
@@ -61,7 +91,19 @@ export function BatchKanban(props: BatchKanbanProps) {
                     }
                   >
                     {batch => (
-                      <article class="w-full rounded-lg border border-border bg-surface p-4 text-left shadow-sm transition hover:border-primary/40 hover:shadow">
+                      <article
+                        draggable={!updateBatch.isPending}
+                        onDragStart={event => {
+                          setDraggingId(batch.id)
+                          event.dataTransfer?.setData("text/plain", batch.id)
+                          if (event.dataTransfer) event.dataTransfer.effectAllowed = "move"
+                        }}
+                        onDragEnd={() => {
+                          setDraggingId(null)
+                          setHoverStatus(null)
+                        }}
+                        class="w-full cursor-grab rounded-lg border border-border bg-surface p-4 text-left shadow-sm transition hover:border-primary/40 hover:shadow active:cursor-grabbing"
+                      >
                         <div class="flex items-start justify-between gap-2">
                           <button
                             type="button"
@@ -75,20 +117,13 @@ export function BatchKanban(props: BatchKanbanProps) {
                               {batch.trainingOfferingLabel ?? batch.trainingName}
                             </span>
                           </button>
-                          <button
-                            type="button"
-                            aria-label={`Drag ${batch.batchCode}`}
+                          <span
+                            aria-hidden="true"
                             title="Drag to another stage"
-                            draggable={!updateBatch.isPending}
-                            onDragStart={event => {
-                              event.dataTransfer?.setData("text/plain", batch.id)
-                              if (event.dataTransfer) event.dataTransfer.effectAllowed = "move"
-                            }}
-                            onDragEnd={() => setHoverStatus(null)}
-                            class="shrink-0 cursor-grab rounded p-1 text-muted hover:bg-surface-muted hover:text-foreground active:cursor-grabbing"
+                            class="shrink-0 p-1 text-muted"
                           >
                             <GripVertical class="h-4 w-4" />
-                          </button>
+                          </span>
                           <Show when={batch.noticeToProceedUrl}>
                             <span title="Notice to Proceed attached">
                               <Icons.fileText class="h-4 w-4 text-green-600" />
@@ -96,7 +131,7 @@ export function BatchKanban(props: BatchKanbanProps) {
                           </Show>
                         </div>
                         <p class="mt-2 text-xs font-medium text-muted">
-                          {batch.trainingSchemeLabel ?? "Legacy / Unspecified"}
+                          {displayTrainingScheme(batch.trainingSchemeLabel)}
                         </p>
                         <div class="mt-3 space-y-1.5 text-xs text-muted">
                           <p>
@@ -121,22 +156,6 @@ export function BatchKanban(props: BatchKanbanProps) {
                             </span>
                           </div>
                         </div>
-                        <label class="mt-3 block text-xs text-muted">
-                          Move to
-                          <select
-                            aria-label={`Move ${batch.batchCode} to`}
-                            value={batch.status}
-                            disabled={updateBatch.isPending}
-                            onChange={event =>
-                              moveBatch(batch.id, event.currentTarget.value as BatchStatus)
-                            }
-                            class="mt-1 w-full rounded-md border border-border bg-surface px-2 py-1.5 text-xs text-foreground disabled:opacity-50"
-                          >
-                            <For each={COLUMNS}>
-                              {option => <option value={option}>{option}</option>}
-                            </For>
-                          </select>
-                        </label>
                       </article>
                     )}
                   </For>

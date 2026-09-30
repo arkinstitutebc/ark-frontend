@@ -24,7 +24,7 @@ export default function BatchBoardPage() {
 
       <PageHeader
         title="Batch Board"
-        subtitle="Track training delivery. Drag a batch to another stage, or use its status menu."
+        subtitle="Drag a batch card to another stage. Open a batch to edit its status or details."
         action={
           <Button type="button" size="sm" onClick={() => setShowAddModal(true)}>
             <Icons.plus class="h-4 w-4" />

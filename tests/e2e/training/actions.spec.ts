@@ -101,6 +101,7 @@ test.describe("Training — batch and student actions", () => {
       trainingName: "Bartending NC II",
       trainingOfferingId: "d5101bc8-014e-47dd-a9ea-14ac3da2c6dd",
       trainingSchemeId: "dcdd3bc9-bbae-47cf-8b76-0f6d37c76ec4",
+      trainingSchemeLabel: "Legacy / Unspecified",
       trainingLevel: "NC II",
       trainingCategory: "Bartending",
       startDate: "2026-09-01",
@@ -125,8 +126,16 @@ test.describe("Training — batch and student actions", () => {
       await route.fulfill({ json: [{ ...batch, status }] })
     })
     await page.route(`**/api/training/batches/${batch.id}`, async route => {
-      status = (route.request().postDataJSON() as { status: BatchStatus }).status
+      if (route.request().method() === "PUT") {
+        status = (route.request().postDataJSON() as { status: BatchStatus }).status
+      }
       await route.fulfill({ json: { ...batch, status } })
+    })
+    await page.route(`**/api/training/batches/${batch.id}/students`, async route => {
+      await route.fulfill({ json: [] })
+    })
+    await page.route(`**/api/training/batches/${batch.id}/audit*`, async route => {
+      await route.fulfill({ json: { items: [], total: 0, page: 1, limit: 5 } })
     })
 
     await page.goto(`${TRAINING_URL}/`)
@@ -144,16 +153,49 @@ test.describe("Training — batch and student actions", () => {
         .locator(`section[aria-label="${status} batches"] article`)
         .filter({ hasText: batch.batchCode })
     await expect(cardIn("Not Started")).toBeVisible()
+    await expect(card.getByText("Scheme not recorded (older batch)")).toBeVisible()
+    await expect(card.getByRole("combobox", { name: `Move ${batch.batchCode} to` })).toHaveCount(0)
 
-    await card
-      .getByRole("combobox", { name: `Move ${batch.batchCode} to` })
-      .selectOption("In Progress")
+    await page.getByRole("button", { name: "Collapse In Progress column" }).click()
+    await expect(page.getByRole("button", { name: "Expand In Progress column" })).toBeVisible()
+
+    await card.dragTo(page.locator('section[aria-label="In Progress batches"]'))
+    await expect(cardIn("In Progress")).toBeHidden()
+    await page.getByRole("button", { name: "Expand In Progress column" }).click()
     await expect(cardIn("In Progress")).toBeVisible()
 
-    await card
-      .getByRole("button", { name: `Drag ${batch.batchCode}` })
-      .dragTo(page.locator('section[aria-label="Completed batches"]'))
+    await cardIn("In Progress").dragTo(page.locator('section[aria-label="Completed batches"]'))
     await expect(cardIn("Completed")).toBeVisible()
+
+    await cardIn("Completed")
+      .getByRole("button", { name: /TEST-BOARD-001/i })
+      .click()
+    await waitForReady(page)
+    await expect(page.getByRole("heading", { name: "Notice to Proceed" })).toBeVisible()
+    await expect(page.getByRole("heading", { name: "Billing" })).toHaveCount(0)
+    await expect(page.getByRole("heading", { name: "Budget Control" })).toHaveCount(0)
+  })
+
+  test("explains the historical scheme in settings", async ({ page }) => {
+    await page.route("**/api/training/settings/schemes?includeInactive=true", async route => {
+      await route.fulfill({
+        json: [
+          {
+            id: "dcdd3bc9-bbae-47cf-8b76-0f6d37c76ec4",
+            code: "LEGACY",
+            label: "Legacy / Unspecified",
+            active: true,
+            sortOrder: 999,
+          },
+        ],
+      })
+    })
+
+    await page.goto(`${TRAINING_URL}/settings`)
+    await waitForReady(page)
+    await expect(page.getByText("Older batches — scheme not recorded")).toBeVisible()
+    await expect(page.getByText("Historical placeholder")).toBeVisible()
+    await expect(page.getByRole("button", { name: "Deactivate" })).toHaveCount(0)
   })
 
   test("student modal blocks blank single-student submissions", async ({ page }) => {

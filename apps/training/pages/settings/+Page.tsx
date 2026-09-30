@@ -70,19 +70,34 @@ export default function TrainingSettingsPage() {
           <div class="overflow-hidden rounded-lg border border-border bg-surface">
             <For each={schemes}>
               {scheme => (
-                <div class="grid grid-cols-[1fr_auto_auto] items-center gap-4 border-b border-border px-5 py-4 last:border-0">
+                <div class="flex flex-wrap items-center gap-4 border-b border-border px-5 py-4 last:border-0 sm:grid sm:grid-cols-[1fr_auto_auto]">
                   <div>
-                    <p class="font-medium">{scheme.label}</p>
-                    <p class="text-xs text-muted">{scheme.code}</p>
+                    <p class="font-medium">
+                      {scheme.code === "LEGACY"
+                        ? "Older batches — scheme not recorded"
+                        : scheme.label}
+                    </p>
+                    <p class="text-xs text-muted">
+                      {scheme.code === "LEGACY"
+                        ? "Used for batches created before schemes were tracked. Choose the correct scheme when editing each batch."
+                        : scheme.code}
+                    </p>
                   </div>
-                  <StatusBadge status={scheme.active ? "active" : "inactive"} />
-                  <button
-                    type="button"
-                    onClick={() => updateScheme.mutate({ id: scheme.id, active: !scheme.active })}
-                    class="rounded-lg border border-border px-3 py-2 text-sm font-medium"
+                  <Show
+                    when={scheme.code !== "LEGACY"}
+                    fallback={
+                      <span class="text-xs font-medium text-muted">Historical placeholder</span>
+                    }
                   >
-                    {scheme.active ? "Deactivate" : "Activate"}
-                  </button>
+                    <StatusBadge status={scheme.active ? "active" : "inactive"} />
+                    <button
+                      type="button"
+                      onClick={() => updateScheme.mutate({ id: scheme.id, active: !scheme.active })}
+                      class="rounded-lg border border-border px-3 py-2 text-sm font-medium"
+                    >
+                      {scheme.active ? "Deactivate" : "Activate"}
+                    </button>
+                  </Show>
                 </div>
               )}
             </For>

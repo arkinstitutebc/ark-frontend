@@ -7,6 +7,7 @@ import {
   useVenues,
 } from "@data/hooks"
 import { updateBatchSchema } from "@data/schemas"
+import { displayTrainingScheme } from "@data/scheme-label"
 import type { Batch } from "@data/types"
 import { validateForm } from "@data/validate"
 import { createMemo, createSignal, Show } from "solid-js"
@@ -71,7 +72,10 @@ export function EditBatchModal(props: EditBatchModalProps) {
     (offeringsQuery.data ?? []).map(item => ({ label: item.label, value: item.id }))
   )
   const schemeOptions = createMemo(() =>
-    (schemesQuery.data ?? []).map(item => ({ label: item.label, value: item.id }))
+    (schemesQuery.data ?? []).map(item => ({
+      label: item.code === "LEGACY" ? displayTrainingScheme(item.label) : item.label,
+      value: item.id,
+    }))
   )
   const levelOptions = createMemo(trainingLevelOptions)
   const statusOptions = createMemo(batchStatusOptions)

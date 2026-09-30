@@ -44,7 +44,9 @@ export function AddBatchModal(props: AddBatchModalProps) {
     (offeringsQuery.data ?? []).map(item => ({ label: item.label, value: item.id }))
   )
   const schemeOptions = createMemo(() =>
-    (schemesQuery.data ?? []).map(item => ({ label: item.label, value: item.id }))
+    (schemesQuery.data ?? [])
+      .filter(item => item.code !== "LEGACY")
+      .map(item => ({ label: item.label, value: item.id }))
   )
   const budgetBreakdown = createMemo(() => {
     const gross = Number(budget())

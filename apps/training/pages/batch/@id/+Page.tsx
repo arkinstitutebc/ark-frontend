@@ -15,10 +15,10 @@ import {
   useBatchStudents,
   useCurrentUser,
   useDeleteBatch,
-  useRegenerateReceivable,
   useStudent,
   useUpdateNoticeToProceed,
 } from "@data/hooks"
+import { displayTrainingScheme } from "@data/scheme-label"
 import { uploadTrainingFile } from "@data/uploads"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
@@ -63,7 +63,6 @@ export default function BatchDetailPage() {
   const editingStudentQuery = useStudent(() => editingStudentId() || "")
   const deletingStudentQuery = useStudent(() => deletingStudentId() || "")
   const updateNtp = useUpdateNoticeToProceed()
-  const regenerateReceivable = useRegenerateReceivable()
   const deleteBatch = useDeleteBatch()
 
   const handleDeleteBatch = () => {
@@ -165,7 +164,7 @@ export default function BatchDetailPage() {
                     </div>
                     <p class="text-muted">{b().trainingOfferingLabel ?? b().trainingName}</p>
                     <p class="mt-1 text-sm font-medium text-primary">
-                      {b().trainingSchemeLabel ?? "Legacy / Unspecified"}
+                      {displayTrainingScheme(b().trainingSchemeLabel)}
                     </p>
                   </div>
                   <div class="flex flex-wrap items-center gap-2">
@@ -213,77 +212,26 @@ export default function BatchDetailPage() {
                 </div>
               </section>
 
-              <section class="mb-6 grid gap-4 xl:grid-cols-3">
-                <div class="rounded-xl border border-border bg-surface p-5">
-                  <div class="flex items-start justify-between gap-3">
-                    <div>
-                      <h2 class="text-sm font-semibold text-foreground">Billing</h2>
-                      <p class="mt-1 text-xs text-muted">Automatically synced from this batch.</p>
-                    </div>
-                    <span class="capitalize text-sm font-semibold text-foreground">
-                      {b().billing?.status.replace("_", " ") ?? "Missing"}
-                    </span>
-                  </div>
-                  <div class="mt-4 grid grid-cols-3 gap-3 text-sm">
-                    <DetailItem label="2% Withholding" value={formatPeso(b().withholdingAmount)} />
-                    <DetailItem label="Paid" value={formatPeso(b().billing?.paidAmount ?? 0)} />
-                    <DetailItem
-                      label="Outstanding"
-                      value={formatPeso(b().billing?.outstandingAmount ?? b().grossRevenue)}
-                    />
-                  </div>
-                  <Show when={!b().billing}>
-                    <Button
-                      type="button"
-                      size="sm"
-                      class="mt-4"
-                      disabled={regenerateReceivable.isPending}
-                      onClick={() => regenerateReceivable.mutate(b().id)}
+              <section class="mb-6 rounded-xl border border-border bg-surface p-5">
+                <div class="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <h2 class="text-sm font-semibold text-foreground">Notice to Proceed</h2>
+                    <Show
+                      when={b().noticeToProceedUrl}
+                      fallback={<p class="mt-2 text-sm text-muted">No NTP attached.</p>}
                     >
-                      Regenerate Receivable
-                    </Button>
-                  </Show>
-                </div>
-
-                <Show when={b().budgetSummary}>
-                  {summary => (
-                    <div class="rounded-xl border border-border bg-surface p-5">
-                      <h2 class="text-sm font-semibold text-foreground">Budget Control</h2>
-                      <p class="mt-1 text-xs text-muted">
-                        Commitments and actual spending across Procurement and HR.
-                      </p>
-                      <div class="mt-4 grid grid-cols-3 gap-3 text-sm">
-                        <DetailItem
-                          label="Committed"
-                          value={formatPeso(summary().committedAmount)}
-                        />
-                        <DetailItem label="Actual" value={formatPeso(summary().actualAmount)} />
-                        <DetailItem
-                          label="Available"
-                          value={formatPeso(summary().availableAmount)}
-                        />
-                      </div>
-                    </div>
-                  )}
-                </Show>
-
-                <div class="rounded-xl border border-border bg-surface p-5">
-                  <h2 class="text-sm font-semibold text-foreground">Notice to Proceed</h2>
-                  <Show
-                    when={b().noticeToProceedUrl}
-                    fallback={<p class="mt-2 text-sm text-muted">No NTP attached.</p>}
-                  >
-                    <a
-                      href={b().noticeToProceedUrl ?? "#"}
-                      target="_blank"
-                      rel="noreferrer"
-                      class="mt-2 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
-                    >
-                      <Icons.fileText class="h-4 w-4" />
-                      {b().noticeToProceedName ?? "View Notice to Proceed"}
-                    </a>
-                  </Show>
-                  <label class="mt-4 inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-surface-muted">
+                      <a
+                        href={b().noticeToProceedUrl ?? "#"}
+                        target="_blank"
+                        rel="noreferrer"
+                        class="mt-2 inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+                      >
+                        <Icons.fileText class="h-4 w-4" />
+                        {b().noticeToProceedName ?? "View Notice to Proceed"}
+                      </a>
+                    </Show>
+                  </div>
+                  <label class="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-surface-muted">
                     <Icons.upload class="h-4 w-4" />
                     {uploadingNtp()
                       ? "Uploading…"
