@@ -1,21 +1,25 @@
 import { z } from "zod"
 
 const prItemSchema = z.object({
-  name: z.string().min(1, "Item name is required"),
+  name: z.string().trim().min(1, "Item name is required"),
   quantity: z.number().int().positive("Quantity must be greater than zero"),
-  unit: z.string().min(1, "Unit is required"),
-  unitPrice: z.number().positive("Unit price must be greater than zero"),
+  unit: z.string().trim().min(1, "Unit is required"),
+  unitPrice: z.number().finite().positive("Unit price must be greater than zero"),
 })
 
 export const createPrSchema = z
   .object({
     expenseType: z.enum(["operations", "assets"]),
     operationsSubtype: z.enum(["training_expense", "company_overhead"]).optional(),
-    expenseItemId: z.string().min(1, "Expense item is required"),
-    batchId: z.string().optional(),
-    specialRequestNote: z.string().optional(),
-    purpose: z.string().min(1, "Purpose is required"),
-    dateNeeded: z.string().min(1, "Date needed is required"),
+    expenseItemId: z.string().uuid("Select an expense item"),
+    batchId: z.string().uuid("Select a batch").optional(),
+    specialRequestNote: z.string().trim().max(500, "Keep details under 500 characters").optional(),
+    purpose: z
+      .string()
+      .trim()
+      .min(1, "Purpose is required")
+      .max(500, "Keep purpose under 500 characters"),
+    dateNeeded: z.string().date("Enter a valid date"),
     items: z.array(prItemSchema).min(1, "At least one item is required"),
   })
   .superRefine((data, ctx) => {
@@ -26,7 +30,11 @@ export const createPrSchema = z
         message: "Choose an operations type",
       })
     }
-    if (data.operationsSubtype === "training_expense" && !data.batchId) {
+    if (
+      data.expenseType === "operations" &&
+      data.operationsSubtype === "training_expense" &&
+      !data.batchId
+    ) {
       ctx.addIssue({ code: "custom", path: ["batchId"], message: "Batch is required" })
     }
   })

@@ -19,7 +19,7 @@ export {
   useUpdateEmailAlertSettings,
   useUpdateUser,
 } from "./admin"
-export { API_URL, api } from "./api"
+export { API_URL, ApiError, api } from "./api"
 export {
   type CurrentUser,
   type LoginCredentials,

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, mock, test } from "bun:test"
-import { API_URL, api } from "./api"
+import { API_URL, ApiError, api } from "./api"
 
 const originalFetch = globalThis.fetch
 
@@ -69,6 +69,25 @@ describe("api()", () => {
     ) as typeof fetch
 
     await expect(api("/api/admin/users")).rejects.toThrow("Email already exists")
+  })
+
+  test("keeps field details and surfaces the first validation message", async () => {
+    globalThis.fetch = mock(
+      async () =>
+        new Response(
+          JSON.stringify({ error: "Validation failed", details: { batchId: ["Invalid uuid"] } }),
+          { status: 400 }
+        )
+    ) as typeof fetch
+
+    try {
+      await api("/api/procurement/requests")
+      throw new Error("Expected validation to fail")
+    } catch (error) {
+      expect(error).toBeInstanceOf(ApiError)
+      expect((error as ApiError).message).toBe("Validation failed: Invalid uuid")
+      expect((error as ApiError).details).toEqual({ batchId: ["Invalid uuid"] })
+    }
   })
 
   test("falls back to status code when an error response is not JSON", async () => {

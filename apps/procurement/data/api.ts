@@ -1,1 +1,1 @@
-export { API_URL, api } from "@ark/api-client"
+export { API_URL, ApiError, api } from "@ark/api-client"

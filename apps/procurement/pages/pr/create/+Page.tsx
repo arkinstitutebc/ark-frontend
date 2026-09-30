@@ -1,10 +1,9 @@
 import { AttachmentUploader, BackLink, formatPeso, Icons, PageContainer, Select } from "@ark/ui"
-import { api } from "@data/api"
+import { ApiError, api } from "@data/api"
 import { useCreatePr, useExpenseItems } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
 import { createPrSchema } from "@data/schemas"
 import type { Batch, PrAttachment } from "@data/types"
-import { validateForm } from "@data/validate"
 import { createQuery } from "@tanstack/solid-query"
 import { createMemo, createSignal, Index, Show } from "solid-js"
 import { navigate } from "vike/client/router"
@@ -44,11 +43,25 @@ export default function CreatePrPage() {
   ])
   const [attachments, setAttachments] = createSignal<PrAttachment[]>([])
 
+  const budgetQuery = createQuery(() => ({
+    queryKey: queryKeys.batches.budgetSummary(selectedBatchId()),
+    queryFn: () =>
+      api<NonNullable<Batch["budgetSummary"]>>(
+        `/api/training/batches/${selectedBatchId()}/budget-summary`
+      ),
+    enabled:
+      expenseType() === "operations" &&
+      operationsSubtype() === "training_expense" &&
+      !!selectedBatchId(),
+  }))
+
   const batches = createMemo(() => {
     return (batchesQuery.data || []) as Batch[]
   })
 
   const selectedBatch = createMemo(() => batches().find(b => b.id === selectedBatchId()))
+  const isTrainingExpense = () =>
+    expenseType() === "operations" && operationsSubtype() === "training_expense"
 
   const totalAmount = () => {
     return items().reduce((sum, item) => sum + (item.quantity || 0) * (item.unitPrice || 0), 0)
@@ -72,46 +85,47 @@ export default function CreatePrPage() {
   const handleSubmit = (e: Event) => {
     e.preventDefault()
 
-    const validItems = items()
-      .filter(item => item.name.trim() && item.quantity > 0 && item.unitPrice > 0)
-      .map(item => ({
-        name: item.name,
-        specification: item.specification?.trim() || undefined,
-        quantity: item.quantity,
-        unit: item.unit,
-        unitPrice: item.unitPrice,
-        remarks: item.remarks?.trim() || undefined,
-      }))
+    const requestItems = items().map(item => ({
+      name: item.name.trim(),
+      specification: item.specification?.trim() || undefined,
+      quantity: item.quantity,
+      unit: item.unit,
+      unitPrice: item.unitPrice,
+      remarks: item.remarks?.trim() || undefined,
+    }))
 
     const data = {
-      batchId: operationsSubtype() === "training_expense" ? selectedBatchId() : undefined,
+      batchId: isTrainingExpense() ? selectedBatchId() || undefined : undefined,
       expenseType: expenseType(),
       operationsSubtype: expenseType() === "operations" ? operationsSubtype() : undefined,
       expenseItemId: expenseItemId(),
       specialRequestNote: specialRequestNote(),
       purpose: purpose(),
       dateNeeded: dateNeeded(),
-      items:
-        validItems.length > 0
-          ? validItems
-          : items().map(item => ({
-              name: item.name,
-              quantity: item.quantity,
-              unit: item.unit,
-              unitPrice: item.unitPrice,
-            })),
+      items: requestItems,
     }
 
-    const result = validateForm(createPrSchema, data)
+    const result = createPrSchema.safeParse(data)
     if (!result.success) {
-      setErrors(result.errors)
+      const fieldErrors: Record<string, string> = {}
+      for (const issue of result.error.issues) {
+        const key = issue.path.join(".") || "form"
+        if (!fieldErrors[key]) fieldErrors[key] = issue.message
+        if (issue.path[0] === "items" && !fieldErrors.items)
+          fieldErrors.items = "Check each item below."
+      }
+      setErrors(fieldErrors)
+      return
+    }
+    if (selectedExpenseItem()?.requiresSpecialRequestNote && !specialRequestNote().trim()) {
+      setErrors({ specialRequestNote: "Explain the special request" })
       return
     }
     setErrors({})
 
-    const batch = selectedBatch()
+    const batch = isTrainingExpense() ? selectedBatch() : undefined
 
-    const prItems = validItems.map((item, index) => ({
+    const prItems = requestItems.map((item, index) => ({
       id: String(index + 1),
       name: item.name,
       specification: item.specification,
@@ -124,22 +138,31 @@ export default function CreatePrPage() {
 
     createPrMutation.mutate(
       {
-        batchId: operationsSubtype() === "training_expense" ? selectedBatchId() : undefined,
-        batchName: batch?.trainingName || "",
-        batchCode: batch?.batchCode || "",
-        expenseType: expenseType(),
-        operationsSubtype: expenseType() === "operations" ? operationsSubtype() : undefined,
-        expenseItemId: expenseItemId(),
-        specialRequestNote: specialRequestNote().trim() || undefined,
-        purpose: purpose(),
-        dateNeeded: dateNeeded(),
+        batchId: result.data.batchId,
+        batchName: batch?.trainingName,
+        batchCode: batch?.batchCode,
+        expenseType: result.data.expenseType,
+        operationsSubtype: result.data.operationsSubtype,
+        expenseItemId: result.data.expenseItemId,
+        specialRequestNote: result.data.specialRequestNote || undefined,
+        purpose: result.data.purpose,
+        dateNeeded: result.data.dateNeeded,
         items: prItems,
         attachments: attachments().length > 0 ? attachments() : undefined,
-        totalAmount: String(totalAmount()),
+        totalAmount: totalAmount().toFixed(2),
       },
       {
         onSuccess: () => {
           navigate("/")
+        },
+        onError: error => {
+          if (error instanceof ApiError) {
+            setErrors(
+              Object.fromEntries(
+                Object.entries(error.details).map(([field, messages]) => [field, messages[0]])
+              )
+            )
+          }
         },
       }
     )
@@ -185,6 +208,10 @@ export default function CreatePrPage() {
         </div>
       </Show>
 
+      <Show when={errors().form}>
+        <p class="mb-6 text-sm text-red-700">{errors().form}</p>
+      </Show>
+
       <form onSubmit={handleSubmit}>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Main Form */}
@@ -205,6 +232,7 @@ export default function CreatePrPage() {
                     onChange={value => {
                       setExpenseType(value as "operations" | "assets")
                       setExpenseItemId("")
+                      setSpecialRequestNote("")
                     }}
                     ariaLabel="Expense type"
                   />
@@ -224,6 +252,7 @@ export default function CreatePrPage() {
                       onChange={value => {
                         setOperationsSubtype(value as "training_expense" | "company_overhead")
                         setExpenseItemId("")
+                        setSpecialRequestNote("")
                       }}
                       ariaLabel="Operations type"
                     />
@@ -267,7 +296,10 @@ export default function CreatePrPage() {
                   <Select
                     options={expenseItemOptions()}
                     value={expenseItemId() || undefined}
-                    onChange={setExpenseItemId}
+                    onChange={value => {
+                      setExpenseItemId(value)
+                      setSpecialRequestNote("")
+                    }}
                     placeholder={
                       expenseItemsQuery.isPending ? "Loading expense items…" : "Select expense item"
                     }
@@ -289,8 +321,12 @@ export default function CreatePrPage() {
                       onInput={event => setSpecialRequestNote(event.currentTarget.value)}
                       rows={2}
                       required
-                      class="w-full px-3 py-2 border border-border rounded-lg text-sm"
+                      maxLength={500}
+                      class={`w-full px-3 py-2 border rounded-lg text-sm ${errors().specialRequestNote ? "border-red-300" : "border-border"}`}
                     />
+                    <Show when={errors().specialRequestNote}>
+                      <p class="mt-1 text-xs text-red-600">{errors().specialRequestNote}</p>
+                    </Show>
                   </label>
                 </Show>
 
@@ -327,6 +363,7 @@ export default function CreatePrPage() {
                     value={purpose()}
                     onInput={e => setPurpose(e.currentTarget.value)}
                     required
+                    maxLength={500}
                     rows={3}
                     placeholder="Describe the purpose of this purchase request..."
                     class={`w-full px-3 py-2 border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary resize-none ${errors().purpose ? "border-red-300" : "border-border"}`}
@@ -379,6 +416,9 @@ export default function CreatePrPage() {
                           placeholder="Item name/description"
                           class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                         />
+                        <Show when={errors()[`items.${index}.name`]}>
+                          <p class="mt-1 text-xs text-red-600">{errors()[`items.${index}.name`]}</p>
+                        </Show>
                       </div>
 
                       <div>
@@ -399,6 +439,7 @@ export default function CreatePrPage() {
                           <input
                             type="number"
                             min="1"
+                            step="1"
                             value={item().quantity}
                             onInput={e =>
                               updateItem(
@@ -409,6 +450,11 @@ export default function CreatePrPage() {
                             }
                             class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                           />
+                          <Show when={errors()[`items.${index}.quantity`]}>
+                            <p class="mt-1 text-xs text-red-600">
+                              {errors()[`items.${index}.quantity`]}
+                            </p>
+                          </Show>
                         </label>
                         <div>
                           <span class="block text-xs text-muted mb-1">Unit</span>
@@ -424,7 +470,7 @@ export default function CreatePrPage() {
                           <span class="block text-xs text-muted mb-1">Unit Price (P)</span>
                           <input
                             type="number"
-                            min="0"
+                            min="0.01"
                             step="0.01"
                             value={item().unitPrice || ""}
                             onInput={e =>
@@ -436,6 +482,11 @@ export default function CreatePrPage() {
                             }
                             class="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                           />
+                          <Show when={errors()[`items.${index}.unitPrice`]}>
+                            <p class="mt-1 text-xs text-red-600">
+                              {errors()[`items.${index}.unitPrice`]}
+                            </p>
+                          </Show>
                         </label>
                       </div>
 
@@ -488,16 +539,37 @@ export default function CreatePrPage() {
                   </div>
                 </div>
 
-                <Show when={selectedBatch()}>
+                <Show when={isTrainingExpense() && selectedBatch()}>
                   <div class="border-t border-border pt-3">
-                    <p class="text-xs text-muted mb-1">Budget Remaining</p>
-                    <p class="text-sm font-medium text-foreground">
-                      {formatPeso(
-                        (selectedBatch()?.budget || 0) -
-                          (selectedBatch()?.budgetUsed || 0) -
-                          totalAmount()
-                      )}
+                    <p class="text-xs text-muted mb-1">
+                      Available batch budget (after 2% withholding)
                     </p>
+                    <Show
+                      when={budgetQuery.data}
+                      fallback={
+                        <p class="text-sm text-muted">
+                          {budgetQuery.isError ? "Budget unavailable" : "Loading budget…"}
+                        </p>
+                      }
+                    >
+                      {budget => (
+                        <>
+                          <p class="text-sm font-medium text-foreground">
+                            {formatPeso(budget().availableAmount)} available
+                          </p>
+                          <p class="text-xs text-muted mt-1">
+                            {formatPeso(budget().availableAmount - totalAmount())} after this
+                            request
+                          </p>
+                          <Show when={totalAmount() > budget().availableAmount}>
+                            <p class="text-xs text-amber-700 mt-2">
+                              This request exceeds the available batch budget. It can still be
+                              submitted for approval, but needs additional funding.
+                            </p>
+                          </Show>
+                        </>
+                      )}
+                    </Show>
                   </div>
                 </Show>
               </div>

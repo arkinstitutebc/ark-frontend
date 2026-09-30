@@ -28,6 +28,7 @@ export const queryKeys = {
   },
   batches: {
     all: ["batches"] as const,
+    budgetSummary: (id: string) => ["batches", id, "budget-summary"] as const,
   },
   receipts: {
     byPoCode: (poCode: string) => ["receipts", poCode] as const,
