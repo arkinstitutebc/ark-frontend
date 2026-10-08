@@ -6,6 +6,18 @@ import { Icons, Modal, QueryBoundary, StatusBadge } from "@/components/ui"
 
 type FilterStatus = "all" | ArStatus
 
+const paidAtFormatter = new Intl.DateTimeFormat("en-PH", {
+  dateStyle: "medium",
+  timeStyle: "short",
+  timeZone: "Asia/Manila",
+})
+
+function formatPaidAt(paidAt: string | null | undefined): string {
+  if (!paidAt) return ""
+  const date = new Date(paidAt)
+  return Number.isNaN(date.getTime()) ? "" : paidAtFormatter.format(date)
+}
+
 export default function ReceivablesPage() {
   const [filterStatus, setFilterStatus] = createSignal<FilterStatus>("all")
   const [searchQuery, setSearchQuery] = createSignal("")
@@ -116,16 +128,26 @@ export default function ReceivablesPage() {
   }
 
   const exportToCSV = () => {
-    const headers = ["Batch Code", "Amount", "Status", "Billed", "Paid", "Created"]
+    const headers = [
+      "Batch Code",
+      "Amount",
+      "Status",
+      "Billed",
+      "Paid",
+      "Date Paid (PHT)",
+      "Created",
+    ]
     const rows = filteredAr().map(ar => [
       ar.batchCode,
       ar.amount,
       ar.status,
       ar.billedAt ? formatDatePH(ar.billedAt) : "",
       ar.paidAmount || 0,
+      formatPaidAt(ar.paidAt) || (ar.status === "paid" ? "Not recorded" : ""),
       formatDatePH(ar.createdAt),
     ])
-    const csv = [headers.join(","), ...rows.map(r => r.join(","))].join("\n")
+    const csvCell = (value: string | number) => `"${String(value).split('"').join('""')}"`
+    const csv = [headers, ...rows].map(row => row.map(csvCell).join(",")).join("\n")
     const blob = new Blob([csv], { type: "text/csv" })
     const url = URL.createObjectURL(blob)
     const a = document.createElement("a")
@@ -230,6 +252,7 @@ export default function ReceivablesPage() {
                     <Th align="right">Net 98%</Th>
                     <Th align="center">Status</Th>
                     <Th align="right">Paid</Th>
+                    <Th>Date paid (PHT)</Th>
                     <Th align="center">Actions</Th>
                   </THead>
                   <tbody>
@@ -254,6 +277,10 @@ export default function ReceivablesPage() {
                             ) : (
                               <span class="text-muted">—</span>
                             )}
+                          </td>
+                          <td class="py-4 px-6 text-sm text-muted whitespace-nowrap">
+                            {formatPaidAt(ar.paidAt) ||
+                              (ar.status === "paid" ? "Not recorded" : "—")}
                           </td>
                           <td class="py-4 px-6 text-center">
                             <Show

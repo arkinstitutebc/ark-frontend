@@ -68,10 +68,12 @@ test.describe("Billing actions", () => {
     await expect
       .poll(async () => {
         const res = await page.request.get(`${API_URL}/api/billing/receivables/${receivable.id}`)
-        const updated = (await res.json()) as { status: string }
-        return updated.status
+        const updated = (await res.json()) as { status: string; paidAt: string | null }
+        return updated.status === "paid" && updated.paidAt ? updated.paidAt : null
       })
-      .toBe("paid")
+      .not.toBeNull()
     await expect(row.getByText("Paid", { exact: true }).first()).toBeVisible()
+    await expect(row.locator("td").nth(5)).not.toHaveText("—")
+    await expect(row.locator("td").nth(5)).not.toHaveText("Not recorded")
   })
 })
