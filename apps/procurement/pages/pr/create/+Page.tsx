@@ -1,4 +1,12 @@
-import { AttachmentUploader, BackLink, formatPeso, Icons, PageContainer, Select } from "@ark/ui"
+import {
+  AttachmentUploader,
+  BackLink,
+  formatPeso,
+  Icons,
+  PageContainer,
+  Select,
+  toast,
+} from "@ark/ui"
 import { ApiError, api } from "@data/api"
 import { useCreatePr, useExpenseItems } from "@data/hooks"
 import { queryKeys } from "@data/query-keys"
@@ -115,10 +123,12 @@ export default function CreatePrPage() {
           fieldErrors.items = "Check each item below."
       }
       setErrors(fieldErrors)
+      toast.error(result.error.issues[0]?.message ?? "Check the highlighted request fields")
       return
     }
     if (selectedExpenseItem()?.requiresSpecialRequestNote && !specialRequestNote().trim()) {
       setErrors({ specialRequestNote: "Explain the special request" })
+      toast.error("Explain the special request")
       return
     }
     setErrors({})

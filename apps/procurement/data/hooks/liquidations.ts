@@ -52,10 +52,12 @@ export function useReviewPoLiquidation() {
         method: "POST",
         body: JSON.stringify(data),
       }),
-    onSuccess: () => {
+    onSuccess: (_data, variables) => {
       qc.invalidateQueries({ queryKey: queryKeys.liquidations.all })
       qc.invalidateQueries({ queryKey: queryKeys.orders.all })
-      toast.success("Liquidation reviewed")
+      toast.success(
+        variables.action === "approve" ? "Liquidation approved" : "Liquidation rejected"
+      )
     },
     onError: (error: Error) => toast.error(error.message),
   }))

@@ -6,6 +6,10 @@
 
 `/` PR list, `/pr/:id`, `/pr/create` (Operations/Assets taxonomy), `/pr/:id/edit` (pending-only), `/approvals` (single approval that generates a pending PO), `/orders`, `/orders/:id` (confirm and acknowledge), `/liquidation` (all PO statuses, receipt upload for acknowledged POs, Finance review, completed history), `/expense-settings`, `/cash-voucher`, `/cash-voucher/new`, `/cash-voucher/:id`, `/tutorials`. Cash-voucher liquidation remains in its own flow.
 
+Pending PR edits use the same expense type, subtype, item, and batch choices as
+creation. Historical requests without a catalog item can still receive detail-only
+edits; choosing a new classification validates it against the active catalog.
+
 ## Dev
 
 From monorepo root: `bun install && bun run dev:procurement`. Backend must also be running ([`ark-services`](https://github.com/arkinstitutebc/ark-services)).

@@ -11,6 +11,7 @@ import {
   PageContainer,
   PageHeader,
   Select,
+  toast,
 } from "@ark/ui"
 import { API_URL } from "@data/api"
 import {
@@ -262,6 +263,7 @@ function LiquidationPanel(props: { request: PettyCashRequest }) {
     })
     if (!result.success) {
       setErrors(result.errors)
+      toast.error(Object.values(result.errors)[0] ?? "Check the highlighted liquidation fields")
       return
     }
     setErrors({})

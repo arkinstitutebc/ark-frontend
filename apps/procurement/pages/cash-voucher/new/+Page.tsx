@@ -8,6 +8,7 @@ import {
   Icons,
   PageContainer,
   Select,
+  toast,
 } from "@ark/ui"
 import { useCreatePettyCashRequest, useCurrentUser } from "@data/hooks"
 import { createPettyCashRequestSchema } from "@data/schemas"
@@ -46,6 +47,7 @@ export default function NewPettyCashRequestPage() {
     const result = validateForm(createPettyCashRequestSchema, data)
     if (!result.success) {
       setErrors(result.errors)
+      toast.error(Object.values(result.errors)[0] ?? "Check the highlighted request fields")
       return
     }
     setErrors({})

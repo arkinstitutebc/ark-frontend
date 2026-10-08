@@ -12,6 +12,7 @@ import {
   StatCard,
   THead,
   Th,
+  toast,
 } from "@ark/ui"
 import { usePettyCashRequests, usePettyCashSummary, useUpsertPettyCashFund } from "@data/hooks"
 import { pettyCashFundSchema } from "@data/schemas"
@@ -60,6 +61,7 @@ function FundSetupModal(props: {
     })
     if (!result.success) {
       setErrors(result.errors)
+      toast.error(Object.values(result.errors)[0] ?? "Check the highlighted fund fields")
       return
     }
     setErrors({})

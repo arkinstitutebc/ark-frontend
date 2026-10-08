@@ -1,4 +1,4 @@
-import { formErrorClass, formInputClass, formLabelClass, Modal, ModalFooter } from "@ark/ui"
+import { formErrorClass, formInputClass, formLabelClass, Modal, ModalFooter, toast } from "@ark/ui"
 import { useUpdatePo } from "@data/hooks"
 import type { PurchaseOrder } from "@data/types"
 import { createEffect, createSignal, Show } from "solid-js"
@@ -34,6 +34,7 @@ export function EditPoModal(props: EditPoModalProps) {
 
     if (!supplier().trim()) {
       setErrors({ supplier: "Supplier is required" })
+      toast.error("Supplier is required")
       return
     }
 

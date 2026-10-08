@@ -22,14 +22,14 @@ interface CreatePrInput {
 }
 
 interface UpdatePrInput {
-  batchId?: string
-  batchName?: string
-  batchCode?: string
+  batchId?: string | null
+  batchName?: string | null
+  batchCode?: string | null
   category?: string
   expenseItemId?: string
   expenseType?: "operations" | "assets"
-  operationsSubtype?: "training_expense" | "company_overhead"
-  specialRequestNote?: string
+  operationsSubtype?: "training_expense" | "company_overhead" | null
+  specialRequestNote?: string | null
   purpose?: string
   dateNeeded?: string
   items?: PrItem[]
