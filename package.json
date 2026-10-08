@@ -10,7 +10,7 @@
   "scripts": {
     "lint": "biome check .",
     "format": "biome format --write .",
-    "test:unit": "bun test packages",
+    "test:unit": "bun test packages tests/unit scripts/test-e2e-changed.test.ts",
     "typecheck": "bun run --filter '*' typecheck",
     "build": "bun run --filter '*' build",
     "dev:main": "cd apps/main && bun run dev",
@@ -22,6 +22,7 @@
     "dev:hr": "cd apps/hr && bun run dev",
     "deploy:prod": "bash infra/deploy-production.sh",
     "test:e2e": "playwright test",
+    "test:e2e:changed": "bun scripts/test-e2e-changed.ts",
     "test:e2e:training": "E2E_PORTALS=main,training playwright test tests/e2e/training",
     "test:e2e:hr": "E2E_PORTALS=main,hr playwright test tests/e2e/hr",
     "test:e2e:update": "playwright test --update-snapshots",

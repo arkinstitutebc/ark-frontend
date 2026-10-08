@@ -7,7 +7,7 @@ const localPortalEnv = {
   VITE_PROCUREMENT_PORTAL_URL: "http://localhost:3002",
   VITE_INVENTORY_PORTAL_URL: "http://localhost:3003",
   VITE_FINANCE_PORTAL_URL: "http://localhost:3004",
-  VITE_BILLING_PORTAL_URL: "http://localhost:3005",
+  VITE_BILLING_PORTAL_URL: `http://localhost:${process.env.E2E_BILLING_PORT || 3005}`,
   VITE_HR_PORTAL_URL: "http://localhost:3006",
 }
 
@@ -17,7 +17,7 @@ const portalPorts = {
   procurement: 3002,
   inventory: 3003,
   finance: 3004,
-  billing: 3005,
+  billing: Number(process.env.E2E_BILLING_PORT || 3005),
   hr: 3006,
 } as const
 
@@ -81,7 +81,8 @@ export default defineConfig({
       command: `cd apps/${name} && bun run build && PORT=${port} bun run preview --port ${port}`,
       env: localPortalEnv,
       url: `http://localhost:${port}`,
-      reuseExistingServer: !process.env.CI,
+      // Never treat an unrelated app already on this port as a successful portal preview.
+      reuseExistingServer: false,
       timeout: 180_000,
     }
   }),

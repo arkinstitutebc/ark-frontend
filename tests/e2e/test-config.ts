@@ -6,7 +6,7 @@ export const PORTAL_URLS = {
   procurement: "http://localhost:3002",
   inventory: "http://localhost:3003",
   finance: "http://localhost:3004",
-  billing: "http://localhost:3005",
+  billing: `http://localhost:${process.env.E2E_BILLING_PORT || 3005}`,
   hr: "http://localhost:3006",
 } as const
 

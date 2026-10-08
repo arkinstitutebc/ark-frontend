@@ -23,4 +23,19 @@ Use Playwright specs here for portal-level flows that need a browser.
 - `auth-helper.ts` owns backend reachability checks and seeded admin login.
 - `helpers.ts` owns browser/UI wait helpers.
 
+The backend must be running locally on `:4000` with a current schema. Set
+`E2E_ADMIN_EMAIL` and `E2E_ADMIN_PASSWORD` for the local test account. If the
+database came from production, point the API at a disposable local clone, not
+the pristine snapshot; these tests can create operational records.
+
 Keep API mutations in focused specs and clean up test data when a flow creates users or long-lived records.
+
+`bun run test:e2e:changed` selects module specs and preview servers from uncommitted
+files, or from the latest commit when the worktree is clean. Set `E2E_BASE=<ref>`
+to compare against a branch or commit. Shared app/test setup changes run the
+whole suite; documentation-only changes skip browser tests. Pass Playwright
+flags through, for example `bun run test:e2e:changed --project chromium-light`.
+
+If another local app occupies Billing's default port 3005, set
+`E2E_BILLING_PORT=3105` for the run. The Billing preview and test URL will both
+use that port; do not stop an unrelated service just to run these tests.
