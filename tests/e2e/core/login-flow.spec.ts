@@ -1,5 +1,25 @@
 import { expect, test } from "@playwright/test"
+import { SEEDED_ADMIN } from "../auth-helper"
 import { waitForReady } from "../helpers"
+import { PORTAL_URLS } from "../test-config"
+
+test("login form cannot submit before hydration", async ({ browser }) => {
+  const context = await browser.newContext({ javaScriptEnabled: false })
+  try {
+    const page = await context.newPage()
+    await page.goto("/login")
+
+    const submit = page.locator('button[type="submit"]')
+    await expect(submit).toBeDisabled()
+
+    await page.fill('input[type="email"]', "smoke@test.local")
+    await page.fill('input[type="password"]', "PlaceholderPass-1234!")
+    await page.press('input[type="password"]', "Enter")
+    await expect(page).toHaveURL(/\/login$/)
+  } finally {
+    await context.close()
+  }
+})
 
 /**
  * Real interactivity test: type into the form, submit, assert the request
@@ -42,8 +62,8 @@ test("login form binds inputs to the request body (not empty)", async ({ page })
 async function signIn(page: import("@playwright/test").Page, search = "") {
   await page.goto(`/login${search}`)
   await waitForReady(page)
-  await page.fill('input[type="email"]', "smoke@test.local")
-  await page.fill('input[type="password"]', "GoodPass-1234!")
+  await page.fill('input[type="email"]', SEEDED_ADMIN.email)
+  await page.fill('input[type="password"]', SEEDED_ADMIN.password)
   await page.click('button[type="submit"]')
 }
 
@@ -54,9 +74,11 @@ test("successful login lands on the dashboard", async ({ page }) => {
 })
 
 test("a return URL pointing at a known portal is honoured", async ({ page }) => {
-  await signIn(page, `?return=${encodeURIComponent("http://localhost:3004/disbursements")}`)
-  await page.waitForURL(/localhost:3004/, { timeout: 15_000 }).catch(() => {})
-  expect(page.url()).toContain("localhost:3004/disbursements")
+  await signIn(page, `?return=${encodeURIComponent(PORTAL_URLS.procurement)}`)
+  await page.waitForURL(url => url.origin === PORTAL_URLS.procurement && url.pathname === "/", {
+    timeout: 15_000,
+  })
+  expect(page.url()).toBe(`${PORTAL_URLS.procurement}/`)
 })
 
 test("a hostile return URL is ignored", async ({ page }) => {

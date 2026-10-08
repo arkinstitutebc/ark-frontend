@@ -46,6 +46,7 @@ export default function LoginPage() {
   const [password, setPassword] = createSignal("")
   const [showPassword, setShowPassword] = createSignal(false)
   const [loading, setLoading] = createSignal(false)
+  const [hydrated, setHydrated] = createSignal(false)
   const [error, setError] = createSignal<string | null>(null)
   const [resetOpen, setResetOpen] = createSignal(false)
   const [resetLoading, setResetLoading] = createSignal(false)
@@ -56,6 +57,7 @@ export default function LoginPage() {
   let cancelled = false
 
   onMount(() => {
+    setHydrated(true)
     void preloadBrandAssets().finally(() => {
       if (!cancelled) setBrandAssetsReady(true)
     })
@@ -286,6 +288,7 @@ export default function LoginPage() {
 
               <Button
                 type="submit"
+                disabled={!hydrated()}
                 variant="ghost"
                 class="w-full !bg-primary !text-white hover:!bg-primary/95 focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:ring-offset-2 active:translate-y-px"
                 loading={loading()}
