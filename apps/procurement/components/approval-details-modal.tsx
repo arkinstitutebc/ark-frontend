@@ -1,6 +1,6 @@
 import { categoryToneClass, formatDatePH, formatPeso, Modal, StatusBadge } from "@ark/ui"
-import type { PurchaseRequest } from "@data/types"
 import { createSignal, Show } from "solid-js"
+import type { PurchaseRequest } from "@/data/types"
 
 export type ApprovalAction = "view" | "approve" | "reject"
 

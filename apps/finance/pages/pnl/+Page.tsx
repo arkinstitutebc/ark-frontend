@@ -1,9 +1,9 @@
 import { DataTable, formatPeso, PageContainer, PageHeader, THead, Th, Tr } from "@ark/ui"
-import { type PnlReport, usePnl } from "@data/hooks"
 import type { Cell } from "exceljs"
 import { createSignal, For, Show } from "solid-js"
 import { currentMonthValue, MonthStepper } from "@/components/finance/report-controls"
 import { Icons, QueryBoundary } from "@/components/ui"
+import { type PnlReport, usePnl } from "@/data/hooks"
 
 function downloadBlob(content: BlobPart, filename: string, mimeType: string) {
   const blob = new Blob([content], { type: mimeType })

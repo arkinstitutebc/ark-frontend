@@ -8,12 +8,6 @@ import {
   Select,
   toast,
 } from "@ark/ui"
-import { useBatches, useUpdateStudent } from "@data/hooks"
-import { queryKeys } from "@data/query-keys"
-import { updateStudentSchema } from "@data/schemas"
-import type { Student } from "@data/types"
-import { uploadStudentFile } from "@data/uploads"
-import { validateForm } from "@data/validate"
 import { useQueryClient } from "@tanstack/solid-query"
 import { createMemo, createSignal, Show } from "solid-js"
 import {
@@ -25,6 +19,12 @@ import {
   studentStatusOptions,
   TrainingFormPanel,
 } from "@/components/forms"
+import { useBatches, useUpdateStudent } from "@/data/hooks"
+import { queryKeys } from "@/data/query-keys"
+import { updateStudentSchema } from "@/data/schemas"
+import type { Student } from "@/data/types"
+import { uploadStudentFile } from "@/data/uploads"
+import { validateForm } from "@/data/validate"
 
 interface EditStudentModalProps {
   open: boolean

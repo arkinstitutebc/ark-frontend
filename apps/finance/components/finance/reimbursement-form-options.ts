@@ -1,12 +1,12 @@
 import type { AccountingTreatment, CostType, ExpenseCategory } from "@ark/data-types"
 import type { SelectOption } from "@ark/ui"
-import type { ProfitCenterSetting } from "@data/hooks"
+import type { ProfitCenterSetting } from "@/data/hooks"
 import {
   accountingTreatmentOptions,
   costTypeOptions,
   expenseCategoryOptions,
   profitCenterOptions,
-} from "@data/schemas"
+} from "@/data/schemas"
 
 const expenseCategoryLabels: Record<ExpenseCategory, string> = {
   "cost-of-services": "Cost of Services",

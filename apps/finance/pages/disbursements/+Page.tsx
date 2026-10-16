@@ -1,7 +1,4 @@
 import { ConfirmDialog, formatPeso, PageHeader, Select, StatCard } from "@ark/ui"
-import { categoryOptionsBySection } from "@data/gl-defaults"
-import { useBankBalance, useDeleteDisbursement, useDisbursements } from "@data/hooks"
-import type { Transaction, TxnCategory } from "@data/types"
 import { createEffect, createMemo, createSignal, Show } from "solid-js"
 import {
   DisbursementDetailsModal,
@@ -10,6 +7,9 @@ import {
   DisbursementTable,
 } from "@/components/finance"
 import { Icons, QueryBoundary } from "@/components/ui"
+import { categoryOptionsBySection } from "@/data/gl-defaults"
+import { useBankBalance, useDeleteDisbursement, useDisbursements } from "@/data/hooks"
+import type { Transaction, TxnCategory } from "@/data/types"
 
 const PAGE_SIZE = 20
 

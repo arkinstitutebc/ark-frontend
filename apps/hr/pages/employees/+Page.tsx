@@ -1,7 +1,7 @@
 import { formatPeso, PageContainer, PageHeader, StatCard } from "@ark/ui"
-import { useCreateEmployee, useDeleteEmployee, useEmployees } from "@data/hooks"
 import { createSignal, For, Show } from "solid-js"
 import { QueryBoundary, StatusBadge } from "@/components/ui"
+import { useCreateEmployee, useDeleteEmployee, useEmployees } from "@/data/hooks"
 
 export default function EmployeesPage() {
   const query = useEmployees()

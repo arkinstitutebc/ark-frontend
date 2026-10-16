@@ -1,8 +1,8 @@
 import { formatDatePH, formatPeso, PageContainer, PageHeader, StatCard, THead, Th } from "@ark/ui"
-import { useDeleteAr, useReceivables, useRecordPayment, useUpdateAr } from "@data/hooks"
-import type { AccountReceivable, ArStatus } from "@data/types"
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { Icons, Modal, QueryBoundary, StatusBadge } from "@/components/ui"
+import { useDeleteAr, useReceivables, useRecordPayment, useUpdateAr } from "@/data/hooks"
+import type { AccountReceivable, ArStatus } from "@/data/types"
 
 type FilterStatus = "all" | ArStatus
 

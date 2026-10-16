@@ -1,8 +1,8 @@
 import { formatDatePH, formatPeso, PageHeader } from "@ark/ui"
-import { usePayroll } from "@data/hooks"
-import type { PayrollPeriod } from "@data/types"
 import { For } from "solid-js"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
+import { usePayroll } from "@/data/hooks"
+import type { PayrollPeriod } from "@/data/types"
 
 export default function Page() {
   const query = usePayroll()

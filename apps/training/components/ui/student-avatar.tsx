@@ -1,6 +1,6 @@
 import { Icons } from "@ark/ui"
-import type { Student } from "@data/types"
 import { Show } from "solid-js"
+import type { Student } from "@/data/types"
 
 interface StudentAvatarProps {
   student: Pick<Student, "firstName" | "lastName" | "photoUrl">

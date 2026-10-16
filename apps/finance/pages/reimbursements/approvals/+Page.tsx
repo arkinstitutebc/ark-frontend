@@ -1,6 +1,5 @@
 import type { Reimbursement } from "@ark/data-types"
 import { Button, PageContainer, PageHeader, QueryBoundary, StatCard, TableSkeleton } from "@ark/ui"
-import { usePaginatedReimbursements } from "@data/hooks"
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
 import {
@@ -9,6 +8,7 @@ import {
   reimbursementQueueFilters,
 } from "@/components/finance/reimbursement-list-helpers"
 import { ReimbursementTable } from "@/components/finance/reimbursement-table"
+import { usePaginatedReimbursements } from "@/data/hooks"
 
 export default function RrApprovalsPage() {
   const [filter, setFilter] =

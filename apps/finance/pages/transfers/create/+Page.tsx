@@ -1,10 +1,10 @@
 import { BackLink, formatPeso } from "@ark/ui"
-import { useBankBalance, useBanks, useCreateTransfer } from "@data/hooks"
-import { createTransferSchema } from "@data/schemas"
-import type { Bank } from "@data/types"
-import { validateForm } from "@data/validate"
 import { createSignal, Show } from "solid-js"
 import { Icons } from "@/components/ui"
+import { useBankBalance, useBanks, useCreateTransfer } from "@/data/hooks"
+import { createTransferSchema } from "@/data/schemas"
+import type { Bank } from "@/data/types"
+import { validateForm } from "@/data/validate"
 
 const HIGH_VALUE_THRESHOLD = 50000
 

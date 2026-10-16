@@ -1,7 +1,7 @@
 import { ConfirmDialog, Modal, ModalFooter } from "@ark/ui"
-import { useCreateVenue, useDeleteVenue, useUpdateVenue, useVenues } from "@data/hooks"
-import type { Venue } from "@data/types"
 import { createSignal, For, Show } from "solid-js"
+import { useCreateVenue, useDeleteVenue, useUpdateVenue, useVenues } from "@/data/hooks"
+import type { Venue } from "@/data/types"
 
 interface ManageVenuesModalProps {
   open: boolean

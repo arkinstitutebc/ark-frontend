@@ -1,8 +1,8 @@
 import { Button, formatDatePH, formatPeso, Modal, THead, Th } from "@ark/ui"
-import { useAttendance, useTrainerAssignments } from "@data/hooks"
-import type { Trainer } from "@data/types"
 import { For, Show } from "solid-js"
 import { Icons, StatusBadge } from "@/components/ui"
+import { useAttendance, useTrainerAssignments } from "@/data/hooks"
+import type { Trainer } from "@/data/types"
 
 interface TrainerDetailModalProps {
   open: boolean

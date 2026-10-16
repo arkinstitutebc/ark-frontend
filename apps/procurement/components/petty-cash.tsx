@@ -1,6 +1,6 @@
 import { Icons } from "@ark/ui"
-import type { PettyCashAttachment, PettyCashReleaseMethod, PettyCashRequest } from "@data/types"
 import { For, Show } from "solid-js"
+import type { PettyCashAttachment, PettyCashReleaseMethod, PettyCashRequest } from "@/data/types"
 
 export const pettyCashReleaseMethodOptions: { value: PettyCashReleaseMethod; label: string }[] = [
   { value: "digital_transfer", label: "Digital Transfer" },

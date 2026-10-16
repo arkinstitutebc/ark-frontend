@@ -1,8 +1,8 @@
 import { ConfirmDialog } from "@ark/ui"
-import { useDeleteStudent } from "@data/hooks"
-import { queryKeys } from "@data/query-keys"
-import type { Student } from "@data/types"
 import { useQueryClient } from "@tanstack/solid-query"
+import { useDeleteStudent } from "@/data/hooks"
+import { queryKeys } from "@/data/query-keys"
+import type { Student } from "@/data/types"
 
 interface ConfirmDeleteStudentModalProps {
   open: boolean

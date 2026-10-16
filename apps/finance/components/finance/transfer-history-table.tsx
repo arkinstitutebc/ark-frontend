@@ -1,7 +1,7 @@
 import { DataTable, formatDatePH, formatPeso, THead, Th, Tr } from "@ark/ui"
-import type { Transfer } from "@data/types"
 import { For } from "solid-js"
 import { Icons } from "@/components/ui"
+import type { Transfer } from "@/data/types"
 
 interface TransferHistoryTableProps {
   transfers: Transfer[]

@@ -1,5 +1,4 @@
 import { Button, Icons, PageContainer, PageHeader, Select } from "@ark/ui"
-import { useBatches, useStudent, useStudents } from "@data/hooks"
 import { createEffect, createMemo, createSignal, Show } from "solid-js"
 import { AddStudentModal, ConfirmDeleteStudentModal, EditStudentModal } from "@/components/modals"
 import {
@@ -8,6 +7,7 @@ import {
   type StudentViewMode,
   ViewModeToggle,
 } from "@/components/students"
+import { useBatches, useStudent, useStudents } from "@/data/hooks"
 
 const STUDENTS_VIEW_MODE_KEY = "training.students.viewMode"
 

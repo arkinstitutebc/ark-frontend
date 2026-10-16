@@ -8,10 +8,10 @@ import {
   Th,
   Tr,
 } from "@ark/ui"
-import { useBankBalance, useTransactions } from "@data/hooks"
-import type { Transaction } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
+import { useBankBalance, useTransactions } from "@/data/hooks"
+import type { Transaction } from "@/data/types"
 
 function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-PH", {

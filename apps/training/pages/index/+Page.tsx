@@ -9,11 +9,11 @@ import {
   THead,
   Th,
 } from "@ark/ui"
-import { useBatches } from "@data/hooks"
-import type { Batch } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
 import { AddBatchModal } from "@/components/modals"
+import { useBatches } from "@/data/hooks"
+import type { Batch } from "@/data/types"
 
 function rqmLabel(value: string) {
   const trimmed = value.trim()

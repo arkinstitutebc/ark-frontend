@@ -1,7 +1,7 @@
 import { API_URL } from "@ark/api-client"
 import { formatDatePH, formatPeso, Modal, StatusBadge } from "@ark/ui"
-import type { PurchaseOrder } from "@data/types"
 import { Show } from "solid-js"
+import type { PurchaseOrder } from "@/data/types"
 
 interface PoDocumentModalProps {
   open: boolean

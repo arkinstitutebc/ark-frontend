@@ -1,16 +1,16 @@
 import { formErrorClass, formInputClass, formLabelClass, Modal, ModalFooter, Select } from "@ark/ui"
+import { createMemo, createSignal, Show } from "solid-js"
+import { OTHER_INSTRUCTOR } from "@/components/forms/options"
 import {
   useCreateBatch,
   useInstructors,
   useTrainingOfferings,
   useTrainingSchemes,
   useVenues,
-} from "@data/hooks"
-import { createBatchSchema } from "@data/schemas"
-import type { Batch } from "@data/types"
-import { validateForm } from "@data/validate"
-import { createMemo, createSignal, Show } from "solid-js"
-import { OTHER_INSTRUCTOR } from "@/components/forms/options"
+} from "@/data/hooks"
+import { createBatchSchema } from "@/data/schemas"
+import type { Batch } from "@/data/types"
+import { validateForm } from "@/data/validate"
 import { ManageVenuesModal } from "./manage-venues"
 
 interface AddBatchModalProps {

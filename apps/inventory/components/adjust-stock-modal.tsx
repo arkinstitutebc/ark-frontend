@@ -1,8 +1,8 @@
 import { Icons, Modal, Select } from "@ark/ui"
-import { adjustStockSchema } from "@data/schemas"
-import type { StockItem } from "@data/types"
-import { validateForm } from "@data/validate"
 import { createSignal, Show } from "solid-js"
+import { adjustStockSchema } from "@/data/schemas"
+import type { StockItem } from "@/data/types"
+import { validateForm } from "@/data/validate"
 
 interface AdjustStockModalProps {
   open: boolean

@@ -1,8 +1,8 @@
 import { BackLink, PageContainer, PageHeader, QueryBoundary, statusTone, THead, Th } from "@ark/ui"
-import { useCycleCount, useStock } from "@data/hooks"
-import type { StockItem } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
+import { useCycleCount, useStock } from "@/data/hooks"
+import type { StockItem } from "@/data/types"
 
 interface CountRow {
   itemId: string

@@ -1,7 +1,7 @@
 import { PageContainer, PageHeader } from "@ark/ui"
-import { useCreateTrainingScheme, useTrainingSchemes, useUpdateTrainingScheme } from "@data/hooks"
 import { createSignal, For, Show } from "solid-js"
 import { QueryBoundary, StatusBadge } from "@/components/ui"
+import { useCreateTrainingScheme, useTrainingSchemes, useUpdateTrainingScheme } from "@/data/hooks"
 
 export default function TrainingSettingsPage() {
   const query = useTrainingSchemes(true)

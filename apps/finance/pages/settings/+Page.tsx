@@ -10,6 +10,26 @@ import {
   Th,
   Tr,
 } from "@ark/ui"
+import { Pencil, Power, RotateCcw } from "lucide-solid"
+import { createMemo, createSignal, For, Match, Show, Switch } from "solid-js"
+import {
+  SettingsCheckbox,
+  SettingsEmptyRow,
+  SettingsFormGrid,
+  SettingsFormSection,
+  SettingsModalForm,
+  SettingsNumberField,
+  SettingsPanelHeader,
+  SettingsRowButton,
+  SettingsSearchInput,
+  SettingsSelectField,
+  SettingsStatCard,
+  SettingsStatusPill,
+  SettingsStickyFooter,
+  SettingsTextArea,
+  SettingsTextField,
+} from "@/components/finance/settings/settings-ui"
+import { QueryBoundary } from "@/components/ui"
 import {
   type ClassificationRuleSetting,
   type CreateGlAccountInput,
@@ -31,27 +51,7 @@ import {
   useUpdateGlAccount,
   useUpdateProfitCenter,
   useUpdateTrainingOffering,
-} from "@data/hooks"
-import { Pencil, Power, RotateCcw } from "lucide-solid"
-import { createMemo, createSignal, For, Match, Show, Switch } from "solid-js"
-import {
-  SettingsCheckbox,
-  SettingsEmptyRow,
-  SettingsFormGrid,
-  SettingsFormSection,
-  SettingsModalForm,
-  SettingsNumberField,
-  SettingsPanelHeader,
-  SettingsRowButton,
-  SettingsSearchInput,
-  SettingsSelectField,
-  SettingsStatCard,
-  SettingsStatusPill,
-  SettingsStickyFooter,
-  SettingsTextArea,
-  SettingsTextField,
-} from "@/components/finance/settings/settings-ui"
-import { QueryBoundary } from "@/components/ui"
+} from "@/data/hooks"
 
 type SettingsTab = "accounts" | "profit-centers" | "offerings" | "rules" | "activity"
 

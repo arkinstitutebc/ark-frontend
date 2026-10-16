@@ -8,18 +8,6 @@ import {
   statusToneClass,
   toast,
 } from "@ark/ui"
-import {
-  type TrainingAuditEvent,
-  useBatch,
-  useBatchAudit,
-  useBatchStudents,
-  useCurrentUser,
-  useDeleteBatch,
-  useStudent,
-  useUpdateNoticeToProceed,
-} from "@data/hooks"
-import { displayTrainingScheme } from "@data/scheme-label"
-import { uploadTrainingFile } from "@data/uploads"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
 import {
@@ -34,6 +22,18 @@ import {
   type StudentViewMode,
   ViewModeToggle,
 } from "@/components/students"
+import {
+  type TrainingAuditEvent,
+  useBatch,
+  useBatchAudit,
+  useBatchStudents,
+  useCurrentUser,
+  useDeleteBatch,
+  useStudent,
+  useUpdateNoticeToProceed,
+} from "@/data/hooks"
+import { displayTrainingScheme } from "@/data/scheme-label"
+import { uploadTrainingFile } from "@/data/uploads"
 
 const PUBLIC_FORMS_URL =
   import.meta.env.VITE_PUBLIC_FORMS_URL?.replace(/\/$/, "") || "https://forms.arkinstitutebc.com"

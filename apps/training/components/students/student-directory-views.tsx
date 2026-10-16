@@ -1,7 +1,7 @@
 import { Icons, StatusBadge, THead, Th } from "@ark/ui"
-import type { Batch, Student } from "@data/types"
 import { For, Show } from "solid-js"
 import { StudentAvatar } from "@/components/ui"
+import type { Batch, Student } from "@/data/types"
 
 type BatchLookup = (batchId: string) => Batch | undefined
 

@@ -1,7 +1,12 @@
 import { Modal, ModalFooter } from "@ark/ui"
-import { useCategories, useCreateCategory, useDeleteCategory, useUpdateCategory } from "@data/hooks"
-import type { ProcurementCategory } from "@data/types"
 import { createSignal, For, Show } from "solid-js"
+import {
+  useCategories,
+  useCreateCategory,
+  useDeleteCategory,
+  useUpdateCategory,
+} from "@/data/hooks"
+import type { ProcurementCategory } from "@/data/types"
 
 interface ManageCategoriesModalProps {
   open: boolean

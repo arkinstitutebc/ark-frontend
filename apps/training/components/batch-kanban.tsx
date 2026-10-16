@@ -1,9 +1,9 @@
 import { formatDatePH, formatPeso, Icons, StatusBadge } from "@ark/ui"
-import { useUpdateBatch } from "@data/hooks"
-import { displayTrainingScheme } from "@data/scheme-label"
-import type { Batch, BatchStatus } from "@data/types"
 import { ChevronDown, GripVertical } from "lucide-solid"
 import { createSignal, For, Show } from "solid-js"
+import { useUpdateBatch } from "@/data/hooks"
+import { displayTrainingScheme } from "@/data/scheme-label"
+import type { Batch, BatchStatus } from "@/data/types"
 
 const COLUMNS: BatchStatus[] = ["Not Started", "In Progress", "On Hold", "Completed"]
 

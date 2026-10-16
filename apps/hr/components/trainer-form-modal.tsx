@@ -1,7 +1,7 @@
 import { formErrorClass, formInputClass, formLabelClass, Modal, ModalFooter, Select } from "@ark/ui"
-import { useCreateTrainer, useUpdateTrainer } from "@data/hooks"
-import type { Trainer, TrainerStatus } from "@data/types"
 import { createEffect, createSignal, Show } from "solid-js"
+import { useCreateTrainer, useUpdateTrainer } from "@/data/hooks"
+import type { Trainer, TrainerStatus } from "@/data/types"
 
 interface TrainerFormModalProps {
   open: boolean

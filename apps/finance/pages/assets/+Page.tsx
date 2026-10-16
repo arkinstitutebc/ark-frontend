@@ -11,9 +11,9 @@ import {
   Th,
   Tr,
 } from "@ark/ui"
-import { useAssets } from "@data/hooks"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
+import { useAssets } from "@/data/hooks"
 import { bookValueAt, monthsElapsedSince } from "./_lib.ts"
 
 const FILTERS = [

@@ -1,5 +1,5 @@
 import { createCrudHooks } from "@ark/ui"
-import type { ProcurementCategory } from "@data/types"
+import type { ProcurementCategory } from "@/data/types"
 import { queryKeys } from "../query-keys"
 
 interface CreateCategoryInput {

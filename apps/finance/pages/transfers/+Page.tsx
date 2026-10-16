@@ -1,9 +1,9 @@
 import { formatPeso, PageHeader, StatCard } from "@ark/ui"
-import { useBankBalance, useBanks, useTransfers } from "@data/hooks"
-import type { Bank, Transfer } from "@data/types"
 import { Show } from "solid-js"
 import { TransferHistoryTable } from "@/components/finance/transfer-history-table"
 import { Icons, QueryBoundary } from "@/components/ui"
+import { useBankBalance, useBanks, useTransfers } from "@/data/hooks"
+import type { Bank, Transfer } from "@/data/types"
 
 export default function TransfersPage() {
   const transfersQuery = useTransfers()

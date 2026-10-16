@@ -1,7 +1,7 @@
 import { API_URL } from "@ark/api-client"
 import { categoryToneClass, formatDatePH, formatPeso, Modal, StatusBadge } from "@ark/ui"
-import type { PurchaseRequest } from "@data/types"
 import { Show } from "solid-js"
+import type { PurchaseRequest } from "@/data/types"
 
 interface PrDocumentModalProps {
   open: boolean

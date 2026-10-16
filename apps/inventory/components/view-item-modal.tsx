@@ -1,8 +1,8 @@
 import { categoryToneClass, formatDatePH, Icons, Modal } from "@ark/ui"
-import { formatMovementQuantity } from "@data/format"
-import { useMovements } from "@data/hooks"
-import type { StockItem } from "@data/types"
 import { For, Show } from "solid-js"
+import { formatMovementQuantity } from "@/data/format"
+import { useMovements } from "@/data/hooks"
+import type { StockItem } from "@/data/types"
 
 interface ViewItemModalProps {
   open: boolean

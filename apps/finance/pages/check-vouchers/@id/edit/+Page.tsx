@@ -1,6 +1,5 @@
 import type { CheckVoucher } from "@ark/data-types"
 import { Button, QueryBoundary } from "@ark/ui"
-import { useCheckVoucher, useCurrentUser, useUpdateCheckVoucher } from "@data/hooks"
 import { createMemo, Show } from "solid-js"
 import { navigate } from "vike/client/router"
 import { usePageContext } from "vike-solid/usePageContext"
@@ -8,6 +7,7 @@ import {
   CheckVoucherForm,
   type CheckVoucherFormValues,
 } from "@/components/finance/check-voucher-form"
+import { useCheckVoucher, useCurrentUser, useUpdateCheckVoucher } from "@/data/hooks"
 
 const CHECK_VOUCHER_EDITOR_EMAIL = "heart@arkinstitutebc.com"
 

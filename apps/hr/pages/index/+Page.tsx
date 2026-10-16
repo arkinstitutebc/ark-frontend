@@ -1,10 +1,10 @@
 import { Button, formatDatePH, formatPeso, PageHeader, StatCard, THead, Th } from "@ark/ui"
-import { useDeleteTrainer, useTrainers } from "@data/hooks"
-import type { Trainer, TrainerStatus } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { TrainerDetailModal } from "@/components/trainer-detail-modal"
 import { TrainerFormModal } from "@/components/trainer-form-modal"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
+import { useDeleteTrainer, useTrainers } from "@/data/hooks"
+import type { Trainer, TrainerStatus } from "@/data/types"
 
 export default function Page() {
   const query = useTrainers()

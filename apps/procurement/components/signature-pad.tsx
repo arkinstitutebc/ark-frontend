@@ -1,6 +1,6 @@
 import { toast } from "@ark/ui"
-import { api } from "@data/api"
 import { createSignal, onMount } from "solid-js"
+import { api } from "@/data/api"
 
 interface SignatureResponse {
   cloudName: string

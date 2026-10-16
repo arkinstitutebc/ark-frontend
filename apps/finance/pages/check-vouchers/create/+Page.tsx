@@ -1,9 +1,9 @@
-import { useCreateCheckVoucher } from "@data/hooks"
 import { navigate } from "vike/client/router"
 import {
   CheckVoucherForm,
   type CheckVoucherFormValues,
 } from "@/components/finance/check-voucher-form"
+import { useCreateCheckVoucher } from "@/data/hooks"
 
 const today = () => new Date().toISOString().slice(0, 10)
 

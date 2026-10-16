@@ -1,7 +1,7 @@
 import { formatDatePH, formatPeso, PageHeader, StatCard, THead, Th } from "@ark/ui"
-import { useReceivables } from "@data/hooks"
 import { createMemo, For } from "solid-js"
 import { QueryBoundary, StatusBadge } from "@/components/ui"
+import { useReceivables } from "@/data/hooks"
 
 export default function Page() {
   const query = useReceivables()

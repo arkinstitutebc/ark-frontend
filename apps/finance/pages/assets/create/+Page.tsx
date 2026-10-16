@@ -1,8 +1,8 @@
 import type { PrAttachment } from "@ark/data-types"
 import { AttachmentUploader, BackLink, formatPeso, PageContainer, Select } from "@ark/ui"
-import { useCreateAsset, useGlAccounts } from "@data/hooks"
 import { createMemo, createSignal, type JSX, onMount, Show } from "solid-js"
 import { navigate } from "vike/client/router"
+import { useCreateAsset, useGlAccounts } from "@/data/hooks"
 
 const PROFIT_CENTERS = [
   { label: "JDVP", value: "JDVP" },

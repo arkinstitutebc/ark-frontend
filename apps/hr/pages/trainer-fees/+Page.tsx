@@ -1,10 +1,15 @@
 import { formatPeso, PageContainer, PageHeader, Select } from "@ark/ui"
-import { api } from "@data/api"
-import { useAssignTrainer, usePayTrainerFee, useTrainerAssignments, useTrainers } from "@data/hooks"
-import type { Bank, Batch } from "@data/types"
 import { createQuery } from "@tanstack/solid-query"
 import { createSignal, For } from "solid-js"
 import { QueryBoundary } from "@/components/ui"
+import { api } from "@/data/api"
+import {
+  useAssignTrainer,
+  usePayTrainerFee,
+  useTrainerAssignments,
+  useTrainers,
+} from "@/data/hooks"
+import type { Bank, Batch } from "@/data/types"
 
 export default function TrainerFeesPage() {
   const assignments = useTrainerAssignments()

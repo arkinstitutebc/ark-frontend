@@ -1,7 +1,7 @@
 import { DataTable, formatDatePH, formatPeso, SortableTh, THead, Th, Tr } from "@ark/ui"
-import type { Transaction } from "@data/types"
 import { For, Show } from "solid-js"
 import { StatusBadge } from "@/components/ui"
+import type { Transaction } from "@/data/types"
 import {
   accountingTreatmentLabel,
   categoryLabel,

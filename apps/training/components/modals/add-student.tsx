@@ -1,13 +1,13 @@
 import { formErrorClass, formInputClass, Icons, Modal, ModalFooter, Select, toast } from "@ark/ui"
-import { api } from "@data/api"
-import { useBatches, useCreateStudent } from "@data/hooks"
-import { queryKeys } from "@data/query-keys"
-import { createStudentSchema } from "@data/schemas"
-import type { Student } from "@data/types"
-import { validateForm } from "@data/validate"
 import { useQueryClient } from "@tanstack/solid-query"
 import { createMemo, createSignal, Index, Show } from "solid-js"
 import { batchSelectLabel } from "@/components/forms"
+import { api } from "@/data/api"
+import { useBatches, useCreateStudent } from "@/data/hooks"
+import { queryKeys } from "@/data/query-keys"
+import { createStudentSchema } from "@/data/schemas"
+import type { Student } from "@/data/types"
+import { validateForm } from "@/data/validate"
 
 interface AddStudentModalProps {
   open: boolean

@@ -1,6 +1,6 @@
 import { Icons, toast } from "@ark/ui"
-import { type StudentUploadKind, uploadStudentFile } from "@data/uploads"
 import { createSignal, Show } from "solid-js"
+import { type StudentUploadKind, uploadStudentFile } from "@/data/uploads"
 
 interface StudentUploadFieldProps {
   label: string

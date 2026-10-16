@@ -9,12 +9,12 @@ import {
   THead,
   Th,
 } from "@ark/ui"
-import { useRequest } from "@data/hooks"
-import type { PurchaseRequest } from "@data/types"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
 import { PrDocumentModal } from "@/components/pr-document-modal"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
+import { useRequest } from "@/data/hooks"
+import type { PurchaseRequest } from "@/data/types"
 
 export default function PrDetailPage() {
   const pageContext = usePageContext()

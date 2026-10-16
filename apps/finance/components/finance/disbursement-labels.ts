@@ -1,5 +1,5 @@
-import { GL_CATALOG } from "@data/gl-defaults"
-import type { TransactionAuditEvent, TxnCategory } from "@data/types"
+import { GL_CATALOG } from "@/data/gl-defaults"
+import type { TransactionAuditEvent, TxnCategory } from "@/data/types"
 
 const ACCOUNTING_TREATMENT_LABELS: Record<string, string> = {
   variable: "Variable",

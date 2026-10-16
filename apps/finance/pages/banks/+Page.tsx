@@ -1,9 +1,9 @@
 import { DataTable, formatDatePH, formatPeso, PageHeader, Select, THead, Th, Tr } from "@ark/ui"
-import { useBankBalance, useBanks, useTransactions, useTransfers } from "@data/hooks"
-import type { Bank, Transaction, Transfer } from "@data/types"
 import { createSignal, For, Show } from "solid-js"
 import { TransferHistoryTable } from "@/components/finance/transfer-history-table"
 import { Icons, QueryBoundary, StatusBadge } from "@/components/ui"
+import { useBankBalance, useBanks, useTransactions, useTransfers } from "@/data/hooks"
+import type { Bank, Transaction, Transfer } from "@/data/types"
 
 function getTxnLabel(type: string) {
   switch (type) {

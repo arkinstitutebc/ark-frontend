@@ -9,7 +9,6 @@ import {
   StatCard,
   TableSkeleton,
 } from "@ark/ui"
-import { usePaginatedReimbursements } from "@data/hooks"
 import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
 import { navigate } from "vike/client/router"
 import {
@@ -19,6 +18,7 @@ import {
   reimbursementStatusFilters,
 } from "@/components/finance/reimbursement-list-helpers"
 import { ReimbursementTable } from "@/components/finance/reimbursement-table"
+import { usePaginatedReimbursements } from "@/data/hooks"
 
 export default function ReimbursementsPage() {
   const [filter, setFilter] = createSignal<ReimbursementFilter>("all")

@@ -1,9 +1,9 @@
 import { Button, Icons, PageContainer, PageHeader, PageLoading } from "@ark/ui"
-import { useBatches } from "@data/hooks"
 import { createSignal, Show } from "solid-js"
 import { navigate } from "vike/client/router"
 import { BatchKanban } from "@/components/batch-kanban"
 import { AddBatchModal } from "@/components/modals"
+import { useBatches } from "@/data/hooks"
 
 export default function BatchBoardPage() {
   const query = useBatches()

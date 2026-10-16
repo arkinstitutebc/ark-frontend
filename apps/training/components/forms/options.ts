@@ -1,5 +1,5 @@
-import { TRAINING_TYPES } from "@data/constants"
-import type { Batch, Student } from "@data/types"
+import { TRAINING_TYPES } from "@/data/constants"
+import type { Batch, Student } from "@/data/types"
 
 export const OTHER_INSTRUCTOR = "__other__"
 

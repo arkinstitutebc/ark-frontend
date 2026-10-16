@@ -1,7 +1,7 @@
 import { formErrorClass, formInputClass, formLabelClass, Modal, ModalFooter, toast } from "@ark/ui"
-import { useUpdatePo } from "@data/hooks"
-import type { PurchaseOrder } from "@data/types"
 import { createEffect, createSignal, Show } from "solid-js"
+import { useUpdatePo } from "@/data/hooks"
+import type { PurchaseOrder } from "@/data/types"
 
 interface EditPoModalProps {
   open: boolean

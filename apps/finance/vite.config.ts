@@ -9,7 +9,6 @@ export default {
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "."),
-      "@data": path.resolve(__dirname, "data"),
     },
   },
   define: {

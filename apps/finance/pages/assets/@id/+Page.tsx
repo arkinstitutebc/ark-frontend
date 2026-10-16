@@ -11,9 +11,9 @@ import {
   THead,
   Th,
 } from "@ark/ui"
-import { useAsset, useDisposeAsset } from "@data/hooks"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { usePageContext } from "vike-solid/usePageContext"
+import { useAsset, useDisposeAsset } from "@/data/hooks"
 import { bookValueAt, depreciationSchedule, monthsElapsedSince } from "../_lib.ts"
 
 export default function AssetDetailPage() {

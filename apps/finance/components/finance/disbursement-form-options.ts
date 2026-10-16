@@ -1,8 +1,8 @@
 import type { GlAccount, GlAccountSection, TxnCategory } from "@ark/data-types"
 import type { SelectOption } from "@ark/ui"
-import { categoryOptionsBySection, GL_SECTION_LABELS, GL_SECTIONS } from "@data/gl-defaults"
-import type { ProfitCenterSetting } from "@data/hooks"
-import { profitCenterOptions, txnCategoryOptions } from "@data/schemas"
+import { categoryOptionsBySection, GL_SECTION_LABELS, GL_SECTIONS } from "@/data/gl-defaults"
+import type { ProfitCenterSetting } from "@/data/hooks"
+import { profitCenterOptions, txnCategoryOptions } from "@/data/schemas"
 
 export const fallbackProfitCenterOptions = profitCenterOptions.map(value => ({
   label: value === "Admin" ? "Admin / Shared" : value,

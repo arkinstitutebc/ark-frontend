@@ -1,9 +1,9 @@
 import { API_URL } from "@ark/api-client"
 import type { IncomeStatementSegment } from "@ark/data-types"
 import { DataTable, formatPeso, Icons, PageContainer, PageHeader, THead, Th, Tr } from "@ark/ui"
-import { useIncomeStatement } from "@data/hooks"
 import { createMemo, createSignal, For, Show } from "solid-js"
 import { DateRangeControls, type DateRangePreset } from "@/components/finance/report-controls"
+import { useIncomeStatement } from "@/data/hooks"
 
 const SEGMENT_LABEL: Record<IncomeStatementSegment, string> = {
   JDVP: "JDVP",

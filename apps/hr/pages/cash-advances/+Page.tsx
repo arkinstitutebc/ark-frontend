@@ -7,18 +7,18 @@ import {
   PageHeader,
   Select,
 } from "@ark/ui"
-import { api } from "@data/api"
+import { createQuery } from "@tanstack/solid-query"
+import { createSignal, For, Show } from "solid-js"
+import { QueryBoundary, StatusBadge } from "@/components/ui"
+import { api } from "@/data/api"
 import {
   useCashAdvanceAction,
   useCashAdvances,
   useCreateCashAdvance,
   useEmployees,
   useLiquidateCashAdvance,
-} from "@data/hooks"
-import type { Bank, Batch } from "@data/types"
-import { createQuery } from "@tanstack/solid-query"
-import { createSignal, For, Show } from "solid-js"
-import { QueryBoundary, StatusBadge } from "@/components/ui"
+} from "@/data/hooks"
+import type { Bank, Batch } from "@/data/types"
 
 export default function CashAdvancesPage() {
   const query = useCashAdvances()

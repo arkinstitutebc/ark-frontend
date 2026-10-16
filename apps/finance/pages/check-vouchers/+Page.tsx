@@ -15,21 +15,21 @@ import {
   Th,
   Tr,
 } from "@ark/ui"
-import { API_URL } from "@data/api"
+import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
+import { navigate } from "vike/client/router"
+import { API_URL } from "@/data/api"
 import {
   useCheckVouchers,
   useCurrentUser,
   useDeleteCheckVoucher,
   useVoidCheckVoucher,
-} from "@data/hooks"
+} from "@/data/hooks"
 import type {
   CheckVoucher,
   CheckVoucherLine,
   CheckVoucherPaymentLine,
   CheckVoucherStatus,
-} from "@data/types"
-import { createEffect, createMemo, createSignal, For, Show } from "solid-js"
-import { navigate } from "vike/client/router"
+} from "@/data/types"
 
 const PAGE_SIZE = 20
 const CHECK_VOUCHER_EDITOR_EMAIL = "heart@arkinstitutebc.com"
