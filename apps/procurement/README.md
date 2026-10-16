@@ -9,6 +9,7 @@
 Pending PR edits use the same expense type, subtype, item, and batch choices as
 creation. Historical requests without a catalog item can still receive detail-only
 edits; choosing a new classification validates it against the active catalog.
+PR create/edit and other Procurement actions report validation, success, and API errors through top-right toasts.
 
 ## Dev
 

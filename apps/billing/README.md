@@ -6,6 +6,8 @@
 
 `/` Revenue dashboard, `/receivables` (training-synced AR list, edit/delete/payment actions), `/tutorials`. Receivables with payment history cannot be deleted; create them through Training, not Billing.
 
+The receivables table and CSV include Date Paid (PHT) for fully paid records. A partial payment does not set this timestamp; historical paid records without one show "Not recorded".
+
 ## Dev
 
 From monorepo root: `bun install && bun run dev:billing`. Backend must also be running ([`ark-services`](https://github.com/arkinstitutebc/ark-services)).

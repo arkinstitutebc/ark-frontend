@@ -36,7 +36,7 @@ bun install                    # one-time, links workspaces
 bun run dev:main               # local main portal on :3000
 bun run dev:training           # :3001 (procurement :3002, inventory :3003, finance :3004, billing :3005, hr :3006)
 bun run lint                   # biome
-bun run test:unit              # Bun unit tests for shared API/form helpers and E2E selector
+bun run test:unit              # Bun unit tests for shared helpers, modules, and E2E selector
 bun run typecheck              # tsc per workspace
 bun run build                  # Vike production build for every app/package with a build script
 bun run test:e2e               # Playwright portal smoke + focused E2E (LOCAL ONLY, NOT in CI)
